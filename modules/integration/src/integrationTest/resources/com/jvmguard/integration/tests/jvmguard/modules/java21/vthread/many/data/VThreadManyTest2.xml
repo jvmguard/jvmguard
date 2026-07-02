@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="VThreadManyWorkload.invokeOne" time="1995943010" count="1000000" type="devops"/>
+    </children>
+  </callTree>
+</data>

@@ -1,0 +1,43 @@
+---
+// Renders a help figure.
+// - UI screenshots (ui/*.png): a light/dark pair is rendered and toggled with Starlight's [data-theme].
+// - Diagram SVGs: authored as light-mode (dark ink on pastel boxes); in dark mode a CSS invert filter
+//   makes them readable without needing per-diagram dark variants.
+// - Other images (external/): rendered once.
+export interface Props {
+  src: string;
+  alt?: string;
+}
+const { src, alt = '' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isUi = src.startsWith('ui/') && src.endsWith('.png');
+const isSvg = src.endsWith('.svg');
+const lightSrc = `${base}/images/${src}`;
+const darkSrc = isUi ? `${base}/images/${src.replace(/\.png$/, '_dark.png')}` : null;
+const cls = isSvg ? 'figure figure-svg' : 'figure';
+---
+{darkSrc ? (
+  <Fragment>
+    <img src={lightSrc} alt={alt} class="figure figure-light" loading="lazy" />
+    <img src={darkSrc} alt={alt} class="figure figure-dark" loading="lazy" />
+  </Fragment>
+) : (
+  <img src={lightSrc} alt={alt} class={cls} loading="lazy" />
+)}
+
+<style>
+  .figure {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.25rem;
+  }
+  :global(html[data-theme='light']) .figure-dark { display: none; }
+  :global(html[data-theme='dark']) .figure-light { display: none; }
+  /* Light-mode diagrams: flip to dark-mode in dark theme (invert luminance, hue-rotate keeps colors natural). */
+  :global(html[data-theme='dark']) .figure-svg {
+    filter: invert(0.93) hue-rotate(180deg);
+    border-color: var(--sl-color-gray-3);
+  }
+</style>

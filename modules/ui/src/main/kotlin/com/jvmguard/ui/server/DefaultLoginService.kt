@@ -1,0 +1,16 @@
+package com.jvmguard.ui.server
+
+import com.jvmguard.connector.api.ServerConnection
+import com.jvmguard.connector.client.ServerFactory
+
+class DefaultLoginService : LoginService {
+
+    override fun login(userName: String, password: String, authenticatorCode: String?): ServerConnection =
+        SecurityBridge.authenticate(userName, password, authenticatorCode, Sessions.mockMode())
+
+    override fun isUse2fa(): Boolean = try {
+        ServerFactory.lookup().isUse2fa
+    } catch (_: Exception) {
+        false
+    }
+}

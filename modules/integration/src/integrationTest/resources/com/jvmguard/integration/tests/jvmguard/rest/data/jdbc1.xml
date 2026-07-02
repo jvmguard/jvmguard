@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data endTime="2014-12-15T17:00:00.000Z" interval="3600000" vm="" vmType="VM Group" type="jdbc">
+  <hotspots>
+    <element name="select * from statement" time="17972978000" count="110" server="uri">
+      <backtraces>
+        <children>
+          <element name="RestTransactionWorkload.transaction2" time="17972978000" count="110" type="devops">
+            <children>
+              <element name="transaction Щ" time="2997675000" count="10" type="devops" policy="slow">
+                <children>
+                  <element name="/request1" time="2997675000" count="10" type="web"/>
+                </children>
+              </element>
+              <element name="transaction Щ" time="14975303000" count="100" type="devops">
+                <children>
+                  <element name="/request1" time="14975303000" count="100" type="web"/>
+                </children>
+              </element>
+            </children>
+          </element>
+        </children>
+      </backtraces>
+    </element>
+  </hotspots>
+</data>

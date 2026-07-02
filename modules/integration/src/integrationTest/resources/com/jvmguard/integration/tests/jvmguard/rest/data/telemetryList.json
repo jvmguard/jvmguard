@@ -1,0 +1,50 @@
+[
+  {
+    "name": "connections",
+    "description": "Connected VMs"
+  },
+  {
+    "name": "transactions/frequency",
+    "description": "Transactions (Frequency)"
+  },
+  {
+    "name": "transactions/average",
+    "description": "Transactions (Average Duration)"
+  },
+  {
+    "name": "heap",
+    "description": "Heap Usage"
+  },
+  {
+    "name": "cpu",
+    "description": "CPU Load"
+  },
+  {
+    "name": "threads",
+    "description": "Thread Count"
+  },
+  {
+    "name": "gc",
+    "description": "GC activity"
+  },
+  {
+    "name": "devops/group1",
+    "description": "group1"
+  },
+  {
+    "name": "devops/requestedConfigurationNumber",
+    "description": "requestedConfigurationNumber"
+  },
+  {
+    "name": "devops/vmNoSingle Щ",
+    "description": "vmNoSingle Щ"
+  },
+  {
+    "name": "mbean/Class MBean telemetry Л",
+    "description": "Class MBean telemetry Л"
+  },
+  {
+    "name": "mbean/compilation time",
+    "description": "compilation time"
+  }
+]

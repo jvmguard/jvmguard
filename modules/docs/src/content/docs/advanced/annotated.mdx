@@ -1,0 +1,72 @@
+---
+title: Annotation Transactions
+---
+
+import Figure from '../../../components/Figure.astro';
+
+Many frameworks use annotations for designating important classes and entry points that could be turned into
+transactions in jvmguard. With the "Annotated invocations" transaction type you can let jvmguard do this work for you.
+
+## Method and class annotations
+
+An annotation transaction definition takes the fully qualified class name of the annotation that you are interested in.
+Annotations can be either used on **classes or on methods**. Before proceeding with the configuration, you have to tell
+jvmguard for which target the selected annotation is used.
+
+For an annotated method, each method invocation becomes a transaction in jvmguard. Annotations on classes create
+transactions for all calls into **public instance methods**.
+
+The second choice is whether derived classes should be considered as well. For methods, it can be important to capture
+the time in an overridden method. For example, if a framework creates an implementing proxy class and overrides the
+annotated method to add database transactions, you want to intercept the method in the proxy class, and not only the
+annotated method.
+
+For annotated classes, the "Method selection" options determine which methods are selected to generate transactions:
+
+* **Implementing methods only**: If the annotation is placed on an interface that already defines all operations of
+interest with its methods, you should select this option.
+* **All public methods**: If the derived classes have their own methods of interest that do not implement or override
+the methods in the annotated class, use this option to create transactions from all public methods.
+
+<Figure src="ui/annotated_transactions.png" />
+
+## Naming
+
+When you use annotations on classes with the setting for intercepting public methods in derived classes, the question
+remains what class name should be used in the transaction naming.
+
+By default, a naming element of type "Class name" adds the name of the class where the intercepted method is defined. If
+you want to add the name of the annotated superclass instead, select the "Use annotated class name for filter and
+naming" check box in the "Annotation" step of the wizard.
+
+If you want to go the other way and add the class name of the actual instance on which the method was called, use the
+"Instance class name" naming element instead.
+
+<Figure src="ui/annotated_naming.png" />
+
+Even more specific, the "Instance name" naming element adds the `toString()` invocation on the object where the
+transaction method was called.
+
+<Figure src="ui/instance_name_config.png" />
+
+This naming element can also apply a getter chain to this object and append the `toString()` invocation on the result to
+the transaction name instead. For example, if the instance class has a `getVerbose()` method that returns the desired
+text, set the getter chain to `getVerbose()`. You can mix public field accesses and parameterless invocations of public
+methods like this:
+
+```
+getParent().descriptor.getVerbose()
+```
+
+If you use the `getClass()` method to append a class name, there are two special fields that are provided by jvmguard to
+simulate the abbreviated and simple class name modes that are available for the "Class name" and "Instance class name"
+naming elements:
+
+* With getClass().simpleName, the name of the class without its package is added. For example, com.mycorp.MyClass
+becomes MyClass.
+* With getClass().abbrevName, the abbreviated package names are added. For example, com.mycorp.MyClass becomes
+c.m.MyClass.
+
+Note that the "Instance name" naming element generates a far higher overhead than the "Instance class name" or "Class
+name" naming elements, since it always involves actual method calls.
+

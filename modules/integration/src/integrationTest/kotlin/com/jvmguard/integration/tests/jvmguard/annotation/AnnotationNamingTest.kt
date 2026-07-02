@@ -1,0 +1,125 @@
+package com.jvmguard.integration.tests.jvmguard.annotation
+
+import com.jvmguard.agent.config.transactions.*
+import com.jvmguard.agent.config.transactions.naming.InstanceElement
+import com.jvmguard.agent.config.transactions.naming.MethodNameElement
+import com.jvmguard.agent.config.transactions.naming.TextElement
+import com.jvmguard.integration.JvmGuardTest
+import com.jvmguard.integration.Controller
+import com.jvmguard.integration.TestServerConnection
+import com.jvmguard.integration.TestVmManager
+import com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.CAnno1
+import com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.MAnno1
+import com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.MAnno2
+import com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.MAnno3
+import com.jvmguard.integration.util.TimeComparator
+import com.jvmguard.integration.util.TransactionTreeComparator
+import com.jvmguard.data.config.GroupConfig
+import com.jvmguard.data.transactions.TransactionDataType
+import com.jvmguard.data.transactions.TransactionTreeInterval
+
+class AnnotationNamingTest: JvmGuardTest() {
+
+    override fun getJvmGuardOptions(runNo: Int, vmNo: Int, libraryNo: Int) =
+        super.getJvmGuardOptions(runNo, vmNo, libraryNo) + " -Xmx64m"
+
+    override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
+        var transactionDef = CustomAnnotatedTransactionDef()
+        initDefaultNaming(transactionDef)
+        initDefaultPolicy(transactionDef.policy)
+        transactionDef.id = 100
+        transactionDef.annotatedTarget = CustomAnnotatedTransactionDef.AnnotatedTarget.CLASS
+        transactionDef.isInterceptSubclasses = true
+        transactionDef.annotationName = CAnno1::class.java.name
+        rootConfig.transactionSettings.transactionDefs.add(transactionDef)
+
+        transactionDef = CustomAnnotatedTransactionDef()
+        initDefaultNaming(transactionDef)
+        initDefaultPolicy(transactionDef.policy)
+        transactionDef.id = 101
+        transactionDef.annotatedTarget = CustomAnnotatedTransactionDef.AnnotatedTarget.METHOD
+        transactionDef.isInterceptSubclasses = true
+        transactionDef.annotationName = MAnno1::class.java.name
+        transactionDef.naming.group.usedValue = "group1"
+        rootConfig.transactionSettings.transactionDefs.add(transactionDef)
+
+        transactionDef = CustomAnnotatedTransactionDef()
+        initDefaultNaming(transactionDef)
+        initDefaultPolicy(transactionDef.policy)
+        transactionDef.id = 102
+        transactionDef.annotatedTarget = CustomAnnotatedTransactionDef.AnnotatedTarget.METHOD
+        transactionDef.annotationName = MAnno2::class.java.name
+        transactionDef.naming.group.usedValue = "group1"
+        rootConfig.transactionSettings.transactionDefs.add(transactionDef)
+
+        transactionDef = CustomAnnotatedTransactionDef()
+        initDefaultNaming(transactionDef)
+        transactionDef.naming.namingElements.add(TextElement(": "))
+        transactionDef.naming.namingElements.add(InstanceElement())
+        initDefaultPolicy(transactionDef.policy)
+        transactionDef.id = 102
+        transactionDef.annotatedTarget = CustomAnnotatedTransactionDef.AnnotatedTarget.METHOD
+        transactionDef.isInterceptSubclasses = true
+        transactionDef.isUseDeclaringClassName = true
+        transactionDef.annotationName = MAnno3::class.java.name
+        rootConfig.transactionSettings.transactionDefs.add(transactionDef)
+    }
+
+
+    private fun initDefaultNaming(transactionDef: CustomAnnotatedTransactionDef) {
+        transactionDef.initDefault()
+        transactionDef.naming.namingElements.add(TextElement("."))
+        transactionDef.naming.namingElements.add(MethodNameElement())
+    }
+
+    private fun initDefaultPolicy(policy: Policy) {
+        policy.slowValue = 500
+        policy.slowDurationType = DurationType.MILLIS
+        policy.verySlowValue = 10000
+        policy.verySlowDurationType = DurationType.MILLIS
+    }
+
+
+    override fun connect(vmManager: TestVmManager, serverConnection: TestServerConnection, controller: Controller) {
+        val comparator = TransactionTreeComparator(TimeComparator.NONE)
+        waitForConnection(serverConnection, listOf("JVM"))
+
+        waitForNextConfigRequest(serverConnection)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+
+        modifyCurrentRootConfig(serverConnection) { rootConfig ->
+            var transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 100L } as CustomAnnotatedTransactionDef
+            transactionDef.methodInterceptionMode = CustomAnnotatedTransactionDef.MethodInterceptionMode.IMPLEMENTING_PUBLIC
+
+            transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 101L } as CustomAnnotatedTransactionDef
+            transactionDef.naming.reentryInhibition = ReentryInhibition.GROUP
+        }
+
+        waitForNextConfigRequest(serverConnection)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, false, comparator)
+
+        modifyCurrentRootConfig(serverConnection) { rootConfig ->
+            var transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 100L } as CustomAnnotatedTransactionDef
+            transactionDef.isInterceptSubclasses = false
+
+            transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 101L } as CustomAnnotatedTransactionDef
+            transactionDef.naming.reentryInhibition = ReentryInhibition.DEF
+        }
+
+        waitForNextConfigRequest(serverConnection)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, false, comparator)
+
+        modifyCurrentRootConfig(serverConnection) { rootConfig ->
+            val transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 100L } as CustomAnnotatedTransactionDef
+            val subDef = PolicySubDef(transactionDef)
+            subDef.filter = "*m3"
+            subDef.isDiscard = true
+            transactionDef.policySubDefs.add(subDef)
+
+            rootConfig.transactionSettings.transactionDefs.removeAll { it.id > 100 }
+        }
+
+        waitForNextConfigRequest(serverConnection)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, false, comparator)
+    }
+}

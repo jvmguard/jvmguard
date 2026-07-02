@@ -1,0 +1,399 @@
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/Poppins-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/NotoSans-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/NotoSans-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/NotoSans-Italic.woff2') format('woff2');
+}
+
+/*
+ * Metric-matched fallbacks. These @font-face rules adjust local Arial so its
+ * line height and character widths match the web fonts, eliminating the
+ * reflow/layout shift when the web font swaps in (the FOUT problem,
+ * especially visible in Firefox). Overrides computed from the actual font
+ * metrics via fonttools.
+ */
+@font-face {
+  font-family: 'Poppins Fallback';
+  src: local('Arial');
+  ascent-override: 116.0%;
+  descent-override: 165.2%;
+  line-gap-override: 9.0%;
+  size-adjust: 112.6%;
+}
+
+@font-face {
+  font-family: 'Noto Sans Fallback';
+  src: local('Arial');
+  ascent-override: 118.1%;
+  descent-override: 138.3%;
+  line-gap-override: 0.0%;
+  size-adjust: 102.6%;
+}
+
+:root,
+:root[data-theme="light"] {
+  /* Surface and ink. Clean neutrals, no tinted paper. */
+  --paper: #ffffff;
+  --paper-raised: #ffffff;
+  --paper-sunk: #f5f7fa;
+  --ink: #161b22;
+  --ink-soft: #353c47;
+  --ink-muted: #6a7382;
+  --rule: #e6e9ef;
+  --rule-strong: #cdd3de;
+
+  /* Brand. The gradient is reserved for the logo; flat brand blue for type and rules. */
+  --brand: #2258d2;
+  --brand-deep: #1740a8;
+  --brand-tint: #eaf1fd;
+
+  /* Alive signal. Reserved for live/active/primary-action only. */
+  --alive: #6abe1e;
+  --alive-deep: #4f9a12;
+
+  /* Logo wordmark fill (inline SVG uses this via CSS variable). */
+  --logo-text: #161b22;
+
+  /* Dark panel (code blocks). */
+  --scope-bg: #0d1117;
+  --scope-ink: #d7deea;
+
+  /* Type. */
+  --font-headings: 'Poppins', 'Poppins Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Noto Sans', 'Noto Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Rhythm. */
+  --measure: 68ch;            /* prose measure */
+  --measure-wide: 92ch;       /* hero and feature rows */
+  --measure-grid: 1000px;     /* card grids: wider than prose, so 3-up cards stay readable */
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+  --space-7: 4rem;
+  --space-8: 6rem;
+
+  /* Type scale. */
+  --step--1: 0.85rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.6rem;
+  --step-3: 2.1rem;
+  --step-4: 2.9rem;
+  --step-5: 3.7rem;
+
+  /* Radius. Rounded, not square. */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-pill: 999px;
+}
+
+:root[data-theme="dark"] {
+  /* Dark theme: deep slate surfaces, light ink. */
+  --paper: #0d1117;
+  --paper-raised: #161b22;
+  --paper-sunk: #080b10;
+  --ink: #e6edf3;
+  --ink-soft: #c2cad6;
+  --ink-muted: #8b95a5;
+  --rule: #232a35;
+  --rule-strong: #3a4454;
+  --brand: #6a9cff;
+  --brand-deep: #9bbcff;
+  --brand-tint: #16203a;
+  --alive: #7ec84a;
+  --alive-deep: #6abe1e;
+
+  /* Logo wordmark fill for dark mode. */
+  --logo-text: #ffffff;
+  --scope-bg: #000408;
+  --scope-ink: #d7deea;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* Reserve the scrollbar gutter on every page so the centered header and
+     content do not shift horizontally between scrolling and non-scrolling pages. */
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  font-feature-settings: 'kern', 'liga';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--brand-deep);
+}
+
+/* Headings: Poppins. Sentence case in copy. */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+h1 {
+  font-size: var(--step-4);
+  margin: 0 0 var(--space-5);
+  max-width: 20ch;
+}
+h2 {
+  font-size: var(--step-3);
+  margin: var(--space-7) 0 var(--space-4);
+}
+h3 {
+  font-size: var(--step-1);
+  margin: var(--space-5) 0 var(--space-3);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
+}
+
+ul,
+ol {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.25rem;
+  max-width: var(--measure);
+}
+
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--paper-sunk);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+}
+
+/* Layout primitives. */
+.shell {
+  position: relative;
+  width: 100%;
+  max-width: var(--measure-grid);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+/* .shell--wide is now equivalent to .shell (all sections share one width).
+   Kept for backward compatibility with existing markup. */
+.shell--wide {
+  max-width: var(--measure-grid);
+}
+
+.eyebrow {
+  font-family: var(--font-headings);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand);
+  margin: 0 0 var(--space-3);
+}
+
+.lede {
+  font-family: var(--font-sans);
+  font-size: var(--step-2);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  max-width: 42ch;
+  margin: 0 0 var(--space-6);
+}
+
+/* Section rule with a marginal label. */
+.rule {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  border-top: 1px solid var(--rule-strong);
+  margin: var(--space-7) 0 var(--space-5);
+  padding-top: var(--space-4);
+}
+.rule__no {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+  letter-spacing: 0.06em;
+  flex: 0 0 auto;
+}
+.rule__label {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* Buttons. Rounded, not square. */
+.btn {
+  --btn-bg: var(--ink);
+  --btn-fg: var(--paper);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-headings);
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.85em 1.4em;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--btn-bg);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover {
+  color: var(--btn-fg);
+  transform: translateY(-1px);
+}
+.btn--primary {
+  /* The one place the alive green appears as a fill. */
+  --btn-bg: var(--alive);
+  --btn-fg: #0d1a04;
+  border-color: var(--alive-deep);
+}
+.btn--primary:hover {
+  --btn-bg: var(--alive-deep);
+}
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--ink);
+  border-color: var(--rule-strong);
+}
+.btn--ghost:hover {
+  --btn-bg: var(--paper-sunk);
+  --btn-fg: var(--ink);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Cards / panels. */
+.panel {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+}
+.panel--dark {
+  background: var(--scope-bg);
+  color: var(--scope-ink);
+  border-color: #1f2733;
+}
+.panel--dark h2,
+.panel--dark h3 {
+  color: #f2f5fb;
+}
+
+/* Grids. */
+.grid {
+  display: grid;
+  gap: var(--space-5);
+}
+.grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+.grid--3 {
+  /* Fixed 3-up on desktop, single column on narrow screens. Avoids the
+     auto-fit 2+1 orphan for sections with exactly three cards. */
+  grid-template-columns: 1fr;
+}
+@media (min-width: 760px) {
+  .grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Utility. */
+.muted {
+  color: var(--ink-muted);
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.center {
+  text-align: center;
+}
+.stack > * + * {
+  margin-top: var(--space-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

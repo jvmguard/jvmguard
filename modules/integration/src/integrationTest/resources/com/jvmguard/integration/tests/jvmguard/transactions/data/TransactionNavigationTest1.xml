@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="TransactionNavigationWorkload.invokeEverything" time="601119" count="1500" type="devops">
+        <children>
+          <element name="TransactionNavigationWorkload.prep1" time="300494" count="1500" type="devops"/>
+          <element name="TransactionNavigationWorkload.prep2" time="300527" count="1500" type="devops"/>
+        </children>
+      </element>
+    </children>
+  </callTree>
+</data>

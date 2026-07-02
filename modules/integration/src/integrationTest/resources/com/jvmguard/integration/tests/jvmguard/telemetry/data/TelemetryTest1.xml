@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="TelemetryWorkload.transaction1" time="6610267" count="33000" type="devops"/>
+      <element name="TelemetryWorkload.transaction1" time="900219" count="600" type="devops" policy="slow"/>
+    </children>
+  </callTree>
+</data>

@@ -1,0 +1,56 @@
+{
+  "endTime": "2014-12-16T13:22:00.000Z",
+  "interval": 3600000,
+  "vm": "",
+  "vmType": "VM Group",
+  "type": "jdbc",
+  "hotspots": [
+    {
+      "name": "select * from statement",
+      "time": 17974326000,
+      "count": 110,
+      "server": "uri",
+      "backtraces": {
+        "children": [
+          {
+            "name": "RestTransactionWorkload.transaction2",
+            "time": 17974326000,
+            "count": 110,
+            "type": "devops",
+            "children": [
+              {
+                "name": "transaction Щ",
+                "time": 14977393000,
+                "count": 100,
+                "type": "devops",
+                "children": [
+                  {
+                    "name": "/request1",
+                    "time": 14977393000,
+                    "count": 100,
+                    "type": "web"
+                  }
+                ]
+              },
+              {
+                "name": "transaction Щ",
+                "time": 2996933000,
+                "count": 10,
+                "type": "devops",
+                "policy": "slow",
+                "children": [
+                  {
+                    "name": "/request1",
+                    "time": 2996933000,
+                    "count": 10,
+                    "type": "web"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

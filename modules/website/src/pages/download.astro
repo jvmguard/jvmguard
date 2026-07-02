@@ -1,0 +1,136 @@
+---
+import PageFrame from '../layouts/PageFrame.astro';
+import {SITE, DOWNLOADS} from '../consts';
+
+const platforms = [
+  {
+    name: 'Windows',
+    file: '.exe installer',
+    links: [{label: 'Download', href: DOWNLOADS.windows, primary: true}],
+  },
+  {
+    name: 'macOS',
+    file: '.dmg installer',
+    links: [{label: 'Download', href: DOWNLOADS.macos, primary: true}],
+  },
+  {
+    name: 'Linux',
+    file: '.rpm  ·  .deb  ·  .sh',
+    links: [
+      {label: 'Installer (.sh)', href: DOWNLOADS.linuxInstaller, primary: true},
+      {label: 'RPM', href: DOWNLOADS.linuxRpm, primary: false},
+      {label: 'DEB', href: DOWNLOADS.linuxDeb, primary: false},
+    ],
+  },
+];
+---
+
+<PageFrame
+  active="download"
+  title={`Download - ${SITE.name}`}
+  description="Download jvmguard for Windows, macOS, or Linux, or run the current development version from source."
+>
+  <section class="shell shell--wide hero">
+    <p class="eyebrow">Download</p>
+    <h1>Get jvmguard.</h1>
+    <p class="lede">
+      The installer bundles a compatible Java runtime. Run from source if you prefer, or to track the
+      current development version.
+    </p>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 01</span>
+      <span class="rule__label">Installer</span>
+    </div>
+    <div class="grid grid--3">
+      {platforms.map((p) => (
+        <article class="platform">
+          <h3>{p.name}</h3>
+          <p class="muted platform__file">{p.file}</p>
+          <div class="platform__links">
+            {p.links.map((l) => (
+              <a class:list={['btn', l.primary ? 'btn--primary' : 'btn--ghost', 'platform__link']} href={l.href}>{l.label}</a>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+    <p class="muted platform__note">
+      After installing, open <code>http://localhost:8020/</code> and complete the setup wizard. Then
+      point a JVM at the agent port, default <code>8847</code>, to start monitoring. See the
+      <a href={SITE.docsInstalling}>installation guide</a> for details.
+    </p>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
+      <span class="rule__label">Run from source</span>
+    </div>
+    <div class="panel">
+      <p>
+        To run the current development version without building an installer, clone the repository and
+        launch the server. The build auto-provisions a Java 25 toolchain, so no separate Java setup is
+        needed.
+      </p>
+      <pre class="code"><code>git clone https://github.com/jvmguard/jvmguard.git
+cd jvmguard
+./gradlew :jvmguard:server:bootRun</code></pre>
+      <p class="muted">
+        Once you see <code>Server started</code>, open <code>http://localhost:8020/</code>. The default
+        web port is <code>8020</code> and the agent port is <code>8847</code>.
+      </p>
+    </div>
+  </section>
+</PageFrame>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-5);
+  }
+  .platform {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+  .platform h3 {
+    margin-top: 0;
+  }
+  .platform__file {
+    margin-bottom: var(--space-3);
+  }
+  .platform__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+  .platform__link {
+    width: 100%;
+    text-align: center;
+  }
+  .platform__note {
+    margin-top: var(--space-5);
+    max-width: var(--measure);
+  }
+  .code {
+    margin: 0 0 var(--space-4);
+    background: var(--scope-bg);
+    color: #d7deea;
+    border: 1px solid #1f2733;
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    line-height: 1.7;
+  }
+  .code code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+  }
+</style>

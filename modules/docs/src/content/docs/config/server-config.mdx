@@ -1,0 +1,72 @@
+---
+title: Server Configuration
+---
+
+jvmguard configuration options that cannot be changed in the jvmguard UI are contained in the text file
+`config/application.yaml` in the jvmguard installation directory. To change a value, edit that file with a text editor
+and restart the jvmguard server. Any individual key can also be overridden with a `-Djvmguard.<key>=<value>` system
+property.
+
+The properties themselves are documented with comments in `config/application.yaml`. Here, a couple of scenarios are
+discussed where it is necessary to adjust the default parameters.
+
+## Data directory
+
+The **dataDirectory** property points to the directory where all variable data is located. The following subdirectories
+are created by jvmguard:
+
+* **db**: Contains the embedded H2 database.
+* **log**: Contains all log files. By default, log files are rotated. The rotation settings can be changed in the
+`logback.xml` file in the jvmguard installation directory. Different settings can be applied to the three different log
+files, "server", "connection" and "event". All log files can be viewed in the jvmguard UI.
+* **snapshots**: Memory snapshots and profiling snapshots are saved in this directory. These snapshots can be downloaded
+or deleted in the "Snapshots" view in jvmguard.
+* **ssl**: This directory contains the file pair agent.ks / server.ks for authentication and encryption as well as the
+SSL certificate for the web server.
+
+If you run two jvmguard servers on the same machine, they have to have different data directories. By default, the
+installer always suggests the same location for the data directory, so in the case of multiple installations you have to
+adjust it in the installer or after the installation in `config/application.yaml`.
+
+## Web server
+
+jvmguard comes with a built-in web server that listens on port 8020 by default. You can adjust that port with the
+**httpPort** property and switch to HTTPS by setting **useHttps** to `true`.
+
+When you use HTTPS, jvmguard will generate a self-signed certificate `ssl/self_signed.ks` in the jvmguard data directory.
+Browsers will display warning messages with this certificate. If you have a certificate signed by a recognized
+certificate authority, you can copy it in PKCS12 format to `ssl/web.pkcs12`. If the certificate file has a different
+name, you can specify the **keystoreName** property.
+
+If the certificate is protected with a password, you can specify it in the **keystorePassword** property. While the
+password cannot be encrypted, it can at least be obfuscated with the command line tool `jvmguard_obfuscate`:
+
+```
+jvmguard_obfuscate [password]
+```
+
+If you put jvmguard behind a reverse proxy, you have to set the **reverseProxy** property to `true`. The web server will
+then analyze the proxy headers to create correct URLs. If this should not work due to a problem with the reverse proxy,
+set the **reverseProxyHost** to the host name of the proxy. If jvmguard is served under a path prefix, set the
+**contextPath** property to that prefix, for example `jvmguard`, without a leading or trailing slash.
+
+The [REST API service](/docs/main/rest) is enabled by setting the **restApiEnabled** property to `true`. The REST API
+is then served at the `/api` path on the same port as the web server and uses the same protocol (HTTP/HTTPS) as
+configured for the web server.
+
+## Communication with monitored VMs
+
+Monitored VMs create a TCP connection on the port that is configured with the **vmPort** property.
+
+By default, the communication between monitored VMs and the jvmguard collector is unencrypted and unauthenticated. This
+means that every VM can connect to the jvmguard server and the jvmguard agent has no way of knowing if the jvmguard server
+on the other side can be trusted. This can be acceptable in certain local area networks, but it is not suitable for
+connecting over WANs or even over the internet.
+
+To enable authentication and encryption set the property **vmUseSsl** to `true`. In that case, the file pair
+`ssl/agent.ks` and `ssl/server.ks` will be created. Now, the server will only allow connections from agents who possess
+the `agent.ks` file and agents will only connect to servers who have the `server.ks` file. In addition, the
+communication protocol will be encrypted.
+
+For more information on this topic, see the chapter on [monitoring JVMs](/docs/main/monitoring).
+

@@ -1,0 +1,32 @@
+{
+  "endTime": "2026-06-18T19:25:00.000Z",
+  "interval": 3600000,
+  "vm": "",
+  "vmType": "VM Group",
+  "callTree": {
+    "children": [{
+      "name": "transaction Щ",
+      "time": 15035823725,
+      "count": 100,
+      "type": "devops",
+      "children": [{
+        "name": "RestTransactionWorkload.transaction2",
+        "time": 15027568797,
+        "count": 100,
+        "type": "devops"
+      }]
+    }, {
+      "name": "transaction Щ",
+      "time": 3011182458,
+      "count": 10,
+      "type": "devops",
+      "policy": "slow",
+      "children": [{
+        "name": "RestTransactionWorkload.transaction2",
+        "time": 3004006437,
+        "count": 10,
+        "type": "devops"
+      }]
+    }]
+  }
+}

@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data name="test export" vms="my vms" date="2013-12-15T14:00:00Z">
+  <hotspots>
+    <element name="select * from test" time="3000000" count="30" server="jdbc:test">
+      <associated>
+        <custom23>
+          <element name="custom payload" time="1000000" count="10"/>
+        </custom23>
+      </associated>
+      <backtraces>
+        <children>
+          <element name="sub" time="1000000" count="10" type="devops" policy="very slow">
+            <children>
+              <element name="test" time="1000000" count="10" type="pojo"/>
+            </children>
+          </element>
+          <element name="sub" time="1000000" count="10" type="devops" policy="slow">
+            <children>
+              <element name="test" time="1000000" count="10" type="pojo"/>
+            </children>
+          </element>
+          <element name="test 123" time="1000000" count="10" type="devops" policy="error" error="Error message"/>
+        </children>
+      </backtraces>
+    </element>
+    <element name="select * from test2" time="2000000" count="20" server="jdbc:test">
+      <backtraces>
+        <children>
+          <element name="sub" time="1000000" count="10" type="devops" policy="very slow">
+            <children>
+              <element name="test" time="1000000" count="10" type="pojo"/>
+            </children>
+          </element>
+          <element name="test 123" time="1000000" count="10" type="devops" policy="error" error="Error message"/>
+        </children>
+      </backtraces>
+    </element>
+  </hotspots>
+</data>

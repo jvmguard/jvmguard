@@ -1,0 +1,205 @@
+---
+import PageFrame from '../layouts/PageFrame.astro';
+import {SITE} from '../consts';
+
+const facts = [
+  {
+    k: 'Pure Java agent',
+    v: 'The agent intercepts class loading to instrument selected methods. It loads no native libraries unless you explicitly enable the profiling cross-over.',
+  },
+  {
+    k: 'No phone home',
+    v: 'Agents connect to your jvmguard server. The server makes no outbound calls to a vendor. There is no telemetry, usage, or crash reporting shipped anywhere by default.',
+  },
+  {
+    k: 'No JMX port',
+    v: 'The agent reads MBeans in process. You do not have to open a JMX connector server on the monitored JVM to inspect or operate on MBeans.',
+  },
+  {
+    k: 'Single H2 file',
+    v: 'All persistent data, recorded data and configuration, lives in one embedded H2 database file on a host you control. There is no external database to operate.',
+  },
+  {
+    k: 'TLS by default-ready',
+    v: 'Agent-to-server traffic and the web UI can be encrypted and authenticated. Keystores are configured at install time.',
+  },
+  {
+    k: 'Spring Security, LDAP',
+    v: 'Access is gated by Spring Security. Authenticate locally or against LDAP. Three access levels, Admin, Profiler, and Viewer, partition a single server for separate teams.',
+  },
+];
+
+const collect = [
+  'Timing of transactions you explicitly configured (POJO, DevOps, or custom-annotation types).',
+  'Scalar telemetries you enabled: heap, CPU, threads, GC, and MBean or DevOps values.',
+  'Threshold states for the telemetries you chose to watch.',
+];
+
+const capture = [
+  'A JFR recording, taken on one VM, for a bounded duration.',
+  'A heap dump (HPROF) or a thread dump, for one VM.',
+  'A JProfiler snapshot, via the optional profiling cross-over.',
+];
+---
+
+<PageFrame
+  active="security"
+  title={`Security and data flow - ${SITE.name}`}
+  description="What the jvmguard agent does and does not do in your JVM: no default collection, no phone home, no cloud egress, source-available under Apache 2.0."
+>
+  <section class="shell hero">
+    <p class="eyebrow">Security and data flow</p>
+    <h1>What jvmguard does inside your JVM.</h1>
+    <p class="lede">
+      The hardest question for a production profiling tool is trust. This page states what jvmguard
+      collects, where it sends it, and what you can verify in the source.
+    </p>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 01</span>
+      <span class="rule__label">Architecture</span>
+    </div>
+    <figure class="arch">
+      <img src="/architecture.svg" alt="jvmguard architecture: agents in monitored VMs connect to a server that runs the collector, an embedded H2 database, and the web UI." width="510" height="350" />
+      <figcaption class="mono">
+        Agents push to your server over an authenticated connection. Users reach the web UI over HTTPS.
+        No component talks to a vendor.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
+      <span class="rule__label">Collected by default</span>
+    </div>
+    <p>
+      The steady state records only lightweight data, with near-zero overhead: the telemetries you
+      enabled and the transactions you defined. jvmguard collects no application payloads, no end-user
+      data, and no deep profiling artifacts. The list below is the full steady-state footprint.
+    </p>
+    <ul class="ticks">
+      {collect.map((c) => (
+        <li>{c}</li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 03</span>
+      <span class="rule__label">Captured on demand</span>
+    </div>
+    <p>
+      Deep artifacts are never collected in the steady state. A capture runs only when a trigger fires
+      or when you start one manually, for the VM that needs it. The rest of the time, none of the
+      following is collected.
+    </p>
+    <ul class="ticks">
+      {capture.map((c) => (
+        <li>{c}</li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 04</span>
+      <span class="rule__label">Operational posture</span>
+    </div>
+    <div class="grid grid--2">
+      {facts.map((f) => (
+        <article class="fact">
+          <h3>{f.k}</h3>
+          <p class="muted">{f.v}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 05</span>
+      <span class="rule__label">License and deployment</span>
+    </div>
+    <div class="panel license">
+      <ul class="stack">
+        <li><strong>{SITE.license}.</strong> Source-available. Read it, build it, and audit it with your own tooling before it touches production.</li>
+        <li><strong>Self-hosted.</strong> Runs behind your firewall. Suitable for air-gapped networks. No outbound cloud dependency.</li>
+        <li><strong>Single server.</strong> The collector, the embedded database, and the web UI run in one process. No separate services to secure.</li>
+      </ul>
+    </div>
+  </section>
+</PageFrame>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-5);
+  }
+  .arch {
+    margin: 0;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    text-align: center;
+  }
+  .arch img {
+    display: block;
+    width: 100%;
+    max-width: 760px;
+    height: auto;
+    margin-inline: auto;
+  }
+  /* The diagram is authored light (dark ink). Invert it in dark mode. */
+  :root[data-theme="dark"] .arch img {
+    filter: invert(0.93) hue-rotate(180deg);
+  }
+  .arch figcaption {
+    margin-top: var(--space-4);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    max-width: 60ch;
+    margin-inline: auto;
+  }
+  .ticks {
+    list-style: none;
+    padding: 0;
+    max-width: var(--measure);
+  }
+  .ticks li {
+    position: relative;
+    padding-left: 1.75rem;
+    margin-bottom: var(--space-3);
+  }
+  .ticks li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 0.7em;
+    height: 0.7em;
+    background: var(--alive);
+    border-radius: 50%;
+  }
+  .fact {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+  .fact h3 {
+    margin-top: 0;
+    color: var(--brand-deep);
+  }
+  .license {
+    max-width: var(--measure);
+  }
+  .license ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: none;
+  }
+</style>

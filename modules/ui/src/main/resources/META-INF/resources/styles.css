@@ -1,0 +1,758 @@
+html {
+    --aura-accent-color-light: #1976d2;
+    --aura-accent-color-dark: #69c1fc;
+
+    /* Slightly denser typography */
+    --aura-base-font-size: 13;
+
+    --jvmguard-header-background: #021527;
+    --jvmguard-header-foreground: #ffffff;
+    --jvmguard-welcome-color: #1e84dd;
+
+    /* Dark navbar */
+    --vaadin-app-layout-navbar-background: var(--jvmguard-header-background);
+
+    --jvmguard-status-ok: #98df58;
+    --jvmguard-status-warning: #ffba42;
+    --jvmguard-status-error: #ec6464;
+    --jvmguard-status-disabled: #888888;
+
+    --jvmguard-sparkline-path: #999999;
+    --jvmguard-sparkline-value-dot: #6699ff;
+    --jvmguard-sparkline-value: #1976d2;
+    --jvmguard-sparkline-average: #aaaaaa;
+    --jvmguard-sparkline-normal: #dddddd;
+    --jvmguard-sparkline-label: #999999;
+}
+
+@media (prefers-color-scheme: dark) {
+    html {
+        --jvmguard-sparkline-value: #69c1fc;
+        --jvmguard-sparkline-normal: #444444;
+    }
+}
+
+
+vaadin-app-layout.jvmguard-shell::part(navbar) {
+    color: var(--jvmguard-header-foreground);
+    min-height: 56px;
+}
+
+/* Otherwise the content card sits flush under the fixed navbar.
+   The host is border-box and reserves the navbar height via padding-top, so a transparent top border
+   equal to the inset pushes the card down by exactly the side/bottom gap and shrinks it to fit
+   giving symmetric spacing on all four sides. */
+vaadin-app-layout.jvmguard-shell {
+    border-top: var(--aura-app-layout-inset, 0px) solid transparent;
+
+    --jvmguard-drawer-padding: 0 0.5rem;          /* expanded */
+    --jvmguard-drawer-padding-overlay: 1rem;  /* collapsed */
+}
+
+vaadin-app-layout.jvmguard-shell:not([overlay])::part(drawer) {
+    padding: var(--jvmguard-drawer-padding);
+}
+
+vaadin-app-layout.jvmguard-shell[overlay]::part(drawer) {
+    padding: var(--jvmguard-drawer-padding-overlay);
+}
+
+vaadin-app-layout.jvmguard-shell:not([overlay]) vaadin-drawer-toggle {
+    display: none;
+}
+
+vaadin-app-layout.jvmguard-shell:not([overlay]) .jvmguard-nav {
+    margin-top: var(--aura-app-layout-inset, 0.75rem);
+}
+
+.jvmguard-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.25rem 1rem 0.5rem;
+    min-width: 13rem;
+}
+
+.jvmguard-user-name {
+    font-weight: 600;
+    color: var(--vaadin-text-color);
+}
+
+.jvmguard-user-info-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.jvmguard-user-info-label {
+    color: var(--vaadin-text-color-secondary);
+    /*noinspection CssUnresolvedCustomProperty*/
+    font-size: var(--vaadin-font-size-s, 0.875em);
+}
+
+.jvmguard-user-info-value {
+    color: var(--vaadin-text-color);
+}
+
+/* The recording group selector is navigated by row selection, so suppress the per-cell focus ring. */
+vaadin-grid.jvmguard-group-selector::part(cell)::before {
+    display: none;
+}
+
+.jvmguard-field-hint {
+    color: var(--vaadin-text-color-secondary);
+    /*noinspection CssUnresolvedCustomProperty*/
+    font-size: var(--vaadin-font-size-s, 0.875em);
+}
+
+.jvmguard-row-detail {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.jvmguard-settings-section {
+    padding-bottom: var(--vaadin-padding-l, 1.5rem);
+    max-width: 36rem;
+}
+
+/* A settings section page is the routed content card (like a data view); give it inner padding. */
+.jvmguard-settings-page {
+    padding: var(--vaadin-padding-m);
+    overflow: auto;
+}
+
+.jvmguard-settings-title {
+    margin: 0;
+    color: var(--jvmguard-header-foreground);
+}
+
+/* Thin vertical divider between the logo and the "General Settings" caption ("brand | section"). The
+   logo box has built-in right padding, so the gap is wide on the title side only. */
+.jvmguard-settings-separator {
+    width: 1px;
+    height: 1.75rem;
+    flex-shrink: 0;
+    background-color: var(--jvmguard-header-foreground);
+    opacity: 0.4;
+    margin-right: 1.5rem;
+}
+
+/* Keep a field's label on one line even when the field itself is narrow (e.g. the cap field). */
+.jvmguard-nowrap-label::part(label) {
+    white-space: nowrap;
+}
+
+/* The Save button sits on the dark settings navbar; Aura's default disabled style dims the whole
+   button via opacity, leaving the label unreadable there. Drive Aura's own button properties instead
+   and neutralize the opacity, so the disabled state is a legible faded chip on the dark bar. */
+.jvmguard-settings-save[disabled] {
+    --vaadin-button-text-color: rgba(255, 255, 255, 0.6);
+    --vaadin-button-background: rgba(255, 255, 255, 0.12);
+    opacity: 1 !important;
+}
+
+/* Extra separation before a control that starts a new logical group within a section. */
+.jvmguard-settings-gap-before {
+    margin-top: 1.25rem;
+}
+
+.jvmguard-settings-gap-after {
+    margin-bottom: 1.25rem;
+}
+
+/* Installed-version line is important info — keep it at normal size. */
+.jvmguard-settings-version {
+    font-weight: 500;
+}
+
+/* Extra breathing room around a sparse control. */
+.jvmguard-settings-spacious {
+    margin-block: 1rem;
+}
+
+/* The standalone Account page: its own header + Save/Cancel, content scrolls. */
+.jvmguard-settings-header {
+    box-sizing: border-box;
+    padding: var(--vaadin-padding-m);
+    gap: var(--vaadin-gap-s, 0.5rem);
+    border-bottom: 1px solid var(--vaadin-border-color, var(--lumo-contrast-10pct));
+}
+
+.jvmguard-settings-content {
+    overflow: auto;
+    padding: var(--vaadin-padding-m);
+}
+
+.jvmguard-header {
+    width: 100%;
+    padding: 0 1rem;
+}
+
+vaadin-app-layout.jvmguard-shell:not([overlay]) .jvmguard-header {
+    padding: 0;
+}
+
+.jvmguard-logo {
+    width: 193px;
+    height: 45px;
+    flex-shrink: 0;
+    background-image: url('icons/header_logo.svg');
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: contain;
+}
+
+/* On a narrow header drop the wordmark and keep just the icon, so the brand never vanishes. */
+@media (max-width: 640px) {
+    .jvmguard-logo {
+        width: 45px;
+        background-image: url('icons/logo.svg');
+    }
+
+    .jvmguard-header vaadin-button.jvmguard-collapsible::part(label) {
+        display: none;
+    }
+}
+
+/* header controls are light on the dark bar */
+.jvmguard-header vaadin-button,
+.jvmguard-header vaadin-button::part(label),
+.jvmguard-header vaadin-button vaadin-icon {
+    color: var(--jvmguard-header-foreground);
+}
+
+.jvmguard-header vaadin-button {
+    --aura-surface-opacity: 0;
+}
+
+.jvmguard-header vaadin-button:hover {
+    --aura-surface-opacity: 0.18;
+}
+
+.jvmguard-header vaadin-button[disabled],
+.jvmguard-header vaadin-button[disabled]::part(label) {
+    color: var(--jvmguard-header-foreground);
+    opacity: 0.45;
+}
+
+/* Size to its single item so the MenuBar never collapses it into an overflow button. */
+.jvmguard-header vaadin-menu-bar {
+    flex: 0 0 auto;
+    color: var(--jvmguard-header-foreground);
+}
+
+.jvmguard-header vaadin-menu-bar vaadin-icon {
+    color: var(--jvmguard-header-foreground);
+}
+
+/* dropdown caret */
+.jvmguard-header vaadin-menu-bar-button {
+    color: var(--jvmguard-header-foreground);
+}
+
+/*
+ * Fix overflow button problems at fractional DPI settings
+ */
+.jvmguard-header vaadin-menu-bar.jvmguard-settings-cog {
+    min-width: 4.5rem;
+}
+
+.jvmguard-header vaadin-menu-bar.jvmguard-settings-cog::part(container) {
+    justify-content: center;
+}
+
+/*
+ * Fix overflow button problems at fractional DPI settings
+ */
+vaadin-menu-bar.jvmguard-dropdown-button {
+    flex-shrink: 0;
+}
+
+vaadin-menu-bar.jvmguard-dropdown-button::part(container) {
+    border-inline-end: 2px solid transparent;
+}
+
+.jvmguard-header vaadin-avatar {
+    --vaadin-avatar-background: rgba(255, 255, 255, 0.2);
+    --vaadin-avatar-text-color: var(--jvmguard-header-foreground);
+}
+
+.jvmguard-user {
+    color: var(--jvmguard-header-foreground);
+    opacity: 0.85;
+    white-space: nowrap;
+}
+
+.jvmguard-login-page {
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.jvmguard-login-card {
+    box-sizing: border-box;
+    width: 360px;
+    max-width: 100%;
+    padding: 2rem;
+    gap: 0.75rem;
+    border-radius: 8px;
+    background-color: var(--aura-surface-color);
+    box-shadow: var(--aura-shadow-m);
+}
+
+.jvmguard-login-logo {
+    width: 48px;
+    height: 48px;
+    background-image: url('icons/logo.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.jvmguard-login-title {
+    margin: 0;
+    font-size: var(--aura-font-size-xl);
+    font-weight: var(--aura-font-weight-semibold);
+    color: var(--jvmguard-welcome-color);
+}
+
+.jvmguard-login-subtitle {
+    margin: 0 0 0.5rem;
+    color: var(--vaadin-text-color-secondary);
+}
+
+.jvmguard-vm-link {
+    color: var(--aura-accent-color-light);
+    cursor: pointer;
+}
+
+.jvmguard-vm-link:hover,
+.jvmguard-vm-link:focus-visible {
+    text-decoration: underline;
+}
+
+.jvmguard-vm-link:focus-visible {
+    outline: 2px solid var(--aura-accent-color-light);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+jvmguard-sparkline.jvmguard-sparkline-link {
+    cursor: pointer;
+}
+
+.jvmguard-breadcrumb {
+    gap: 0.3rem;
+    font-size: var(--aura-font-size-l);
+}
+
+.jvmguard-breadcrumb-separator {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.jvmguard-breadcrumb-current {
+    font-weight: 600;
+}
+
+vaadin-grid.jvmguard-selector-tree::part(header-cell) {
+    display: none;
+}
+
+jvmguard-echart {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.jvmguard-telemetry-toolbar {
+    gap: 0.5rem 0.75rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+/* The auto-update checkbox has no floating label */
+.jvmguard-telemetry-toolbar .jvmguard-telemetry-autoupdate {
+    margin-bottom: 0.45rem;
+}
+
+.jvmguard-controls-hidden {
+    visibility: hidden;
+}
+
+/* A tight cluster of related buttons (e.g. paging/zoom). */
+.jvmguard-navgroup {
+    gap: 0.1rem;
+}
+
+.jvmguard-data-message {
+    color: var(--vaadin-text-color-secondary);
+}
+
+/* Tighter column spacing than the Aura default (~8.8px each side). The padding lives entirely on
+   the cell-content wrapper, and --vaadin-grid-cell-padding is non-inheriting, so set it here. */
+vaadin-grid.jvmguard-vm-grid vaadin-grid-cell-content {
+    padding: 0.3rem 0.4rem;
+}
+
+
+vaadin-grid-tree-toggle {
+    align-items: center;
+}
+
+vaadin-grid.jvmguard-telemetry-overview-grid vaadin-grid-cell-content {
+    padding: 0.4rem 0.6rem;
+}
+
+vaadin-grid.jvmguard-mbean-tree vaadin-grid-cell-content,
+vaadin-grid.jvmguard-mbean-attribute-tree vaadin-grid-cell-content,
+vaadin-grid.jvmguard-mbean-operations vaadin-grid-cell-content {
+    padding: 0.25rem 0.5rem;
+}
+
+.jvmguard-mbean-operation-signature {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.jvmguard-stacktrace {
+    margin: 0;
+    max-height: 16rem;
+    overflow: auto;
+    font-size: 0.8em;
+    white-space: pre;
+}
+
+@media (max-width: 800px) {
+    vaadin-split-layout.jvmguard-mbean-split {
+        flex-direction: column;
+    }
+
+    vaadin-split-layout.jvmguard-mbean-split::part(splitter) {
+        display: none;
+    }
+
+    vaadin-split-layout.jvmguard-mbean-split > [slot="primary"],
+    vaadin-split-layout.jvmguard-mbean-split > [slot="secondary"] {
+        width: 100% !important;
+        padding-inline: 0 !important;
+    }
+
+    vaadin-split-layout.jvmguard-mbean-split > [slot="primary"] {
+        flex: 0 0 auto !important;
+        height: 22rem !important;
+    }
+
+    vaadin-split-layout.jvmguard-mbean-split > [slot="secondary"] {
+        flex: 1 1 auto !important;
+        min-height: 0;
+        margin-block-start: var(--vaadin-padding-m);
+    }
+}
+
+.jvmguard-mbean-attribute-title {
+    font-weight: 600;
+    padding: 0.35rem 0.5rem;
+    overflow-wrap: anywhere;
+}
+
+.jvmguard-mbean-attribute-class,
+.jvmguard-mbean-info-icon,
+.jvmguard-mbean-placeholder {
+    color: var(--vaadin-text-color-secondary);
+    font-weight: 400;
+}
+
+/* Attribute/operation values truncate to the cell; the "show" button reveals the full text. */
+.jvmguard-mbean-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.jvmguard-vm-detail {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.85em;
+}
+
+.jvmguard-login-card vaadin-text-field,
+.jvmguard-login-card vaadin-password-field,
+.jvmguard-login-card vaadin-button {
+    width: 100%;
+}
+
+vaadin-grid.jvmguard-transaction-grid vaadin-grid-cell-content {
+    padding: 0.3rem 0.5rem;
+}
+
+.jvmguard-transaction-name-cell {
+    width: 100%;
+    gap: 0.25rem;
+}
+
+/* The trailing hamburger must not make the row taller than its text line */
+.jvmguard-transaction-name-cell vaadin-button {
+    flex: 0 0 auto;
+    min-width: 0;
+    min-height: 0;
+    height: 1lh;
+    margin: 0;
+    --vaadin-button-padding: 0 0.1rem;
+    --vaadin-button-min-width: 0;
+}
+
+.jvmguard-transaction-name-cell vaadin-button vaadin-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.jvmguard-transaction-name {
+    gap: 0.35rem;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.jvmguard-transaction-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.jvmguard-transaction-policy-prefix {
+    font-weight: 600;
+    margin-inline-end: 0.25rem;
+}
+
+.jvmguard-transaction-name.policy-slow,
+.jvmguard-transaction-name.policy-very-slow {
+    color: var(--jvmguard-status-warning);
+}
+
+.jvmguard-transaction-name.policy-error {
+    color: var(--jvmguard-status-error);
+}
+
+.jvmguard-time-bar {
+    position: relative;
+    width: 100%;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.jvmguard-time-bar-fill {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    background: color-mix(in srgb, var(--aura-accent-color-light) 35%, transparent);
+    border-radius: 2px;
+}
+
+.jvmguard-time-bar-label {
+    position: relative;
+    padding-inline-start: 0.35rem;
+}
+
+.jvmguard-transaction-timeline {
+    min-height: 0;
+}
+
+@media (max-width: 640px) {
+    vaadin-split-layout.jvmguard-transaction-split {
+        overflow-y: auto;
+    }
+
+    vaadin-split-layout.jvmguard-transaction-split::part(splitter) {
+        display: none;
+    }
+
+    vaadin-split-layout.jvmguard-transaction-split > [slot="primary"] {
+        flex: 0 0 auto !important;
+        height: 24rem !important;
+    }
+
+    vaadin-split-layout.jvmguard-transaction-split > [slot="secondary"] {
+        flex: 0 0 auto !important;
+        height: 22rem !important;
+    }
+}
+
+.jvmguard-timeline-header {
+    padding: 0.25rem 0.5rem;
+    gap: 0.4rem 0.6rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.jvmguard-timeline-header .jvmguard-telemetry-autoupdate {
+    margin-bottom: 0.45rem;
+}
+
+.jvmguard-timeline-title {
+    font-weight: 600;
+    color: var(--vaadin-text-color-secondary);
+    margin-bottom: 0.45rem;
+}
+
+vaadin-button.jvmguard-field-icon-button {
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    --vaadin-button-padding: 0;
+    --vaadin-button-min-width: 0;
+}
+
+/* The funnel tints when a non-"All" status is active. */
+vaadin-button.jvmguard-filter-active,
+vaadin-button.jvmguard-filter-active vaadin-icon {
+    color: var(--aura-accent-color-light);
+}
+
+/* Non-interactive group header inside the filter funnel menu. The item is disabled, so keyboard
+   navigation skips it, Style it as a header and override the disabled look. */
+.jvmguard-menu-header,
+.jvmguard-menu-header[disabled] {
+    display: block;
+    padding: 0.25rem 0.75rem 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--vaadin-text-color-secondary);
+    opacity: 1;
+}
+
+/* The header isn't checkable, but the menu reserves checkmark space because its sibling items are */
+.jvmguard-menu-header::part(checkmark) {
+    display: none;
+}
+
+.jvmguard-transaction-info {
+    margin-block: 0.5rem 0.25rem;
+}
+
+.jvmguard-form-subhead {
+    margin: 0.75rem 0 0.25rem;
+    color: var(--vaadin-text-color-secondary);
+}
+
+.jvmguard-recording-toolbar {
+    margin-bottom: 1rem;
+}
+
+.jvmguard-recording-override {
+    white-space: nowrap;
+    margin-right: 1.25rem;
+}
+
+.jvmguard-default-marker {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.jvmguard-selector-legend {
+    margin-top: 0.5rem;
+}
+
+.jvmguard-dialog-subtitle {
+    color: var(--vaadin-text-color-secondary);
+    margin-bottom: 0.25rem;
+}
+
+/*
+ * Fix vertical scrollbar in unsized dialogs
+ */
+vaadin-dialog-overlay:not([has-bounds-set])::part(content) {
+    flex: 0 1 auto;
+}
+
+.jvmguard-step-title {
+    font-weight: 600;
+}
+
+.jvmguard-step-label {
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.jvmguard-addvms-download-row {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.jvmguard-code-block {
+    background: rgba(127, 127, 127, 0.12);
+    border: 1px solid rgba(127, 127, 127, 0.25);
+    border-radius: var(--vaadin-radius-m, 4px);
+    padding: 0.35rem 0.5rem;
+}
+
+.jvmguard-code-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    user-select: all;
+    align-self: center;
+}
+
+.jvmguard-log-view {
+    height: 100%;
+}
+
+.jvmguard-log-toolbar {
+    flex: 0 0 auto;
+}
+
+vaadin-grid.jvmguard-log-grid::part(header-cell) {
+    display: none;
+}
+
+vaadin-grid.jvmguard-log-grid {
+    font-family: monospace;
+    font-size: var(--lumo-font-size-s, 0.875rem);
+}
+
+vaadin-grid.jvmguard-log-grid::part(cell) {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.jvmguard-inbox-view {
+    height: 100%;
+}
+
+.jvmguard-inbox-toolbar {
+    flex: 0 0 auto;
+}
+
+.jvmguard-unread {
+    font-weight: 600;
+}
+
+.jvmguard-inbox-message {
+    margin: 0;
+    max-height: 60vh;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: inherit;
+}
+
+vaadin-badge.jvmguard-inbox-badge {
+    --vaadin-badge-background: var(--aura-accent-color-light, #1976d2);
+    --vaadin-badge-text-color: #ffffff;
+    color: #ffffff;
+}
+
+vaadin-badge.jvmguard-inbox-badge::part(content) {
+    color: #ffffff;
+}
+
+vaadin-grid-cell-content {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+vaadin-grid.jvmguard-log-grid vaadin-grid-cell-content {
+    -webkit-user-select: text;
+    user-select: text;
+}

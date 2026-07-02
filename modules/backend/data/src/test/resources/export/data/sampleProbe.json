@@ -1,0 +1,27 @@
+{
+  "name" : "test export",
+  "vms" : "my vms",
+  "date" : "2013-12-15T14:00:00Z",
+  "payload" : [ {
+    "name" : "select * from test",
+    "time" : 1000000,
+    "count" : 10,
+    "server" : "jdbc:test",
+    "vm" : "vm 1",
+    "associated" : {
+      "custom23" : [ {
+        "name" : "custom payload",
+        "time" : 1000000,
+        "count" : 10
+      }, {
+        "name" : "custom payload2",
+        "time" : 1000000,
+        "count" : 10
+      } ]
+    }
+  }, {
+    "name" : "select * from test2",
+    "time" : 1000000,
+    "count" : 10
+  } ]
+}

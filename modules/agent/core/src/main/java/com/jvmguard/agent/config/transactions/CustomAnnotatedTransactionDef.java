@@ -1,0 +1,163 @@
+package com.jvmguard.agent.config.transactions;
+
+import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.instrument.transaction.DefinitionSite;
+import com.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
+import com.jvmguard.agent.instrument.transaction.annotation.CustomAnnotationDefinition;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+
+public class CustomAnnotatedTransactionDef extends AnnotatedTransactionDef {
+
+    private String annotationName = "";
+    private AnnotatedTarget annotatedTarget = AnnotatedTarget.CLASS;
+
+    private boolean interceptSubclasses = false;
+
+    private MethodInterceptionMode methodInterceptionMode = MethodInterceptionMode.ALL_PUBLIC;
+    private boolean useDeclaringClassName = false;
+
+    @Override
+    public String getAutomaticName() {
+        return annotationName + " [" + super.getAutomaticName() + "]";
+    }
+
+    public String getAnnotationName() {
+        return annotationName;
+    }
+
+    public void setAnnotationName(String annotationName) {
+        String oldValue = this.annotationName;
+        this.annotationName = annotationName;
+        fireChanged(oldValue, annotationName);
+    }
+
+    public AnnotatedTarget getAnnotatedTarget() {
+        return annotatedTarget;
+    }
+
+    public void setAnnotatedTarget(AnnotatedTarget annotatedTarget) {
+        AnnotatedTarget oldValue = this.annotatedTarget;
+        this.annotatedTarget = annotatedTarget;
+        fireChanged(oldValue, annotatedTarget);
+    }
+
+    public boolean isInterceptSubclasses() {
+        return interceptSubclasses;
+    }
+
+    public void setInterceptSubclasses(boolean interceptSubclasses) {
+        boolean oldValue = this.interceptSubclasses;
+        this.interceptSubclasses = interceptSubclasses;
+        fireChanged(oldValue, interceptSubclasses);
+    }
+
+    public MethodInterceptionMode getMethodInterceptionMode() {
+        return methodInterceptionMode;
+    }
+
+    public void setMethodInterceptionMode(MethodInterceptionMode methodInterceptionMode) {
+        MethodInterceptionMode oldValue = this.methodInterceptionMode;
+        this.methodInterceptionMode = methodInterceptionMode;
+        fireChanged(oldValue, methodInterceptionMode);
+    }
+
+    public boolean isUseDeclaringClassName() {
+        return useDeclaringClassName;
+    }
+
+    public void setUseDeclaringClassName(boolean useDeclaringClassName) {
+        boolean oldValue = this.useDeclaringClassName;
+        this.useDeclaringClassName = useDeclaringClassName;
+        fireChanged(oldValue, useDeclaringClassName);
+    }
+
+    @Override
+    public boolean matches(DefinitionSite definitionSite) {
+        return matches(useDeclaringClassName ? definitionSite.getDefinedBy() : definitionSite.getDefinedFor());
+    }
+
+    @Override
+    public void read(CommunicationContext context, DataInputStream in) throws Exception {
+        readState(new BinaryAgentReader(in));
+    }
+
+    @Override
+    public void write(CommunicationContext context, DataOutputStream out) throws Exception {
+        writeState(new BinaryAgentWriter(out));
+    }
+
+    @Override
+    public String codecType() {
+        return "CustomAnnotatedTransactionDef";
+    }
+
+    @Override
+    public void readState(AgentReader reader) throws Exception {
+        super.readState(reader);
+        annotationName = reader.readString("annotationName");
+        annotatedTarget = reader.readEnum("annotatedTarget", AnnotatedTarget.class);
+        methodInterceptionMode = reader.readEnum("methodInterceptionMode", MethodInterceptionMode.class);
+        useDeclaringClassName = reader.readBoolean("useDeclaringClassName");
+        interceptSubclasses = reader.readBoolean("interceptSubclasses");
+    }
+
+    @Override
+    public void writeState(AgentWriter writer) throws Exception {
+        super.writeState(writer);
+        writer.writeString("annotationName", annotationName);
+        writer.writeEnum("annotatedTarget", annotatedTarget);
+        writer.writeEnum("methodInterceptionMode", methodInterceptionMode);
+        writer.writeBoolean("useDeclaringClassName", useDeclaringClassName);
+        writer.writeBoolean("interceptSubclasses", interceptSubclasses);
+    }
+
+    @Override
+    public TransactionType getTransactionType() {
+        return TransactionType.ANNOTATED;
+    }
+
+    @Override
+    public AnnotationDefinition[] getAnnotationDefinitions() {
+        boolean methodAnnotation = annotatedTarget == AnnotatedTarget.METHOD;
+        return new AnnotationDefinition[] {
+            new CustomAnnotationDefinition(getAnnotationName(), methodAnnotation, methodAnnotation, getTransactionType())
+                .inheritable(interceptSubclasses)
+                .implementingOnly(methodAnnotation || methodInterceptionMode == MethodInterceptionMode.IMPLEMENTING_PUBLIC)
+                .useDeclaringClassName(useDeclaringClassName)
+        };
+    }
+
+    public enum AnnotatedTarget {
+        CLASS("Annotated classes"),
+        METHOD("Annotated methods");
+
+        private final String verbose;
+
+        AnnotatedTarget(String verbose) {
+            this.verbose = verbose;
+        }
+
+        @Override
+        public String toString() {
+            return verbose;
+        }
+    }
+
+    public enum MethodInterceptionMode {
+        IMPLEMENTING_PUBLIC("Implementing or overriding public methods"),
+        ALL_PUBLIC("All public methods of implementing or derived classes");
+
+        private final String verbose;
+
+        MethodInterceptionMode(String verbose) {
+            this.verbose = verbose;
+        }
+
+        @Override
+        public String toString() {
+            return verbose;
+        }
+    }
+}

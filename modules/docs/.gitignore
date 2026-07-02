@@ -1,0 +1,10 @@
+# build output
+dist/
+# Astro generated
+.astro/
+
+# dependencies
+node_modules/
+
+# npm
+npm-debug.log*

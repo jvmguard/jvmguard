@@ -1,0 +1,95 @@
+{
+  "name" : "test export",
+  "vms" : "my vms",
+  "date" : "2013-12-15T14:00:00Z",
+  "group" : {
+    "violations" : [ {
+      "telemetry" : "Free heap",
+      "count" : 10
+    }, {
+      "telemetry" : "Connections",
+      "count" : 20
+    } ],
+    "vms" : [ {
+      "name" : "direct child",
+      "violations" : [ {
+        "telemetry" : "Free heap",
+        "count" : 10
+      }, {
+        "telemetry" : "Connections",
+        "count" : 20
+      } ]
+    }, {
+      "name" : "direct child2",
+      "violations" : [ {
+        "telemetry" : "Free heap",
+        "count" : 5
+      } ]
+    } ],
+    "groups" : [ {
+      "name" : "sub1",
+      "violations" : [ {
+        "telemetry" : "Free heap",
+        "count" : 10
+      }, {
+        "telemetry" : "Connections",
+        "count" : 20
+      } ],
+      "vms" : [ {
+        "name" : "sub1 child",
+        "violations" : [ {
+          "telemetry" : "Free heap",
+          "count" : 10
+        }, {
+          "telemetry" : "Connections",
+          "count" : 20
+        } ]
+      }, {
+        "name" : "sub1 child2",
+        "violations" : [ {
+          "telemetry" : "Free heap",
+          "count" : 5
+        } ]
+      } ],
+      "groups" : [ {
+        "name" : "sub1pool",
+        "violations" : [ {
+          "telemetry" : "Free heap",
+          "count" : 5
+        } ],
+        "vms" : [ {
+          "name" : "127.0.0.1:3345 [23bdc8]",
+          "violations" : [ {
+            "telemetry" : "Free heap",
+            "count" : 5
+          } ]
+        } ]
+      } ]
+    }, {
+      "name" : "sub2",
+      "violations" : [ {
+        "telemetry" : "Free heap",
+        "count" : 10
+      }, {
+        "telemetry" : "Connections",
+        "count" : 20
+      } ],
+      "vms" : [ {
+        "name" : "sub2 child",
+        "violations" : [ {
+          "telemetry" : "Free heap",
+          "count" : 10
+        }, {
+          "telemetry" : "Connections",
+          "count" : 20
+        } ]
+      }, {
+        "name" : "sub2 child2",
+        "violations" : [ {
+          "telemetry" : "Free heap",
+          "count" : 5
+        } ]
+      } ]
+    } ]
+  }
+}

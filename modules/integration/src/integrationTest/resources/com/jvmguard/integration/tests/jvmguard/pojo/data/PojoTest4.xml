@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data>
+  <transactionTree>
+    <children>
+      <element name="SimplePojo" count="30" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.a.AbstractSubA.b1" count="120" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.a.AbstractSubA.b2" count="120" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.a.Class1.b3" count="60" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.a.Class2.b3" count="60" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.b.AbstractSubB.b1" count="120" type="pojo" policy="error" error="java.lang.RuntimeException"/>
+      <element name="c.j.i.t.j.p.c.b.AbstractSubB.b2" count="120" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.b.Class1.b3" count="60" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.b.Class2.b3" count="60" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.c.AbstractSubC.b1" count="120" type="pojo" policy="error" error="java.lang.RuntimeException"/>
+      <element name="c.j.i.t.j.p.c.c.AbstractSubC.b2" count="120" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.c.Class1.b3" count="60" type="pojo"/>
+      <element name="c.j.i.t.j.p.c.c.Class2.b3" count="60" type="pojo"/>
+    </children>
+  </transactionTree>
+</data>

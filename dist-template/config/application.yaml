@@ -1,0 +1,48 @@
+# jvmguard configuration.
+#
+# Edit this file to override the built-in defaults. It is read by the jvmguard server on startup
+# (Spring Boot's external "config/application.yaml" override location, next to the launcher).
+# Any individual key can also be overridden with a "-Djvmguard.<key>=<value>" system property, which
+# always takes the highest precedence. Top-level Spring Boot keys (server.*, logging.*, ...) may be
+# added here as well.
+
+jvmguard:
+  # Parent directory for the jvmguard database and log files. Absolute path or relative to the install dir.
+  # To change this value, shut down jvmguard, move the data directory and then change this value accordingly.
+  dataDirectory: data
+
+  # Port of the bundled web server (the jvmguard UI). When useHttps is true, this is the HTTPS port.
+  httpPort: 8020
+
+  # Set to true to serve the UI over HTTPS instead of HTTP.
+  useHttps: false
+
+  # Set to true when the web server is behind a reverse proxy. The server then honors the
+  # "X-Forwarded-Host" header when building URLs.
+  reverseProxy: false
+
+  # Explicit reverse-proxy host (include the port for SSL, e.g. "server.com:443"). Empty = auto-detect.
+  reverseProxyHost: ""
+
+  # Context path prepended to all URLs when behind a reverse proxy (no leading/trailing slash), e.g. "jvmguard".
+  contextPath: ""
+
+  # Set to true to enable the REST API served at /api on the web server port.
+  restApiEnabled: false
+
+  # Name of the keystore/PKCS12 file in the ssl directory used when useHttps is true.
+  # Empty = ssl/web.pkcs12 or ssl/self_signed.ks.
+  keystoreName: ""
+
+  # Password for the keystore named above. May be obfuscated (run "jvmguard_obfuscate <password>").
+  # Empty = the console server asks for the password on startup.
+  keystorePassword: ""
+
+  # Port VMs connect to on the dedicated agent channel.
+  vmPort: 8847
+
+  # Set to true to authenticate and encrypt the VM<->server channel (creates ssl/agent.ks).
+  vmUseSsl: false
+
+  # Set to true to expose the embedded H2 database console (default http://localhost:8082).
+  startH2Console: false

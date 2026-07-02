@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data description="test description" unit="b" name="test export" vms="my vms" date="2013-12-15T14:00:00.000Z">
+  <data>
+    <element time="0" used="3.2" free="7.2"/>
+    <element time="1000" used="50.0" free="20.0"/>
+    <element time="2000" used="0.1" free="0.1"/>
+    <element time="3000" used="0.0" free="0.0"/>
+    <element time="4000" used="null" free="null"/>
+  </data>
+</data>

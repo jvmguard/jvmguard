@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="491"
+   height="221.78087"
+   id="svg4885"
+   version="1.1"
+   inkscape:version="0.92.1 r15371"
+   sodipodi:docname="threshold_groups.svg">
+  <defs
+     id="defs4887">
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend"
+       style="overflow:visible">
+      <path
+         id="path3901"
+         style="fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="215.19025"
+     inkscape:cy="95.697815"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1636"
+     inkscape:window-height="1122"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     fit-margin-top="15"
+     fit-margin-right="15"
+     fit-margin-bottom="15"
+     fit-margin-left="15"
+     inkscape:snap-bbox="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4893"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true"
+       originx="-63.999992"
+       originy="-773.21913"
+       spacingx="1"
+       spacingy="1" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata4890">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-63.999992,-57.362183)">
+    <rect
+       style="color:#000000;fill:#ffd5d5;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3755"
+       width="99"
+       height="49.740742"
+       x="80"
+       y="212.54533"
+       rx="5"
+       ry="5" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       x="96.482422"
+       y="234.11395"
+       id="text3757"><tspan
+         sodipodi:role="line"
+         id="tspan3759"
+         x="96.482422"
+         y="234.11395"
+         style="font-size:10.8px;line-height:1.25">VM 1</tspan><tspan
+         sodipodi:role="line"
+         x="96.482422"
+         y="249.11395"
+         id="tspan3779"
+         style="font-size:10.8px;line-height:1.25">Violations: <tspan
+   style="font-weight:bold"
+   id="tspan4335">1</tspan></tspan></text>
+    <rect
+       ry="5.0000005"
+       rx="5"
+       y="213.40671"
+       x="201.23828"
+       height="49.736347"
+       width="98.011719"
+       id="rect3763"
+       style="color:#000000;fill:#ffd5d5;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <text
+       id="text3765"
+       y="235.03465"
+       x="216.4707"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="235.03465"
+         x="216.4707"
+         id="tspan3767"
+         sodipodi:role="line"
+         style="font-size:10.8px;line-height:1.25">VM 2</tspan><tspan
+         y="250.03465"
+         x="216.4707"
+         sodipodi:role="line"
+         id="tspan3781"
+         style="font-size:10.8px;line-height:1.25">Violations: <tspan
+   style="font-weight:bold"
+   id="tspan4337">2</tspan></tspan></text>
+    <rect
+       style="color:#000000;fill:#e3f4d7;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3771"
+       width="98.011719"
+       height="49.736347"
+       x="321"
+       y="213.40671"
+       rx="5"
+       ry="5.0000005" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       x="336.25586"
+       y="235.03465"
+       id="text3773"><tspan
+         sodipodi:role="line"
+         id="tspan3775"
+         x="336.25586"
+         y="235.03465"
+         style="font-size:10.8px;line-height:1.25">VM 3</tspan><tspan
+         sodipodi:role="line"
+         x="336.25586"
+         y="250.03465"
+         id="tspan3783"
+         style="font-size:10.8px;line-height:1.25">Violations: <tspan
+   style="font-weight:bold"
+   id="tspan4339">0</tspan></tspan></text>
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3808"
+       width="339"
+       height="49"
+       x="80"
+       y="143.36218"
+       rx="5"
+       ry="5.0000005" />
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:1.99999976;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3810"
+       width="99"
+       height="48"
+       x="440"
+       y="143.36218"
+       rx="5"
+       ry="5.0000005" />
+    <rect
+       ry="5.0000005"
+       rx="5"
+       y="213.40671"
+       x="441"
+       height="49.736347"
+       width="98"
+       id="rect3812"
+       style="color:#000000;fill:#ffd5d5;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <text
+       id="text3814"
+       y="235.03465"
+       x="456.22656"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="235.03465"
+         x="456.22656"
+         id="tspan3816"
+         sodipodi:role="line"
+         style="font-size:10.8px;line-height:1.25">VM 4</tspan><tspan
+         id="tspan3820"
+         y="250.03465"
+         x="456.22656"
+         sodipodi:role="line"
+         style="font-size:10.8px;line-height:1.25">Violations: <tspan
+   style="font-weight:bold"
+   id="tspan4341">2</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       x="96.482422"
+       y="165.05164"
+       id="text3822"><tspan
+         sodipodi:role="line"
+         id="tspan3824"
+         x="96.482422"
+         y="165.05164"
+         style="font-size:10.8px;line-height:1.25">Group <tspan
+   style="font-weight:bold"
+   id="tspan4378">EDS/DB</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="96.482422"
+         y="180.05164"
+         id="tspan3826"
+         style="font-size:10.8px;line-height:1.25">Violations: <tspan
+   style="font-weight:bold"
+   id="tspan4345">3</tspan></tspan></text>
+    <text
+       id="text3828"
+       y="164.12195"
+       x="446.71777"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         id="tspan3832"
+         y="164.12195"
+         x="446.71777"
+         sodipodi:role="line"
+         style="font-size:10.8px;line-height:1.25">Group <tspan
+   style="font-weight:bold"
+   id="tspan4389">EDS/RMI</tspan></tspan><tspan
+         y="179.12195"
+         x="446.71777"
+         sodipodi:role="line"
+         id="tspan3836"
+         style="font-size:10.8px;line-height:1.25">Violations: <tspan
+   style="font-weight:bold"
+   id="tspan4343">2</tspan></tspan></text>
+    <rect
+       ry="5.0000005"
+       rx="5"
+       y="73.362183"
+       x="79.999992"
+       height="49"
+       width="458.99997"
+       id="rect3838"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       x="96.482422"
+       y="92.362183"
+       id="text3822-1"><tspan
+         sodipodi:role="line"
+         x="96.482422"
+         y="92.362183"
+         id="tspan3826-4"
+         style="font-size:10.8px;line-height:1.25">Group <tspan
+   style="font-weight:bold"
+   id="tspan4380">EDS</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="96.482422"
+         y="107.36218"
+         id="tspan3866"
+         style="font-size:10.8px;line-height:1.25">Violations: <tspan
+   style="font-weight:bold"
+   id="tspan4347">5</tspan></tspan></text>
+    <path
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;marker-end:url(#Arrow2Mend);visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 130.88017,213.07647 0,-17.55298"
+       id="path3868"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path4314"
+       d="m 250.19795,213.32647 0,-17.55298"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;marker-end:url(#Arrow2Mend);visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <path
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;marker-end:url(#Arrow2Mend);visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 369.48366,212.61218 0,-17.55298"
+       id="path4316"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path4329"
+       d="m 490.01938,212.43361 0,-17.55298"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;marker-end:url(#Arrow2Mend);visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <path
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;marker-end:url(#Arrow2Mend);visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 490.19795,143.32647 0,-17.55298"
+       id="path4331"
+       inkscape:connector-curvature="0" />
+    <path
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;marker-end:url(#Arrow2Mend);visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 249.66224,142.96933 0,-17.55298"
+       id="path4333"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       x="143.94675"
+       y="194.74268"
+       id="text4357"><tspan
+         sodipodi:role="line"
+         id="tspan4359"
+         x="143.94675"
+         y="194.74268"
+         style="font-size:10.8px;line-height:1.25"> </tspan></text>
+  </g>
+</svg>

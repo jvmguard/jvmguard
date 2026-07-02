@@ -1,0 +1,67 @@
+# jvmguard configuration.
+#
+# This is the built-in default configuration. It is shipped inside the jar and is NOT meant
+# to be edited directly for a production deployment. To override any value at runtime, edit
+# "config/application.yaml" next to the launcher (Spring Boot's external override location).
+# Any individual key can also be overridden with a "-Djvmguard.<key>=<value>" system property, which
+# always takes the highest precedence.
+#
+# The "jvmguard:" section below is bound to com.jvmguard.common.JvmGuardProperties; top-level Spring Boot
+# keys (server.*, vaadin.*, logging.*, ...) may be added here and are picked up by Spring Boot as usual.
+
+jvmguard:
+  # Parent directory for the jvmguard database and log files. Absolute path or relative to the install dir.
+  dataDirectory: data
+
+  # Port of the bundled web server (the jvmguard UI). When useHttps is true, this is the HTTPS port.
+  httpPort: 8020
+
+  # Set to true to serve the UI over HTTPS instead of HTTP.
+  useHttps: false
+
+  # Set to true when the web server is behind a reverse proxy; the server then honours the
+  # "X-Forwarded-Host" header when building URLs.
+  reverseProxy: false
+
+  # Explicit reverse-proxy host (include the port for SSL, e.g. "server.com:443"). Empty = auto-detect.
+  reverseProxyHost: ""
+
+  # Context path prepended to all URLs when behind a reverse proxy (no leading/trailing slash), e.g. "jvmguard".
+  contextPath: ""
+
+  # Set to true to enable the REST API served at /api on the web server port.
+  restApiEnabled: false
+
+  # Name of the keystore/PKCS12 file in the ssl directory used when useHttps is true.
+  # Empty = ssl/web.pkcs12 or ssl/self_signed.ks.
+  keystoreName: ""
+
+  # Password for the keystore named above. May be obfuscated (run "jvmguard_obfuscate <password>").
+  # Empty = the console server asks for the password on startup.
+  keystorePassword: ""
+
+  # Port VMs connect to on the dedicated agent channel.
+  vmPort: 8847
+
+  # Set to true to authenticate and encrypt the VM<->server channel (creates ssl/agent.ks).
+  vmUseSsl: false
+
+  # Set to true to expose the embedded H2 database console (default http://localhost:8082).
+  startH2Console: false
+
+# Spring Boot persistence
+spring:
+  datasource:
+    # The database directory is resolved at runtime (JvmGuardEnvironmentPostProcessor publishes it). H2 tuning
+    # is co-located here and can be overridden via config/application.yaml.
+    url: jdbc:h2:file:${jvmguard.databaseDirectory}/jvmguard;LOCK_TIMEOUT=30000;DB_CLOSE_ON_EXIT=FALSE;MAX_COMPACT_TIME=${jvmguard.dbMaxCompactTime:5000}
+    username: sa
+    driver-class-name: org.h2.Driver
+    hikari:
+      pool-name: jvmguard
+      maximum-pool-size: 80
+      minimum-idle: 5
+      connection-timeout: 120000
+      transaction-isolation: TRANSACTION_READ_UNCOMMITTED
+  flyway:
+    enabled: true

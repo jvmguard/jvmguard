@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="c.j.i.t.j.p.c.n.Sub1.b3" time="400" count="4" type="pojo">
+        <children>
+          <element name="c.j.i.t.j.p.c.n.Sub1.m2" time="400" count="4" type="pojo"/>
+        </children>
+      </element>
+      <element name="com.jvmguard.integration.tests.jvmguard.pojo.classes.naming.Name1.invoke" time="799" count="4" type="pojo"/>
+    </children>
+  </transactionTree>
+</data>

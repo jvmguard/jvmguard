@@ -1,0 +1,79 @@
+{
+  "name" : "test export",
+  "vms" : "my vms",
+  "date" : "2013-12-15T14:00:00Z",
+  "hotspots" : [ {
+    "name" : "select * from test",
+    "time" : 3000000,
+    "count" : 30,
+    "server" : "jdbc:test",
+    "associated" : {
+      "custom23" : [ {
+        "name" : "custom payload",
+        "time" : 1000000,
+        "count" : 10
+      } ]
+    },
+    "backtraces" : {
+      "children" : [ {
+        "name" : "sub",
+        "time" : 1000000,
+        "count" : 10,
+        "type" : "devops",
+        "policy" : "very slow",
+        "children" : [ {
+          "name" : "test",
+          "time" : 1000000,
+          "count" : 10,
+          "type" : "pojo"
+        } ]
+      }, {
+        "name" : "sub",
+        "time" : 1000000,
+        "count" : 10,
+        "type" : "devops",
+        "policy" : "slow",
+        "children" : [ {
+          "name" : "test",
+          "time" : 1000000,
+          "count" : 10,
+          "type" : "pojo"
+        } ]
+      }, {
+        "name" : "test 123",
+        "time" : 1000000,
+        "count" : 10,
+        "type" : "devops",
+        "policy" : "error",
+        "error" : "Error message"
+      } ]
+    }
+  }, {
+    "name" : "select * from test2",
+    "time" : 2000000,
+    "count" : 20,
+    "server" : "jdbc:test",
+    "backtraces" : {
+      "children" : [ {
+        "name" : "sub",
+        "time" : 1000000,
+        "count" : 10,
+        "type" : "devops",
+        "policy" : "very slow",
+        "children" : [ {
+          "name" : "test",
+          "time" : 1000000,
+          "count" : 10,
+          "type" : "pojo"
+        } ]
+      }, {
+        "name" : "test 123",
+        "time" : 1000000,
+        "count" : 10,
+        "type" : "devops",
+        "policy" : "error",
+        "error" : "Error message"
+      } ]
+    }
+  } ]
+}

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/buildSrc" name="buildSrc">
+                <projects>
+                  <project path="$PROJECT_DIR$/buildSrc" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/buildSrc" />
+            <option value="$PROJECT_DIR$/modules/agent" />
+            <option value="$PROJECT_DIR$/modules/agent/api" />
+            <option value="$PROJECT_DIR$/modules/agent/bootstrap" />
+            <option value="$PROJECT_DIR$/modules/agent/bundle" />
+            <option value="$PROJECT_DIR$/modules/agent/core" />
+            <option value="$PROJECT_DIR$/modules/agent/java11" />
+            <option value="$PROJECT_DIR$/modules/agent/mbean" />
+            <option value="$PROJECT_DIR$/modules/backend" />
+            <option value="$PROJECT_DIR$/modules/backend/collector" />
+            <option value="$PROJECT_DIR$/modules/backend/connector" />
+            <option value="$PROJECT_DIR$/modules/backend/data" />
+            <option value="$PROJECT_DIR$/modules/backend/rest" />
+            <option value="$PROJECT_DIR$/modules/demo" />
+            <option value="$PROJECT_DIR$/modules/docs" />
+            <option value="$PROJECT_DIR$/modules/installer" />
+            <option value="$PROJECT_DIR$/modules/integration" />
+            <option value="$PROJECT_DIR$/modules/integration/workloads" />
+            <option value="$PROJECT_DIR$/modules/integration/workloads/java21" />
+            <option value="$PROJECT_DIR$/modules/integration/workloads/logging" />
+            <option value="$PROJECT_DIR$/modules/server" />
+            <option value="$PROJECT_DIR$/modules/ui" />
+            <option value="$PROJECT_DIR$/modules/website" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

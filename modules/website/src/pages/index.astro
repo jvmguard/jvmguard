@@ -1,0 +1,264 @@
+---
+import PageFrame from '../layouts/PageFrame.astro';
+import {SITE} from '../consts';
+
+const steps = [
+  {
+    no: '01',
+    title: 'Manually',
+    body: 'Start a capture from the UI for any connected VM, the moment you want a closer look. The capture lands in the inbox.',
+  },
+  {
+    no: '02',
+    title: 'Triggered',
+    body: 'Set a threshold on a telemetry or a transaction. When it crosses, jvmguard captures a JFR recording, a heap dump, or a thread dump for the offending VM. No one has to be watching, and a trigger can fire as often as the condition recurs.',
+  },
+  {
+    no: '03',
+    title: 'Agent-driven',
+    body: 'Planned for 1.0. An AI agent will initiate captures through the REST API or MCP, within guardrails and with every operation audited.',
+  },
+];
+
+const features = [
+  {
+    title: 'Pure Java agent by default',
+    body: 'The agent instruments selected methods through class loading. It loads no native libraries unless you explicitly enable the profiling cross-over.',
+  },
+  {
+    title: 'Triggers and actions',
+    body: 'Compose the response in the UI. When a trigger fires, jvmguard records JFR, takes a heap or thread dump, writes to the inbox, sends an email, or calls a webhook.',
+  },
+  {
+    title: 'Cross-over to profiling',
+    body: 'For the hardest cases, jvmguard loads the JProfiler agent and produces a snapshot for deep analysis. The capture is delivered to your inbox.',
+  },
+  {
+    title: 'No JMX port required',
+    body: 'The agent reads MBeans in process. You inspect and operate on MBeans without exposing a JMX connector server to the network.',
+  },
+  {
+    title: 'A fleet, not a single VM',
+    body: 'Organize hundreds of JVMs into hierarchical groups. Configuration is inherited and applied to entire groups. New VMs need no up-front configuration.',
+  },
+  {
+    title: 'Indefinite retention',
+    body: 'Recorded data is never discarded, only aggregated to larger intervals as it ages. The database grows at a slow, linear rate.',
+  },
+  {
+    title: 'In-house and air-gapped',
+    body: 'Install on Windows, macOS, or Linux, or install unattended for cloud deployments. No outbound cloud dependency. The server runs behind your firewall.',
+  },
+  {
+    title: 'Three access levels',
+    body: 'Admin, Profiler, and Viewer roles partition a single server for multiple teams. Authentication is local or LDAP, over TLS.',
+  },
+];
+
+const isNot = [
+  {
+    k: 'Not an APM',
+    v: 'No continuous tracing, span shipping, or metrics pipeline. jvmguard does not auto-instrument your frameworks.',
+  },
+  {
+    k: 'Not continuous collection',
+    v: 'The steady state keeps only lightweight telemetries and the transactions you define. Deep data comes only from a capture, so the overhead stays near zero.',
+  },
+  {
+    k: 'Not gathering your app data',
+    v: 'No application or end-user data leaves the JVM. A capture is a profile, not your business data.',
+  },
+];
+---
+
+<PageFrame active="overview">
+  <section class="shell shell--wide hero">
+    <p class="eyebrow">Automatic Production Profiling</p>
+    <h1>Lightweight monitoring.<br />Always on.<br />Deep data on demand.</h1>
+    <p class="lede">
+      jvmguard keeps watch over your production JVMs. When something is off, it captures the profile
+      that shows you why.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn--primary" href="/download">Download</a>
+      <a class="btn btn--ghost" href={SITE.docs}>Read the docs</a>
+      <a class="btn btn--ghost" href={SITE.repo}>View on GitHub</a>
+    </div>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 01</span>
+      <span class="rule__label">Three ways to capture</span>
+    </div>
+    <div class="grid grid--3 steps">
+      {steps.map((s) => (
+        <article class="step">
+          <span class="step__no">{s.no}</span>
+          <h3>{s.title}</h3>
+          <p>{s.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
+      <span class="rule__label">What jvmguard is not</span>
+    </div>
+    <div class="grid grid--3">
+      {isNot.map((item) => (
+        <article class="panel isnot">
+          <h3>{item.k}</h3>
+          <p class="muted">{item.v}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 03</span>
+      <span class="rule__label">What it does</span>
+    </div>
+    <div class="grid grid--2">
+      {features.map((f) => (
+        <article class="feature">
+          <h3>{f.title}</h3>
+          <p class="muted">{f.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 04</span>
+      <span class="rule__label">Open captures, open analysis</span>
+    </div>
+    <div class="panel open">
+      <p>
+        Captures are standard files. JFR recordings and HPROF heap dumps open in JProfiler for the
+        deepest analysis, in JDK Mission Control, or in Eclipse MAT.
+      </p>
+      <p class="muted">
+        jvmguard does not lock you in. The handoff to a dedicated analyzer is a feature, not a
+        constraint. For a privacy-respecting, capture-on-demand workflow, that matters.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="/security">How it stays safe in production</a>
+        <a class="btn btn--ghost" href="/compare">How it compares</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 05</span>
+      <span class="rule__label">Direction</span>
+    </div>
+    <div class="panel roadmap">
+      <h3>Agent-driven profiling, planned</h3>
+      <p>
+        The intended next step is to make jvmguard drivable by AI agents, so the full loop runs with a
+        human supervising rather than operating it. Detect a problem, capture the right profile,
+        analyze it, recommend the next action.
+      </p>
+      <p class="muted">
+        This is a planned direction, built on the REST API, with first-class guardrails and auditing
+        of every operation an agent performs. It is not shipped yet.
+      </p>
+    </div>
+  </section>
+
+  <section class="shell shell--wide cta">
+    <div class="panel cta__panel">
+      <h2>
+        <svg class="cta__icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        Try it on a JVM.
+      </h2>
+      <p class="lede">
+        Run from source in two commands, or download the installer for your platform.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="/download">Get jvmguard</a>
+        <a class="btn btn--ghost" href={SITE.repo}>Source on GitHub</a>
+      </div>
+    </div>
+  </section>
+</PageFrame>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-7);
+  }
+  .hero h1 {
+    max-width: 28ch;
+  }
+  .hero h1 br {
+    display: none;
+  }
+  @media (min-width: 820px) {
+    .hero h1 br {
+      display: inline;
+    }
+  }
+  .step {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+  .step__no {
+    display: block;
+    color: var(--brand);
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: var(--space-2);
+  }
+  .step h3 {
+    margin-top: 0;
+  }
+  .feature {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+  .feature h3 {
+    margin-top: 0;
+  }
+  .isnot h3 {
+    color: var(--brand-deep);
+  }
+  .open p {
+    max-width: none;
+  }
+  .roadmap p {
+    max-width: none;
+  }
+  .roadmap h3 {
+    margin-top: 0;
+  }
+  .cta {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-8);
+  }
+  .cta__panel {
+    text-align: center;
+  }
+  .cta__panel h2 {
+    margin-top: 0;
+  }
+  .cta__icon {
+    color: var(--brand);
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+  .cta__panel .lede {
+    margin-inline: auto;
+    max-width: none;
+  }
+  .cta__panel .btn-row {
+    justify-content: center;
+  }
+</style>

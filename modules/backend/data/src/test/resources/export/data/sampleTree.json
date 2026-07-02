@@ -1,0 +1,52 @@
+{
+  "name" : "test export",
+  "vms" : "my vms",
+  "date" : "2013-12-15T14:00:00Z",
+  "sampleTree" : {
+    "children" : [ {
+      "type" : "Time in fully filtered methods",
+      "time" : 1000
+    }, {
+      "type" : "Unsampled time before policy violation",
+      "time" : 1000
+    }, {
+      "type" : "Transaction duration below sampling threshold"
+    }, {
+      "remoteVm" : "Remote VM Name",
+      "time" : 1000,
+      "inherent" : 800,
+      "children" : [ {
+        "className" : "class2",
+        "methodName" : "method3",
+        "lineNumber" : 20,
+        "time" : 200,
+        "inherent" : 200
+      } ]
+    }, {
+      "className" : "class1",
+      "methodName" : "method1",
+      "lineNumber" : 10,
+      "time" : 10000,
+      "inherent" : 9300,
+      "children" : [ {
+        "className" : "class2",
+        "methodName" : "method2",
+        "lineNumber" : 20,
+        "time" : 500,
+        "inherent" : 500
+      }, {
+        "className" : "class2",
+        "methodName" : "method3",
+        "lineNumber" : 20,
+        "time" : 200,
+        "inherent" : 200
+      } ]
+    }, {
+      "className" : "class3",
+      "methodName" : "method2",
+      "lineNumber" : 20,
+      "time" : 200,
+      "inherent" : 200
+    } ]
+  }
+}
