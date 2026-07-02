@@ -169,8 +169,9 @@ FQNs/package names, so a code rename must be mirrored in the goldens):
 **JDK matrix** — property-driven, defaults to ONE vm (the JDK running the build). `-Pjdks=all` runs the
 central `allTestJdks` list (`8,11,17,21,25`); `-Pjdks=21,25` pins a subset. Per-test floors are open-ended
 `@MinJdk(n)` annotations (never closed sets, so a new JDK is picked up automatically); a test may also opt
-out at runtime via `isRunOnVM(VMConfig)` (reported as skipped). A full `-Pjdks=all` run is on the order of
-**2 hours** — while iterating, scope to one test and the current JDK.
+out at runtime via `isRunOnVM(VMConfig)` (reported as skipped). Even the default single-JDK run is on the
+order of **2 hours**, and a full `-Pjdks=all` run is several times longer — while iterating, scope to one
+test and the current JDK.
 
 **Running** (from the jvmguard root):
 - One test, current JDK: `./gradlew :integration:integrationTest --tests "*<TestName>"`
@@ -190,7 +191,7 @@ Tests boot the server on fixed ports (8010/8846), so the task pins `forkEvery=1`
 (strictly one server at a time). A crashed `ServerMain` can leave the embedded `db/` locked; if a run can't
 start the server, kill stray `jvmguard.testClass` / `jvmguard.vmPort` java processes and delete the work dir.
 
-**Timing:** a single test takes seconds to ~2 minutes; `@Telemetry` tests wait on config round-trips and
+**Timing:** a single test takes several minutes; `@Telemetry` tests wait on config round-trips and
 `getRunCount > 1` tests (e.g. `CapTest`) launch the workload once per run, so they run longer.
 
 ## Module map & integration points
