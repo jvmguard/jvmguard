@@ -18,7 +18,7 @@ karibuDsl = "2.6.0"
 playwright = "1.60.0"
 servletApi = "6.1.0"
 install4j = "12.0.5"
-shadow = "8.3.9"
+shadow = "9.4.3"
 vanniktechPublish = "0.34.0"
 cyclonedx = "3.2.4"
 
