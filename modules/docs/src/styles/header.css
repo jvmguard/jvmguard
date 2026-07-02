@@ -1,0 +1,47 @@
+/* Fonts matching the main site. */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/docs/fonts/Poppins-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/docs/fonts/NotoSans-Regular.woff2') format('woff2');
+}
+
+/* Logo text color per theme (inline SVG uses var(--logo-text)). */
+:root { --logo-text: #161b22; }
+:root[data-theme='dark'] { --logo-text: #ffffff; }
+
+/* Override Starlight header background to match the main site. */
+:root[data-theme='light'] .header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #cdd3de;
+}
+:root[data-theme='dark'] .header {
+  background-color: #0d1117;
+  border-bottom: 1px solid #3a4454;
+}
+
+/* Nav links. */
+.jg-nav-link {
+  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sl-color-gray-3);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.jg-nav-link:hover {
+  color: var(--sl-color-white);
+}
+.jg-nav-link.is-active {
+  color: #6a9cff;
+}

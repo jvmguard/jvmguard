@@ -1,0 +1,69 @@
+package com.jvmguard.common.config
+
+import com.jvmguard.data.config.GlobalConfig
+import com.jvmguard.data.config.GroupConfig
+import com.jvmguard.data.config.sets.TriggerSet
+import com.jvmguard.data.config.triggers.ThresholdTrigger
+import com.jvmguard.data.user.AccessLevel
+import com.jvmguard.data.user.User
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
+
+class ConfigStorageRoundTripTest {
+
+    private val mapper: ObjectMapper = ConfigStorage.objectMapper()
+
+    @Test
+    fun userRoundTrips() {
+        val user = User("login", "Full Name", "hash", "e@mail", AccessLevel.ADMIN)
+        val back = roundTrip(user, User::class.java)
+        assertEquals("login", back.loginName)
+        assertEquals("Full Name", back.fullName)
+        assertEquals(AccessLevel.ADMIN, back.accessLevel)
+    }
+
+    @Test
+    fun inheritedModifiedFlagIsIgnored() {
+        val user = User("login", "Full Name", "hash", "e@mail", AccessLevel.ADMIN)
+        user.modified()
+        val json = mapper.writeValueAsString(user)
+        assertFalse(json.contains("\"modified\""), "the runtime dirty flag must not be persisted")
+    }
+
+    @Test
+    fun globalConfigRoundTrips() {
+        val back = roundTrip(GlobalConfig(), GlobalConfig::class.java)
+        assertNotNull(back)
+        assertNotNull(back.smtpConfig)
+    }
+
+    @Test
+    fun groupConfigRoundTripsNestedAgentBeans() {
+        val gc = GroupConfig.createDefault()
+        val back = roundTrip(gc, GroupConfig::class.java)
+        assertNotNull(back.agentGroupConfig)
+        assertNotNull(back.agentGroupConfig.recordingOptions)
+        assertNotNull(back.agentGroupConfig.transactionSettings)
+    }
+
+    @Test
+    fun polymorphicTriggerSetRoundTrips() {
+        val set = TriggerSet()
+        set.name = "ts"
+        set.items.add(ThresholdTrigger())
+        val json = mapper.writeValueAsString(set)
+        assertTrue(json.contains("ThresholdTrigger"), "default typing must embed the concrete element type for the polymorphic Trigger list")
+        val back = mapper.readValue(json, TriggerSet::class.java)
+        assertEquals("ts", back.name)
+        assertEquals(1, back.items.size)
+        assertInstanceOf(ThresholdTrigger::class.java, back.items.first())
+    }
+
+    private fun <T> roundTrip(bean: T, type: Class<T>): T =
+        mapper.readValue(mapper.writeValueAsString(bean), type)
+}

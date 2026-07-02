@@ -1,0 +1,18 @@
+{
+  "name" : "test export",
+  "vms" : "my vms",
+  "date" : "2013-12-15T14:00:00Z",
+  "heapHisto" : [ {
+    "className" : "class1",
+    "count" : 10,
+    "size" : 100
+  }, {
+    "className" : "class2",
+    "count" : 10,
+    "size" : 100
+  }, {
+    "className" : "class3",
+    "count" : 20,
+    "size" : 200
+  } ]
+}

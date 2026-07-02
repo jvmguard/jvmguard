@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="AMethodBase1Sub2.m1" count="2" type="devops"/>
+      <element name="BMethodBase1Sub1.m2" count="2" type="devops" policy="error" error="java.lang.RuntimeException"/>
+      <element name="BMethodBase1Sub2.m1" count="2" type="devops"/>
+      <element name="BMethodBase1Sub2.m2" count="2" type="devops" policy="error" error="java.lang.RuntimeException"/>
+      <element name="BMethodBase1Sub3.m2" count="2" type="devops" policy="error" error="java.lang.RuntimeException"/>
+      <element name="CMethodBase1Sub1.m2" count="2" type="devops" policy="error" error="java.lang.RuntimeException"/>
+      <element name="CMethodBase1Sub2.m1" count="2" type="devops"/>
+      <element name="CMethodBase1Sub2.m2" count="2" type="devops" policy="error" error="java.lang.RuntimeException"/>
+      <element name="CMethodBase1Sub3.m2" count="2" type="devops" policy="error" error="java.lang.RuntimeException"/>
+      <element name="MethodBase1SubA1.m3" count="6" type="devops" policy="error" error="java.lang.Error"/>
+      <element name="MethodBase1SubC1.m3" count="6" type="devops" policy="error" error="java.lang.Error"/>
+    </children>
+  </transactionTree>
+</data>

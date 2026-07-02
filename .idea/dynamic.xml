@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DynamicElementsStorage">
+    <option name="containingClasses">
+      <map>
+        <entry key="integration_test">
+          <value>
+            <DClassElement>
+              <option name="name" value="integration_test" />
+              <option name="myName" value="integration_test" />
+              <option name="myProperties">
+                <set>
+                  <DPropertyElement>
+                    <option name="name" value="process" />
+                    <option name="static" value="false" />
+                    <option name="type" value="java.lang.Process" />
+                    <option name="myType" value="java.lang.Process" />
+                    <option name="myStatic" value="false" />
+                    <option name="myName" value="process" />
+                  </DPropertyElement>
+                </set>
+              </option>
+            </DClassElement>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
+

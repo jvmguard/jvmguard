@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="Name1.invoke" time="799" count="4" type="pojo"/>
+    </children>
+  </transactionTree>
+</data>

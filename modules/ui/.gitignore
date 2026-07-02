@@ -1,0 +1,9 @@
+frontend/generated/
+frontend/index.html
+src/main/resources/main/bundles/
+node_modules/
+vite.generated.ts
+
+
+# Remove after the next Vaadin bugfix release
+home/

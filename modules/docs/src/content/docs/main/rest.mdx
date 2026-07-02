@@ -1,0 +1,120 @@
+---
+title: REST Export API
+---
+
+
+
+
+import Figure from '../../../components/Figure.astro';
+
+## Introduction
+
+In the jvmguard UI, the data views have an export button that allows you to extract the displayed data in a
+machine-readable format for further processing.
+
+<Figure src="ui/export_button.png" />
+
+To automate external data analysis, as well as to hook up jvmguard to other monitoring systems, this manual export is
+impractical. In that case, you can use the REST export API instead.
+
+By default, the REST API is not enabled. You can enable it by setting the
+[**restApiEnabled** property](/docs/config/server-config) to `true` in `config/application.yaml`. The API is then served
+at the `/api` path on the same port as the web server and uses the same protocol, either HTTP or HTTPS.
+
+Once enabled you can make HTTP(S) calls to the web server port to retrieve recorded data. Just like in the web UI, you
+can request data for single VMs, or ask for cumulated data for a particular VM group.
+
+## Using the API
+
+Access to the API is protected with basic HTTP authentication. This means that the credentials will only be encrypted
+when using HTTPS as the protocol. The user name is your jvmguard login name, and the password is an API key that you
+generate in the jvmguard UI. The data export endpoints are available to any user with an API key, regardless of the
+access level. The `/api/triggerBackup` endpoint requires an administrator.
+
+You can create an API key by clicking on "API key" menu item in the user drop-down at the top of the jvmguard UI. You
+will only see the generated API key once. If you confirm the dialog, the new API key will become active and any previous
+API key will become invalid.
+
+The returned format depends on the "Accept" header of the HTTP request. The following mime types are supported:
+
+* **text/plain**: The output will be plain text. If multiple columns are available, CSV data is written. For
+hierarchical data, only the top-level will be exported. The separator is a comma by default, but you can change this
+with the csvSeparator URL query parameter. The winLineBreak URL query parameter changes the default line feed from LF to
+CR+LF. This is the default when no Accept header is sent.
+* **application/json**: The output will be in JSON format. Use application/json;charset=UTF-8 to ensure that the output
+is in UTF-8 encoding regardless of other accept headers.
+* **application/xml**: The output will be in XML format.
+
+A call to the REST API consists of the `/api` prefix, followed by one or more URL segments, followed by a list of query
+parameters. For example, if the web server port is 8020, a call to
+
+```
+http://localhost:8020/api/groups
+```
+
+lists all groups that are configured in jvmguard. The URL
+
+```
+http://localhost:8020/api/transactions/callTree?group=Demo%2FWeb&interval=1h
+```
+
+retrieves the call tree data for the VM group "Demo/Web" for the last hour. Note the URL-encoded forward slash in the
+group name.
+
+All start and end times can be specified in milliseconds between the current time and midnight, January 1, 1970 UTC or
+in one of the following formats:
+
+| Format | Example | Description |
+|---|---|---|
+| `yyyy-MM-dd'T'HH:mm:ss.SSS`<br />`yyyy-MM-dd'T'HH:mm:ss`<br />`yyyy-MM-dd` | 2016-03-02T22:40:00.000<br />2016-03-02T22:40:00<br />2016-03-02 | Date and time in the local time of the server. All shortened versions will be equal to providing zeros. |
+| `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`<br />`yyyy-MM-dd'T'HH:mm:ss'Z'`<br />`yyyy-MM-dd'Z'` | 2016-03-02T22:40:00.000Z<br />2016-03-02T22:40:00Z<br />2016-03-02Z | Date and time in UTC. All shortened versions will be equal to providing zeros. |
+
+## API documentation
+
+The following URLs are available:
+
+* **/api/groups**: Returns a list of all VM groups. The group hierarchy separator is a forward slash. All nodes in the tree
+table of the recording options are returned in a breadth-first manner. In XML and JSON, the "pool" attribute shows if
+the group is a VM pool or not.
+* **/api/vms**: Returns a list of VMs. The names include the hierarchical group path as returned by the /api/groups URL.
+Individual pool VMs are not returned.
+
+| Query Parameter | Description |
+|---|---|
+| group | A specific group the VMs should be listed from. If unspecified, all VMs are returned. |
+| connected | If set to `true`, only currently connected VMs are returned. |
+
+* **/api/telemetries**: Returns a list of all available telemetry types, to be used in the URL below.
+* **/api/telemetries/\{telemetryType\}**: Returns the specified telemetry data. The value of \{telemetryType\} must be one
+of the values that is returned by the /api/telemetries URL above.
+
+| Query Parameter | Description |
+|---|---|
+| interval | A telemetry interval. Possible values are `10min`, `20min`, `40min`, `80min`, `3h`, `6h`, `12h`, `1d`, `3d`, `6d`, `12d`, `30d`, `60d`, `180d` |
+| startTime<br />endTime | You can specify a start or an end time in addition to the interval. For time formats, please see above. If left out, the current time will be used as the end time. |
+| vm<br />group | You can specify a vm name or a group name. If left out, all VMs will be used. |
+| pretty | If set to `true`, JSON and XML output will be pretty printed |
+| csvSeparator | If text/plain is requested, you can specify a custom separator char |
+| winLineBreak | If set to `true` and if text/plain is requested, CR+LF line breaks will be written instead of LF line breaks. |
+
+* **/api/transactions/callTree**: Returns the call tree data for the selected interval.
+* **/api/transactions/hotSpots**: Returns the hot spots data for the selected interval.
+* **/api/transactions/overdue**: Returns the overdue transactions for the selected interval.
+
+| Query Parameter | Description |
+|---|---|
+| interval | A transaction interval. Possible values are `1min`, `10min`, `1h`, `1d` |
+| mergePolicies | If set to `true`, transactions with different policy violations are merged into a single node. |
+| startTime<br />endTime | You can specify a start or an end time in addition to the interval. For time formats, please see above. If left out, the current time will be used as the end time. |
+| vm<br />group | You can specify a vm name or a group name. If left out, all VMs will be used. |
+| pretty | If set to `true`, JSON and XML output will be pretty printed |
+| csvSeparator | If text/plain is requested, you can specify a custom separator char |
+| winLineBreak | If set to `true` and if text/plain is requested, CR+LF line breaks will be written instead of LF line breaks. |
+
+* **/api/triggerBackup**: Triggers a backup of the database. This endpoint requires an administrator and returns the
+absolute directory path of the backup directory as plain text. The backup files are written to the `backup` directory
+inside the jvmguard data directory. To restore such a backup, stop the jvmguard server, replace the contents of the `db`
+directory with the contents of the `backup` directory and start the jvmguard server again. If the REST API is impractical
+to use, or if you have not enabled it for your jvmguard installation, you can also create a file named `trigger_backup` in
+the jvmguard data directory. After the backup has been completed successfully, the file will be deleted and the backup
+will be performed.

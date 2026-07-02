@@ -1,0 +1,33 @@
+{
+  "name" : "test export",
+  "vms" : "my vms",
+  "date" : "2013-12-15T14:00:00.000Z",
+  "callTree" : {
+    "children" : [ {
+      "name" : "test",
+      "time" : 1000,
+      "count" : 100,
+      "type" : "pojo",
+      "children" : [ {
+        "name" : "sub",
+        "time" : 200,
+        "count" : 1,
+        "type" : "devops",
+        "policy" : "slow"
+      }, {
+        "name" : "sub",
+        "time" : 500,
+        "count" : 1,
+        "type" : "devops",
+        "policy" : "very slow"
+      } ]
+    }, {
+      "name" : "test 123",
+      "time" : 1000,
+      "count" : 100,
+      "type" : "devops",
+      "policy" : "error",
+      "error" : "Error message"
+    } ]
+  }
+}

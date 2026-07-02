@@ -1,0 +1,69 @@
+---
+title: Installing jvmguard
+---
+
+
+
+
+import Figure from '../../../components/Figure.astro';
+
+## Installer
+
+Installers are available for all major platforms. By default, the installer shows a GUI, but if you start the installer
+with the argument `-c`, it shows a **console interface**. This is required if you install jvmguard on a remote server
+with ssh.
+
+For cloud-based deployments you may want to install and configure the jvmguard server without any user interaction. See
+the help topic on [unattended installations](/docs/config/unattended-installations) for how to do that.
+
+The installer asks you about all configuration options that are not configurable through the browser in the jvmguard UI.
+The most common setting that has to be adjusted is the HTTPS/HTTP port for the web server.
+
+<Figure src="external/installer_web_server.png" />
+
+Beside the installation directory, a jvmguard installation needs a **data directory** where all variable data is stored.
+This includes the database, log files and security certificates. By default, this directory is set to the program data
+directory on Windows (typically `C:\ProgramData`) and `/var/opt/jvmguard` on Unix and Mac OS X. In a scenario where you
+install multiple instances of jvmguard on the same machine, each jvmguard installation has to have its own data directory.
+
+<Figure src="external/installer_data_dir.png" />
+
+For evaluation purposes, this is all the installer needs to know. If you are deploying to a production environment, you
+might want to adjust other options.
+
+<Figure src="external/installer_advanced.png" />
+
+## Changing the initial configuration later on
+
+The installer writes the configuration to the file `config/application.yaml` in the installation directory. To change the
+configuration at a later time, edit that file with a text editor and restart the jvmguard server. The options are
+documented with comments directly in `config/application.yaml`. For more information, see the help on [server
+configuration](/docs/config/server-config).
+
+## Post-installation setup
+
+After the installer has finished, the jvmguard server is running and you can open your browser at
+`http[s]://localhost:[port]` to connect to the jvmguard UI. Note that if you have selected HTTPS for the web server,
+there is no port that serves HTTP requests.
+
+Before you can use jvmguard, you have to complete the installation wizard in the jvmguard UI.
+
+The important step in the wizard is the one where you configure the **initial admin user**. You can configure other
+admin and non-admin users later on. The full name is displayed in the UI, and the email can be entered so that an
+administrator can more easily identify or contact users.
+
+By default 2FA is enabled, but you can disable it in this step. If 2FA is enabled, you will have to set up 2FA with your
+authenticator app when the wizard is completed. Single users can be exempted from 2FA later on in the user settings.
+
+<Figure src="ui/installer_user.png" />
+
+In the "Recording Options" step you already get a chance to configure **VM groups**. However, it is not necessary to do
+so at this point.
+
+The server can only send emails if it has a valid **SMTP server configuration**, so in the next step it asks you to
+provide this information. If you do not intend to send emails, you can skip this step.
+
+When you complete the wizard, the server is fully initialized and the installation wizard cannot be shown again.
+However, all settings in the installation wizard can also be adjusted in the jvmguard UI. You are now taken to the VMs
+view and can continue to set up monitored JVMs as explained in the next chapter.
+

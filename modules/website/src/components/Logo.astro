@@ -1,0 +1,16 @@
+---
+// Logo.astro: inline SVG logo, rendered synchronously with the HTML.
+// Inlining avoids the Firefox SVG re-render flash that occurs when SVGs are
+// loaded as external resources (img src or background-image).
+// The wordmark fill is driven by the --logo-text CSS variable, set by the
+// theme, so a single SVG works for both light and dark.
+import logoRaw from '../assets/logo-inline.svg?raw';
+
+interface Props {
+  width?: number;
+  height?: number;
+}
+const { width = 120, height = 32 } = Astro.props;
+const svg = logoRaw.replace('class="logo-svg"', `class="logo-svg" style="width:${width}px;height:${height}px"`);
+---
+<Fragment set:html={svg} />

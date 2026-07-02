@@ -1,0 +1,129 @@
+---
+import PageFrame from '../layouts/PageFrame.astro';
+
+const comparisons = [
+  {
+    name: 'Cryostat',
+    base: 'Red Hat, open source. Container-native JFR management for JVMs on Kubernetes and OpenShift.',
+    differs: [
+      'jvmguard is deployment-agnostic. It watches JVMs wherever they run, not only on Kubernetes.',
+      'Beyond JFR, the same triggers can take a heap dump, a thread dump, or read MBean state.',
+      'Captures fire on thresholds and policies across a fleet, with an inbox and an audit trail.',
+    ],
+  },
+  {
+    name: 'Plain JFR and jcmd',
+    base: 'The built-in baseline. JFR and JDK Mission Control are free, low-overhead, and scriptable.',
+    differs: [
+      'jvmguard adds the operational layer on top of JFR: fleet-wide rules, an inbox of captures, retention, and audit.',
+      'Triggers start a capture the moment a condition crosses, so no one has to catch the problem by hand.',
+      'Heap dumps, thread dumps, and an in-process MBean browser are built in.',
+    ],
+  },
+  {
+    name: 'Continuous profilers',
+    base: 'Grafana Pyroscope, Parca and Polar Signals, Elastic Universal Profiling, and profilers embedded in APM suites. They collect profiles continuously and aggregate them.',
+    differs: [
+      'jvmguard takes the opposite shape: near-zero steady-state collection, with a deep capture on demand.',
+      'It is a complement, not a replacement. Many teams run both: breadth from the continuous profiler, depth from jvmguard.',
+      'Captures are standard JFR and HPROF, ready to open in JProfiler, JMC, or Eclipse MAT.',
+    ],
+  },
+];
+---
+
+<PageFrame
+  active="compare"
+  title={`How jvmguard compares`}
+  description="How jvmguard compares to Cryostat, plain JFR and jcmd, and continuous profilers, and what it is built for."
+>
+  <section class="shell hero">
+    <p class="eyebrow">Comparison</p>
+    <h1>How jvmguard compares.</h1>
+    <p class="lede">
+      jvmguard takes a distinct approach to production profiling. Here is how it relates to the tools
+      you may already use.
+    </p>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 01</span>
+      <span class="rule__label">Adjacent approaches</span>
+    </div>
+    <div class="cmp">
+      {comparisons.map((c) => (
+        <article class="cmp__row">
+          <header class="cmp__head">
+            <h2>{c.name}</h2>
+            <p class="muted">{c.base}</p>
+          </header>
+          <ul class="cmp__diff">
+            {c.differs.map((d) => (
+              <li>{d}</li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
+      <span class="rule__label">What jvmguard is for</span>
+    </div>
+    <div class="panel">
+      <p>
+        jvmguard pairs two things. Lightweight monitoring is always on: the telemetries and transactions
+        you configured, recorded with near-zero overhead. Deep, profiler-grade captures run only on
+        demand, when a trigger fires or you start one yourself.
+      </p>
+      <p>
+        jvmguard stands on its own. If you already use an APM or a continuous profiler, it fits beside
+        them rather than replacing them. And instead of hand-rolling JFR on each JVM, you get fleet-wide
+        rules, triggers, and an audit trail.
+      </p>
+    </div>
+  </section>
+</PageFrame>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-5);
+  }
+  .cmp {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .cmp__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    border-top: 1px solid var(--rule-strong);
+    padding-block: var(--space-5);
+  }
+  @media (min-width: 820px) {
+    .cmp__row {
+      grid-template-columns: 1fr 1.4fr;
+      gap: var(--space-6);
+    }
+  }
+  .cmp__head h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--step-2);
+  }
+  .cmp__head p {
+    margin: 0;
+  }
+  .cmp__diff {
+    margin: 0;
+    padding-left: 1.1rem;
+    max-width: none;
+  }
+  .cmp__diff li {
+    margin-bottom: var(--space-3);
+  }
+</style>

@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data name="test export" vms="my vms" date="2013-12-15T14:00:00Z">
+  <group>
+    <violations>
+      <element telemetry="Free heap" count="10"/>
+      <element telemetry="Connections" count="20"/>
+    </violations>
+    <vms>
+      <element name="direct child">
+        <violations>
+          <element telemetry="Free heap" count="10"/>
+          <element telemetry="Connections" count="20"/>
+        </violations>
+      </element>
+      <element name="direct child2">
+        <violations>
+          <element telemetry="Free heap" count="5"/>
+        </violations>
+      </element>
+    </vms>
+    <groups>
+      <element name="sub1">
+        <violations>
+          <element telemetry="Free heap" count="10"/>
+          <element telemetry="Connections" count="20"/>
+        </violations>
+        <vms>
+          <element name="sub1 child">
+            <violations>
+              <element telemetry="Free heap" count="10"/>
+              <element telemetry="Connections" count="20"/>
+            </violations>
+          </element>
+          <element name="sub1 child2">
+            <violations>
+              <element telemetry="Free heap" count="5"/>
+            </violations>
+          </element>
+        </vms>
+        <groups>
+          <element name="sub1pool">
+            <violations>
+              <element telemetry="Free heap" count="5"/>
+            </violations>
+            <vms>
+              <element name="127.0.0.1:3345 [23bdc8]">
+                <violations>
+                  <element telemetry="Free heap" count="5"/>
+                </violations>
+              </element>
+            </vms>
+          </element>
+        </groups>
+      </element>
+      <element name="sub2">
+        <violations>
+          <element telemetry="Free heap" count="10"/>
+          <element telemetry="Connections" count="20"/>
+        </violations>
+        <vms>
+          <element name="sub2 child">
+            <violations>
+              <element telemetry="Free heap" count="10"/>
+              <element telemetry="Connections" count="20"/>
+            </violations>
+          </element>
+          <element name="sub2 child2">
+            <violations>
+              <element telemetry="Free heap" count="5"/>
+            </violations>
+          </element>
+        </vms>
+      </element>
+    </groups>
+  </group>
+</data>

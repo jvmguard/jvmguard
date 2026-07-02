@@ -1,0 +1,90 @@
+---
+title: UI
+---
+
+
+
+
+import Figure from '../../../components/Figure.astro';
+
+<Figure src="ui/config_menu.png" />
+
+## The data views
+
+The left side-navigation holds the main entry points. The **VMs** view is the home view. It shows you the hierarchy of
+all connected VMs, together with selected information in the form of sparklines.
+
+<Figure src="ui/vms.png" />
+
+From the VMs view you reach the per-VM data views for a selected group or VM. They provide access to all recorded data
+that is available for your selection, including the telemetry views, the transaction call tree and hot spots, and the
+MBean browser. You follow the VM name link or use the context actions of a row to open these views. Clicking on a
+sparkline takes you to the full telemetry view.
+
+The **inbox** view shows all messages that have been sent to you. For example, if you record a CPU snapshot on a
+particular VM, a notice will be sent to your inbox once the snapshot is ready for downloading. If there are unread
+messages, the inbox entry in the side-navigation shows a notification badge.
+
+<Figure src="ui/inbox.png" />
+
+The server logs are available from the side-navigation as well and let you inspect the server, connection and event logs
+without leaving the UI.
+
+## Configuration
+
+The configuration drop-down in the header gives you access to two parts: **general settings** and **recording options**.
+If you want to view and edit general settings, you have to be an administrator. Recording options can also be edited by
+the "profiler", but not by the "viewer" access level.
+
+As long as you do not change anything, you can simply leave a settings view again. If you made a change, **Apply** and
+**Discard** buttons appear. No changes to the configuration have any effect before you apply them.
+
+<Figure src="ui/apply_discard.png" />
+
+## General Settings
+
+In the general settings you administrate the jvmguard server. This includes
+
+* the users and their access levels
+* data consolidation options
+* SMTP access
+
+<Figure src="ui/general_settings_menu.png" />
+
+In addition, you can export and import the entire server configuration.
+
+## Recording &amp; triggers
+
+Recording options and triggers are configured for each VM group. You can click the edit button or double-click on any
+column to jump directly to the desired step.
+
+<Figure src="ui/recording_settings.png" />
+
+The configuration contains recording options as well as threshold and trigger settings. Recording options are sent to
+the monitoring agents in each connected VM. They are inherited to nested VM groups and nested VM groups can override
+settings in their parent groups.
+
+<Figure src="ui/vm_group_override.png" />
+
+Thresholds and triggers, on the other hand, are handled in the jvmguard server and are processed for the VM group for
+which they have been defined. They operate on all VMs that are contained recursively in their VM group. If you need
+additional thresholds or triggers that operate only on a nested VM group, you can define them on that group.
+
+## User settings
+
+The user drop-down in the header shows selected information about your account and the current session and contains the
+**Logout** button that terminates your jvmguard session.
+
+<Figure src="ui/user_drop_down.png" />
+
+User settings, like your name and password can be adjusted by following the "Account Settings" link. If your access
+level is "profiler", this is where you can see the VM groups that you are allowed to modify.
+
+<Figure src="ui/account_settings.png" />
+
+## Dark mode
+
+If you prefer a dark UI, use the theme switcher in the header. The setting is persistent for the current browser.
+
+<Figure src="ui/dark_mode.png" />
+

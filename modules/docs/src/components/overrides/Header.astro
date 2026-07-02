@@ -1,0 +1,98 @@
+---
+// Custom Header: replicates the main site masthead inside Starlight's fixed
+// header slot. Logo + nav links + search are left-aligned. Theme toggle and
+// social icons stay on the right. Fonts match the main site.
+import config from 'virtual:starlight/user-config';
+import Search from 'virtual:starlight/components/Search';
+import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
+import SocialIcons from 'virtual:starlight/components/SocialIcons';
+import '../../styles/header.css';
+import '@fontsource-variable/jetbrains-mono';
+import logoRaw from '../../assets/logo-inline.svg?raw';
+
+const dev = import.meta.env.DEV;
+const site = dev ? 'http://localhost:4321' : '';
+const docsSelf = dev ? 'http://localhost:4322/docs/main/introduction' : '/docs/main/introduction';
+
+const nav = [
+  {label: 'Overview', href: site + '/'},
+  {label: 'Security', href: site + '/security'},
+  {label: 'Compare', href: site + '/compare'},
+  {label: 'Download', href: site + '/download'},
+  {label: 'Docs', href: docsSelf, active: true},
+];
+
+const shouldRenderSearch =
+	config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
+
+// Inline the SVG with a fixed display size (no network request, no flash).
+const logo = logoRaw
+  .replace('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n', '')
+  .replace('class="logo-svg"', 'class="jg-logo" style="height:36px;width:auto"');
+---
+
+<div class="jg-header" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%">
+  <div class="jg-header-left">
+    <a class="jg-wordmark" href={site + '/'} aria-label="jvmguard home">
+      <Fragment set:html={logo} />
+    </a>
+    <nav class="jg-nav" aria-label="Primary">
+      {nav.map((item) => (
+        <a href={item.href} class:list={['jg-nav-link', { 'is-active': item.active }]}>{item.label}</a>
+      ))}
+    </nav>
+    {shouldRenderSearch && <Search />}
+  </div>
+  <div class="jg-header-right">
+    <div class="jg-social">
+      <SocialIcons />
+    </div>
+    <ThemeSelect />
+  </div>
+</div>
+
+<style>
+  .jg-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-width: 0;
+    flex: 1 1 0;
+    overflow: hidden;
+  }
+  .jg-wordmark {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .jg-logo {
+    display: block;
+  }
+  .jg-nav {
+    display: none;
+    gap: 1rem;
+    align-items: center;
+  }
+  @media (min-width: 50rem) {
+    .jg-nav {
+      display: flex;
+    }
+  }
+  .jg-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+  .jg-social {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .jg-social::after {
+    content: '';
+    height: 2rem;
+    border-inline-end: 1px solid var(--sl-color-gray-5);
+  }
+</style>

@@ -1,0 +1,26 @@
+---
+title: jvmguard architecture
+---
+
+
+
+
+import Figure from '../../../components/Figure.astro';
+
+<Figure src="architecture.svg" />
+
+jvmguard consists of two main parts: the **server** and the **agent**. The agent is loaded in the monitored VM and
+records data. The agent connects to a jvmguard server. The server periodically queries all connected agents and processes
+their data. Historical information is written to a database. Users log in with their web browser to the jvmguard server
+to analyze the recorded data.
+
+Internally, the jvmguard server consists of three components:
+
+* The collector accepts TCP connections from jvmguard agents in monitored VMs. These connections can be encrypted and
+authenticated, so they are viable for wide area networks. The collector also consolidates data in the database, fires
+triggers and executes their actions.
+* The embedded H2 database stores all persistent data, both recorded data and configuration, in a single database file
+called "jvmguard".
+* The UI server accepts HTTP or HTTPS connections where users can log in, view and analyze the collected data and
+configure the server.
+

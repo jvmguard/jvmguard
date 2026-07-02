@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%-5level [%thread] %logger: %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="server" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${dataDirectory}/log/server.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <fileNamePattern>${dataDirectory}/log/server-%i.log</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>10</maxIndex>
+    </rollingPolicy>
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>20MB</maxFileSize>
+    </triggeringPolicy>
+    <encoder>
+      <pattern>%d{ISO8601} %-5level [%thread] %logger: %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="connection" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${dataDirectory}/log/connection.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <fileNamePattern>${dataDirectory}/log/connection-%i.log</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>10</maxIndex>
+    </rollingPolicy>
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>20MB</maxFileSize>
+    </triggeringPolicy>
+    <encoder>
+      <pattern>%d{ISO8601} %-5level: %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="event" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${dataDirectory}/log/event.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <fileNamePattern>${dataDirectory}/log/event-%i.log</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>10</maxIndex>
+    </rollingPolicy>
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>20MB</maxFileSize>
+    </triggeringPolicy>
+    <encoder>
+      <pattern>%d{ISO8601} %-5level: %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="failOnError" class="com.jvmguard.server.FailOnErrorAppender"/>
+
+  <logger name="connection" level="INFO" additivity="false">
+    <appender-ref ref="stdout"/>
+    <appender-ref ref="connection"/>
+  </logger>
+
+  <logger name="event" level="INFO" additivity="false">
+    <appender-ref ref="stdout"/>
+    <appender-ref ref="event"/>
+  </logger>
+
+  <logger name="org.apache.catalina" level="WARN"/>
+  <logger name="org.atmosphere" level="ERROR"/>
+
+  <root level="INFO">
+    <appender-ref ref="stdout"/>
+    <appender-ref ref="server"/>
+    <appender-ref ref="failOnError"/>
+  </root>
+</configuration>

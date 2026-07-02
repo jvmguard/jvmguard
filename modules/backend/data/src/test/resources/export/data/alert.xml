@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data name="test export" vms="my vms" date="2013-12-15T14:00:00Z">
+  <alerts>
+    <element severity="Error" time="2013-12-15T14:00:00Z" description="error descr" lastVm="root/base/group"/>
+    <element severity="Info" time="2013-12-15T14:00:00Z" description="info descr" lastVm="root/base/pool/127.0.0.1:3345 [87a238]"/>
+  </alerts>
+</data>

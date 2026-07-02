@@ -1,0 +1,44 @@
+---
+title: Automatic Update Of The jvmguard Agent
+---
+
+When you set up a JVM for monitoring, you copy the jvmguard agent files to the machine where the monitored JVM is
+running. When you update the jvmguard server, the question arises how the agent files are updated.
+
+While the server is shut down during an update, so that all of its files can be replaced, the monitored JVM cannot be
+terminated just for updating a monitoring agent. This is why jvmguard performs an automatic deployment of agent updates
+whenever the server installation is updated.
+
+## Server Update
+
+You can check for updates within the same major series in the [global settings](/docs/config/admin) and update
+notifications are sent to you as inbox messages if automatic update checking is enabled.
+
+When you update the jvmguard server, all monitoring agents are disconnected from the collector. However, the agents
+continue to record data and will transmit it to the collector when it becomes available again. After a disconnection,
+the agent will periodically try to reconnect to the jvmguard collector with diminishing frequency. Data is only discarded
+if its quantity exceeds limits that are considered unsafe with respect to memory overhead.
+
+After a server update, the jvmguard agent may have changed with respect to the older version. In that case, the VMs view
+will show a  warning icon next to the VM name. The jvmguard server will continue to work with agents of all previous
+versions, but new functionality may not be available for JVMs that are being monitored with an outdated agent.
+
+When the monitored JVM is restarted at some point in the future, the new agent will be used automatically. There is no
+need for you to transfer new agent files to remote machines.
+
+## Agent Update Mechanism
+
+When connected to a JVM that is monitored with an outdated jvmguard agent, the jvmguard server transfers the new agent
+files to the remote machine. Because the original agent files are in use and may be write-protected, they cannot be
+overwritten. New agents are stored in the `$HOME/.jvmguard/agent2` directory. In that directory there are subdirectories
+for each monitored VM that in turn contain directories with the transferred agents.
+
+When a monitored JVM is started, it loads the `jvmguard.jar` Java agent that [you have specified](/docs/main/monitoring)
+in the `-javaagent` VM parameter. That Java agent bootstraps the actual implementation of the monitoring agent by
+looking into `$HOME/.jvmguard/agent2` and selecting the most recent agent files for the monitored JVM. If no agents have
+been transferred, the implementation in the `lib` directory of the extracted agent archive is used.
+
+While the `jvmguard.jar` file with the bootstrapping code is never updated, it performs a limited function at startup
+that does not impact the monitoring functionality itself. Even if the JAR file changes in a newer release, it does not
+mean that you have to replace it on any remote machines.
+

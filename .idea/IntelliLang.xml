@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LanguageInjectionConfiguration">
+    <injection language="HTML" injector-id="java">
+      <display-name>AbstractComponent.setDescription (com.vaadin.ui)</display-name>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("setDescription").withParameters("java.lang.String").definedInClass("com.vaadin.ui.AbstractComponent"))]]></place>
+    </injection>
+    <injection language="CSS" injector-id="java">
+      <display-name>By.cssSelector (org.openqa.selenium)</display-name>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("cssSelector").withParameters("java.lang.String").definedInClass("org.openqa.selenium.By"))]]></place>
+    </injection>
+    <injection language="XPath" injector-id="java">
+      <display-name>By.xpath (org.openqa.selenium)</display-name>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("xpath").withParameters("java.lang.String").definedInClass("org.openqa.selenium.By"))]]></place>
+    </injection>
+    <injection language="JavaScript" injector-id="java">
+      <display-name>JavaScript.execute (com.vaadin.ui)</display-name>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("execute").withParameters("java.lang.String").definedInClass("com.vaadin.ui.JavaScript"))]]></place>
+    </injection>
+    <injection language="HTML" injector-id="java">
+      <display-name>Label.Label (com.vaadin.ui)</display-name>
+      <place disabled="true"><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("Label").withParameters("java.lang.String").definedInClass("com.vaadin.ui.Label"))]]></place>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("Label").withParameters("java.lang.String", "int").definedInClass("com.vaadin.ui.Label"))]]></place>
+    </injection>
+    <injection language="JavaScript" injector-id="java">
+      <display-name>Labels.setFormatter (com.vaadin.addon.charts.model)</display-name>
+      <prefix>function f() { return &quot;&quot;+</prefix>
+      <suffix>}</suffix>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("setFormatter").withParameters("java.lang.String").definedInClass("com.vaadin.addon.charts.model.Labels"))]]></place>
+    </injection>
+    <injection language="RegExp" injector-id="java">
+      <display-name>String (java.lang)</display-name>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("matches").withParameters("java.lang.String").definedInClass("java.lang.String"))]]></place>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("replaceAll").withParameters("java.lang.String", "java.lang.String").definedInClass("java.lang.String"))]]></place>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("replaceFirst").withParameters("java.lang.String", "java.lang.String").definedInClass("java.lang.String"))]]></place>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("split").withParameters("java.lang.String").definedInClass("java.lang.String"))]]></place>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("split").withParameters("java.lang.String", "int").definedInClass("java.lang.String"))]]></place>
+    </injection>
+    <injection language="JavaScript" injector-id="java">
+      <display-name>Tooltip.setFormatter (com.vaadin.addon.charts.model)</display-name>
+      <prefix>function f() {return &quot;&quot;+</prefix>
+      <suffix>}</suffix>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("setFormatter").withParameters("java.lang.String").definedInClass("com.vaadin.addon.charts.model.Tooltip"))]]></place>
+    </injection>
+  </component>
+</project>

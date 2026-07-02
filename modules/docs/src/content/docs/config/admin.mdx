@@ -1,0 +1,87 @@
+---
+title: Server Administration
+---
+
+
+
+import Figure from '../../../components/Figure.astro';
+
+Many server options are contained in the file `config/application.yaml` in the installation directory and can only be
+[changed when the server is restarted](/docs/config/server-config). The server administration settings that can be
+changed in the jvmguard UI are contained in the "General Settings". These settings include user configuration and data
+consolidation options.
+
+<Figure src="ui/general_settings_menu.png" />
+
+## Access control
+
+There are three different access levels in jvmguard: admin, profiler and viewer. With these access levels you can
+implement a safe usage policy for the jvmguard UI in a larger organization.
+
+* **Admin**: When you install jvmguard, you have to create an admin user. Only an admin user can open the "General
+Settings" and make modifications to it.
+* **Profiler**: With the "Profiler" access level, you can assign full control for a particular VM group, including the
+ability to put the JVM in profiling mode. First, you create the VM group in the recording settings, if it does not
+already exist. When creating the user, set its access level to "Profiler" and add the VM group to the list of access
+rights, removing the entry for "All VM groups". This user will now be able to change the recording settings for this VM
+group and all VM groups that are contained within it. In addition, heap dumps and CPU snapshots in profiling mode can be
+taken for the associated VMs. Viewing rights are not restricted in jvmguard.
+* **Viewer**: To give somebody access to monitoring data without the ability to change any monitoring settings, use this
+access level.
+
+## LDAP authentication
+
+Instead of managing user passwords in jvmguard, you can delegate authentication to an LDAP server. After you configure a
+URL for the LDAP server, you can switch the type of a user from "Local" to "LDAP" and enter the LDAP DN for the user.
+The LDAP server URL must start with `ldap://` or `ldaps://`, if you select the "Start TLS" LDAP extension, an `ldap://`
+URL must be used.
+
+LDAP users do not have to be manually created in jvmguard, they can be mapped automatically. In the LDAP server
+configuration, you can map the login name entered by the user in jvmguard to an LDAP user DN. If no configured mapping
+matches, the user will see the generic error message that the combination of user name and password is incorrect. Local
+user definitions will always be given precedence to LDAP user mappings. If a new LDAP user authenticates successfully, a
+new user entry will be created in jvmguard and you can inspect the user details on the "Users and Roles" tab of the
+general settings.
+
+<Figure src="ui/ldap_config.png" />
+
+A single user mapping consists of a base LDAP DN whose entire subtree will be searched. The user filter is an LDAP
+filter expression containing the character sequence `@USER@` that will be replaced with the login name entered by the
+user. Each mapping has an associated access level and may match exactly one LDAP DN. If zero or more than one matches
+are found, jvmguard will try the next configured mapping.
+
+<Figure src="ui/ldap_user_mapping.png" />
+
+## Global settings
+
+In the global settings, you can configure an SMTP server that is used for sending emails. Emails are only sent by "Send
+email" [trigger actions](/docs/main/triggers). If no SMTP server is defined, these actions do not have any effect.
+
+<Figure src="ui/global_settings.png" />
+
+The data consolidation options determine how long certain types of data are kept in the database.
+
+For transaction data, the maximum retention time can be indefinite or a fixed number of days. Smaller time scales are
+consolidated progressively and independently of this setting, so that for times that are far in the past, there is only
+a relatively small increase in the size of the database.
+
+[Telemetries](/docs/main/telemetries) are consolidated automatically, the highest aggregation level remains in the
+database indefinitely. Due to the large interval size, the linear increase in required storage space is small.
+
+Snapshot data takes a lot of space and is of decreasing interest the farther back you go. After some time, it can be
+deleted. The higher the retention times are set, the more disk space will be used by the database.
+
+With the "frequency unit for telemetries" option you can make the numbers in telemetries easier to interpret. It should
+be set to a value that fits with the typical throughput in your applications. If your monitored VMs handle many
+transactions per second, you can set it to "per second", if the transaction frequency is more on the order of minutes,
+the setting "per hour" will be appropriate.
+
+The global settings also show the currently installed version of jvmguard and let you configure automatic update
+checking. If selected, jvmguard will check for updates within the current major version once a day. If an update is
+detected, an inbox message will be sent to all admin users. The inbox message contains the new version and hyperlinks
+for change log and download. An update notification will only be shown once even if jvmguard is restarted. When another
+version is released, a new update notification will be sent, even if you have not updated jvmguard in the meantime.
+
+Whether you have enabled or disabled automatic update checking, the manual **Check For Updates Now** button performs the
+same check live and shows you its results in a dialog right away.
+

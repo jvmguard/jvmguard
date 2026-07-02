@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="LoggingWorkload.javaLogging" count="5" type="devops"/>
+      <element name="LoggingWorkload.log4j1" count="5" type="devops"/>
+      <element name="LoggingWorkload.log4j2" count="5" type="devops"/>
+      <element name="LoggingWorkload.logback" count="5" type="devops"/>
+    </children>
+  </callTree>
+</data>

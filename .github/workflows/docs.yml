@@ -1,0 +1,67 @@
+name: docs
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'modules/docs/**'
+      - 'modules/website/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            modules/docs/package-lock.json
+            modules/website/package-lock.json
+
+      - name: Build marketing site
+        working-directory: modules/website
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build docs site
+        working-directory: modules/docs
+        run: |
+          npm ci
+          npm run build
+
+      # Combine: the marketing build serves at the artifact root, the docs build
+      # (whose own base is '/docs') is placed under /docs/ so its internal links
+      # and assets resolve. The upload is the combined tree.
+      - name: Combine sites
+        run: |
+          mkdir -p modules/website/dist/docs
+          cp -r modules/docs/dist/. modules/website/dist/docs/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: modules/website/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

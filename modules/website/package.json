@@ -1,0 +1,23 @@
+{
+  "name": "jvmguard-website",
+  "type": "module",
+  "version": "5.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "dev:all": "concurrently -n website,docs -c blue,green \"astro dev\" \"cd ../docs && astro dev --port 4322\"",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "astro": "^7.0.3",
+    "sharp": "^0.35.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "concurrently": "^9.2.0",
+    "typescript": "^6.0.3"
+  }
+}

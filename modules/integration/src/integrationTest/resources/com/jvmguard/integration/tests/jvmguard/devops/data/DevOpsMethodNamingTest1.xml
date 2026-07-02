@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="ntest1: DevopsMethodNaming com.jvmguard.integration.tests.jvmguard.devops.classes.naming.DevopsMethodNaming 333 basecall ArrayList c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 55" count="2" type="devops"/>
+      <element name="ntest1: DevopsMethodNaming com.jvmguard.integration.tests.jvmguard.devops.classes.naming.DevopsMethodNamingSub1 333 basecall ArrayList c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 55" count="2" type="devops"/>
+      <element name="ntest1: DevopsMethodNaming com.jvmguard.integration.tests.jvmguard.devops.classes.naming.DevopsMethodNamingSub1_1 333 basecall ArrayList c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 55" count="2" type="devops"/>
+      <element name="ntest1: DevopsMethodNamingSub2 com.jvmguard.integration.tests.jvmguard.devops.classes.naming.DevopsMethodNamingSub2 333 basecall ArrayList c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 55" count="2" type="devops"/>
+      <element name="ntest2: DevopsMethodNaming c.j.i.t.j.d.c.n.DevopsMethodNaming 333 5 subcall c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 11" count="2" type="devops">
+        <children>
+          <element name="ntest5" count="2" type="pojo"/>
+          <element name="pojo2" count="2" type="pojo"/>
+          <element name="ntest9" count="2" type="devops">
+            <children>
+              <element name="ntest5" count="2" type="pojo"/>
+              <element name="pojo1" count="2" type="pojo"/>
+              <element name="pojo2" count="2" type="pojo"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest2: DevopsMethodNaming c.j.i.t.j.d.c.n.DevopsMethodNamingSub1 333 5 subcall c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 11" count="2" type="devops">
+        <children>
+          <element name="ntest5" count="2" type="pojo"/>
+          <element name="pojo2" count="2" type="pojo"/>
+          <element name="ntest9" count="2" type="devops">
+            <children>
+              <element name="ntest5" count="2" type="pojo"/>
+              <element name="pojo1" count="2" type="pojo"/>
+              <element name="pojo2" count="2" type="pojo"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest2: DevopsMethodNaming c.j.i.t.j.d.c.n.DevopsMethodNamingSub1_1 333 5 subcall c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 11" count="2" type="devops">
+        <children>
+          <element name="ntest5" count="2" type="pojo"/>
+          <element name="pojo2" count="2" type="pojo"/>
+          <element name="ntest9" count="2" type="devops">
+            <children>
+              <element name="ntest5" count="2" type="pojo"/>
+              <element name="pojo1" count="2" type="pojo"/>
+              <element name="pojo2" count="2" type="pojo"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest2: DevopsMethodNaming c.j.i.t.j.d.c.n.DevopsMethodNamingSub2 333 5 subcall c.j.i.t.j.d.c.n.DevopsMethodNaming$ParameterClass 11" count="2" type="devops">
+        <children>
+          <element name="ntest5" count="2" type="pojo"/>
+          <element name="pojo2" count="2" type="pojo"/>
+          <element name="ntest9" count="2" type="devops">
+            <children>
+              <element name="ntest5" count="2" type="pojo"/>
+              <element name="pojo1" count="2" type="pojo"/>
+              <element name="pojo2" count="2" type="pojo"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest3: DevopsMethodNaming DevopsMethodNaming" count="2" type="devops"/>
+      <element name="ntest3: DevopsMethodNaming DevopsMethodNamingSub2" count="2" type="devops"/>
+      <element name="ntest3: DevopsMethodNamingSub1 DevopsMethodNamingSub1" count="2" type="devops">
+        <children>
+          <element name="ntest3: DevopsMethodNaming DevopsMethodNamingSub1" count="2" type="devops"/>
+        </children>
+      </element>
+      <element name="ntest3: DevopsMethodNamingSub1 DevopsMethodNamingSub1_1" count="2" type="devops">
+        <children>
+          <element name="ntest3: DevopsMethodNaming DevopsMethodNamingSub1_1" count="2" type="devops"/>
+        </children>
+      </element>
+      <element name="ntest4: DevopsMethodNaming DevopsMethodNaming" count="2" type="devops"/>
+      <element name="ntest4: DevopsMethodNaming DevopsMethodNamingSub2" count="2" type="devops"/>
+      <element name="ntest5" count="8" type="devops">
+        <children>
+          <element name="pojo2" count="8" type="pojo"/>
+          <element name="ntest4: DevopsMethodNaming DevopsMethodNaming" count="2" type="devops"/>
+          <element name="ntest4: DevopsMethodNaming DevopsMethodNamingSub2" count="2" type="devops"/>
+        </children>
+      </element>
+      <element name="ntest6" count="8" type="devops">
+        <children>
+          <element name="ntest5" count="8" type="pojo"/>
+          <element name="pojo1" count="8" type="pojo"/>
+          <element name="pojo2" count="8" type="pojo"/>
+        </children>
+      </element>
+      <element name="ntest7" count="8" type="devops"/>
+    </children>
+  </transactionTree>
+</data>

@@ -1,0 +1,98 @@
+name: gradle build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tasks:
+        description: 'gradle tasks'
+        required: true
+        type: string
+      branch:
+        description: 'git branch'
+        required: true
+        type: string
+      java:
+        description: 'java major version'
+        required: true
+        type: string
+      workingdir:
+        description: 'working directory'
+        required: true
+        type: string
+      additional:
+        description: 'additional script'
+        required: false
+        default: ''
+        type: string
+      displayname:
+        description: 'custom run-name display'
+        required: false
+        default: ''
+        type: string
+      rootprojectprefix:
+        description: 'prefix to the root project'
+        required: false
+        default: './'
+        type: string
+      runner:
+        description: 'runner name'
+        required: false
+        default: 'ubuntu-24.04-l'
+        type: string
+
+concurrency:
+  group: build-workflow-${{ inputs.branch }}
+
+run-name: "${{ inputs.displayname != '' && inputs.displayname || inputs.tasks }} [${{ inputs.branch }}]"
+jobs:
+  build:
+
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 120
+    permissions:
+      contents: write
+      issues: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: '0'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: false
+
+      - name: Running gradle
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MAVEN_CENTRAL: "${{ secrets.MAVEN_CENTRAL }}"
+        run: |
+          export ORG_GRADLE_PROJECT_mavenCentralUsername=$(echo "$MAVEN_CENTRAL" | jq -er .username)
+          echo "::add-mask::$ORG_GRADLE_PROJECT_mavenCentralUsername"
+          export ORG_GRADLE_PROJECT_mavenCentralPassword=$(echo "$MAVEN_CENTRAL" | jq -er .password)
+          echo "::add-mask::$ORG_GRADLE_PROJECT_mavenCentralPassword"
+
+          ${{ inputs.additional }}
+          ${{ inputs.rootprojectprefix }}gradlew ${{ inputs.tasks }} -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
+        working-directory: ./${{ inputs.workingdir }}
+        shell: bash
+
+      - name: Upload notarization logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: notarization-logs
+          path: |
+            ${{ inputs.workingdir }}/media/**/*.notarization.log
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: |
+            ${{ inputs.workingdir }}/build/gradle/**/reports

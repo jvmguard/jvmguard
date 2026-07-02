@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="Class1.innerM2" count="1" type="annotated"/>
+      <element name="Class1.innerM2" count="1" type="annotated" policy="slow"/>
+      <element name="Class1.m1" count="2" type="annotated"/>
+      <element name="Class1.m1" count="2" type="annotated" policy="slow"/>
+      <element name="Class1.m2" count="1" type="annotated">
+        <children>
+          <element name="Class1.innerM2" count="1" type="annotated"/>
+        </children>
+      </element>
+      <element name="Class1.m2" count="1" type="annotated" policy="slow">
+        <children>
+          <element name="Class1.innerM2" count="1" type="annotated" policy="slow"/>
+        </children>
+      </element>
+      <element name="Class1.m3" count="1" type="annotated"/>
+      <element name="Class1.m3" count="1" type="annotated" policy="slow"/>
+      <element name="Class2.manno1_1" count="1" type="annotated"/>
+      <element name="Class2.manno1_2" count="1" type="annotated">
+        <children>
+          <element name="Class2.manno2" count="1" type="annotated"/>
+          <element name="Class2.manno3: tostring: com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.Class2" count="1" type="annotated"/>
+        </children>
+      </element>
+      <element name="Class2.manno2" count="1" type="annotated"/>
+      <element name="Class2.manno3: tostring: com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.Class2" count="1" type="annotated"/>
+      <element name="Class2.manno3: tostring: com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.Class2Sub1" count="1" type="annotated"/>
+      <element name="Class2Sub1.manno1_1" count="1" type="annotated"/>
+      <element name="Class2Sub1.manno1_2" count="1" type="annotated"/>
+    </children>
+  </transactionTree>
+</data>

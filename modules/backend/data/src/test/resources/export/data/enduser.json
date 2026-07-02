@@ -1,0 +1,20 @@
+{
+  "name" : "test export",
+  "vms" : "my vms",
+  "date" : "2013-12-15T14:00:00Z",
+  "transactions" : [ {
+    "name" : "transaction 1",
+    "transactionCount" : 50,
+    "transactionDuration" : 200,
+    "samples" : 10,
+    "duration" : 1000,
+    "overhead" : 400
+  }, {
+    "name" : "transaction 2",
+    "transactionCount" : 100,
+    "transactionDuration" : 200,
+    "samples" : 25,
+    "duration" : 400,
+    "overhead" : 100
+  } ]
+}
