@@ -15,7 +15,7 @@
     "lit": "3.3.3",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-router": "7.17.0"
+    "react-router": "7.18.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -26,10 +26,10 @@
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "25.9.3",
+    "@types/node": "25.9.4",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.2",
+    "@vitejs/plugin-react": "6.0.3",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.0.1",
@@ -37,7 +37,7 @@
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
     "vite": "8.0.16",
-    "vite-plugin-checker": "0.14.1"
+    "vite-plugin-checker": "0.14.4"
   },
   "vaadin": {
     "dependencies": {
@@ -53,7 +53,7 @@
       "lit": "3.3.3",
       "react": "19.2.7",
       "react-dom": "19.2.7",
-      "react-router": "7.17.0"
+      "react-router": "7.18.0"
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
@@ -64,10 +64,10 @@
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "25.9.3",
+      "@types/node": "25.9.4",
       "@types/react": "19.2.17",
       "@types/react-dom": "19.2.3",
-      "@vitejs/plugin-react": "6.0.2",
+      "@vitejs/plugin-react": "6.0.3",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.0.1",
@@ -75,9 +75,9 @@
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
       "vite": "8.0.16",
-      "vite-plugin-checker": "0.14.1"
+      "vite-plugin-checker": "0.14.4"
     },
-    "hash": "9abe43113280149d83b3fe4b6d5657ad30b1da4bfba570fc813775f87312f44e",
+    "hash": "be07edc69a3bb0fc1dc4fad777751be39ac4de9a2329d9b3ecc7f6bb0349ef7a",
     "overrides": {
       "@vaadin/a11y-base": "25.2.0",
       "@vaadin/accordion": "25.2.0",
