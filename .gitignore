@@ -1,7 +1,9 @@
 /build/
+buildSrc/build/
 /dist/
 /media/
 .gradle/
 .kotlin/
 
 *.iml
+.idea/workspace.xml
