@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -23,4 +25,4 @@ jobs:
 
       - name: Building and running tests
         run: |
-          ./gradlew :jvmguard:integration:citest -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
+          ./gradlew :integration:citest -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
