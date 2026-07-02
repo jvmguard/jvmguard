@@ -2,7 +2,7 @@
 kotlin = "2.3.21"
 springBoot = "4.1.0"
 vaadin = "25.2.0"
-asm = "9.9.1"
+asm = "9.10.1"
 nanojson = "1.10"
 jdom = "2.0.6.1"
 fastutil = "8.5.18"
