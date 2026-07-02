@@ -15,11 +15,11 @@ dependencies {
 val fullVersion = getProductVersion("jvmguard")
 
 tasks {
-    val jar by existing(Jar::class) {
+    val jar = named<Jar>("jar") {
         include("com/jvmguard/installer/**")
     }
 
-    val buildMedia by registering(Install4jTask::class) {
+    val buildMedia = register<Install4jTask>("buildMedia") {
         dependsOn(jar, ":dist")
 
         val fullVersionForFileName = fullVersion.replace('.', '_')
@@ -49,7 +49,7 @@ tasks {
     }
     provideNotarizationKey(buildMedia)
 
-    val media by registering {
+    val media = register("media") {
         dependsOn(buildMedia)
     }
 

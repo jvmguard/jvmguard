@@ -4,7 +4,7 @@ val npmBin = if (isWindows()) "npm.cmd" else "npm"
 
 tasks {
 
-    val npmInstall by registering(Exec::class) {
+    val npmInstall = register<Exec>("npmInstall") {
         group = "website"
         description = "Installs the website npm dependencies (npm ci)."
         workingDir = projectDir
@@ -14,7 +14,7 @@ tasks {
         outputs.dir("node_modules")
     }
 
-    val npmBuild by registering(Exec::class) {
+    val npmBuild = register<Exec>("npmBuild") {
         group = "website"
         description = "Builds the marketing site into dist/."
         dependsOn(npmInstall)

@@ -28,7 +28,7 @@ tasks {
         }
     }
 
-    val copyDist by registering (Copy::class) {
+    val copyDist = register<Copy>("copyDist") {
         dependsOn("jar")
         into(file("$distDir/agent").apply { mkdirs() })
         from(jar)

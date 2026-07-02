@@ -25,7 +25,7 @@ tasks {
         "shadow"(libs.nanojson)
     }
 
-    val distJar by registering(ShadowJar::class) {
+    val distJar = register<ShadowJar>("distJar") {
         archiveBaseName.set("agent-bundle")
     }
 
@@ -50,7 +50,7 @@ tasks {
     }
 
     // Pass -PvmName to set the name of the VM, -PvmGroup to set the group of the VM
-    val runTest by registering(JavaExec::class) {
+    val runTest = register<JavaExec>("runTest") {
         dependsOn("testClasses", distJar)
         mainClass.set("javaagent.TestMain")
     }

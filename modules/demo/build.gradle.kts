@@ -24,7 +24,7 @@ tasks {
         from(getDependencyOutputPaths())
     }
 
-    val dist by registering(Copy::class) {
+    val dist = register<Copy>("dist") {
         dependsOn(jar)
         into(file("$distDir/lib/demo").apply { mkdirs() })
         from(jar)

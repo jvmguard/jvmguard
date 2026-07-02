@@ -18,14 +18,14 @@ val demoSnapshotFile: File = File(project.projectDir, "src/test/resources/demo-s
 
 val e2ePort = (findProperty("jvmguard.e2e.port") as String?)?.toInt() ?: 8123
 val e2eVmPort = (findProperty("jvmguard.e2e.vmPort") as String?)?.toInt() ?: 8948
-val e2eServerRuntime: Configuration by configurations.creating
+val e2eServerRuntime = configurations.create("e2eServerRuntime")
 
 val dataPort = (findProperty("jvmguard.data.port") as String?)?.toInt() ?: 8124
 val dataVmPort = (findProperty("jvmguard.data.vmPort") as String?)?.toInt() ?: 8949
 val dataServer = gradle.sharedServices.registerIfAbsent("jvmguardWebDataServer", ServerProcessService::class.java) {}
 val demoCluster = gradle.sharedServices.registerIfAbsent("jvmguardWebDemoCluster", DemoClusterService::class.java) {}
 val dataServerDataDir: File by lazy { createTempDirectory("jvmguard-web-data").toFile() }
-val demoRuntime: Configuration by configurations.creating
+val demoRuntime = configurations.create("demoRuntime")
 
 java {
     disableAutoTargetJvm()
@@ -96,77 +96,9 @@ val e2eServerDataDir: File by lazy { createTempDirectory("jvmguard-web-e2e").toF
 val e2eServerClasspath = e2eServerRuntime.elements.map { set -> set.joinToString(File.pathSeparator) { it.asFile.absolutePath } }
 
 
-// TODO remove after the next Vaadin release
-afterEvaluate {
-    val tokenService = gradle.sharedServices.registrations.findByName("vaadinBuildFrontendToken")?.service
-    tasks.named<Jar>("jar").configure {
-        val projectCapturingActions = actions.filter { action ->
-            var current: Any? = action
-            var fromFlowPlugin = false
-            while (current != null) {
-                if (current.javaClass.name.startsWith("com.vaadin.flow.gradle.FlowPlugin")) {
-                    fromFlowPlugin = true
-                    break
-                }
-                val field = current.javaClass.declaredFields.firstOrNull { it.name == "action" }
-                current = field?.apply { isAccessible = true }?.get(current)
-            }
-            fromFlowPlugin
-        }
-        actions.removeAll(projectCapturingActions)
-        if (tokenService != null) {
-            usesService(tokenService)
-            doFirst {
-                val service = tokenService.get()
-                val params = service.javaClass.getMethod("getParameters").invoke(service)
-                fun path(getter: String) =
-                    (params.javaClass.methods.first { it.name == getter }.invoke(params) as Property<*>).get() as String
-                val cached = File(path("getCachedTokenFilePath"))
-                val token = File(path("getTokenFilePath"))
-                if (cached.exists()) {
-                    token.parentFile.mkdirs()
-                    cached.copyTo(token, overwrite = true)
-                }
-            }
-        }
-    }
-}
-
 tasks {
 
-    // TODO remove after the next Vaadin release
-    vaadinPrepareFrontend {
-        val projectDirFile: File = project.projectDir
-        val buildDirFile: File = project.layout.buildDirectory.get().asFile
-        doLast {
-            if (!buildDirFile.absolutePath.startsWith(projectDirFile.absolutePath + File.separator)) {
-                val junk = File(projectDirFile, buildDirFile.path)
-                val projectBase = projectDirFile.absolutePath + File.separator
-                if (junk.isDirectory && junk.absolutePath.startsWith(projectBase)) {
-                    junk.deleteRecursively()
-                    // The plugin prepends projectDir to the *whole* absolute build path, so the
-                    // junk file sits at the leaf; prune the now-empty ancestor chain back up to
-                    // projectDir (stops there and only removes empty directories).
-                    var dir = junk.parentFile
-                    while (dir != null &&
-                        dir.absolutePath != projectDirFile.absolutePath &&
-                        dir.isDirectory && (dir.list()?.isEmpty() == true)) {
-                        dir.delete()
-                        dir = dir.parentFile
-                    }
-                }
-            }
-        }
-    }
-
-
-    // TODO remove after the next Vaadin release
-    vaadinBuildFrontend {
-        val bundleIndexHtml = layout.buildDirectory.file("resources/main/META-INF/VAADIN/webapp/index.html").get().asFile
-        outputs.upToDateWhen { bundleIndexHtml.exists() }
-    }
-
-    val dist by registering
+    val dist = register("dist")
 
     test {
         useJUnitPlatform {
@@ -175,7 +107,7 @@ tasks {
         systemProperty("vaadin.productionMode", "true")
     }
 
-    val installPlaywrightBrowsers by registering(JavaExec::class) {
+    val installPlaywrightBrowsers = register<JavaExec>("installPlaywrightBrowsers") {
         description = "Installs the Chromium browser used by the Playwright e2e tests."
         classpath = sourceSets.test.get().runtimeClasspath
         mainClass.set("com.microsoft.playwright.CLI")
@@ -189,7 +121,7 @@ tasks {
         }
     }
 
-    val e2eStartServer by registering {
+    val e2eStartServer = register("e2eStartServer") {
         inputs.files(e2eServerRuntime)
         // Localize script-level state so the task action does not capture the build script
         // object (configuration-cache requirement).
@@ -203,7 +135,7 @@ tasks {
             service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log)
         }
     }
-    val e2eStopServer by registering {
+    val e2eStopServer = register("e2eStopServer") {
         usesService(e2eServer)
         doLastWith(e2eServer) { it.get().shutdown() }
     }
@@ -237,7 +169,7 @@ tasks {
         outputs.upToDateWhen { false }
     }
 
-    val dataE2eStartServer by registering {
+    val dataE2eStartServer = register("dataE2eStartServer") {
         usesService(dataServer)
         inputs.files(e2eServerRuntime)
         val service = dataServer
@@ -253,7 +185,7 @@ tasks {
         }
     }
 
-    val dataE2eStartDemo by registering {
+    val dataE2eStartDemo = register("dataE2eStartDemo") {
         usesService(demoCluster)
         dependsOn(dataE2eStartServer)
         inputs.files(demoRuntime)
@@ -274,12 +206,12 @@ tasks {
         }
     }
 
-    val dataE2eStopDemo by registering {
+    val dataE2eStopDemo = register("dataE2eStopDemo") {
         usesService(demoCluster)
         doLastWith(demoCluster) { service -> service.get().shutdown() }
     }
 
-    val dataE2eStopServer by registering {
+    val dataE2eStopServer = register("dataE2eStopServer") {
         usesService(dataServer)
         doLastWith(dataServer) { service -> service.get().shutdown() }
     }

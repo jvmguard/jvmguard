@@ -13,7 +13,7 @@ publishedApi {
 }
 
 tasks {
-    val transformOverview by registering(Copy::class) {
+    val transformOverview = register<Copy>("transformOverview") {
         from(file("overview.html"))
         into(file("$buildDirFile/overview").apply { mkdirs() })
         filter(mapOf("tokens" to mapOf(
@@ -28,7 +28,7 @@ tasks {
         options.overview = overviewFile.path
     }
 
-    val distJavadoc by registering(Copy::class) {
+    val distJavadoc = register<Copy>("distJavadoc") {
         dependsOn(javadoc)
         into(file("$distDir/api/doc").apply { mkdirs() })
         from(javadoc.flatMap { provider { it.destinationDir } })

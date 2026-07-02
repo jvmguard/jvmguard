@@ -4,14 +4,14 @@ val npmBin = if (isWindows()) "npm.cmd" else "npm"
 
 tasks {
 
-    val copyScreenshots by registering(Copy::class) {
+    val copyScreenshots = register<Copy>("copyScreenshots") {
         group = "docs"
         from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsLight")) { into("ui") }
         from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsDark")) { into("ui") }
         into(layout.projectDirectory.dir("public/images"))
     }
 
-    val npmInstall by registering(Exec::class) {
+    val npmInstall = register<Exec>("npmInstall") {
         group = "docs"
         workingDir = projectDir
         commandLine(npmBin, "ci")
@@ -20,7 +20,7 @@ tasks {
         outputs.dir("node_modules")
     }
 
-    val npmBuild by registering(Exec::class) {
+    val npmBuild = register<Exec>("npmBuild") {
         group = "docs"
         description = "Builds the Starlight static site into dist/."
         dependsOn(npmInstall)

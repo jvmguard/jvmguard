@@ -12,7 +12,7 @@ java {
 sourceSets.create("integrationTest")
 sourceSets.create("benchmark")
 
-val workloadRuntimeClasspath: Configuration by configurations.creating {
+val workloadRuntimeClasspath = configurations.create("workloadRuntimeClasspath") {
     isCanBeResolved = true
     isCanBeConsumed = false
 }

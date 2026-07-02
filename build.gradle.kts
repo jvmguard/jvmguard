@@ -13,19 +13,19 @@ tasks {
         }
     }
 
-    val distTemplate by registering(Copy::class) {
+    val distTemplate = register<Copy>("distTemplate") {
         into(distDir)
         from(distTemplateDir)
     }
 
-    val distProperties by registering(Copy::class) {
+    val distProperties = register<Copy>("distProperties") {
         into(file("$distDir/resources"))
         from(file("$distTemplateDir/config"))
         include("application.yaml")
         rename("application.yaml", "application.yaml-default")
     }
 
-    val dist by registering {
+    val dist = register("dist") {
         group = "distribution"
         description = "Assembles the full jvmguard distribution into dist/"
         dependsOn(
@@ -62,7 +62,7 @@ tasks {
         )
     }
 
-    val media by registering {
+    val media = register("media") {
         group = "distribution"
         description = "Cleans, builds the distribution and generates the installer media"
         dependsOn(clean, dist, ":installer:media")

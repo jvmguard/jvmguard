@@ -78,7 +78,7 @@ tasks {
         addApacheLicense()
     }
 
-    val sourcesJar by registering(Jar::class) {
+    val sourcesJar = register<Jar>("sourcesJar") {
         archiveBaseName.set(jar.flatMap { it.archiveBaseName })
         from("src")
         archiveClassifier.set("sources")
@@ -108,7 +108,7 @@ tasks {
         executable = project.getJavadocExecutable()
     }
 
-    val javadocJar by registering(Jar::class) {
+    val javadocJar = register<Jar>("javadocJar") {
         dependsOn(javadoc)
         archiveBaseName.set(jar.flatMap { it.archiveBaseName })
         archiveClassifier.set("javadoc")
@@ -118,7 +118,7 @@ tasks {
         from(javadoc.get().destinationDir)
     }
 
-    val copyDist by registering(Copy::class) {
+    val copyDist = register<Copy>("copyDist") {
         dependsOn(jar, sourcesJar)
         into(distDir)
         into("api") {

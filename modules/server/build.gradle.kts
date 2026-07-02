@@ -63,7 +63,7 @@ tasks {
 
     val jar = named<Jar>("jar")
 
-    val serverJar by registering(ShadowJar::class) {
+    val serverJar = register<ShadowJar>("serverJar") {
         dependsOn(jar)
         from(zipTree(jar.flatMap { it.archiveFile }))
         archiveAppendix.set("server")
@@ -75,7 +75,7 @@ tasks {
         from(getDependencyOutputPaths())
     }
 
-    val dist by registering(Copy::class) {
+    val dist = register<Copy>("dist") {
         into(file("$distDir/lib/server").apply { mkdirs() })
         from(serverJar.get().archiveFile)
     }
