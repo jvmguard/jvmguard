@@ -14,4 +14,7 @@ dependencies {
     api(libs.cyclonedx.plugin)
     api(libs.spring.boot.gradle.plugin)
     api(libs.vaadin.gradle.plugin)
+
+    // TODO check if this can be removed after the next cyclonedx release
+    api(platform(libs.jackson.bom))
 }

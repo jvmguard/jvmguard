@@ -21,6 +21,9 @@ install4j = "12.0.5"
 shadow = "9.4.3"
 vanniktechPublish = "0.37.0"
 cyclonedx = "3.2.4"
+# TODO check if this can be removed after the next cyclonedx release
+# Pins the cyclonedx plugin's transitive Jackson (build tooling only) to a non-vulnerable release.
+jackson = "2.22.0"
 
 [libraries]
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -31,6 +34,7 @@ vaadin-gradle-plugin = { module = "com.vaadin:vaadin-gradle-plugin", version.ref
 shadow-gradle-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 vanniktech-publish-plugin = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "vanniktechPublish" }
 cyclonedx-plugin = { module = "org.cyclonedx.bom:org.cyclonedx.bom.gradle.plugin", version.ref = "cyclonedx" }
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
 install4j-gradle-plugin = { module = "com.install4j:install4j-gradle", version.ref = "install4j" }
 json = { module = "org.json:json", version.ref = "json" }
 
