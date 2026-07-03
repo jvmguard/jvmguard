@@ -63,7 +63,7 @@ dependencies {
 
     testImplementation("com.vaadin:browserless-test-junit6")
     testImplementation(libs.playwright)
-    testImplementation("com.github.ingokegel:apacheds-embedded:v0.11")
+    testImplementation("com.unboundid:unboundid-ldapsdk:7.0.4")
 
     e2eServerRuntime(project(":server"))
     e2eServerRuntime(libs.install4j.runtime)

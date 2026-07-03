@@ -9,12 +9,6 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenCentral()
-        maven {
-            setUrl("https://jitpack.io")
-            content {
-                includeGroup("com.github.ingokegel")
-            }
-        }
     }
 }
 
@@ -24,23 +18,36 @@ plugins {
 
 rootProject.name = "jvmguard"
 
-// Each project's directory mirrors its path under modules/ (e.g. :backend:collector -> modules/backend/collector).
 listOf(
-    // agent domain (Java 8, loads into monitored JVMs)
-    ":agent",                   // container
-    ":agent:bundle",            // aggregate: api-bundle + relocated agent fat jar
-    ":agent:core", ":agent:java11", ":agent:bootstrap",
-    ":agent:api", ":agent:mbean",
-    // backend (Kotlin / JDK 25)
-    ":backend", ":backend:data", ":backend:collector", ":backend:connector", ":backend:rest",
-    // frontend + app
-    ":ui", ":server",
-    // tooling / distribution / sites
-    ":demo", ":installer", ":docs", ":website",
+    // agent
+    ":agent",
+    ":agent:bundle",
+    ":agent:core",
+    ":agent:java11",
+    ":agent:bootstrap",
+    ":agent:api",
+    ":agent:mbean",
+    // backend
+    ":backend",
+    ":backend:data",
+    ":backend:collector",
+    ":backend:connector",
+    ":backend:rest",
+    // frontend
+    ":ui",
+    // aggregate server
+    ":server",
+    // distribution
+    ":demo",
+    ":installer",
+    ":docs",
+    ":website",
     // agent integration tests
     ":integration",
-    ":integration:workloads", ":integration:workloads:java21", ":integration:workloads:logging",
-).forEach { path ->
+    ":integration:workloads",
+    ":integration:workloads:java21",
+    ":integration:workloads:logging",
+    ).forEach { path ->
     include(path)
     project(path).projectDir = file("modules/${path.removePrefix(":").replace(':', '/')}")
 }
