@@ -1,5 +1,6 @@
 package com.jvmguard.agent.data;
 
+import com.jvmguard.agent.JvmGuardAgent;
 import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.comm.CommunicationContext;
 import com.jvmguard.agent.helper.SnapshotRecorder;
@@ -19,7 +20,7 @@ public class HeapDumpResult extends OrderedSnapshotTransferResult {
 
     private static File dumpHprof() {
         try {
-            File file = File.createTempFile("jdm", ".hprof");
+            File file = File.createTempFile("jdm", ".hprof", JvmGuardAgent.getAgentUserDir());
             if (!file.delete()) { // dumpHeap requires that the file does not exist yet
                 Logger.log(Subsystem.COMMON, 1, true, "could not prepare heap dump file " + file);
                 return null;

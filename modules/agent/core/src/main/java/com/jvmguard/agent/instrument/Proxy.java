@@ -1,5 +1,6 @@
 package com.jvmguard.agent.instrument;
 
+import com.jvmguard.agent.JvmGuardAgent;
 import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.instrument.TargetClassGenerator.TargetClassLoader;
 import com.jvmguard.agent.util.Logger;
@@ -59,7 +60,7 @@ public abstract class Proxy {
         } catch (Throwable e) {
             try {
                 if (data != null) {
-                    File file = File.createTempFile("pfproxy", ".class");
+                    File file = File.createTempFile("pfproxy", ".class", JvmGuardAgent.getAgentUserDir());
                     FileOutputStream out = new FileOutputStream(file);
                     out.write(data);
                     out.close();
