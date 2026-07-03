@@ -10,6 +10,7 @@
       <w>authz</w>
       <w>bcpkix</w>
       <w>buildsys</w>
+      <w>codeql</w>
       <w>echart</w>
       <w>echarts</w>
       <w>fastutil</w>

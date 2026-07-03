@@ -26,8 +26,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # build-mode 'none' analyses the sources directly, so we avoid the
-          # full (~1h) Gradle build. Covers Java and Kotlin together.
           - language: java-kotlin
             build-mode: none
           - language: javascript-typescript
