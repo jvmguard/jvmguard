@@ -19,5 +19,8 @@
     "@astrojs/check": "^0.9.9",
     "concurrently": "^9.2.0",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "yaml": "^2.8.3"
   }
 }
