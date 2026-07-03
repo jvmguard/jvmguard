@@ -44,6 +44,10 @@ concurrency:
   group: build-workflow-${{ inputs.branch }}
 
 run-name: "${{ inputs.displayname != '' && inputs.displayname || inputs.tasks }} [${{ inputs.branch }}]"
+
+permissions:
+  contents: read
+
 jobs:
   build:
 
