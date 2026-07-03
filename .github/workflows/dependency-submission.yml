@@ -17,7 +17,3 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: gradle/actions/dependency-submission@v6
-        env:
-          # Exclude the buildscript classpath configuration
-          # These dependencies are build tooling, never shipped and not on any test path.
-          DEPENDENCY_GRAPH_EXCLUDE_CONFIGURATIONS: "^classpath$"
