@@ -7,4 +7,37 @@ updates:
     open-pull-requests-limit: 10
     groups:
       gradle-minor-patch:
+        applies-to: version-updates
         update-types: [minor, patch]
+      gradle-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories:
+      - "/modules/ui"
+      - "/modules/website"
+      - "/modules/docs"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      actions-all:
+        applies-to: version-updates
+        patterns: ["*"]
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
