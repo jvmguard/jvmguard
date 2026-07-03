@@ -14,4 +14,7 @@ dependencies {
     api(libs.cyclonedx.plugin)
     api(libs.spring.boot.gradle.plugin)
     api(libs.vaadin.gradle.plugin)
+
+    // TODO check if this can be removed after the next release of cyclonedx plugin (fixes several CVEs)
+    api(platform("com.fasterxml.jackson:jackson-bom:2.22.0"))
 }
