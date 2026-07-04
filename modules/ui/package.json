@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
-    "@babel/plugin-transform-react-jsx-development": "7.29.7",
+    "@babel/plugin-transform-react-jsx-development": "8.0.1",
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.7",
     "@preact/signals-react-transform": "0.8.1",
@@ -57,7 +57,7 @@
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
-      "@babel/plugin-transform-react-jsx-development": "7.29.7",
+      "@babel/plugin-transform-react-jsx-development": "8.0.1",
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.7",
       "@preact/signals-react-transform": "0.8.1",
