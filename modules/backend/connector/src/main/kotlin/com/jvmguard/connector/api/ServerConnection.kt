@@ -104,6 +104,8 @@ interface ServerConnection {
 
     fun sendTestMail(recipient: String, subject: String, content: String, smtpConfig: SmtpConfig)
 
+    fun testSsoDiscovery(issuerUri: String): String
+
     fun modifyGroupConfigs(listModification: ListModification<GroupConfig>)
 
     fun resetCaps()

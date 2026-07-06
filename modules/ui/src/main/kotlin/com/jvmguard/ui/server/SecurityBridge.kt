@@ -37,7 +37,7 @@ object SecurityBridge {
         context.authentication = authentication
         SecurityContextHolder.setContext(context)
         persist(context)
-        val principal = authentication.principal as JvmGuardUserDetails
+        val principal = authentication.principal as JvmGuardPrincipal
         return checkNotNull(principal.serverConnection) { "Authenticated principal has no server connection" }
     }
 

@@ -17,6 +17,8 @@ interface Server {
     val defaultTheme: DefaultTheme
     val isUse2fa: Boolean
 
+    val enabledSsoProviders: List<SsoProviderInfo>
+
     val idToTelemetryType: Map<String, TelemetryType>
 
     fun createInitialUser(
@@ -32,6 +34,8 @@ interface Server {
     @MethodTransaction(naming = [Part(text = "Login")], group = "serverConnection", inheritance = Inheritance(Mode.WITH_SUPERCLASS_NAME))
     fun authenticate(loginName: String, password: String, authenticatorCode: String?): User
 
+    fun authenticateSso(issuer: String, subject: String, email: String, name: String?, groups: List<String>): User
+
     fun connect(user: User, mode: MockMode = MockMode.NONE): ServerConnection
 
     fun login(loginName: String, password: String, authenticatorCode: String?, mode: MockMode = MockMode.NONE): ServerConnection {
@@ -42,3 +46,5 @@ interface Server {
         const val TEST_AUTH_CODE: String = "123"
     }
 }
+
+data class SsoProviderInfo(val registrationId: String, val displayName: String)

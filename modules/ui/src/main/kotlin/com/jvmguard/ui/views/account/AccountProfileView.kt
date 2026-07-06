@@ -2,6 +2,7 @@ package com.jvmguard.ui.views.account
 
 import com.jvmguard.common.helper.PasswordHelper
 import com.jvmguard.data.user.User
+import com.jvmguard.data.user.UserType
 import com.jvmguard.ui.components.PasswordResult
 import com.jvmguard.ui.components.PasswordRules
 import com.jvmguard.ui.components.Validators
@@ -39,19 +40,34 @@ class AccountProfileView : AbstractAccountSectionView() {
     private val newPassword = passwordField("New password", ID_NEW_PW)
     private val confirmPassword = passwordField("Confirm new password", ID_CONFIRM_PW)
 
+    private val isOidc = Sessions.current()?.user?.userType == UserType.OIDC
+
     init {
-        val passwordHint = Span("Leave blank to keep your current password.").apply { addClassName("jvmguard-field-hint") }
-        add(
-            settingsSection("User information", FormLayout(fullName, email)),
-            settingsSection("Change password", VerticalLayout(currentPassword, newPassword, confirmPassword, passwordHint).apply {
-                isPadding = false
-                isSpacing = true
-            }),
-        )
+        if (isOidc) {
+            val user = Sessions.current()!!.user
+            val ssoInfo = VerticalLayout(
+                Span("Signed in via ${user.ssoIssuer}").apply { style.set("font-weight", "bold") },
+                Span("Email: ${user.loginName}"),
+            ).apply { isPadding = false; isSpacing = true }
+            user.fullName.takeIf { it.isNotBlank() }?.let { ssoInfo.add(Span("Name: $it")) }
+            add(settingsSection("SSO identity", ssoInfo))
+        } else {
+            val passwordHint = Span("Leave blank to keep your current password.").apply { addClassName("jvmguard-field-hint") }
+            add(
+                settingsSection("User information", FormLayout(fullName, email)),
+                settingsSection("Change password", VerticalLayout(currentPassword, newPassword, confirmPassword, passwordHint).apply {
+                    isPadding = false
+                    isSpacing = true
+                }),
+            )
+        }
     }
 
     @Suppress("DuplicatedCode")
     override fun bind(binder: Binder<User>) {
+        if (isOidc) {
+            return
+        }
         binder.forField(fullName).bind({ it.fullName }, { u, value -> u.fullName = value })
         binder.forField(email)
             .withValidator(Validators.optionalEmail())
@@ -60,10 +76,15 @@ class AccountProfileView : AbstractAccountSectionView() {
 
     override fun applyToDraft() {
         super.applyToDraft()
-        checkPassword(apply = true)
+        if (!isOidc) {
+            checkPassword(apply = true)
+        }
     }
 
     override fun isValid(): Boolean {
+        if (isOidc) {
+            return true
+        }
         val passwordOk = checkPassword(apply = false)
         return binder.validate().isOk && passwordOk
     }

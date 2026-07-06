@@ -24,12 +24,16 @@ class UserEditDialog(
 
     private val binder = Binder(User::class.java)
 
+    private val userType = EnumSelect("User type", UserType::class.java) { it.toString() }.apply {
+        addValueChangeListener { updateTypeVisibility() }
+    }
     private val loginName = TextField("Login name").apply {
         setWidthFull()
         testId = ID_LOGIN_NAME
     }
-    private val userType = EnumSelect("User type", UserType::class.java) { it.toString() }.apply {
-        addValueChangeListener { updateTypeVisibility() }
+    private val ssoEmail = EmailField("SSO email").apply {
+        setWidthFull()
+        testId = ID_SSO_EMAIL
     }
     private val ldapDn = TextField("LDAP distinguished name").apply {
         setWidthFull()
@@ -84,13 +88,14 @@ class UserEditDialog(
 
         bind()
         binder.readBean(user)
+        ssoEmail.value = user.loginName
         updateTypeVisibility()
         updateGroupsEnabled()
         updatePasswordVisibility()
 
         add(
             VerticalLayout(
-                loginName, userType, ldapDn, fullName, email, accessLevel,
+                userType, loginName, ssoEmail, ldapDn, fullName, email, accessLevel,
                 associatedGroups, passwordSection, reset2fa, exemptFrom2fa,
             ).apply {
                 isPadding = false
@@ -128,14 +133,24 @@ class UserEditDialog(
             .bind({ it.isExemptFrom2fa }, { u, value -> u.isExemptFrom2fa = value })
     }
 
-    private fun isLocal(): Boolean = userType.value != UserType.LDAP
+    private fun isLocal(): Boolean = userType.value == UserType.LOCAL
+
+    private fun isLdap(): Boolean = userType.value == UserType.LDAP
+
+    private fun isOidc(): Boolean = userType.value == UserType.OIDC
 
     private fun updateTypeVisibility() {
         val local = isLocal()
-        ldapDn.isVisible = !local
+        val ldap = isLdap()
+        val oidc = isOidc()
+        loginName.isVisible = !oidc
+        ssoEmail.isVisible = oidc
+        ldapDn.isVisible = ldap
         fullName.isVisible = local
         email.isVisible = local
         passwordSection.isVisible = local
+        reset2fa.isVisible = use2faEnabled && !oidc && !isNew
+        exemptFrom2fa.isVisible = use2faEnabled && !oidc
         updatePasswordVisibility()
     }
 
@@ -153,8 +168,17 @@ class UserEditDialog(
     private fun save() {
         newPassword.isInvalid = false
         confirmPassword.isInvalid = false
+        if (isOidc()) {
+            if (ssoEmail.isInvalid || ssoEmail.value.isNullOrBlank()) {
+                return
+            }
+            loginName.value = ssoEmail.value
+        }
         if (!binder.writeBeanIfValid(user) || !applyPassword()) {
             return
+        }
+        if (isOidc()) {
+            user.email = user.loginName
         }
         onSave(user)
         close()
@@ -178,6 +202,7 @@ class UserEditDialog(
 
     companion object {
         const val ID_LOGIN_NAME = "user-login-name"
+        const val ID_SSO_EMAIL = "user-sso-email"
         const val ID_LDAP_DN = "user-ldap-dn"
         const val ID_FULL_NAME = "user-full-name"
         const val ID_EMAIL = "user-email"

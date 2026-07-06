@@ -122,6 +122,8 @@ class MockServerConnectionImpl(override val user: User) : AbstractServerConnecti
         this.globalConfig = globalConfig
     }
 
+    override fun testSsoDiscovery(issuerUri: String): String = "Mock: discovery test skipped"
+
     override val groupConfigs: Collection<GroupConfig>
         get() = mockEntities.getGroupConfigs()
 

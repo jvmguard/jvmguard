@@ -1,6 +1,7 @@
 package com.jvmguard.ui.server
 
 import com.jvmguard.connector.api.ServerConnection
+import com.jvmguard.connector.api.SsoProviderInfo
 import com.jvmguard.connector.client.ServerFactory
 
 class DefaultLoginService : LoginService {
@@ -12,5 +13,11 @@ class DefaultLoginService : LoginService {
         ServerFactory.lookup().isUse2fa
     } catch (_: Exception) {
         false
+    }
+
+    override fun enabledSsoProviders(): List<SsoProviderInfo> = try {
+        ServerFactory.lookup().enabledSsoProviders
+    } catch (_: Exception) {
+        emptyList()
     }
 }

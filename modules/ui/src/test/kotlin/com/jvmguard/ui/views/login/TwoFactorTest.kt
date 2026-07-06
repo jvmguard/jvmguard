@@ -1,5 +1,6 @@
 package com.jvmguard.ui.views.login
 
+import com.jvmguard.connector.api.SsoProviderInfo
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.ui.JvmGuardBrowserlessTest
 import com.jvmguard.ui.components.TwoFactorEnroller
@@ -29,6 +30,7 @@ class TwoFactorTest : JvmGuardBrowserlessTest() {
         object : LoginService {
             override fun login(userName: String, password: String, authenticatorCode: String?) = connection()
             override fun isUse2fa() = use2fa
+            override fun enabledSsoProviders() = emptyList<SsoProviderInfo>()
         }
 
     @Test

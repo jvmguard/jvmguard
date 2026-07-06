@@ -3,6 +3,8 @@ package com.jvmguard.server
 import com.jvmguard.common.JvmGuardConfig
 import com.jvmguard.common.JvmGuardDirectories
 import com.jvmguard.common.JvmGuardProperties
+import com.jvmguard.server.sso.JvmGuardOidcUserService
+import com.jvmguard.server.sso.MutableClientRegistrationRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -23,6 +25,7 @@ import java.io.File
 @Import(
     ServerMain::class, WebServerSupport::class, WebServerCustomizer::class, SecurityConfiguration::class,
     IntegrationTestControlController::class, SnapshotDirectoryInitializer::class,
+    JvmGuardOidcUserService::class, MutableClientRegistrationRepository::class,
 )
 class SpringConfiguration {
 

@@ -1,6 +1,7 @@
 package com.jvmguard.ui.views.login
 
 import com.github.mvysny.karibudsl.v10.*
+import com.jvmguard.ui.server.JvmGuardPrincipal
 import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.server.UserSession
 import com.jvmguard.ui.views.setup.InstallWizardView
@@ -8,6 +9,7 @@ import com.jvmguard.ui.views.vms.VmsView
 import com.vaadin.flow.component.Key
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
+import com.vaadin.flow.component.html.Anchor
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.PasswordField
@@ -18,6 +20,7 @@ import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.server.auth.AnonymousAllowed
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.context.SecurityContextHolder
 
 @AnonymousAllowed
 @Route("login")
@@ -59,10 +62,35 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
                 addClickShortcut(Key.ENTER)
             }
             errorMessage = span { isVisible = false }
+
+            val ssoProviders = Sessions.loginService().enabledSsoProviders()
+            if (ssoProviders.isNotEmpty()) {
+                span("or") { addClassName("jvmguard-login-divider") }
+                ssoProviders.forEach { provider ->
+                    add(Anchor("/oauth2/authorization/${provider.registrationId}", "Sign in with ${provider.displayName}").apply {
+                        setRouterIgnore(true)
+                        addClassName("jvmguard-sso-button")
+                        style.set("width", "100%")
+                        style.set("text-align", "center")
+                    })
+                }
+            }
         }
     }
 
     override fun beforeEnter(event: BeforeEnterEvent) {
+        // After an SSO callback, Spring Security has authenticated the user but the Vaadin UserSession
+        // hasn't been created yet. The redirect chain lands here (LoginView) because no session exists.
+        // Detect the SSO principal and create the session, then forward to the main view.
+        val principal = SecurityContextHolder.getContext().authentication?.principal
+        if (principal is JvmGuardPrincipal && Sessions.current() == null) {
+            principal.serverConnection?.let { connection ->
+                Sessions.setCurrent(UserSession(connection))
+                event.forwardTo(VmsView::class.java)
+                return
+            }
+        }
+
         Sessions.captureMock(event.location.queryParameters)
         if (Sessions.isNewInstallation()) {
             event.forwardTo(InstallWizardView::class.java, event.location.queryParameters)

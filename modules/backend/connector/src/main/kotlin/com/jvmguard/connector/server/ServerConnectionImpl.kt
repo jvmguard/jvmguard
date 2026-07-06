@@ -157,6 +157,30 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
         configManager.setGlobalConfig(globalConfig, false)
     }
 
+    @RequireAdmin
+    override fun testSsoDiscovery(issuerUri: String): String {
+        val baseUri = issuerUri.trim().trimEnd('/')
+        val discoveryUrl = "$baseUri/.well-known/openid-configuration"
+        return try {
+            val client = java.net.http.HttpClient.newBuilder()
+                .connectTimeout(java.time.Duration.ofSeconds(10))
+                .build()
+            val request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create(discoveryUrl))
+                .timeout(java.time.Duration.ofSeconds(10))
+                .GET()
+                .build()
+            val response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString())
+            if (response.statusCode() == 200) {
+                "Discovery OK: $discoveryUrl is reachable."
+            } else {
+                "Discovery failed: HTTP ${response.statusCode()} from $discoveryUrl"
+            }
+        } catch (e: Exception) {
+            "Discovery failed: ${e.message}"
+        }
+    }
+
     override val groupConfigs: Collection<GroupConfig>
         get() = configManager.getGroupConfigs(user.accessLevel, user.groupNames)
 

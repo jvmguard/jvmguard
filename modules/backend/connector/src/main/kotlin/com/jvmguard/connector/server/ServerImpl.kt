@@ -20,6 +20,7 @@ import com.jvmguard.data.vmdata.VmIdentifier
 import com.jvmguard.connector.api.MockMode
 import com.jvmguard.connector.api.Server
 import com.jvmguard.connector.api.ServerConnection
+import com.jvmguard.connector.api.SsoProviderInfo
 import com.jvmguard.connector.server.mock.MockServerConnectionImpl
 import com.jvmguard.connector.server.mock.SnapshotReplayConnection
 import com.jvmguard.connector.totp.TOTP
@@ -53,6 +54,11 @@ class ServerImpl(
 
     override val isUse2fa: Boolean
         get() = getGlobalConfig().use2fa
+
+    override val enabledSsoProviders: List<SsoProviderInfo>
+        get() = getGlobalConfig().ssoConfig.providers
+            .filter { it.enabled }
+            .map { SsoProviderInfo(SsoProviderConfig.slugify(it.displayName), it.displayName) }
 
     override fun createInitialUser(
         userName: String,
@@ -101,13 +107,55 @@ class ServerImpl(
             throwInvalidUser()
         }
 
-        user.lastLogin = Instant.now()
-        try {
-            userManager.store(user)
-        } catch (e: CredentialException) {
-            Loggers.SERVER.warn("Could not store last login for {}", user, e)
+        return stampLogin(user)
+    }
+
+    override fun authenticateSso(issuer: String, subject: String, email: String, name: String?, groups: List<String>): User {
+        val providers = getGlobalConfig().ssoConfig.providers
+        val provider = providers
+            .find { it.issuerUri.trim() == issuer.trim() && it.enabled }
+            ?: run {
+                Loggers.SERVER.warn(
+                    "SSO issuer '{}' not found among {} provider(s): {}",
+                    issuer,
+                    providers.size,
+                    providers.map { "issuer=${it.issuerUri}, enabled=${it.enabled}" },
+                )
+                throw FailedLoginException("No SSO provider configured for issuer: $issuer")
+            }
+
+        if (provider.domainRestriction.isNotEmpty()) {
+            val domain = email.substringAfter("@", "")
+            if (domain.isBlank() || !domain.equals(provider.domainRestriction, ignoreCase = true)) {
+                throw FailedLoginException("Email domain does not match the configured restriction.")
+            }
         }
-        return user
+
+        userManager.getBySsoSubject(issuer, subject)?.let { return stampLogin(it) }
+
+        if (subject.isNotEmpty()) {
+            userManager.findOidcUserByLoginName(email, issuer)?.let { user ->
+                user.ssoSubject = subject
+                user.ssoIssuer = issuer.trim()
+                if (user.email.isBlank()) user.email = email
+                if (user.fullName.isBlank()) user.fullName = name?.takeIf { it.isNotBlank() } ?: email.substringBefore("@", email)
+                return stampLogin(user)
+            }
+        }
+
+        val accessLevel = evaluateSsoAccessRules(provider, groups)
+            ?: throw FailedLoginException("Access denied. Contact your administrator.")
+
+        val newUser = User()
+        newUser.loginName = email
+        newUser.userType = UserType.OIDC
+        newUser.ssoIssuer = issuer
+        newUser.ssoSubject = subject
+        newUser.email = email
+        newUser.fullName = email.substringBefore("@", email)
+        newUser.accessLevel = accessLevel
+        newUser.groupNames = arrayListOf(GroupHelper.ROOT_GROUP_ID)
+        return stampLogin(newUser)
     }
 
     override fun connect(user: User, mode: MockMode): ServerConnection = when (mode) {
@@ -151,7 +199,34 @@ class ServerImpl(
             }
 
             UserType.LDAP -> LdapHelper.validatePasswordLdap(password, user, getLdapConfig())
+            UserType.OIDC -> false
         }
+
+    private fun stampLogin(user: User): User {
+        user.lastLogin = Instant.now()
+        try {
+            userManager.store(user)
+        } catch (e: CredentialException) {
+            Loggers.SERVER.warn("Could not store last login for {}", user, e)
+        }
+        return user
+    }
+
+    private fun evaluateSsoAccessRules(provider: SsoProviderConfig, groups: List<String>): AccessLevel? {
+        val rules = provider.accessRules
+        if (rules.isEmpty()) return null
+        for (rule in rules) {
+            if (!rule.isCatchAll && groups.contains(rule.claimValue)) {
+                return rule.accessLevel
+            }
+        }
+        for (rule in rules) {
+            if (rule.isCatchAll) {
+                return rule.accessLevel
+            }
+        }
+        return null
+    }
 
     private fun getLdapConfig(): LdapConfig = getGlobalConfig().ldapConfig
 

@@ -203,7 +203,7 @@ abstract class AbstractServerConnectionImpl : ServerConnection {
         return telemetryData
     }
 
-    fun modified(modificationType: ModificationType) {
+    open fun modified(modificationType: ModificationType) {
         modificationTypes.add(modificationType)
     }
 }

@@ -2,6 +2,7 @@ package com.jvmguard.ui.server
 
 import com.jvmguard.data.config.GlobalConfig
 import com.jvmguard.data.config.LdapUserMapping
+import com.jvmguard.data.config.SsoProviderConfig
 import com.jvmguard.data.user.User
 import com.jvmguard.connector.api.ServerConnection
 
@@ -16,6 +17,7 @@ class SettingsDraft(val config: GlobalConfig) : SettingsModeDraft {
     var hiddenTelemetries: Set<String>? = null
     val users = StagedListEdits(User::class.java)
     val ldapMappings = StagedListEdits(LdapUserMapping::class.java)
+    val ssoProviders = StagedListEdits(SsoProviderConfig::class.java)
 
     override fun markDirty() {
         if (!dirty) {
@@ -31,6 +33,9 @@ class SettingsDraft(val config: GlobalConfig) : SettingsModeDraft {
     override fun persist(connection: ServerConnection) {
         if (ldapMappings.hasChanges()) {
             config.ldapConfig.userMappings = ArrayList(ldapMappings.items())
+        }
+        if (ssoProviders.hasChanges()) {
+            config.ssoConfig.providers = ArrayList(ssoProviders.items())
         }
         connection.setGlobalConfig(config)
         hiddenTelemetries?.let { hidden ->

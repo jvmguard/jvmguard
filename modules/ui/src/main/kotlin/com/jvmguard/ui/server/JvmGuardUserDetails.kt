@@ -8,10 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails
 import java.io.Serializable
 
 class JvmGuardUserDetails(
-    private val loginName: String,
-    val accessLevel: AccessLevel,
-    @Transient val serverConnection: ServerConnection?,
-) : UserDetails, Serializable {
+    override val loginName: String,
+    override val accessLevel: AccessLevel,
+    @Transient override val serverConnection: ServerConnection?,
+) : UserDetails, JvmGuardPrincipal, Serializable {
 
     private val authorities: List<GrantedAuthority> =
         AccessLevel.entries

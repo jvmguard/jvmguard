@@ -39,6 +39,7 @@ class UsersView : AbstractSettingsSectionView() {
     private val grid = Grid(User::class.java, false).apply {
         testId = ID_GRID
         addColumn { it.loginName }.setHeader("Login name").setAutoWidth(true)
+        addColumn { it.userType.toString() }.setHeader("Type").setAutoWidth(true)
         addColumn { it.fullName }.setHeader("Full name").setAutoWidth(true)
         addColumn { it.email }.setHeader("Email").setAutoWidth(true)
         addColumn { it.accessLevel.toString() }.setHeader("Access level").setAutoWidth(true)

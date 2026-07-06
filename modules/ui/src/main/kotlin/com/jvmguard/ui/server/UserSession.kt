@@ -3,6 +3,7 @@ package com.jvmguard.ui.server
 import com.jvmguard.common.notification.ModificationType
 import com.jvmguard.data.config.FrequencyUnit
 import com.jvmguard.data.user.User
+import com.jvmguard.data.user.UserType
 import com.jvmguard.data.user.viewsettings.ViewSettings
 import com.jvmguard.connector.api.ServerConnection
 import com.vaadin.flow.server.VaadinService
@@ -42,6 +43,10 @@ class UserSession(val serverConnection: ServerConnection) {
 
     fun forcedSetupRequired(): Boolean {
         if (setupResolved) {
+            return false
+        }
+        if (user.userType == UserType.OIDC) {
+            setupResolved = true
             return false
         }
         val currentUser = user

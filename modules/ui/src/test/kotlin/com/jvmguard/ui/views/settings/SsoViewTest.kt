@@ -1,0 +1,93 @@
+package com.jvmguard.ui.views.settings
+
+import com.jvmguard.data.config.SsoGroupMapping
+import com.jvmguard.data.config.SsoPreset
+import com.jvmguard.data.user.AccessLevel
+import com.jvmguard.ui.JvmGuardBrowserlessTest
+import com.jvmguard.ui.server.MockConnections
+import com.jvmguard.ui.server.Sessions
+import com.jvmguard.ui.server.UserSession
+import com.jvmguard.connector.server.mock.MockServerConnectionImpl
+import com.vaadin.flow.component.UI
+import com.vaadin.flow.component.button.Button
+import com.vaadin.flow.component.textfield.PasswordField
+import com.vaadin.flow.component.textfield.TextField
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+class SsoViewTest : JvmGuardBrowserlessTest() {
+
+    private lateinit var connection: MockServerConnectionImpl
+
+    @BeforeEach
+    fun setUp() {
+        connection = MockConnections.create(AccessLevel.ADMIN)
+        Sessions.setCurrent(UserSession(connection))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Sessions.setCurrent(null)
+        Sessions.clearSettingsDraft()
+    }
+
+    private fun textField(label: String): TextField = find<TextField>().all().first { it.label == label }
+    private fun passwordField(label: String): PasswordField = find<PasswordField>().all().first { it.label == label }
+    private fun button(text: String): Button = find<Button>().all().first { it.text == text }
+    private fun shellSave(): Button = find<Button>().all().first { "jvmguard-settings-save" in it.classNames }
+    private fun dialogSave(): Button = find<Button>().all().first { it.text == "Save" && "jvmguard-settings-save" !in it.classNames }
+
+    @Test
+    fun addingAProviderPersistsOnSave() {
+        UI.getCurrent().navigate(SsoView::class.java)
+        use(button("Add provider")).click()
+
+        use(textField("Display name")).setValue("Company Okta")
+        use(textField("Issuer URI")).setValue("https://yourco.okta.com")
+        use(textField("Client ID")).setValue("client-123")
+        use(passwordField("Client secret")).setValue("secret-456")
+        use(textField("Domain / tenant")).setValue("yourco.com")
+        use(dialogSave()).click()
+
+        assertTrue(shellSave().isEnabled, "staging a provider enables Save")
+        assertTrue(connection.getGlobalConfig(false).ssoConfig.providers.isEmpty(), "not committed before Save")
+
+        use(shellSave()).click()
+
+        val providers = connection.getGlobalConfig(false).ssoConfig.providers
+        assertEquals(1, providers.size)
+        assertEquals("Company Okta", providers[0].displayName)
+        assertEquals("https://yourco.okta.com", providers[0].issuerUri)
+        assertEquals("client-123", providers[0].clientId)
+        assertEquals("secret-456", providers[0].clientSecret)
+        assertEquals("yourco.com", providers[0].domainRestriction)
+    }
+
+    @Test
+    fun providerWithEmptyRulesGridIsClosedByDefault() {
+        UI.getCurrent().navigate(SsoView::class.java)
+        use(button("Add provider")).click()
+
+        use(textField("Display name")).setValue("Google")
+        use(textField("Issuer URI")).setValue("https://accounts.google.com")
+        use(textField("Client ID")).setValue("client-id")
+        use(passwordField("Client secret")).setValue("secret")
+        use(textField("Domain / tenant")).setValue("yourco.com")
+        use(dialogSave()).click()
+
+        use(shellSave()).click()
+
+        val provider = connection.getGlobalConfig(false).ssoConfig.providers[0]
+        assertTrue(provider.accessRules.isEmpty(), "no rules = closed circle")
+    }
+
+    @Test
+    fun nonAdminIsForwardedAwayFromSsoSettings() {
+        Sessions.setCurrent(UserSession(MockConnections.create(AccessLevel.VIEWER)))
+        UI.getCurrent().navigate(SsoView::class.java)
+
+        assertFalse(SsoView::class.java.isInstance(currentView))
+    }
+}

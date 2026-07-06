@@ -1,5 +1,6 @@
 package com.jvmguard.ui.views.login
 
+import com.jvmguard.connector.api.SsoProviderInfo
 import com.jvmguard.ui.JvmGuardBrowserlessTest
 import com.jvmguard.ui.server.DefaultLoginService
 import com.jvmguard.ui.server.LoginService
@@ -20,6 +21,7 @@ class LoginFlowTest : JvmGuardBrowserlessTest() {
         Sessions.setLoginService(object : LoginService {
             override fun login(userName: String, password: String, authenticatorCode: String?) = MockConnections.create()
             override fun isUse2fa() = false
+            override fun enabledSsoProviders() = emptyList<SsoProviderInfo>()
         })
     }
 

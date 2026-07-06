@@ -31,6 +31,20 @@ open class User @DefaultConstructor constructor() : StoredConfig(), Cloneable, U
             fireChanged(old, value)
         }
 
+    var ssoIssuer: String = ""
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
+    var ssoSubject: String = ""
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
     override var fullName: String = ""
         set(value) {
             val old = field
@@ -154,6 +168,9 @@ open class User @DefaultConstructor constructor() : StoredConfig(), Cloneable, U
         isExemptFrom2fa = modifiedUser.isExemptFrom2fa
         isUse2fa = modifiedUser.isUse2fa
         encryptedTotpSecret = modifiedUser.encryptedTotpSecret
+        ldapDn = modifiedUser.ldapDn
+        ssoIssuer = modifiedUser.ssoIssuer
+        ssoSubject = modifiedUser.ssoSubject
     }
 
     public override fun clone(): User {
@@ -171,7 +188,8 @@ interface UserSpec {
 
 enum class UserType(private val verbose: String) {
     LOCAL("Local"),
-    LDAP("LDAP");
+    LDAP("LDAP"),
+    OIDC("SSO");
 
     override fun toString(): String = verbose
 }

@@ -20,6 +20,9 @@ open class GlobalConfig : StoredConfig() {
     var ldapConfig: LdapConfig = LdapConfig()
         private set
 
+    var ssoConfig: SsoConfig = SsoConfig()
+        private set
+
     var infiniteTransactionDays: Boolean = false
         set(value) {
             val old = field
@@ -102,7 +105,7 @@ open class GlobalConfig : StoredConfig() {
     }
 
     private val authenticationContainers: List<AuthenticationContainer>
-        get() = listOf(smtpConfig, ldapConfig)
+        get() = listOf(smtpConfig, ldapConfig) + ssoConfig.providers
 
     companion object {
         fun getUsedRetentionDays(retentionDays: Int): Int = maxOf(retentionDays, 2)

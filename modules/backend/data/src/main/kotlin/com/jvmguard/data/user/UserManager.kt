@@ -66,4 +66,18 @@ class UserManager(private val configStorage: ConfigStorage) {
 
     @Synchronized
     fun getByLoginName(loginName: String): User? = loginNameToUser[loginName]?.clone()
+
+    @Synchronized
+    fun getBySsoSubject(issuer: String, subject: String): User? =
+        loginNameToUser.values
+            .find { it.userType == UserType.OIDC && it.ssoIssuer == issuer && it.ssoSubject == subject }
+            ?.clone()
+
+    @Synchronized
+    fun findOidcUserByLoginName(loginName: String, issuer: String): User? {
+        val user = loginNameToUser[loginName] ?: return null
+        return if (user.userType == UserType.OIDC &&
+            (user.ssoIssuer.isBlank() || user.ssoIssuer.trim() == issuer.trim())
+        ) user.clone() else null
+    }
 }
