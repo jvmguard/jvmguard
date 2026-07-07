@@ -65,10 +65,10 @@ class PreviousAgentTest : JvmGuardTest() {
         sleep(70 * 1000)
         val heapType =
             serverConnection.idToTelemetryType.values.find { it.telemetryIdentifier == PersistentTelemetryIdentifier("hp", TelemetryType.SUB_ID_USED_HEAP) }!!
-        val devOpsType = serverConnection.idToTelemetryType.values.find { it.name == "test1" }!!
+        val declaredType = serverConnection.idToTelemetryType.values.find { it.name == "test1" }!!
         val mbeanType = serverConnection.idToTelemetryType.values.find { it.name == "mbean tel1 (class)" }!!
 
-        val vmDataHolderGroup = serverConnection.getVmDataHolders(VmFilter.CONNECTED, SparkLineRange.LAST_HOUR, listOf(heapType, devOpsType, mbeanType))
+        val vmDataHolderGroup = serverConnection.getVmDataHolders(VmFilter.CONNECTED, SparkLineRange.LAST_HOUR, listOf(heapType, declaredType, mbeanType))
         val dataMap = vmDataHolderGroup.groupChildren[VmIdentifier(getGroupName(1), VmType.GROUP)]!!.vmDataMap
 
         vms.forEach { vm ->
@@ -85,7 +85,7 @@ class PreviousAgentTest : JvmGuardTest() {
             val vmDataHolder = dataMap[vm]!!
 
             assertTrue(vmDataHolder.getSparkLineData(heapType).scaledCurrent.toBigDecimal() > 0.toBigDecimal())
-            assertEqual(vmDataHolder.getSparkLineData(devOpsType).scaledCurrent, 10.toBigDecimal())
+            assertEqual(vmDataHolder.getSparkLineData(declaredType).scaledCurrent, 10.toBigDecimal())
 
             if (libraryNo == 3 || vm.name == getVmName(1)) {
                 println("CHECKING PATH1")

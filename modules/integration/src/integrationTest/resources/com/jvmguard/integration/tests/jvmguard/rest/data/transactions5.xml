@@ -2,9 +2,9 @@
 <data endTime="2026-06-18T19:25:00.000Z" interval="3600000" vm="" vmType="VM Group">
   <callTree>
     <children>
-      <element name="transaction Щ" time="18047006183" count="110" type="devops">
+      <element name="transaction Щ" time="18047006183" count="110" type="declared">
         <children>
-          <element name="RestTransactionWorkload.transaction2" time="18031575234" count="110" type="devops"/>
+          <element name="RestTransactionWorkload.transaction2" time="18031575234" count="110" type="declared"/>
         </children>
       </element>
     </children>

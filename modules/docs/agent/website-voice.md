@@ -191,7 +191,7 @@ of jvmguard** and must never appear on the site, even obliquely.
 - **Auto-detected Web / EJB / Spring / RMI transactions.**
 
 **In scope, with a nuance you must get right:**
-- **Transactions** are **POJO, DevOps, and custom-annotation** types only. The site may describe
+- **Transactions** are **Matched, Declared, and Mapped** types only. The site may describe
   transactions, the call tree, and hot spots. It must **not** claim jvmguard "automatically detects"
   servlet, EJB, Spring, RMI, or web-service transactions. Transactions are explicitly configured.
 - **Heap dumps** are a trigger action (`HEAP_DUMP`), a capture-on-trigger. Steady-state memory views are
@@ -200,7 +200,7 @@ of jvmguard** and must never appear on the site, even obliquely.
   it as a capture-and-handoff, never as analysis inside jvmguard.
 - **Trigger actions the UI produces:** `RECORD_DATA`, `RECORD_JFR`, `THREAD_DUMP`, `HEAP_DUMP`, `EMAIL`,
   `WEBHOOK`, `LOG`, `INBOX`.
-- **Telemetries** come from VM, MBean, and DevOps sources.
+- **Telemetries** come from VM, MBean, and Declared sources.
 
 Keep every sentence on what jvmguard does. Do not describe a capability it does not have.
 
@@ -308,7 +308,7 @@ Run this before marking any page done. Every box must hold.
 - [ ] No out-of-scope capability appears: dashboard, dashboard alerts, EUEM, any probe, method sampling,
       memory monitoring / memory views, call graph / cross-VM, historical comparisons, threshold-
       violations view, auto-detected web/EJB/Spring/RMI transactions.
-- [ ] Transactions are described as POJO / DevOps / custom-annotation only; heap dumps as a trigger
+- [ ] Transactions are described as Matched / Declared / Mapped only; heap dumps as a trigger
       action only; the JVMTI cross-over as a capture-and-handoff only.
 - [ ] Trigger actions referenced are only `RECORD_DATA`, `RECORD_JFR`, `THREAD_DUMP`, `HEAP_DUMP`,
       `EMAIL`, `WEBHOOK`, `LOG`, `INBOX`.

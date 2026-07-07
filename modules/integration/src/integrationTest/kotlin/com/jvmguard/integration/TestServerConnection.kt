@@ -56,7 +56,7 @@ class TestServerConnection(private val delegate: ServerConnection) {
     val idToTelemetryType: Map<String, TelemetryType> get() = delegate.idToTelemetryType
     val namedVms: Collection<VM> get() = delegate.namedVms
     val connectedVms: Collection<VM> get() = delegate.connectedVms
-    val hiddenDevOpsTelemetryNodes: Collection<String> get() = delegate.hiddenDevOpsTelemetryNodes
+    val hiddenDeclaredTelemetryNodes: Collection<String> get() = delegate.hiddenDeclaredTelemetryNodes
     val caps: EnumSet<CapType> get() = delegate.caps
     val isUseSsl: Boolean get() = delegate.isUseSsl
     val customTelemetryNodes: Collection<CustomTelemetryNodeIdentifier>
@@ -210,8 +210,8 @@ class TestServerConnection(private val delegate: ServerConnection) {
     fun getAgentArchiveFile(archiveFileType: ArchiveFileType): ArchiveFile =
         delegate.getAgentArchiveFile(archiveFileType)
 
-    fun setDevOpsTelemetryNodeVisibility(nodeName: String, visible: Boolean) =
-        delegate.setDevOpsTelemetryNodeVisibilities(mapOf(nodeName to visible))
+    fun setDeclaredTelemetryNodeVisibility(nodeName: String, visible: Boolean) =
+        delegate.setDeclaredTelemetryNodeVisibilities(mapOf(nodeName to visible))
 
     fun getCustomTelemetryData(
         vm: VM?,

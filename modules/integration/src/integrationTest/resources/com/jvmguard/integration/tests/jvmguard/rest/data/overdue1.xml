@@ -2,12 +2,12 @@
 <data endTime="2026-06-18T19:27:00.000Z" interval="3600000" vm="" vmType="VM Group">
   <overdue>
     <children>
-      <element name="RestTransactionWorkload.overdueInner" time="0" count="5" type="devops">
+      <element name="RestTransactionWorkload.overdueInner" time="0" count="5" type="declared">
         <children>
-          <element name="RestTransactionWorkload.overdue" time="0" count="5" type="devops"/>
+          <element name="RestTransactionWorkload.overdue" time="0" count="5" type="declared"/>
         </children>
       </element>
-      <element name="RestTransactionWorkload.overdue" time="0" count="5" type="devops"/>
+      <element name="RestTransactionWorkload.overdue" time="0" count="5" type="declared"/>
     </children>
   </overdue>
 </data>

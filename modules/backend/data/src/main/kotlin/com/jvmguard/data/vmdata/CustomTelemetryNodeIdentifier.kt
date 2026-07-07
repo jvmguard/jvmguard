@@ -42,6 +42,6 @@ class CustomTelemetryNodeIdentifier(
 
     enum class Type {
         MBEAN,
-        DEVOPS,
+        DECLARED,
     }
 }

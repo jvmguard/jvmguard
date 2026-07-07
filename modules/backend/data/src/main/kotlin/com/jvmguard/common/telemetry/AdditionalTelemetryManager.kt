@@ -117,13 +117,13 @@ class AdditionalTelemetryManager(private val jdbcClient: JdbcClient) {
         return false
     }
 
-    fun setDevOpsTelemetryHidden(nodeName: String?, hidden: Boolean): Boolean {
+    fun setDeclaredTelemetryHidden(nodeName: String?, hidden: Boolean): Boolean {
         if (nodeName != null) {
             val changedIds = ArrayList<Int>()
             synchronized(this) {
                 val nodeNameWithLineStart = "$nodeName\t"
                 for (additionalTelemetry in assignedStringIdToAdditionalTelemetry.values) {
-                    if (additionalTelemetry.type == AgentConstants.TELEMETRY_TYPE_DEVOPS &&
+                    if (additionalTelemetry.type == AgentConstants.TELEMETRY_TYPE_DECLARED &&
                         (additionalTelemetry.name == nodeName || additionalTelemetry.name?.startsWith(nodeNameWithLineStart) == true)
                     ) {
                         changedIds.add(additionalTelemetry.assignedId)

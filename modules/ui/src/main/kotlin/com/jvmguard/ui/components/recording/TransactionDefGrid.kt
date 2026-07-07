@@ -40,6 +40,7 @@ class TransactionDefGrid(
         isPadding = false
         isSpacing = false
         setWidthFull()
+        add(Span(helpText(type)).apply { addClassName("jvmguard-transaction-type-info") })
         add(tree)
         refresh()
     }
@@ -125,17 +126,17 @@ class TransactionDefGrid(
 
     private fun openDefDialog(def: TransactionDef, isNew: Boolean, onSave: (TransactionDef) -> Unit) {
         when (type) {
-            TransactionType.POJO -> PojoTransactionDefDialog(def as PojoTransactionDef, isNew) { onSave(it) }.open()
-            TransactionType.DEVOPS -> DevOpsTransactionDefDialog(def as DevOpsAnnotatedTransactionDef, isNew) { onSave(it) }.open()
-            TransactionType.ANNOTATED -> CustomTransactionDefDialog(def as CustomAnnotatedTransactionDef, isNew) { onSave(it) }.open()
+            TransactionType.MATCHED -> MatchedTransactionDefDialog(def as MatchedTransactionDef, isNew) { onSave(it) }.open()
+            TransactionType.DECLARED -> DeclaredTransactionDefDialog(def as DeclaredTransactionDef, isNew) { onSave(it) }.open()
+            TransactionType.MAPPED -> MappedTransactionDefDialog(def as MappedTransactionDef, isNew) { onSave(it) }.open()
             else -> {}
         }
     }
 
     private fun newDef(): TransactionDef = when (type) {
-        TransactionType.POJO -> PojoTransactionDef()
-        TransactionType.DEVOPS -> DevOpsAnnotatedTransactionDef()
-        TransactionType.ANNOTATED -> CustomAnnotatedTransactionDef()
+        TransactionType.MATCHED -> MatchedTransactionDef()
+        TransactionType.DECLARED -> DeclaredTransactionDef()
+        TransactionType.MAPPED -> MappedTransactionDef()
         else -> throw IllegalStateException("Unsupported transaction type $type")
     }
 
@@ -175,6 +176,13 @@ class TransactionDefGrid(
     private fun changed() {
         markChanged()
         refresh()
+    }
+
+    private fun helpText(type: TransactionType): String = when (type) {
+        TransactionType.MATCHED -> "Match individual methods or entire classes by name, configured directly in the UI without touching your code."
+        TransactionType.DECLARED -> "Declare transactions in your source code with the @MethodTransaction and @ClassTransaction annotations."
+        TransactionType.MAPPED -> "Map any existing annotation such as @Service or @Transactional to a transaction without modifying your code."
+        else -> ""
     }
 
     sealed class TxNode {

@@ -45,9 +45,9 @@ export default defineConfig({
       label: 'Advanced topics',
       collapsed: false,
       items: [
-        { label: 'Annotation transactions', slug: 'advanced/annotated' },
-        { label: 'POJO transactions', slug: 'advanced/pojo' },
-        { label: 'DevOps transactions', slug: 'advanced/devops' },
+        { label: 'Mapped transactions', slug: 'advanced/mapped' },
+        { label: 'Matched transactions', slug: 'advanced/matched' },
+        { label: 'Declared transactions', slug: 'advanced/declared' },
         { label: 'Customizing net I/O methods', slug: 'advanced/netio' },
       ],
     },

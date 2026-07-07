@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Create a Devops telemetry from the numeric return value of the annotated static method.
+ * Create a Declared telemetry from the numeric return value of the annotated static method.
  * <p>
  * Only public static parameterless methods can be used for creating custom telemetries, annotating instance methods or non-public
  * static methods will not have any effect.

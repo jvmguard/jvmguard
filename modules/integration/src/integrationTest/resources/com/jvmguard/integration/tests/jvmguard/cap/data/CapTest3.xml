@@ -2,35 +2,35 @@
 <data timeUnit="milliseconds">
   <callTree>
     <children>
-      <element name="transaction 35" count="1" type="devops">
+      <element name="transaction 35" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="&lt;capped description>" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 36" count="1" type="devops">
+      <element name="transaction 36" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="&lt;capped description>" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 37" count="1" type="devops">
+      <element name="transaction 37" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="&lt;capped description>" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 38" count="1" type="devops">
+      <element name="transaction 38" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="&lt;capped description>" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 39" count="1" type="devops">
+      <element name="transaction 39" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="&lt;capped description>" count="1" server="uri"/>

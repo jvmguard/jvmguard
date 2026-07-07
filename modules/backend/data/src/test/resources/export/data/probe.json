@@ -19,31 +19,31 @@
         "name" : "sub",
         "time" : 1000000,
         "count" : 10,
-        "type" : "devops",
+        "type" : "declared",
         "policy" : "very slow",
         "children" : [ {
           "name" : "test",
           "time" : 1000000,
           "count" : 10,
-          "type" : "pojo"
+          "type" : "matched"
         } ]
       }, {
         "name" : "sub",
         "time" : 1000000,
         "count" : 10,
-        "type" : "devops",
+        "type" : "declared",
         "policy" : "slow",
         "children" : [ {
           "name" : "test",
           "time" : 1000000,
           "count" : 10,
-          "type" : "pojo"
+          "type" : "matched"
         } ]
       }, {
         "name" : "test 123",
         "time" : 1000000,
         "count" : 10,
-        "type" : "devops",
+        "type" : "declared",
         "policy" : "error",
         "error" : "Error message"
       } ]
@@ -58,19 +58,19 @@
         "name" : "sub",
         "time" : 1000000,
         "count" : 10,
-        "type" : "devops",
+        "type" : "declared",
         "policy" : "very slow",
         "children" : [ {
           "name" : "test",
           "time" : 1000000,
           "count" : 10,
-          "type" : "pojo"
+          "type" : "matched"
         } ]
       }, {
         "name" : "test 123",
         "time" : 1000000,
         "count" : 10,
-        "type" : "devops",
+        "type" : "declared",
         "policy" : "error",
         "error" : "Error message"
       } ]

@@ -42,14 +42,15 @@ class RecordingTransactionsView : AbstractRecordingSettingsView() {
     override fun onSelectionChanged(selection: VmIdentifier) {
         val settings = transactionSettings(selection) ?: return
         retransformation.value = settings.retransformationType
-        val pojoGrid = TransactionDefGrid(TransactionType.POJO, true, { settings.transactionDefs }, ::markChanged)
-        val devOpsGrid = TransactionDefGrid(TransactionType.DEVOPS, false, { settings.transactionDefs }, ::markChanged)
-        val customGrid = TransactionDefGrid(TransactionType.ANNOTATED, true, { settings.transactionDefs }, ::markChanged)
+        val declaredGrid = TransactionDefGrid(TransactionType.DECLARED, false, { settings.transactionDefs }, ::markChanged)
+        val matchedGrid = TransactionDefGrid(TransactionType.MATCHED, true, { settings.transactionDefs }, ::markChanged)
+        val mappedGrid = TransactionDefGrid(TransactionType.MAPPED, true, { settings.transactionDefs }, ::markChanged)
         val tabSheet = TabSheet().apply {
             setWidthFull()
-            add("POJO", pojoGrid)
-            add("DevOps", devOpsGrid)
-            add("Custom", customGrid)
+            addClassName("jvmguard-recording-tabsheet")
+            add("Declared", declaredGrid)
+            add("Matched", matchedGrid)
+            add("Mapped", mappedGrid)
         }
         content.removeAll()
         content.add(tabSheet, Span("Higher rows are matched first.").apply { addClassName("jvmguard-field-hint") }, retransformation)
@@ -57,24 +58,24 @@ class RecordingTransactionsView : AbstractRecordingSettingsView() {
         refreshToolbar = {
             val add = Button("Add transaction", VaadinIcon.PLUS.create()) {
                 when (tabSheet.selectedIndex) {
-                    1 -> devOpsGrid
-                    2 -> customGrid
-                    else -> pojoGrid
+                    0 -> declaredGrid
+                    2 -> mappedGrid
+                    else -> matchedGrid
                 }.addDef()
             }.apply {
                 addThemeVariants(ButtonVariant.PRIMARY)
                 testId = "transaction-add"
             }
-            setToolbarActions(add, *setActionButtons(setSpec(settings, pojoGrid, devOpsGrid, customGrid)).toTypedArray())
+            setToolbarActions(add, *setActionButtons(setSpec(settings, declaredGrid, matchedGrid, mappedGrid)).toTypedArray())
         }
         refreshToolbar()
     }
 
     private fun setSpec(
         settings: TransactionSettings,
-        pojoGrid: TransactionDefGrid,
-        devOpsGrid: TransactionDefGrid,
-        customGrid: TransactionDefGrid,
+        declaredGrid: TransactionDefGrid,
+        matchedGrid: TransactionDefGrid,
+        mappedGrid: TransactionDefGrid,
     ): SetSpec<TransactionDef, TransactionDefSet> =
         SetSpec(
             setClass = TransactionDefSet::class.java,
@@ -90,9 +91,9 @@ class RecordingTransactionsView : AbstractRecordingSettingsView() {
             appendItems = { items ->
                 settings.transactionDefs.addAll(items)
                 markChanged()
-                pojoGrid.refresh()
-                devOpsGrid.refresh()
-                customGrid.refresh()
+                matchedGrid.refresh()
+                declaredGrid.refresh()
+                mappedGrid.refresh()
             },
         )
 

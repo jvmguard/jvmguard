@@ -24,7 +24,7 @@ object TransactionTreeReader {
         parentNode.all("children").firstOrNull()?.children?.forEach { childNode ->
             val transactionTypeString = childNode.attr("type")
             val type = if (transactionTypeString != null) TransactionType.valueOf(transactionTypeString.uppercase(Locale.getDefault())) else null
-            val childTree = parentTree.getOrCreateChild(TransactionTree().init(0, childNode.attr("name"), type ?: TransactionType.POJO, getPolicy(childNode)))
+            val childTree = parentTree.getOrCreateChild(TransactionTree().init(0, childNode.attr("name"), type ?: TransactionType.MATCHED, getPolicy(childNode)))
             childTree.addCount(requireNotNull(childNode.attr("count")).toLong())
             val time = childNode.attr("time")?.toLong() ?: 0
             childTree.addTime(if (time == -1L) -1L else timeUnit.toNanos(time))

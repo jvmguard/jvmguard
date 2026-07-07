@@ -2,12 +2,12 @@
 <data endTime="2026-06-18T19:25:00.000Z" interval="3600000" vm="pool/pool/127.0.0.1:46508 [153d2bef]" vmType="Pooled VM">
   <hotSpots>
     <children>
-      <element name="RestTransactionWorkload.transaction2" time="3605576127" count="22" type="devops">
+      <element name="RestTransactionWorkload.transaction2" time="3605576127" count="22" type="declared">
         <children>
-          <element name="transaction Щ" time="3605576127" count="22" type="devops"/>
+          <element name="transaction Щ" time="3605576127" count="22" type="declared"/>
         </children>
       </element>
-      <element name="transaction Щ" time="3383916" count="22" type="devops"/>
+      <element name="transaction Щ" time="3383916" count="22" type="declared"/>
     </children>
   </hotSpots>
 </data>

@@ -237,8 +237,8 @@ class AuthenticateSsoTest {
         private fun dummyTelemetryProvider(): TelemetryProvider = object : TelemetryProvider {
             override val idToTelemetryType: Map<String, TelemetryType> = emptyMap()
             override val customTelemetryInfo: CustomTelemetryInfo = CustomTelemetryInfo(emptyList())
-            override val hiddenDevOpsTelemetryNodes: Collection<String> = emptyList()
-            override fun setDevOpsTelemetryNodeVisibility(nodeName: String, visible: Boolean): Boolean = false
+            override val hiddenDeclaredTelemetryNodes: Collection<String> = emptyList()
+            override fun setDeclaredTelemetryNodeVisibility(nodeName: String, visible: Boolean): Boolean = false
             override fun getTelemetryData(vm: VM?, mainId: String, interval: TelemetryInterval, endTime: Long, plainHeap: Boolean): TelemetryData = throw UnsupportedOperationException()
             override fun getCustomTelemetryData(vm: VM?, nodeIdentifier: CustomTelemetryNodeIdentifier, interval: TelemetryInterval, endTime: Long): TelemetryData = throw UnsupportedOperationException()
         }

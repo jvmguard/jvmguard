@@ -1,7 +1,7 @@
 package com.jvmguard.integration.tests.jvmguard.transactions
 
 import com.jvmguard.agent.config.VmType
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.agent.config.transactions.DurationType
 import com.jvmguard.integration.JvmGuardTest
 import com.jvmguard.integration.Controller
@@ -20,7 +20,7 @@ class NestedOverdueTest : JvmGuardTest() {
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
         rootConfig.transactionSettings.transactionDefs.clear()
 
-        rootConfig.transactionSettings.transactionDefs.add(DevOpsAnnotatedTransactionDef().apply {
+        rootConfig.transactionSettings.transactionDefs.add(DeclaredTransactionDef().apply {
             initDefault()
             group.usedValue = "policy1"
             policy.slowValue = 0
@@ -28,7 +28,7 @@ class NestedOverdueTest : JvmGuardTest() {
             policy.overdueValue = 0
         })
 
-        rootConfig.transactionSettings.transactionDefs.add(DevOpsAnnotatedTransactionDef().apply {
+        rootConfig.transactionSettings.transactionDefs.add(DeclaredTransactionDef().apply {
             initDefault()
             group.usedValue = "policy2"
             policy.slowDurationType = DurationType.MILLIS

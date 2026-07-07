@@ -179,9 +179,9 @@ class PlainTelemetryConverter(
         for ((key, value) in plainData.subIdToData) {
             val additionalTelemetry = additionalTelemetryManager.getVisibleTelemetry(key)
             if (additionalTelemetry != null && (nodeIdentifier == null || nodeIdentifier.name == additionalTelemetry.nodeName)) {
-                val devops = additionalTelemetry.type == AgentConstants.TELEMETRY_TYPE_DEVOPS && (nodeIdentifier == null || nodeIdentifier.type == Type.DEVOPS)
+                val declared = additionalTelemetry.type == AgentConstants.TELEMETRY_TYPE_DECLARED && (nodeIdentifier == null || nodeIdentifier.type == Type.DECLARED)
                 val mbean = additionalTelemetry.type == AgentConstants.TELEMETRY_TYPE_MBEAN && (nodeIdentifier == null || nodeIdentifier.type == Type.MBEAN)
-                if (devops || mbean) {
+                if (declared || mbean) {
                     var node = rootNode.children.firstOrNull { it.description == additionalTelemetry.nodeName }
                     if (node == null) {
                         if (mbean) {

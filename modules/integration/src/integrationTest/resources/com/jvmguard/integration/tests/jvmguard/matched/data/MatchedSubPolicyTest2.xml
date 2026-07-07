@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="Policy1.m1" time="503" count="10" type="matched"/>
+      <element name="Policy1.m1" time="200" count="1" type="matched" policy="slow"/>
+      <element name="Policy1.m1" time="2901" count="2" type="matched" policy="very slow"/>
+      <element name="Policy1.m1" time="200" count="1" type="matched" policy="error" error="java.lang.RuntimeException"/>
+      <element name="Policy1.m2" time="503" count="10" type="matched"/>
+      <element name="Policy1.m2" time="601" count="2" type="matched" policy="slow"/>
+      <element name="Policy1.m2" time="2500" count="1" type="matched" policy="very slow"/>
+      <element name="Policy1.m2" time="201" count="1" type="matched" policy="error" error="java.lang.RuntimeException"/>
+      <element name="Policy1Sub2_4.m1" time="3805" count="14" type="matched"/>
+      <element name="Policy1Sub2_4.m2" time="504" count="10" type="matched"/>
+      <element name="Policy1Sub2_4.m2" time="600" count="2" type="matched" policy="slow"/>
+      <element name="Policy1Sub2_4.m2" time="2500" count="1" type="matched" policy="very slow"/>
+      <element name="Policy1Sub2_4.m2" time="201" count="1" type="matched" policy="error" error="java.lang.RuntimeException"/>
+    </children>
+  </callTree>
+</data>

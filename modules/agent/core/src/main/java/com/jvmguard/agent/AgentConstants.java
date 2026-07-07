@@ -14,7 +14,7 @@ public final class AgentConstants {
     public static final int TELEMETRY_TYPE_MEMORY_NON_HEAP_COMMITTED = 5;
     public static final int TELEMETRY_TYPE_CPU_USAGE = 7;
     public static final int TELEMETRY_TYPE_GC_ACTIVITY = 8;
-    public static final int TELEMETRY_TYPE_DEVOPS = 10;
+    public static final int TELEMETRY_TYPE_DECLARED = 10;
     public static final int TELEMETRY_TYPE_MBEAN = 11;
     public static final int TELEMETRY_TYPE_SYSTEM_LOAD = 13;
 

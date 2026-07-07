@@ -16,13 +16,13 @@
             "name": "RestTransactionWorkload.transaction2",
             "time": 17974326000,
             "count": 110,
-            "type": "devops",
+            "type": "declared",
             "children": [
               {
                 "name": "transaction Щ",
                 "time": 14977393000,
                 "count": 100,
-                "type": "devops",
+                "type": "declared",
                 "children": [
                   {
                     "name": "/request1",
@@ -36,7 +36,7 @@
                 "name": "transaction Щ",
                 "time": 2996933000,
                 "count": 10,
-                "type": "devops",
+                "type": "declared",
                 "policy": "slow",
                 "children": [
                   {

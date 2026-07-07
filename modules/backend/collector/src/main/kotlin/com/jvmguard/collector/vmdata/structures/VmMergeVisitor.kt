@@ -35,6 +35,6 @@ class VmMergeVisitor : Visitor<ProcessedAgentTree> {
     }
 
     private fun initLookup(tree: ProcessedAgentTree): TransactionTree {
-        return lookupTree.init(tree.nameId, tree.name, tree.transactionType ?: TransactionType.POJO, tree.policyTypeString)
+        return lookupTree.init(tree.nameId, tree.name, tree.transactionType ?: TransactionType.MATCHED, tree.policyTypeString)
     }
 }

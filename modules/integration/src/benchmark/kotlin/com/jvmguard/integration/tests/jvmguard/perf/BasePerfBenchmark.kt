@@ -2,8 +2,8 @@ package com.jvmguard.integration.tests.jvmguard.perf
 
 import com.jvmguard.agent.AgentConstants
 import com.jvmguard.agent.config.base.LogCategory
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
-import com.jvmguard.agent.config.transactions.PojoTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
+import com.jvmguard.agent.config.transactions.MatchedTransactionDef
 import com.jvmguard.data.config.GroupConfig
 import com.jvmguard.data.config.thresholds.Threshold
 import com.jvmguard.data.config.triggers.PolicyTrigger
@@ -38,20 +38,20 @@ class BasePerfBenchmark : JvmGuardTest() {
         rootConfig.transactionSettings.transactionDefs.clear()
         rootConfig.triggerSettings.triggers.clear()
 
-        val pojoDev = PojoTransactionDef()
-        pojoDev.initDefault()
-        pojoDev.interceptionTarget = PojoTransactionDef.InterceptionTarget.METHOD
-        pojoDev.declaringClassName = BasePerfWorkload::class.java.name
-        pojoDev.methodName = "pojoExecute"
-        pojoDev.methodSignature = "()V"
-        rootConfig.transactionSettings.transactionDefs.add(pojoDev)
+        val matchedDef = MatchedTransactionDef()
+        matchedDef.initDefault()
+        matchedDef.interceptionTarget = MatchedTransactionDef.InterceptionTarget.METHOD
+        matchedDef.declaringClassName = BasePerfWorkload::class.java.name
+        matchedDef.methodName = "pojoExecute"
+        matchedDef.methodSignature = "()V"
+        rootConfig.transactionSettings.transactionDefs.add(matchedDef)
 
-        val devopsDef = DevOpsAnnotatedTransactionDef()
-        devopsDef.initDefault()
-        rootConfig.transactionSettings.transactionDefs.add(devopsDef)
+        val declaredDef = DeclaredTransactionDef()
+        declaredDef.initDefault()
+        rootConfig.transactionSettings.transactionDefs.add(declaredDef)
 
         val threshold = Threshold()
-        threshold.telemetryIdentifier = PersistentTelemetryIdentifier("cu", "", AgentConstants.TELEMETRY_TYPE_DEVOPS, "test1")
+        threshold.telemetryIdentifier = PersistentTelemetryIdentifier("cu", "", AgentConstants.TELEMETRY_TYPE_DECLARED, "test1")
         threshold.lowerBound = 10
         rootConfig.thresholdSettings.thresholds.add(threshold)
 

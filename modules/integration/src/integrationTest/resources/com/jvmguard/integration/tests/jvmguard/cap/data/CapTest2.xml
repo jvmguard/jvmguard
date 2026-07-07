@@ -2,7 +2,7 @@
 <data timeUnit="milliseconds">
   <callTree>
     <children>
-      <element name="&lt;capped description>" count="5" type="devops">
+      <element name="&lt;capped description>" count="5" type="declared">
         <payload>
           <jdbc>
             <element name="&lt;capped description>" count="5" server="uri"/>

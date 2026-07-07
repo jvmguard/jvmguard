@@ -69,18 +69,18 @@ Often, a small set of methods maps to the operations you want to measure, either
 cannot modify. jvmguard offers three transaction types for these cases. Their configuration is more elaborate, so each of
 them has its own chapter in the advanced topics.
 
-For an **annotated invocation** transaction, you specify a particular annotation class name. In the [further
-configuration](/docs/advanced/annotated) you can decide whether the annotation should apply to classes or methods and
+For a **Mapped invocation** transaction, you specify a particular annotation class name. In the [further
+configuration](/docs/advanced/mapped) you can decide whether the annotation should apply to classes or methods and
 how inherited classes should be handled.
 
-**DevOps** transactions are defined in your code with annotations supplied by jvmguard. While the naming is completely
+**Declared** transactions are defined in your code with annotations supplied by jvmguard. While the naming is completely
 specified with those annotations, the policy must be configured in the jvmguard UI. This is the most maintainable way to
-define complex transactions. See the [advanced topic about DevOps transactions](/docs/advanced/devops) on how to add
+define complex transactions. See the [advanced topic about Declared transactions](/docs/advanced/declared) on how to add
 them to your project.
 
-If you cannot modify the code that should be monitored, **POJO transactions** allow you to specify all the same
-interceptions as DevOps transactions directly in the jvmguard UI. See the detailed explanation of [POJO
-transactions](/docs/advanced/pojo) for more information.
+If you cannot modify the code that should be monitored, **Matched transactions** allow you to specify all the same
+interceptions as Declared transactions directly in the jvmguard UI. See the detailed explanation of [Matched
+transactions](/docs/advanced/matched) for more information.
 
 ## Call tree and hot spots
 

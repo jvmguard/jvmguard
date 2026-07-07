@@ -1,6 +1,6 @@
 package com.jvmguard.integration.tests.jvmguard.modules.logging
 
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.integration.*
 import com.jvmguard.integration.util.TimeComparator
 import com.jvmguard.integration.util.TransactionTreeComparator
@@ -19,7 +19,7 @@ class LoggingTest : JvmGuardTest() {
         checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
-            rootConfig.transactionSettings.transactionDefs.filterIsInstance<DevOpsAnnotatedTransactionDef>().first().apply {
+            rootConfig.transactionSettings.transactionDefs.filterIsInstance<DeclaredTransactionDef>().first().apply {
                 policy.isLoggedWarningAsError = true
                 policy.isLoggedErrorAsError = false
             }

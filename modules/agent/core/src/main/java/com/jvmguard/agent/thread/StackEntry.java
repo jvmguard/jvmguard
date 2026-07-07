@@ -1,6 +1,6 @@
 package com.jvmguard.agent.thread;
 
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef;
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef;
 import com.jvmguard.agent.config.transactions.TransactionDef;
 import com.jvmguard.agent.config.transactions.TransactionType;
 import com.jvmguard.agent.policy.PolicyHandler;
@@ -12,15 +12,15 @@ import java.lang.annotation.Annotation;
 import java.util.IdentityHashMap;
 
 public class StackEntry {
-    private static final int DEVOPS_INHIBITION_ID_NAME = 0;
-    private static final int DEVOPS_INHIBITION_ID_GROUP = -1;
-    private static final int DEVOPS_INHIBITION_ID_TYPE = -2;
-    private static final int DEVOPS_INHIBITION_ID_ALL = -3;
+    private static final int DECLARED_INHIBITION_ID_NAME = 0;
+    private static final int DECLARED_INHIBITION_ID_GROUP = -1;
+    private static final int DECLARED_INHIBITION_ID_TYPE = -2;
+    private static final int DECLARED_INHIBITION_ID_ALL = -3;
 
-    @GuardedBy("devOpsAnnotationIds")
-    private static final IdentityHashMap<Annotation, Integer> devOpsAnnotationIds = new IdentityHashMap<>();
-    @GuardedBy("devOpsAnnotationIds")
-    private static int nextDevOpsAnnotationId = 1;
+    @GuardedBy("declaredAnnotationIds")
+    private static final IdentityHashMap<Annotation, Integer> declaredAnnotationIds = new IdentityHashMap<>();
+    @GuardedBy("declaredAnnotationIds")
+    private static int nextDeclaredAnnotationId = 1;
 
 
     long startTime;
@@ -34,7 +34,7 @@ public class StackEntry {
 
     private String groupName;
     private int inhibitionId;
-    private boolean devops;
+    private boolean declared;
 
     int entryCount;
     boolean overdue;
@@ -54,7 +54,7 @@ public class StackEntry {
         this.inhibitionId = inhibitionId;
         this.transactionDetail = transactionDetail;
         this.countInvocation = countInvocation;
-        devops = namingTransaction != null && namingTransaction.getTransactionType() == TransactionType.DEVOPS;
+        declared = namingTransaction != null && namingTransaction.getTransactionType() == TransactionType.DECLARED;
 
         entryCount = 1;
         overdue = false;
@@ -71,8 +71,8 @@ public class StackEntry {
         return --entryCount <= 0;
     }
 
-    public boolean shouldCreateNewTree(String transactionName, TransactionDef newNamingTransaction, String devOpsGroupName, int devOpsInhibitionId) {
-        if (isPreventSpecialReentry(newNamingTransaction, devOpsGroupName, devOpsInhibitionId)) {
+    public boolean shouldCreateNewTree(String transactionName, TransactionDef newNamingTransaction, String declaredGroupName, int declaredInhibitionId) {
+        if (isPreventSpecialReentry(newNamingTransaction, declaredGroupName, declaredInhibitionId)) {
             entryCount++;
             return false;
         }
@@ -84,19 +84,19 @@ public class StackEntry {
         }
     }
 
-    protected boolean isPreventSpecialReentry(TransactionDef newNamingTransaction, String newDevOpsGroupName, int newDevOpsInhibitionId) {
-        if (devops) {
+    protected boolean isPreventSpecialReentry(TransactionDef newNamingTransaction, String newDeclaredGroupName, int newDeclaredInhibitionId) {
+        if (declared) {
             if (inhibitionId > 0) {
-                return newDevOpsInhibitionId == inhibitionId;
+                return newDeclaredInhibitionId == inhibitionId;
             } else {
                 switch (inhibitionId) {
-                    case DEVOPS_INHIBITION_ID_GROUP:
+                    case DECLARED_INHIBITION_ID_GROUP:
                         // group is interned
                         //noinspection StringEquality
-                        return newNamingTransaction != null && groupName != null && groupName == getActualGroupName(newNamingTransaction, newDevOpsGroupName);
-                    case DEVOPS_INHIBITION_ID_TYPE:
-                        return newNamingTransaction != null && TransactionType.DEVOPS == newNamingTransaction.getTransactionType();
-                    case DEVOPS_INHIBITION_ID_ALL:
+                        return newNamingTransaction != null && groupName != null && groupName == getActualGroupName(newNamingTransaction, newDeclaredGroupName);
+                    case DECLARED_INHIBITION_ID_TYPE:
+                        return newNamingTransaction != null && TransactionType.DECLARED == newNamingTransaction.getTransactionType();
+                    case DECLARED_INHIBITION_ID_ALL:
                         return true;
                 }
             }
@@ -107,7 +107,7 @@ public class StackEntry {
                 case GROUP:
                     // group is interned
                     //noinspection StringEquality
-                    return newNamingTransaction != null && namingTransaction.getUsedGroup() == getActualGroupName(newNamingTransaction, newDevOpsGroupName);
+                    return newNamingTransaction != null && namingTransaction.getUsedGroup() == getActualGroupName(newNamingTransaction, newDeclaredGroupName);
                 case TYPE:
                     return newNamingTransaction != null && namingTransaction.getTransactionType() == newNamingTransaction.getTransactionType();
                 case ALL:
@@ -117,8 +117,8 @@ public class StackEntry {
         return false;
     }
 
-    protected String getActualGroupName(TransactionDef newNamingTransaction, String newDevOpsGroupName) {
-        return newNamingTransaction instanceof DevOpsAnnotatedTransactionDef ? newDevOpsGroupName : newNamingTransaction.getUsedGroup();
+    protected String getActualGroupName(TransactionDef newNamingTransaction, String newDeclaredGroupName) {
+        return newNamingTransaction instanceof DeclaredTransactionDef ? newDeclaredGroupName : newNamingTransaction.getUsedGroup();
     }
 
     public String getErrorMessage() {
@@ -155,25 +155,25 @@ public class StackEntry {
             '}';
     }
 
-    public static Integer getDevOpsInhibitionId(ReentryInhibition reentryInhibition, Annotation annotation) {
+    public static Integer getDeclaredInhibitionId(ReentryInhibition reentryInhibition, Annotation annotation) {
         switch (reentryInhibition) {
             case ANNOTATION:
-                synchronized (devOpsAnnotationIds) {
-                    Integer ret = devOpsAnnotationIds.get(annotation);
+                synchronized (declaredAnnotationIds) {
+                    Integer ret = declaredAnnotationIds.get(annotation);
                     if (ret == null) {
-                        ret = nextDevOpsAnnotationId++;
-                        devOpsAnnotationIds.put(annotation, ret);
+                        ret = nextDeclaredAnnotationId++;
+                        declaredAnnotationIds.put(annotation, ret);
                     }
                     return ret;
                 }
             case GROUP:
-                return DEVOPS_INHIBITION_ID_GROUP;
-            case DEV_OPS:
-                return DEVOPS_INHIBITION_ID_TYPE;
+                return DECLARED_INHIBITION_ID_GROUP;
+            case DECLARED:
+                return DECLARED_INHIBITION_ID_TYPE;
             case ALL:
-                return DEVOPS_INHIBITION_ID_ALL;
+                return DECLARED_INHIBITION_ID_ALL;
         }
-        return DEVOPS_INHIBITION_ID_NAME;
+        return DECLARED_INHIBITION_ID_NAME;
     }
 
 

@@ -2,7 +2,7 @@ package com.jvmguard.integration.tests.jvmguard.trigger.policy
 
 import com.jvmguard.agent.config.base.LogCategory
 import com.jvmguard.agent.config.transactions.ComparisonType
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.agent.config.transactions.DurationType
 import com.jvmguard.integration.JvmGuardTest
 import com.jvmguard.integration.Controller
@@ -22,7 +22,7 @@ class FindLastPolicyVmTest : JvmGuardTest() {
     override fun getVmCount(vmConfig: VMConfig, runNo: Int) = 10
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
-        rootConfig.transactionSettings.transactionDefs.first { it is DevOpsAnnotatedTransactionDef }.policy.apply {
+        rootConfig.transactionSettings.transactionDefs.first { it is DeclaredTransactionDef }.policy.apply {
             slowDurationType = DurationType.MILLIS
             slowValue = 350
             verySlowDurationType = DurationType.MILLIS

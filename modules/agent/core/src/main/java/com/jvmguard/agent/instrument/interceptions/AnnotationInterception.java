@@ -3,7 +3,7 @@ package com.jvmguard.agent.instrument.interceptions;
 import com.jvmguard.agent.instrument.model.InterceptionMethod;
 import com.jvmguard.agent.callee.Handler;
 import com.jvmguard.agent.instrument.transaction.TransactionDefinition;
-import com.jvmguard.agent.instrument.transaction.annotation.CustomAnnotationDefinition;
+import com.jvmguard.agent.instrument.transaction.annotation.MappedAnnotationDefinition;
 
 import java.util.Set;
 
@@ -23,7 +23,7 @@ public class AnnotationInterception extends TransactionInterception {
 
     @Override
     public String getUsedClassName(String instrumentedClassName) {
-        boolean declaringClassName = getDefinition() instanceof CustomAnnotationDefinition ? ((CustomAnnotationDefinition)getDefinition()).isUseDeclaringClassName() : false;
+        boolean declaringClassName = getDefinition() instanceof MappedAnnotationDefinition ? ((MappedAnnotationDefinition)getDefinition()).isUseDeclaringClassName() : false;
         return declaringClassName ? getDeclaringClassName() : instrumentedClassName;
     }
 }

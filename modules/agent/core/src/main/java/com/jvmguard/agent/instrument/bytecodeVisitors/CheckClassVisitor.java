@@ -2,16 +2,16 @@ package com.jvmguard.agent.instrument.bytecodeVisitors;
 
 import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.callee.Handler;
-import com.jvmguard.agent.callee.PojoHandler;
+import com.jvmguard.agent.callee.MatchedHandler;
 import com.jvmguard.agent.instrument.Instrumenter;
 import com.jvmguard.agent.instrument.InterceptionClassHierarchyVisitor;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo.PartiallyDefinedInfo;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo.TriState;
-import com.jvmguard.agent.instrument.classInfo.DevOpsAnnotationInfo;
-import com.jvmguard.agent.instrument.classInfo.DevOpsAnnotations;
+import com.jvmguard.agent.instrument.classInfo.DeclaredAnnotationInfo;
+import com.jvmguard.agent.instrument.classInfo.DeclaredAnnotations;
 import com.jvmguard.agent.instrument.interceptions.BaseInterception;
-import com.jvmguard.agent.instrument.interceptions.DevOpsConcreteMethodInterception;
+import com.jvmguard.agent.instrument.interceptions.DeclaredConcreteMethodInterception;
 import com.jvmguard.agent.instrument.interceptions.TransactionInterception;
 import com.jvmguard.agent.instrument.model.InterceptionMethod;
 import com.jvmguard.agent.instrument.transaction.DefinitionSite;
@@ -19,10 +19,10 @@ import com.jvmguard.agent.instrument.transaction.DefinitionSite.AnnotationDefini
 import com.jvmguard.agent.instrument.transaction.TransactionDefinition;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationTransactionDefList;
-import com.jvmguard.agent.instrument.transaction.annotation.CustomAnnotationDefinition;
-import com.jvmguard.agent.instrument.transaction.annotation.DevOpsAnnotationDefinition;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoDefinition;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoTransactionDefList;
+import com.jvmguard.agent.instrument.transaction.annotation.MappedAnnotationDefinition;
+import com.jvmguard.agent.instrument.transaction.annotation.DeclaredAnnotationDefinition;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefList;
 import com.jvmguard.agent.util.Logger;
 import com.jvmguard.annotation.ClassTransaction;
 import com.jvmguard.annotation.Inheritance.Mode;
@@ -72,10 +72,10 @@ public class CheckClassVisitor extends ClassVisitor {
     private final boolean redefined;
     private boolean transactionInstrumentation;
 
-    private DevOpsAnnotationInfo devOpsClassTransactionInfo;
+    private DeclaredAnnotationInfo declaredClassTransactionInfo;
 
-    private DevOpsAnnotations devOpsAnnotations;
-    private DevOpsAnnotations previousDevOpsAnnotations;
+    private DeclaredAnnotations declaredAnnotations;
+    private DeclaredAnnotations previousDeclaredAnnotations;
 
     public CheckClassVisitor(Instrumenter instrumenter, boolean redefined, boolean transactionInstrumentation) {
         super(ASM_VERSION, null);
@@ -94,16 +94,16 @@ public class CheckClassVisitor extends ClassVisitor {
         this.slashClassName = name;
         this.dottedClassName = name.replace('/', '.');
         if (redefined) {
-            previousDevOpsAnnotations = instrumenter.getDevOpsAnnotations(dottedClassName);
+            previousDeclaredAnnotations = instrumenter.getDeclaredAnnotations(dottedClassName);
         }
 
         for (int i = 0; i < interfaces.length; i++) {
             interfaces[i] = interfaces[i].intern();
         }
         classFileInfo = instrumenter.registerClass(name.intern(), superName.intern(), interfaces, transactionInstrumentation);
-        List<PojoTransactionDefList> transactionDefLists = instrumenter.getPojoClassDefinitions().get(classFileInfo.getName());
+        List<MatchedTransactionDefList> transactionDefLists = instrumenter.getPojoClassDefinitions().get(classFileInfo.getName());
         if (transactionDefLists != null) {
-            for (PojoTransactionDefList transactionDefList : transactionDefLists) {
+            for (MatchedTransactionDefList transactionDefList : transactionDefLists) {
                 if (transactionDefList.getDefinition().isSuperclassWithImplementingMethods()) {
                     definitionsWithPublicMethods.add(transactionDefList.getDefinition());
                     if (publicMethods == null) {
@@ -114,22 +114,22 @@ public class CheckClassVisitor extends ClassVisitor {
         }
     }
 
-    private DevOpsAnnotations getDevOpsAnnotations() {
-        if (devOpsAnnotations == null) {
-            devOpsAnnotations = new DevOpsAnnotations();
+    private DeclaredAnnotations getDeclaredAnnotations() {
+        if (declaredAnnotations == null) {
+            declaredAnnotations = new DeclaredAnnotations();
         }
-        return devOpsAnnotations;
+        return declaredAnnotations;
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-        if (DevOpsAnnotationDefinition.NO_TRANSACTION_DESCRIPTOR.equals(desc)) {
-            getDevOpsAnnotations().setNoTransaction(true);
-        } else if (DevOpsAnnotationDefinition.CLASS_TRANSACTION_DESCRIPTOR.equals(desc)) {
+        if (DeclaredAnnotationDefinition.NO_TRANSACTION_DESCRIPTOR.equals(desc)) {
+            getDeclaredAnnotations().setNoTransaction(true);
+        } else if (DeclaredAnnotationDefinition.CLASS_TRANSACTION_DESCRIPTOR.equals(desc)) {
             if (!redefined) {
                 return new JvmGuardAnnotationVisitor(ClassTransaction.class, classTransaction -> {
-                    handleDevOpsClass(classTransaction);
-                    getDevOpsAnnotations().setClassTransaction(classTransaction);
+                    handleDeclaredClass(classTransaction);
+                    getDeclaredAnnotations().setClassTransaction(classTransaction);
                 });
             }
         } else if (visible) {
@@ -137,8 +137,8 @@ public class CheckClassVisitor extends ClassVisitor {
             List<AnnotationTransactionDefList> annotationDefLists = instrumenter.getAnnotationDefinitions().get(desc);
             if (annotationDefLists != null) {
                 for (AnnotationTransactionDefList annotationDefList : annotationDefLists) {
-                    if (annotationDefList.getDefinition() instanceof CustomAnnotationDefinition) {
-                        CustomAnnotationDefinition customAnnotationDefinition = (CustomAnnotationDefinition)annotationDefList.getDefinition();
+                    if (annotationDefList.getDefinition() instanceof MappedAnnotationDefinition) {
+                        MappedAnnotationDefinition customAnnotationDefinition = (MappedAnnotationDefinition)annotationDefList.getDefinition();
                         if (customAnnotationDefinition.isClassWithImplementingOnly()) {
                             definitionsWithPublicMethods.add(customAnnotationDefinition);
                             if (publicMethods == null) {
@@ -152,12 +152,12 @@ public class CheckClassVisitor extends ClassVisitor {
         return null;
     }
 
-    private void handleDevOpsClass(ClassTransaction classTransaction) {
+    private void handleDeclaredClass(ClassTransaction classTransaction) {
         if (classTransaction.inheritance().value() == Mode.NONE) {
-            classAnnotations.add((DevOpsAnnotationDefinition.CLASS_TRANSACTION_DESCRIPTOR + classTransaction.group()).intern());
+            classAnnotations.add((DeclaredAnnotationDefinition.CLASS_TRANSACTION_DESCRIPTOR + classTransaction.group()).intern());
         } else {
-            devOpsClassTransactionInfo = DevOpsAnnotationInfo.create(classTransaction, dottedClassName);
-            classAnnotations.add(devOpsClassTransactionInfo);
+            declaredClassTransactionInfo = DeclaredAnnotationInfo.create(classTransaction, dottedClassName);
+            classAnnotations.add(declaredClassTransactionInfo);
             if (classTransaction.inheritance().implementingOnly() && publicMethods == null) {
                 publicMethods = new HashSet<>();
             }
@@ -202,15 +202,15 @@ public class CheckClassVisitor extends ClassVisitor {
 
         if (!isInterface()) {
             if (transactionInstrumentation) {
-                checkPojoDefinitions(instrumenter.getPojoMethodDefinitions().get(lookupMethod.init(null, name, methodDesc)));
-                checkPojoDefinitions(instrumenter.getPojoMethodDefinitions().get(lookupMethod.init(null, name, null)));
+                checkMatchedDefinitions(instrumenter.getPojoMethodDefinitions().get(lookupMethod.init(null, name, methodDesc)));
+                checkMatchedDefinitions(instrumenter.getPojoMethodDefinitions().get(lookupMethod.init(null, name, null)));
             }
         }
         return !transactionInstrumentation ? null : new MethodVisitor(ASM_VERSION) {
             @Override
             public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
                 Logger.log(Subsystem.INSTRUMENTATION, 20, false, "found method annotation %s (%s) for %s\n", desc, visible, instrumenter.getAnnotationDefinitions());
-                if (DevOpsAnnotationDefinition.TELEMETRY_DESCRIPTOR.equals(desc)) {
+                if (DeclaredAnnotationDefinition.TELEMETRY_DESCRIPTOR.equals(desc)) {
                     if (!redefined && (access & ACC_STATIC) > 0) {
                         if (Type.getArgumentTypes(methodDesc).length == 0) {
                             Type returnType = Type.getReturnType(methodDesc);
@@ -227,16 +227,16 @@ public class CheckClassVisitor extends ClassVisitor {
                             }
                         }
                     }
-                } else if (DevOpsAnnotationDefinition.NO_TRANSACTION_DESCRIPTOR.equals(desc)) {
+                } else if (DeclaredAnnotationDefinition.NO_TRANSACTION_DESCRIPTOR.equals(desc)) {
                     if (!redefined) {
-                        getDevOpsAnnotations().addNoTransactionMethod(new InterceptionMethod(name, methodDesc));
+                        getDeclaredAnnotations().addNoTransactionMethod(new InterceptionMethod(name, methodDesc));
                     }
-                } else if (DevOpsAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR.equals(desc)) {
+                } else if (DeclaredAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR.equals(desc)) {
                     if (!redefined) {
                         return new JvmGuardAnnotationVisitor(MethodTransaction.class, methodTransaction -> {
                             InterceptionMethod interceptionMethod = new InterceptionMethod(name, methodDesc);
-                            handleDevOpsMethod(interceptionMethod, methodTransaction);
-                            getDevOpsAnnotations().addMethodTransaction(interceptionMethod, methodTransaction);
+                            handleDeclaredMethod(interceptionMethod, methodTransaction);
+                            getDeclaredAnnotations().addMethodTransaction(interceptionMethod, methodTransaction);
                         });
                     }
                 } else if (visible) {
@@ -264,21 +264,21 @@ public class CheckClassVisitor extends ClassVisitor {
         };
     }
 
-    private void handleDevOpsMethod(InterceptionMethod interceptionMethod, MethodTransaction methodTransaction) {
+    private void handleDeclaredMethod(InterceptionMethod interceptionMethod, MethodTransaction methodTransaction) {
         if (methodTransaction.inheritance().value() == Mode.NONE) {
             String groupName = methodTransaction.group();
 
-            List<AnnotationTransactionDefList> transactionDefLists = instrumenter.getAnnotationDefinitions().get(DevOpsAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR + groupName);
+            List<AnnotationTransactionDefList> transactionDefLists = instrumenter.getAnnotationDefinitions().get(DeclaredAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR + groupName);
             if (transactionDefLists == null && !groupName.isEmpty()) {
-                transactionDefLists = instrumenter.getAnnotationDefinitions().get(DevOpsAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR);
+                transactionDefLists = instrumenter.getAnnotationDefinitions().get(DeclaredAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR);
             }
             if (transactionDefLists != null) {
                 for (AnnotationTransactionDefList transactionDefList : transactionDefLists) {
                     if (transactionDefList.getDefinition().isMethodAnnotation()) {
                         Handler handler = transactionDefList.getHandler(lookupAnnotationDefinitionSite.init(dottedClassName, dottedClassName));
                         if (handler != null) {
-                            if (transactionDefList.getDefinition() instanceof DevOpsAnnotationDefinition) {
-                                addMethodInterception(interceptionMethod, new DevOpsConcreteMethodInterception(transactionDefList.getDefinition(), handler, methodTransaction, dottedClassName));
+                            if (transactionDefList.getDefinition() instanceof DeclaredAnnotationDefinition) {
+                                addMethodInterception(interceptionMethod, new DeclaredConcreteMethodInterception(transactionDefList.getDefinition(), handler, methodTransaction, dottedClassName));
                             } else {
                                 addMethodInterception(interceptionMethod, new TransactionInterception(transactionDefList.getDefinition(), handler));
                             }
@@ -286,22 +286,22 @@ public class CheckClassVisitor extends ClassVisitor {
                     }
                 }
             }
-            methodAnnotations.add((DevOpsAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR + groupName).intern());
+            methodAnnotations.add((DeclaredAnnotationDefinition.METHOD_TRANSACTION_DESCRIPTOR + groupName).intern());
         } else {
-            DevOpsAnnotationInfo devOpsAnnotationInfo = DevOpsAnnotationInfo.create(methodTransaction, dottedClassName);
-            devOpsAnnotationInfo.setDefinedMethods(Collections.singleton(interceptionMethod));
-            methodAnnotations.add(devOpsAnnotationInfo);
+            DeclaredAnnotationInfo declaredAnnotationInfo = DeclaredAnnotationInfo.create(methodTransaction, dottedClassName);
+            declaredAnnotationInfo.setDefinedMethods(Collections.singleton(interceptionMethod));
+            methodAnnotations.add(declaredAnnotationInfo);
         }
     }
 
-    private void checkPojoDefinitions(List<PojoTransactionDefList> pojoTransactionDefLists) {
+    private void checkMatchedDefinitions(List<MatchedTransactionDefList> pojoTransactionDefLists) {
         if (pojoTransactionDefLists != null) {
-            for (PojoTransactionDefList pojoTransactionDefList : pojoTransactionDefLists) {
-                PojoDefinition pojoDefinition = pojoTransactionDefList.getDefinition();
+            for (MatchedTransactionDefList pojoTransactionDefList : pojoTransactionDefLists) {
+                MatchedDefinition pojoDefinition = pojoTransactionDefList.getDefinition();
                 if (pojoDefinition.isInterceptSubclasses()) {
                     TriState triState = classFileInfo.isSubclass(pojoDefinition.getDeclaringClassName());
                     if (triState == TriState.TRUE) {
-                        PojoHandler handler = pojoTransactionDefList.getHandler(lookupDefinitionSite.init(dottedClassName));
+                        MatchedHandler handler = pojoTransactionDefList.getHandler(lookupDefinitionSite.init(dottedClassName));
                         if (handler != null) {
                             addMethodInterception(lookupMethod, new TransactionInterception(pojoDefinition, handler));
                         }
@@ -309,7 +309,7 @@ public class CheckClassVisitor extends ClassVisitor {
                         getPartiallyDefinedInfo(true).getUnsureSuperclasses().add(pojoDefinition.getDeclaringClassName());
                     }
                 } else if (pojoDefinition.getDeclaringClassName().equals(classFileInfo.getName().replace('/', '.'))) {
-                    PojoHandler handler = pojoTransactionDefList.getHandler(lookupDefinitionSite.init(dottedClassName));
+                    MatchedHandler handler = pojoTransactionDefList.getHandler(lookupDefinitionSite.init(dottedClassName));
                     if (handler != null) {
                         addMethodInterception(lookupMethod, new TransactionInterception(pojoDefinition, handler));
                     }
@@ -321,13 +321,13 @@ public class CheckClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
-        DevOpsAnnotations devOpsAnnotations = redefined ? previousDevOpsAnnotations : this.devOpsAnnotations;
-        if (transactionInstrumentation && redefined && previousDevOpsAnnotations != null) {
-            for (Entry<InterceptionMethod, MethodTransaction> entry : previousDevOpsAnnotations.getMethodTransactions().entrySet()) {
-                handleDevOpsMethod(entry.getKey(), entry.getValue());
+        DeclaredAnnotations declaredAnnotations = redefined ? previousDeclaredAnnotations : this.declaredAnnotations;
+        if (transactionInstrumentation && redefined && previousDeclaredAnnotations != null) {
+            for (Entry<InterceptionMethod, MethodTransaction> entry : previousDeclaredAnnotations.getMethodTransactions().entrySet()) {
+                handleDeclaredMethod(entry.getKey(), entry.getValue());
             }
-            if (previousDevOpsAnnotations.getClassTransaction() != null) {
-                handleDevOpsClass(previousDevOpsAnnotations.getClassTransaction());
+            if (previousDeclaredAnnotations.getClassTransaction() != null) {
+                handleDeclaredClass(previousDeclaredAnnotations.getClassTransaction());
             }
         }
 
@@ -336,21 +336,21 @@ public class CheckClassVisitor extends ClassVisitor {
         }
 
         boolean noTransaction = false;
-        if (devOpsAnnotations != null) {
-            if (devOpsAnnotations.isNoTransaction()) {
+        if (declaredAnnotations != null) {
+            if (declaredAnnotations.isNoTransaction()) {
                 noTransaction = true;
                 methodInterceptions.clear();
             } else {
-                for (InterceptionMethod interceptionMethod : devOpsAnnotations.getNoTransactionMethods()) {
+                for (InterceptionMethod interceptionMethod : declaredAnnotations.getNoTransactionMethods()) {
                     methodInterceptions.remove(interceptionMethod);
                 }
             }
             if (publicMethods != null) {
-                publicMethods.removeAll(devOpsAnnotations.getNoTransactionMethods());
+                publicMethods.removeAll(declaredAnnotations.getNoTransactionMethods());
             }
         }
         classFileInfo.setNoTransaction(noTransaction);
-        instrumenter.setDevOpsAnnotations(dottedClassName, devOpsAnnotations);
+        instrumenter.setDeclaredAnnotations(dottedClassName, declaredAnnotations);
         if (!classAnnotations.isEmpty()) {
             classFileInfo.setClassAnnotations(classAnnotations.toArray());
         } else {
@@ -362,9 +362,9 @@ public class CheckClassVisitor extends ClassVisitor {
             classFileInfo.setMethodAnnotations(null);
         }
         if (publicMethods != null) {
-            if (devOpsClassTransactionInfo != null) {
+            if (declaredClassTransactionInfo != null) {
                 Logger.log(Subsystem.INSTRUMENTATION, 6, false, "setting defined methods %s for dev ops transaction\n", publicMethods);
-                devOpsClassTransactionInfo.setDefinedMethods(publicMethods);
+                declaredClassTransactionInfo.setDefinedMethods(publicMethods);
             }
             for (TransactionDefinition definition : definitionsWithPublicMethods) {
                 Logger.log(Subsystem.INSTRUMENTATION, 6, false, "setting defined methods %s for %s\n", publicMethods, definition);
@@ -373,7 +373,7 @@ public class CheckClassVisitor extends ClassVisitor {
             publicMethods = null;
         }
         if (!isInterface() && transactionInstrumentation && !noTransaction) {
-            InterceptionClassHierarchyVisitor interceptionClassHierarchyVisitor = new InterceptionClassHierarchyVisitor(instrumenter.getPojoClassDefinitions(), instrumenter.getAnnotationDefinitions(), classInterceptions, devOpsAnnotations, instrumenter);
+            InterceptionClassHierarchyVisitor interceptionClassHierarchyVisitor = new InterceptionClassHierarchyVisitor(instrumenter.getPojoClassDefinitions(), instrumenter.getAnnotationDefinitions(), classInterceptions, declaredAnnotations, instrumenter);
             classFileInfo.visit(interceptionClassHierarchyVisitor);
             if (!interceptionClassHierarchyVisitor.isFullyDefined()) {
                 getPartiallyDefinedInfo(true).setClassInterceptionCount(classInterceptions.size());

@@ -118,7 +118,7 @@ class MockTransactions(private val serverConnection: MockServerConnectionImpl) {
         number: Int,
         policyType: PolicyType
     ): TransactionTree {
-        val child = TransactionTree(transactionTree, methodId, TransactionType.POJO, policyType.typeString)
+        val child = TransactionTree(transactionTree, methodId, TransactionType.MATCHED, policyType.typeString)
         transactionTree.add(child)
         child.addTimeRecursive(interval.timeExtent * 100 * number / (i + 1))
         child.addCountRecursive(number.toLong())

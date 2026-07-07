@@ -42,7 +42,7 @@ open class MailTest : JvmGuardTest() {
     }
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
-        val customIdentifier = PersistentTelemetryIdentifier("cu", "", AgentConstants.TELEMETRY_TYPE_DEVOPS, "test1")
+        val customIdentifier = PersistentTelemetryIdentifier("cu", "", AgentConstants.TELEMETRY_TYPE_DECLARED, "test1")
 
         rootConfig.thresholdSettings.thresholds.add(Threshold().apply {
             telemetryIdentifier = PersistentTelemetryIdentifier("th", "")

@@ -76,7 +76,7 @@ class TelemetryManager(
 
         addTransaction(telemetryTypes, Telemetry.TRANSACTIONS.mainId, CATEGORY_TRANSACTIONS)
 
-        for (additionalTelemetry in additionalTelemetryManager.getTelemetries(AgentConstants.TELEMETRY_TYPE_DEVOPS, false)) {
+        for (additionalTelemetry in additionalTelemetryManager.getTelemetries(AgentConstants.TELEMETRY_TYPE_DECLARED, false)) {
             val telemetryFormat = additionalTelemetryManager.getFormat(additionalTelemetry)
             telemetryTypes.add(
                 TelemetryType(
@@ -145,19 +145,19 @@ class TelemetryManager(
             dataPointManager.addData(connectionEntry, Telemetry.THREADS.mainId, "", true, telemetryData.threadCount)
             dataPointManager.addData(connectionEntry, Telemetry.GC.mainId, "", true, telemetryData.gcActivity)
 
-            var devOpsTelemetriesModified = false
+            var declaredTelemetriesModified = false
             for (additionalData in telemetryData.additionalData) {
-                if (additionalData.type == AgentConstants.TELEMETRY_TYPE_DEVOPS) {
-                    if (addDevOpsTelemetryFormat(connectionEntry, additionalData)) {
-                        devOpsTelemetriesModified = true
+                if (additionalData.type == AgentConstants.TELEMETRY_TYPE_DECLARED) {
+                    if (addDeclaredTelemetryFormat(connectionEntry, additionalData)) {
+                        declaredTelemetriesModified = true
                     }
                 }
             }
             for (additionalData in telemetryData.additionalData) {
                 if (additionalData.type == AgentConstants.TELEMETRY_TYPE_MBEAN) {
                     addMBeanTelemetryData(connectionEntry, additionalData)
-                } else if (additionalData.type == AgentConstants.TELEMETRY_TYPE_DEVOPS) {
-                    addDevOpsTelemetryData(connectionEntry, additionalData)
+                } else if (additionalData.type == AgentConstants.TELEMETRY_TYPE_DECLARED) {
+                    addDeclaredTelemetryData(connectionEntry, additionalData)
                 } else {
                     val additionalTelemetry = additionalTelemetryManager.getOrCreateAdditionalTelemetry(additionalData.type, additionalData.name)
                     if (additionalTelemetry != null) {
@@ -166,7 +166,7 @@ class TelemetryManager(
                 }
             }
 
-            if (devOpsTelemetriesModified) {
+            if (declaredTelemetriesModified) {
                 eventPublisher.publishEvent(ModificationEvent(this, null, ModificationType.TELEMETRY_IDS))
             }
 
@@ -177,7 +177,7 @@ class TelemetryManager(
         return null
     }
 
-    private fun addDevOpsTelemetryData(connectionEntry: CurrentConnectionEntry, additionalData: AdditionalData) {
+    private fun addDeclaredTelemetryData(connectionEntry: CurrentConnectionEntry, additionalData: AdditionalData) {
         val additionalTelemetry = additionalTelemetryManager.getOrCreateAdditionalTelemetry(additionalData.type, additionalData.name)
         if (additionalTelemetry != null) {
             val format = additionalTelemetryManager.getFormat(additionalTelemetry)
@@ -185,12 +185,12 @@ class TelemetryManager(
         }
     }
 
-    private fun addDevOpsTelemetryFormat(connectionEntry: CurrentConnectionEntry, additionalData: AdditionalData): Boolean {
+    private fun addDeclaredTelemetryFormat(connectionEntry: CurrentConnectionEntry, additionalData: AdditionalData): Boolean {
         val additionalTelemetry = additionalTelemetryManager.getOrCreateAdditionalTelemetry(additionalData.type, additionalData.name)
         if (additionalTelemetry != null) {
             var format = additionalData.format
             var formatUpdated = false
-            if (format != null && connectionEntry.committedDevOpsTelemetryFormats.add(additionalTelemetry.nodeName)) {
+            if (format != null && connectionEntry.committedDeclaredTelemetryFormats.add(additionalTelemetry.nodeName)) {
                 formatUpdated = additionalTelemetryManager.updateFormat(additionalTelemetry, format)
             } else {
                 format = additionalTelemetryManager.getFormat(additionalTelemetry)
@@ -280,9 +280,9 @@ class TelemetryManager(
     fun getOrCreateTelemetryType(telemetryIdentifier: PersistentTelemetryIdentifier): TelemetryType? {
         var telemetryType = getTelemetryType(telemetryIdentifier.combinedId)
         if (telemetryType == null) {
-            if (telemetryIdentifier.mainId == Telemetry.CUSTOM.mainId && telemetryIdentifier.additionalType == AgentConstants.TELEMETRY_TYPE_DEVOPS) { // can happen after import, devops telemetries are not added automatically to idToTelemetryType
+            if (telemetryIdentifier.mainId == Telemetry.CUSTOM.mainId && telemetryIdentifier.additionalType == AgentConstants.TELEMETRY_TYPE_DECLARED) { // can happen after import, declared telemetries are not added automatically to idToTelemetryType
                 val additionalTelemetry =
-                    additionalTelemetryManager.getOrCreateAdditionalTelemetry(AgentConstants.TELEMETRY_TYPE_DEVOPS, telemetryIdentifier.additionalName)
+                    additionalTelemetryManager.getOrCreateAdditionalTelemetry(AgentConstants.TELEMETRY_TYPE_DECLARED, telemetryIdentifier.additionalName)
                 if (additionalTelemetry != null) {
                     val format = additionalTelemetryManager.getFormat(additionalTelemetry)
                     telemetryType = TelemetryType(
@@ -371,23 +371,23 @@ class TelemetryManager(
                     ret.add(CustomTelemetryNodeIdentifier(Type.MBEAN, nodeName))
                 }
             }
-            for (additionalTelemetry in additionalTelemetryManager.getTelemetries(AgentConstants.TELEMETRY_TYPE_DEVOPS, true)) {
-                ret.add(CustomTelemetryNodeIdentifier(Type.DEVOPS, additionalTelemetry.nodeName))
+            for (additionalTelemetry in additionalTelemetryManager.getTelemetries(AgentConstants.TELEMETRY_TYPE_DECLARED, true)) {
+                ret.add(CustomTelemetryNodeIdentifier(Type.DECLARED, additionalTelemetry.nodeName))
             }
             return CustomTelemetryInfo(ArrayList(ret))
         }
 
-    override val hiddenDevOpsTelemetryNodes: Collection<String>
+    override val hiddenDeclaredTelemetryNodes: Collection<String>
         get() {
             val ret = TreeSet<String>()
-            for (additionalTelemetry in additionalTelemetryManager.getHiddenTelemetries(AgentConstants.TELEMETRY_TYPE_DEVOPS)) {
+            for (additionalTelemetry in additionalTelemetryManager.getHiddenTelemetries(AgentConstants.TELEMETRY_TYPE_DECLARED)) {
                 ret.add(additionalTelemetry.nodeName)
             }
             return ArrayList(ret)
         }
 
-    override fun setDevOpsTelemetryNodeVisibility(nodeName: String, visible: Boolean): Boolean {
-        if (additionalTelemetryManager.setDevOpsTelemetryHidden(nodeName, !visible)) {
+    override fun setDeclaredTelemetryNodeVisibility(nodeName: String, visible: Boolean): Boolean {
+        if (additionalTelemetryManager.setDeclaredTelemetryHidden(nodeName, !visible)) {
             eventPublisher.publishEvent(ModificationEvent(this, null, ModificationType.TELEMETRY_IDS))
             return true
         }

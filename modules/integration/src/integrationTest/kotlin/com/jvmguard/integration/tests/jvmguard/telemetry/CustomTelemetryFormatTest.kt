@@ -30,20 +30,20 @@ class CustomTelemetryFormatTest : JvmGuardTest() {
         assertEqual(serverConnection.idToTelemetryType.values.count { it.isVisible && it.name.startsWith("stacked (") }, 2) {
             println(serverConnection.idToTelemetryType)
         }
-        serverConnection.setDevOpsTelemetryNodeVisibility("stacked", false)
+        serverConnection.setDeclaredTelemetryNodeVisibility("stacked", false)
         assertEqual(serverConnection.idToTelemetryType.values.count { it.isVisible && it.name.startsWith("stacked (") }, 0) {
             println(serverConnection.idToTelemetryType)
         }
         assertEqual(serverConnection.customTelemetryNodes.size, 10)
         assertEqual(serverConnection.customTelemetryNodes.count { it.name == "stacked" }, 0)
-        serverConnection.setDevOpsTelemetryNodeVisibility("micro", false)
+        serverConnection.setDeclaredTelemetryNodeVisibility("micro", false)
         assertEqual(serverConnection.customTelemetryNodes.size, 9)
         assertEqual(serverConnection.customTelemetryNodes.count { it.name == "micro" }, 0)
-        assertEqual(serverConnection.hiddenDevOpsTelemetryNodes.size, 2)
-        assertEqual(serverConnection.hiddenDevOpsTelemetryNodes.count { it == "micro" }, 1)
-        assertEqual(serverConnection.hiddenDevOpsTelemetryNodes.count { it == "stacked" }, 1)
-        serverConnection.setDevOpsTelemetryNodeVisibility("stacked", true)
-        serverConnection.setDevOpsTelemetryNodeVisibility("micro", true)
+        assertEqual(serverConnection.hiddenDeclaredTelemetryNodes.size, 2)
+        assertEqual(serverConnection.hiddenDeclaredTelemetryNodes.count { it == "micro" }, 1)
+        assertEqual(serverConnection.hiddenDeclaredTelemetryNodes.count { it == "stacked" }, 1)
+        serverConnection.setDeclaredTelemetryNodeVisibility("stacked", true)
+        serverConnection.setDeclaredTelemetryNodeVisibility("micro", true)
         assertEqual(serverConnection.customTelemetryNodes.size, 11)
         assertEqual(serverConnection.customTelemetryNodes.count { it.name == "stacked" }, 1)
         assertEqual(serverConnection.customTelemetryNodes.count { it.name == "micro" }, 1)
@@ -53,7 +53,7 @@ class CustomTelemetryFormatTest : JvmGuardTest() {
 
         val telemetryNodeIdentifiers = serverConnection.customTelemetryNodes
         assertEqual(telemetryNodeIdentifiers.size, 11)
-        assertEqual(telemetryNodeIdentifiers.filter { it.type == CustomTelemetryNodeIdentifier.Type.DEVOPS }.size, 11)
+        assertEqual(telemetryNodeIdentifiers.filter { it.type == CustomTelemetryNodeIdentifier.Type.DECLARED }.size, 11)
         assertTrue(telemetryNodeIdentifiers.find { it.name == "requestedConfigurationNumber" } != null)
 
         checkSingleFormat(
@@ -88,7 +88,7 @@ class CustomTelemetryFormatTest : JvmGuardTest() {
         )
 
         val dataHolder = serverConnection.getGroupVmDataHolder(null, SparkLineRange.LAST_HOUR, serverConnection.idToTelemetryType.values.filter {
-            it.telemetryIdentifier.additionalType == AgentConstants.TELEMETRY_TYPE_DEVOPS
+            it.telemetryIdentifier.additionalType == AgentConstants.TELEMETRY_TYPE_DECLARED
         })
         var sparkLineData = dataHolder.getSparkLineData(serverConnection.idToTelemetryType.values.find { it.name == "micro" }!!)
         assertEqual(sparkLineData.scaledCurrent, 100)
@@ -194,7 +194,7 @@ class CustomTelemetryFormatTest : JvmGuardTest() {
         if (vm == null || vm.isGroupNode) {
             val dataHolder =
                 serverConnection.getGroupVmDataHolder(vm?.qualifiedIdentifier, SparkLineRange.LAST_HOUR, serverConnection.idToTelemetryType.values.filter {
-                    it.telemetryIdentifier.additionalType == AgentConstants.TELEMETRY_TYPE_DEVOPS
+                    it.telemetryIdentifier.additionalType == AgentConstants.TELEMETRY_TYPE_DECLARED
                 })
             val sparkLineData = dataHolder.getSparkLineData(serverConnection.idToTelemetryType.values.first {
                 it.name == "nonAveraged (line 1)"

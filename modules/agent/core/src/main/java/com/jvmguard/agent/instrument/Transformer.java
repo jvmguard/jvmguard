@@ -6,8 +6,8 @@ import com.jvmguard.agent.comm.JvmGuardCommunication;
 import com.jvmguard.agent.config.recording.RetransformationType;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationTransactionDefList;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoDefinition;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoTransactionDefList;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefList;
 import com.jvmguard.agent.util.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -26,7 +26,7 @@ public class Transformer implements TransformerTarget {
     private volatile Instrumentation instrumentation;
 
     private volatile Set<AnnotationDefinition> annotations = new HashSet<>();
-    private volatile Set<PojoDefinition> pojoDefinitions = new HashSet<>();
+    private volatile Set<MatchedDefinition> pojoDefinitions = new HashSet<>();
 
     private int communicationUpdate = 0;
 
@@ -116,7 +116,7 @@ public class Transformer implements TransformerTarget {
         return instrumentation.getAllLoadedClasses();
     }
 
-    public void setTransactionDefs(Map<PojoDefinition, PojoTransactionDefList> pojoInterceptionMap, Map<AnnotationDefinition, AnnotationTransactionDefList> annotationInterceptionMap, boolean initial, RetransformationType retransformationType) {
+    public void setTransactionDefs(Map<MatchedDefinition, MatchedTransactionDefList> pojoInterceptionMap, Map<AnnotationDefinition, AnnotationTransactionDefList> annotationInterceptionMap, boolean initial, RetransformationType retransformationType) {
         List<Class> retransformClasses = instrumenter.calculateChanges(pojoInterceptionMap, annotationInterceptionMap, annotations, pojoDefinitions, instrumentation);
 
         annotations = new HashSet<>(annotationInterceptionMap.keySet());

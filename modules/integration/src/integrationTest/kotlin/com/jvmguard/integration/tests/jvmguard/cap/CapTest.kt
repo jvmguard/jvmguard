@@ -1,6 +1,6 @@
 package com.jvmguard.integration.tests.jvmguard.cap
 
-import com.jvmguard.agent.config.transactions.PojoTransactionDef
+import com.jvmguard.agent.config.transactions.MatchedTransactionDef
 import com.jvmguard.integration.JvmGuardTest
 import com.jvmguard.integration.Controller
 import com.jvmguard.integration.TestServerConnection
@@ -38,7 +38,7 @@ class CapTest : JvmGuardTest() {
             assertTrue(serverConnection.inboxItems.find { it.name == "Too many transactions recorded" } != null)
 
             modifyCurrentRootConfig(serverConnection) { rootConfig ->
-                rootConfig.transactionSettings.transactionDefs.add(PojoTransactionDef().apply {
+                rootConfig.transactionSettings.transactionDefs.add(MatchedTransactionDef().apply {
                     id = 100
                     className = "*.a.*"
                     isDiscard = true

@@ -28,15 +28,15 @@
     "description": "GC activity"
   },
   {
-    "name": "devops/group1",
+    "name": "declared/group1",
     "description": "group1"
   },
   {
-    "name": "devops/requestedConfigurationNumber",
+    "name": "declared/requestedConfigurationNumber",
     "description": "requestedConfigurationNumber"
   },
   {
-    "name": "devops/vmNoSingle Щ",
+    "name": "declared/vmNoSingle Щ",
     "description": "vmNoSingle Щ"
   },
   {

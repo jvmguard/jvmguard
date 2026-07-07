@@ -8,7 +8,7 @@ import com.jvmguard.agent.config.recording.RetransformationType
 import com.jvmguard.agent.config.telemetry.MBeanLineConfig
 import com.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
 import com.jvmguard.agent.config.telemetry.TelemetryUnit
-import com.jvmguard.agent.config.transactions.PojoTransactionDef
+import com.jvmguard.agent.config.transactions.MatchedTransactionDef
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -69,7 +69,7 @@ class CodecRoundTripTest {
             val agc = AgentGroupConfig()
             agc.recordingOptions.setRetransformationType(RetransformationType.STARTUP)
             agc.transactionSettings.retransformationType = RetransformationType.ALWAYS
-            val pojo = PojoTransactionDef()
+            val pojo = MatchedTransactionDef()
             pojo.declaringClassName = "com.example.Foo"
             pojo.methodName = "bar"
             agc.transactionSettings.transactionDefs.add(pojo)
@@ -83,8 +83,8 @@ class CodecRoundTripTest {
             assertEquals(RetransformationType.ALWAYS, back.transactionSettings.retransformationType)
 
             assertEquals(1, back.transactionSettings.transactionDefs.size)
-            assertInstanceOf(PojoTransactionDef::class.java, back.transactionSettings.transactionDefs[0])
-            val pojoBack = back.transactionSettings.transactionDefs[0] as PojoTransactionDef
+            assertInstanceOf(MatchedTransactionDef::class.java, back.transactionSettings.transactionDefs[0])
+            val pojoBack = back.transactionSettings.transactionDefs[0] as MatchedTransactionDef
             assertEquals("com.example.Foo", pojoBack.declaringClassName)
             assertEquals("bar", pojoBack.methodName)
 

@@ -5,7 +5,7 @@ import com.beust.klaxon.JsonBase
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.jvmguard.agent.config.VmType
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.agent.config.transactions.DurationType
 import com.jvmguard.data.config.GroupConfig
 import com.jvmguard.integration.Controller
@@ -30,13 +30,13 @@ class RestTransactionTest : JvmGuardTest() {
     }
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
-        rootConfig.transactionSettings.transactionDefs.filterIsInstance<DevOpsAnnotatedTransactionDef>().first().apply {
+        rootConfig.transactionSettings.transactionDefs.filterIsInstance<DeclaredTransactionDef>().first().apply {
             policy.overdueValue = 400
             policy.slowDurationType = DurationType.MILLIS
             policy.slowValue = 220
         }
 
-        rootConfig.transactionSettings.transactionDefs.add(0, DevOpsAnnotatedTransactionDef().apply {
+        rootConfig.transactionSettings.transactionDefs.add(0, DeclaredTransactionDef().apply {
             group.usedValue = "noPolicy"
         })
     }
@@ -138,7 +138,7 @@ class RestTransactionTest : JvmGuardTest() {
         assertEqual(csvFields.size, 5)
         assertSimilar(csvFields[1].toLong(), 17990921422)
         assertEqual(csvFields[2], "110")
-        assertEqual(csvFields[3], "\"devops\"")
+        assertEqual(csvFields[3], "\"declared\"")
         assertEqual(csvFields[4], "\"normal\"")
     }
 
@@ -155,7 +155,7 @@ class RestTransactionTest : JvmGuardTest() {
         assertEqual(csvFields.size, 5)
         assertEqual(csvFields[1], "0")
         assertEqual(csvFields[2], "5")
-        assertEqual(csvFields[3], "\"devops\"")
+        assertEqual(csvFields[3], "\"declared\"")
         assertEqual(csvFields[4], "\"normal\"")
     }
 

@@ -12,8 +12,8 @@ import com.jvmguard.agent.config.transactions.*;
 import com.jvmguard.agent.instrument.Transformer;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationTransactionDefList;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoDefinition;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoTransactionDefList;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefList;
 import com.jvmguard.agent.policy.PolicyHandler;
 import com.jvmguard.agent.telemetry.TelemetryCollector;
 import com.jvmguard.agent.util.FileNameEncoding;
@@ -70,11 +70,11 @@ public class ConfigurationParameter extends BaseParameter {
         try {
             TelemetryCollector.getInstance().setConfig(parameters.getTelemetrySettings());
 
-            Map<PojoDefinition, PojoTransactionDefList> pojoDefinitionToTransactionDefs = new HashMap<>();
+            Map<MatchedDefinition, MatchedTransactionDefList> pojoDefinitionToTransactionDefs = new HashMap<>();
             Map<AnnotationDefinition, AnnotationTransactionDefList> annotationDefinitionToTransactionDefs = new HashMap<>();
 
             PolicyOptions policyOptions = new PolicyOptions();
-            Set<AnnotationDefinition> devOpsGroupDefinitions = new HashSet<>();
+            Set<AnnotationDefinition> declaredGroupDefinitions = new HashSet<>();
 
             for (TransactionDef transactionDef : parameters.getTransactionSettings().getTransactionDefs()) {
                 transactionDef.getNaming().getGroup().setUsedValue(transactionDef.getNaming().getGroup().getUsedValue().intern());
@@ -83,25 +83,25 @@ public class ConfigurationParameter extends BaseParameter {
                 transactionDef.prepareForUsage();
 
                 {
-                    if (transactionDef instanceof PojoTransactionDef) {
-                        PojoTransactionDef pojoTransactionDef = (PojoTransactionDef)transactionDef;
-                        PojoDefinition pojoDefinition = pojoTransactionDef.createPojoDefinition();
+                    if (transactionDef instanceof MatchedTransactionDef) {
+                        MatchedTransactionDef pojoTransactionDef = (MatchedTransactionDef)transactionDef;
+                        MatchedDefinition pojoDefinition = pojoTransactionDef.createMatchedDefinition();
 
-                        PojoTransactionDefList transactionDefList = pojoDefinitionToTransactionDefs.get(pojoDefinition);
+                        MatchedTransactionDefList transactionDefList = pojoDefinitionToTransactionDefs.get(pojoDefinition);
                         if (transactionDefList == null) {
-                            transactionDefList = new PojoTransactionDefList(pojoDefinition);
+                            transactionDefList = new MatchedTransactionDefList(pojoDefinition);
                             pojoDefinitionToTransactionDefs.put(pojoDefinition, transactionDefList);
                         }
                         transactionDefList.addTransactionDef(pojoTransactionDef);
-                    } else if (transactionDef instanceof DevOpsAnnotatedTransactionDef) {
-                        DevOpsAnnotatedTransactionDef devOpsTransactionDev = (DevOpsAnnotatedTransactionDef)transactionDef;
+                    } else if (transactionDef instanceof DeclaredTransactionDef) {
+                        DeclaredTransactionDef declaredTransactionDev = (DeclaredTransactionDef)transactionDef;
 
-                        for (AnnotationDefinition annotationDefinition : devOpsTransactionDev.getAnnotationDefinitions()) {
+                        for (AnnotationDefinition annotationDefinition : declaredTransactionDev.getAnnotationDefinitions()) {
                             AnnotationTransactionDefList transactionDefList = getAnnotationTransactionDefList(annotationDefinitionToTransactionDefs, annotationDefinition);
-                            if (devOpsTransactionDev.getGroup().getUsedValue().isEmpty()) {
-                                transactionDefList.addTransactionDef(devOpsTransactionDev);
+                            if (declaredTransactionDev.getGroup().getUsedValue().isEmpty()) {
+                                transactionDefList.addTransactionDef(declaredTransactionDev);
                             } else {
-                                devOpsGroupDefinitions.add(annotationDefinition);
+                                declaredGroupDefinitions.add(annotationDefinition);
                             }
                         }
                     } else if (transactionDef instanceof AnnotatedTransactionDef) {
@@ -114,22 +114,22 @@ public class ConfigurationParameter extends BaseParameter {
                     }
                 }
             }
-            Logger.log(Subsystem.INSTRUMENTATION, 5, true, "used devops group definitions %s\n", devOpsGroupDefinitions);
-            if (!devOpsGroupDefinitions.isEmpty()) {
+            Logger.log(Subsystem.INSTRUMENTATION, 5, true, "used declared group definitions %s\n", declaredGroupDefinitions);
+            if (!declaredGroupDefinitions.isEmpty()) {
                 // for every group defined, a list must be constructed containing the entries from this group and the entries for all groups in the correct order
                 for (TransactionDef transactionDef : parameters.getTransactionSettings().getTransactionDefs()) {
-                    if (transactionDef instanceof DevOpsAnnotatedTransactionDef) {
-                        DevOpsAnnotatedTransactionDef devOpsTransactionDev = (DevOpsAnnotatedTransactionDef)transactionDef;
+                    if (transactionDef instanceof DeclaredTransactionDef) {
+                        DeclaredTransactionDef declaredTransactionDev = (DeclaredTransactionDef)transactionDef;
 
-                        if (devOpsTransactionDev.getGroup().getUsedValue().isEmpty()) {
-                            for (AnnotationDefinition annotationDefinition : devOpsGroupDefinitions) {
+                        if (declaredTransactionDev.getGroup().getUsedValue().isEmpty()) {
+                            for (AnnotationDefinition annotationDefinition : declaredGroupDefinitions) {
                                 AnnotationTransactionDefList transactionDefList = getAnnotationTransactionDefList(annotationDefinitionToTransactionDefs, annotationDefinition);
-                                transactionDefList.addTransactionDef(devOpsTransactionDev);
+                                transactionDefList.addTransactionDef(declaredTransactionDev);
                             }
                         } else {
-                            for (AnnotationDefinition annotationDefinition : devOpsTransactionDev.getAnnotationDefinitions()) {
+                            for (AnnotationDefinition annotationDefinition : declaredTransactionDev.getAnnotationDefinitions()) {
                                 AnnotationTransactionDefList transactionDefList = getAnnotationTransactionDefList(annotationDefinitionToTransactionDefs, annotationDefinition);
-                                transactionDefList.addTransactionDef(devOpsTransactionDev);
+                                transactionDefList.addTransactionDef(declaredTransactionDev);
                             }
                         }
                     }
@@ -301,7 +301,7 @@ public class ConfigurationParameter extends BaseParameter {
                     ConfigurationParameter configurationParameter = new ConfigurationParameter();
 
                     List<TransactionDef> transactionDefs = new ArrayList<>();
-                    transactionDefs.add(new DevOpsAnnotatedTransactionDef());
+                    transactionDefs.add(new DeclaredTransactionDef());
                     configurationParameter.getTransactionSettings().setTransactionDefs(transactionDefs);
 
                     applyOptions(configurationParameter, true);

@@ -9,29 +9,29 @@
       </associated>
       <backtraces>
         <children>
-          <element name="sub" time="1000000" count="10" type="devops" policy="very slow">
+          <element name="sub" time="1000000" count="10" type="declared" policy="very slow">
             <children>
-              <element name="test" time="1000000" count="10" type="pojo"/>
+              <element name="test" time="1000000" count="10" type="matched"/>
             </children>
           </element>
-          <element name="sub" time="1000000" count="10" type="devops" policy="slow">
+          <element name="sub" time="1000000" count="10" type="declared" policy="slow">
             <children>
-              <element name="test" time="1000000" count="10" type="pojo"/>
+              <element name="test" time="1000000" count="10" type="matched"/>
             </children>
           </element>
-          <element name="test 123" time="1000000" count="10" type="devops" policy="error" error="Error message"/>
+          <element name="test 123" time="1000000" count="10" type="declared" policy="error" error="Error message"/>
         </children>
       </backtraces>
     </element>
     <element name="select * from test2" time="2000000" count="20" server="jdbc:test">
       <backtraces>
         <children>
-          <element name="sub" time="1000000" count="10" type="devops" policy="very slow">
+          <element name="sub" time="1000000" count="10" type="declared" policy="very slow">
             <children>
-              <element name="test" time="1000000" count="10" type="pojo"/>
+              <element name="test" time="1000000" count="10" type="matched"/>
             </children>
           </element>
-          <element name="test 123" time="1000000" count="10" type="devops" policy="error" error="Error message"/>
+          <element name="test 123" time="1000000" count="10" type="declared" policy="error" error="Error message"/>
         </children>
       </backtraces>
     </element>

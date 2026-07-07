@@ -78,11 +78,11 @@ class GlobalSettingsSectionsTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
-    fun hiddenTelemetryComboOffersTheDevOpsNodes() {
+    fun hiddenTelemetryComboOffersTheDeclaredNodes() {
         UI.getCurrent().navigate(DisplaySettingsView::class.java)
 
         @Suppress("UNCHECKED_CAST")
-        val combo = find<MultiSelectComboBox<*>>().all().first { it.label == "Hidden DevOps telemetries" } as MultiSelectComboBox<String>
+        val combo = find<MultiSelectComboBox<*>>().all().first { it.label == "Hidden Declared telemetries" } as MultiSelectComboBox<String>
         // MultiSelectComboBox selectItem sets the value fromClient=false, so fire the client value change to trip the isFromClient-gated listener.
         val previous = combo.value
         combo.value = setOf("Request queue length")

@@ -2,9 +2,9 @@
 <data timeUnit="milliseconds">
   <transactionTree>
     <children>
-      <element name="NestedOverdueWorkload.policy1" count="0" type="devops">
+      <element name="NestedOverdueWorkload.policy1" count="0" type="declared">
         <children>
-          <element name="NestedOverdueWorkload.policy2" count="5" type="devops"/>
+          <element name="NestedOverdueWorkload.policy2" count="5" type="declared"/>
         </children>
       </element>
     </children>

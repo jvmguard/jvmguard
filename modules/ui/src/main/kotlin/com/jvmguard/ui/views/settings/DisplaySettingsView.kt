@@ -33,7 +33,7 @@ class DisplaySettingsView : AbstractSettingsSectionView() {
     }
     private val defaultTheme = EnumSelect("Default theme", DefaultTheme::class.java) { it.toString() }
     private val frequencyUnit = EnumSelect("Frequency unit for telemetries", FrequencyUnit::class.java) { it.toString() }
-    private val hiddenTelemetries = MultiSelectComboBox<String>("Hidden DevOps telemetries").apply {
+    private val hiddenTelemetries = MultiSelectComboBox<String>("Hidden Declared telemetries").apply {
         setWidthFull()
         testId = ID_HIDDEN_TELEMETRIES
         addValueChangeListener { event ->
@@ -75,11 +75,11 @@ class DisplaySettingsView : AbstractSettingsSectionView() {
         val draft = Sessions.settingsDraft()
         if (draft.allTelemetryNodes.isEmpty()) {
             val connection = Sessions.current()?.serverConnection ?: return
-            val devOpsNodes = connection.customTelemetryInfo.customTelemetryNodeIdentifiers
-                .filter { it.type == CustomTelemetryNodeIdentifier.Type.DEVOPS }
+            val declaredNodes = connection.customTelemetryInfo.customTelemetryNodeIdentifiers
+                .filter { it.type == CustomTelemetryNodeIdentifier.Type.DECLARED }
                 .map { it.name }
-            val currentlyHidden = connection.hiddenDevOpsTelemetryNodes.toSet()
-            draft.allTelemetryNodes = (devOpsNodes + currentlyHidden).distinct().sorted()
+            val currentlyHidden = connection.hiddenDeclaredTelemetryNodes.toSet()
+            draft.allTelemetryNodes = (declaredNodes + currentlyHidden).distinct().sorted()
             if (draft.hiddenTelemetries == null) {
                 draft.hiddenTelemetries = currentlyHidden
             }

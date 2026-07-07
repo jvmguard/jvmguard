@@ -1,0 +1,43 @@
+---
+title: Declared Transactions
+---
+
+import Figure from '../../../components/Figure.astro';
+
+Maintaining Matched transactions in the jvmguard VM group configurations is an extra step in the development workflow and
+can get easily out of sync with the actual code. While Matched transactions are ideally suited for external classes, it is
+much more maintainable to directly annotate the methods and classes of interest in your own code.
+
+Transactions defined this way are called Declared transactions, because you declare them explicitly in your source code
+with the jvmguard annotations.
+
+The jvmguard annotations are located in the JAR file `api/jvmguard-api.jar`, see the javadoc overview for how to download
+this JAR file with Maven, Ivy or Gradle.
+
+All annotations have a class retention policy. This means that they are present in the class file, but the JVM does not
+load them into memory. Code that queries runtime annotations on a particular method cannot be confused by the additional
+jvmguard annotations because they are only detected by jvmguard at the class loading stage and do not appear in the loaded
+class objects.
+
+The usage of Declared transactions is **described in detail in the Javadoc** that is present in the `api/doc` directory of
+the jvmguard installation.
+
+## Policies
+
+The Declared transaction annotations only define the transaction naming, but not the policies for transactions. Policies
+are closer to the operation side and often need to be adjusted in production.
+
+It is possible to select different Declared transactions in the jvmguard configuration by way of the **group name**. Each
+Declared transaction annotation can have a "group" parameter that is set to the empty string by default.
+
+<Figure src="ui/declared_group.png" />
+
+If the configured groups are not granular enough or if you want to single out a particular class, go to the next step to
+add a class filter. Here, it is also possible to discard all Declared transactions that originate from the selected group
+and classes.
+
+<Figure src="ui/declared_filter.png" />
+
+On the last step of the wizard, you define the policies for the selected Declared transactions. As with other transaction
+types, it often makes sense to keep a catch-all transaction definition at the bottom and add more specific transaction
+definitions at the top.

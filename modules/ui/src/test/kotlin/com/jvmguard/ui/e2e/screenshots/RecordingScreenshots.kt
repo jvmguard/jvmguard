@@ -28,7 +28,7 @@ class RecordingScreenshots : ScreenshotTest() {
         login()
         open("recording/transactions")
         assertThat(getByTestId(AbstractRecordingSettingsView.ID_SELECT_BUTTON)).isVisible()
-        getByTestId("transaction-grid-pojo").waitFor()
+        getByTestId("transaction-grid-matched").waitFor()
         capture("recording_settings")
     }
 
@@ -61,7 +61,7 @@ class RecordingScreenshots : ScreenshotTest() {
     fun transactionsConfig() = onPage {
         login()
         open("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
+        getByTestId("transaction-grid-matched").waitFor()
         capture("transactions_config")
     }
 
@@ -188,57 +188,57 @@ class RecordingScreenshots : ScreenshotTest() {
     }
 
     @Test
-    fun pojoType() = onPage {
+    fun matchedType() = onPage {
         login()
-        openPojoDialog()
-        capture("pojo_type")
+        openMatchedDialog()
+        capture("matched_type")
     }
 
     @Test
-    fun pojoClass() = onPage {
+    fun matchedClass() = onPage {
         login()
-        openPojoDialog()
-        // A fresh POJO def already defaults to the "Class or interface" target.
-        capture("pojo_class")
+        openMatchedDialog()
+        // A fresh Matched def already defaults to the "Class or interface" target.
+        capture("matched_class")
     }
 
     @Test
-    fun pojoMethod() = onPage {
+    fun matchedMethod() = onPage {
         login()
-        openPojoDialog()
+        openMatchedDialog()
         selectEnum("Intercept", "Single method of a class or interface")
-        capture("pojo_method")
+        capture("matched_method")
     }
 
     @Test
-    fun pojoNaming() = onPage {
+    fun matchedNaming() = onPage {
         login()
-        openPojoDialog()
+        openMatchedDialog()
         openTab("Naming")
         assertThat(getByTestId(NamingElementsEditor.ID_GRID)).isVisible()
-        capture("pojo_naming")
+        capture("matched_naming")
     }
 
     @Test
-    fun annotatedTransactions() = onPage {
+    fun mappedTransactions() = onPage {
         login()
         openCustomDialog()
-        capture("annotated_transactions")
+        capture("mapped_transactions")
     }
 
     @Test
-    fun annotatedNaming() = onPage {
+    fun mappedNaming() = onPage {
         login()
         openCustomDialog()
         openTab("Naming")
         assertThat(getByTestId(NamingElementsEditor.ID_GRID)).isVisible()
-        capture("annotated_naming")
+        capture("mapped_naming")
     }
 
     @Test
     fun instanceNameConfig() = onPage {
         login()
-        openPojoDialog()
+        openMatchedDialog()
         openTab("Naming")
         addNamingElement("Instance name")
         assertThat(getByTestId("naming-element-save")).isVisible()
@@ -248,7 +248,7 @@ class RecordingScreenshots : ScreenshotTest() {
     @Test
     fun methodParameterConfig() = onPage {
         login()
-        openPojoDialog()
+        openMatchedDialog()
         openTab("Naming")
         addNamingElement("Method parameter")
         assertThat(getByTestId("naming-element-save")).isVisible()
@@ -256,18 +256,18 @@ class RecordingScreenshots : ScreenshotTest() {
     }
 
     @Test
-    fun devopsGroup() = onPage {
+    fun declaredGroup() = onPage {
         login()
-        openDevOpsDialog()
-        capture("devops_group")
+        openDeclaredDialog()
+        capture("declared_group")
     }
 
     @Test
-    fun devopsFilter() = onPage {
+    fun declaredFilter() = onPage {
         login()
-        openDevOpsDialog()
+        openDeclaredDialog()
         openTab("Filter")
-        capture("devops_filter")
+        capture("declared_filter")
     }
 
     @Test
@@ -291,7 +291,7 @@ class RecordingScreenshots : ScreenshotTest() {
     fun transactionsSet() = onPage {
         login()
         open("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
+        getByTestId("transaction-grid-matched").waitFor()
         getByTestId("set-add").click()
         assertThat(locator("vaadin-dialog-overlay")).isVisible()
         capture("transactions_set")
@@ -315,28 +315,29 @@ class RecordingScreenshots : ScreenshotTest() {
         getByTestId(TriggerActionDialog.ID_SAVE).waitFor()
     }
 
-    private fun Page.openPojoDialog() {
+    private fun Page.openMatchedDialog() {
         open("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
-        // The view opens on the POJO tab, so "Add transaction" creates a POJO def.
+        getByTestId("transaction-grid-matched").waitFor()
+        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Matched")).first().click()
+        getByTestId("transaction-grid-matched").waitFor()
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
     }
 
-    private fun Page.openDevOpsDialog() {
+    private fun Page.openDeclaredDialog() {
         open("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
-        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("DevOps")).first().click()
-        getByTestId("transaction-grid-devops").waitFor()
+        getByTestId("transaction-grid-matched").waitFor()
+        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Declared")).first().click()
+        getByTestId("transaction-grid-declared").waitFor()
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
     }
 
     private fun Page.openCustomDialog() {
         open("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
-        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Custom")).first().click()
-        getByTestId("transaction-grid-annotated").waitFor()
+        getByTestId("transaction-grid-matched").waitFor()
+        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Mapped")).first().click()
+        getByTestId("transaction-grid-mapped").waitFor()
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
     }
@@ -362,8 +363,8 @@ class RecordingScreenshots : ScreenshotTest() {
 
     private fun Page.openPolicySubdefDialog() {
         open("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
-        // The row menu offers "Add policy specialization" only on a saved POJO def.
+        getByTestId("transaction-grid-matched").waitFor()
+        // The row menu offers "Add policy specialization" only on a saved Matched def.
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
         // A class filter is required to save the definition.

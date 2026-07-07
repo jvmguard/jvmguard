@@ -2,7 +2,7 @@
 <data timeUnit="milliseconds">
   <callTree>
     <children>
-      <element name="VmDataWorkload.transaction1" time="7210641" count="33600" type="devops"/>
+      <element name="VmDataWorkload.transaction1" time="7210641" count="33600" type="declared"/>
     </children>
   </callTree>
 </data>

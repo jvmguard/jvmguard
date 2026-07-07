@@ -2,7 +2,7 @@ package com.jvmguard.integration.tests.jvmguard.perf;
 
 import com.jvmguard.annotation.MethodTransaction;
 import com.jvmguard.integration.AbstractJvmGuardRun;
-import com.jvmguard.integration.tests.jvmguard.annotation.classes.naming.MAnno1;
+import com.jvmguard.integration.tests.jvmguard.mapped.classes.naming.MAnno1;
 import org.jdom2.JDOMException;
 
 import java.io.IOException;

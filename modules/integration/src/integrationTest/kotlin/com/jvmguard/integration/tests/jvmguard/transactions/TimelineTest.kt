@@ -1,6 +1,6 @@
 package com.jvmguard.integration.tests.jvmguard.transactions
 
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.agent.config.transactions.TransactionType
 import com.jvmguard.data.config.FrequencyUnit
 import com.jvmguard.data.config.GroupConfig
@@ -23,7 +23,7 @@ class TimelineTest : JvmGuardTest() {
     override fun getVmCount(vmConfig: VMConfig, runNo: Int) = 2
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
-        rootConfig.transactionSettings.transactionDefs.add(DevOpsAnnotatedTransactionDef().apply {
+        rootConfig.transactionSettings.transactionDefs.add(DeclaredTransactionDef().apply {
             initDefault()
             group.usedValue = "sample"
         })
@@ -44,7 +44,7 @@ class TimelineTest : JvmGuardTest() {
             vm,
             time - 1000 * 60 * 10,
             time,
-            TransactionInfo("TimelineWorkload.prep2", TransactionType.DEVOPS),
+            TransactionInfo("TimelineWorkload.prep2", TransactionType.DECLARED),
             TransactionTreeValueType.AVERAGE,
             TransactionTreeInterval.MINUTE
         )
@@ -56,7 +56,7 @@ class TimelineTest : JvmGuardTest() {
             vm,
             time - 1000 * 60 * 10,
             time,
-            TransactionInfo("TimelineWorkload.prep2", TransactionType.DEVOPS),
+            TransactionInfo("TimelineWorkload.prep2", TransactionType.DECLARED),
             TransactionTreeValueType.COUNT,
             TransactionTreeInterval.MINUTE
         )
@@ -68,7 +68,7 @@ class TimelineTest : JvmGuardTest() {
             vm,
             time - 1000 * 60 * 10,
             time,
-            TransactionInfo("TimelineWorkload.prep2", TransactionType.DEVOPS),
+            TransactionInfo("TimelineWorkload.prep2", TransactionType.DECLARED),
             TransactionTreeValueType.TOTAL,
             TransactionTreeInterval.MINUTE
         )

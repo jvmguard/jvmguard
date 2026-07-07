@@ -296,14 +296,14 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
         get() = telemetryProvider.customTelemetryInfo
 
     @RequireAdmin
-    override fun setDevOpsTelemetryNodeVisibilities(nameToVisibility: Map<String, Boolean>) {
+    override fun setDeclaredTelemetryNodeVisibilities(nameToVisibility: Map<String, Boolean>) {
         for ((name, visibility) in nameToVisibility) {
-            telemetryProvider.setDevOpsTelemetryNodeVisibility(name, visibility)
+            telemetryProvider.setDeclaredTelemetryNodeVisibility(name, visibility)
         }
     }
 
-    override val hiddenDevOpsTelemetryNodes: Collection<String>
-        get() = telemetryProvider.hiddenDevOpsTelemetryNodes
+    override val hiddenDeclaredTelemetryNodes: Collection<String>
+        get() = telemetryProvider.hiddenDeclaredTelemetryNodes
 
     override fun getCustomTelemetryData(vm: VM?, nodeIdentifier: CustomTelemetryNodeIdentifier, interval: TelemetryInterval, endTime: Long): TelemetryData =
         telemetryProvider.getCustomTelemetryData(vm, nodeIdentifier, interval, endTime)

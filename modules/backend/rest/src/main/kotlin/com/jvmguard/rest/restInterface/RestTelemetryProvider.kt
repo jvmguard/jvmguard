@@ -38,7 +38,7 @@ class RestTelemetryProvider(private val telemetryProvider: TelemetryProvider) {
 
         val customTelemetries = ArrayList<TelemetryDescriptor>()
         for (nodeIdentifier in telemetryProvider.customTelemetryInfo.customTelemetryNodeIdentifiers) {
-            val type = if (nodeIdentifier.type == Type.DEVOPS) TelemetryType.DEVOPS else TelemetryType.MBEAN
+            val type = if (nodeIdentifier.type == Type.DECLARED) TelemetryType.DECLARED else TelemetryType.MBEAN
             customTelemetries.add(TelemetryDescriptor(nodeIdentifier.name, type, nodeIdentifier.name))
         }
 
@@ -53,8 +53,8 @@ class RestTelemetryProvider(private val telemetryProvider: TelemetryProvider) {
         val effectiveEndTime = if (endTime > currentTime) currentTime else endTime
 
         val telemetryExport = when {
-            telemetryName.startsWith(TelemetryType.DEVOPS.namePrefix) -> getCustomTelemetry(
-                CustomTelemetryNodeIdentifier(Type.DEVOPS, telemetryName.substring(TelemetryType.DEVOPS.namePrefix.length)),
+            telemetryName.startsWith(TelemetryType.DECLARED.namePrefix) -> getCustomTelemetry(
+                CustomTelemetryNodeIdentifier(Type.DECLARED, telemetryName.substring(TelemetryType.DECLARED.namePrefix.length)),
                 telemetryInterval, vm, effectiveEndTime
             )
 

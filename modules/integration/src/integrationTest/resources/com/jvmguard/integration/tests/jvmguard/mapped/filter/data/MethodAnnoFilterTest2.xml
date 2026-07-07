@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="Class1" count="1" type="mapped"/>
+      <element name="Class2" count="1" type="mapped" policy="error" error="java.lang.RuntimeException"/>
+      <element name="Class1.declared1" count="1" type="declared"/>
+      <element name="Class1.declared2" count="1" type="declared" policy="error" error="java.lang.RuntimeException"/>
+      <element name="Class2.declared1" count="1" type="declared" policy="error" error="java.lang.RuntimeException"/>
+    </children>
+  </transactionTree>
+</data>

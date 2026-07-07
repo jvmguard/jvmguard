@@ -14,7 +14,7 @@ class CurrentConnectionEntry(
     val agentConnection: AgentConnectionImpl,
     val connection: Connection,
 ) {
-    val committedDevOpsTelemetryFormats: MutableSet<String> = Collections.synchronizedSet(HashSet())
+    val committedDeclaredTelemetryFormats: MutableSet<String> = Collections.synchronizedSet(HashSet())
 
     private val mbeanGuard = Any()
     private var lastMBeanNames: Set<String>? = null

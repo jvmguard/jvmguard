@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="ClassNaming1 Sub1ClassNaming1 m1" count="2" type="declared"/>
+      <element name="ClassNaming1 Sub1ClassNaming1 m2" count="2" type="declared">
+        <children>
+          <element name="ClassNaming1 Sub1ClassNaming1 innerM2" count="2" type="declared"/>
+        </children>
+      </element>
+      <element name="ClassNaming1 Sub1ClassNaming1 m3" count="2" type="declared"/>
+      <element name="ClassNaming1 Sub2ClassNaming1 m1" count="2" type="declared"/>
+      <element name="ClassNaming1 Sub2ClassNaming1 m2" count="2" type="declared">
+        <children>
+          <element name="ClassNaming1 Sub2ClassNaming1 innerM2" count="2" type="declared"/>
+        </children>
+      </element>
+      <element name="ClassNaming1 Sub2ClassNaming1 m3" count="2" type="declared"/>
+      <element name="ClassNaming3 ClassNaming3 all" count="1" type="declared">
+        <children>
+          <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+        </children>
+      </element>
+      <element name="ClassNaming4 ClassNaming4 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming4 pojo" count="1" type="matched"/>
+        </children>
+      </element>
+      <element name="ClassNaming5 ClassNaming5 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming5 pojo" count="1" type="matched"/>
+          <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+          <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+        </children>
+      </element>
+      <element name="ClassNaming5 Sub2ClassNaming5 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming5 pojo" count="1" type="matched"/>
+          <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+          <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+        </children>
+      </element>
+      <element name="ClassNaming6 ClassNaming6 all" count="1" type="declared"/>
+      <element name="ClassNaming7 ClassNaming7 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming7 pojo" count="1" type="matched"/>
+          <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+          <element name="ClassNaming7 ClassNaming7 m1" count="1" type="declared"/>
+          <element name="ClassNaming7 ClassNaming7 s1" count="1" type="declared"/>
+          <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+        </children>
+      </element>
+      <element name="ClassNaming8 ClassNaming8 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming8 pojo" count="1" type="matched"/>
+          <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+          <element name="ClassNaming8 ClassNaming8 m1" count="1" type="declared"/>
+          <element name="ClassNaming8 ClassNaming8 m4" count="1" type="declared"/>
+          <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+        </children>
+      </element>
+      <element name="ClassNaming8 Sub2ClassNaming8 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming8 pojo" count="1" type="matched"/>
+          <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+          <element name="ClassNaming8 Sub2ClassNaming8 m1" count="1" type="declared"/>
+          <element name="ClassNaming8 Sub2ClassNaming8 m4" count="1" type="declared"/>
+          <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+        </children>
+      </element>
+      <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 9" count="2" type="declared"/>
+      <element name="Sub1ClassNaming2 Sub1ClassNaming2 m2 sub1f " count="2" type="declared"/>
+      <element name="Sub1ClassNaming4 Sub1ClassNaming4 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming4 pojo" count="1" type="matched"/>
+        </children>
+      </element>
+      <element name="Sub1ClassNaming7 Sub1ClassNaming7 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming7 Sub1ClassNaming7 all" count="1" type="declared">
+            <children>
+              <element name="ClassNaming7 pojo" count="1" type="matched"/>
+              <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+              <element name="ClassNaming7 ClassNaming7 s1" count="1" type="declared"/>
+              <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+              <element name="Sub1ClassNaming7 Sub1ClassNaming7 m1" count="1" type="declared">
+                <children>
+                  <element name="ClassNaming7 Sub1ClassNaming7 m1" count="1" type="declared"/>
+                </children>
+              </element>
+              <element name="Sub1ClassNaming7 Sub1ClassNaming7 m2" count="1" type="declared"/>
+            </children>
+          </element>
+          <element name="Sub1ClassNaming7 Sub1ClassNaming7 s2" count="1" type="declared"/>
+        </children>
+      </element>
+      <element name="Sub1ClassNaming8 Sub1ClassNaming8 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming8 Sub1ClassNaming8 all" count="1" type="declared">
+            <children>
+              <element name="ClassNaming8 pojo" count="1" type="matched"/>
+              <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+              <element name="ClassNaming8 Sub1ClassNaming8 m1" count="1" type="declared"/>
+              <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+              <element name="Sub1ClassNaming8 Sub1ClassNaming8 m4" count="1" type="declared">
+                <children>
+                  <element name="ClassNaming8 Sub1ClassNaming8 m4" count="1" type="declared"/>
+                </children>
+              </element>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="Sub2ClassNaming2 Sub2ClassNaming2 m1 sub2f 9" count="2" type="declared"/>
+      <element name="Sub2ClassNaming2 Sub2ClassNaming2 m2 sub2f " count="2" type="declared"/>
+      <element name="Sub3ClassNaming2 Sub3ClassNaming2 m1  9" count="2" type="declared"/>
+      <element name="Sub3ClassNaming2 Sub3ClassNaming2 m2  " count="2" type="declared"/>
+      <element name="Sub3ClassNaming5 Sub3ClassNaming5 all" count="1" type="declared">
+        <children>
+          <element name="ClassNaming5 Sub3ClassNaming5 all" count="1" type="declared">
+            <children>
+              <element name="ClassNaming5 pojo" count="1" type="matched"/>
+              <element name="ClassNaming1 Sub1ClassNaming1 m1" count="1" type="declared"/>
+              <element name="Sub1ClassNaming2 Sub1ClassNaming2 m1 sub1f 4" count="1" type="declared"/>
+              <element name="Sub3ClassNaming5 Sub3ClassNaming5 m1" count="1" type="declared">
+                <children>
+                  <element name="ClassNaming5 Sub3ClassNaming5 m1" count="1" type="declared"/>
+                </children>
+              </element>
+              <element name="Sub3ClassNaming5 Sub3ClassNaming5 m2" count="1" type="declared"/>
+            </children>
+          </element>
+        </children>
+      </element>
+    </children>
+  </transactionTree>
+</data>

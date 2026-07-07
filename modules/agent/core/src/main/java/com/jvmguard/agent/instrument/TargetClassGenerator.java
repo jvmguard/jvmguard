@@ -2,9 +2,9 @@ package com.jvmguard.agent.instrument;
 
 import com.jvmguard.agent.JvmGuardAgent;
 import com.jvmguard.agent.instrument.bytecodeVisitors.BoxingHelper;
-import com.jvmguard.agent.instrument.interceptions.DevOpsInterception;
+import com.jvmguard.agent.instrument.interceptions.DeclaredInterception;
 import com.jvmguard.agent.instrument.interceptions.TransactionInterception;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoDefinition;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
 import com.jvmguard.agent.util.collection.WeakHashSet;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -68,7 +68,7 @@ public class TargetClassGenerator {
         cw.visit(V1_5, ACC_PUBLIC, className, null, OBJECT_NAME, null);
         cw.visitField(ACC_PUBLIC | ACC_STATIC, HANDLER_FIELD, handlerDescriptor, null, null);
 
-        if (transactionInterception instanceof DevOpsInterception) {
+        if (transactionInterception instanceof DeclaredInterception) {
             writeMethod(cw, className, handlerDescriptor, ENTER, getEnterArguments(transactionInterception, 1), transactionInterception);
             writeMethod(cw, className, handlerDescriptor, ENTER, getEnterArguments(transactionInterception, -1), transactionInterception); // object array
         }
@@ -106,7 +106,7 @@ public class TargetClassGenerator {
 
     private static List<Type> getEnterArguments(TransactionInterception transactionInterception, int parameterCount) {
         List<Type> enterArgumentTypes = new ArrayList<>();
-        if (transactionInterception instanceof DevOpsInterception) {
+        if (transactionInterception instanceof DeclaredInterception) {
             enterArgumentTypes.add(Type.getObjectType(OBJECT_NAME)); // this object
             enterArgumentTypes.add(Type.getObjectType(STRING_NAME)); // transaction name
             enterArgumentTypes.add(Type.getObjectType(STRING_NAME)); // getter chain
@@ -125,8 +125,8 @@ public class TargetClassGenerator {
             enterArgumentTypes.add(Type.getObjectType(STRING_NAME)); // class name
             enterArgumentTypes.add(Type.getObjectType(STRING_NAME)); // method name
             enterArgumentTypes.add(Type.getObjectType(OBJECT_NAME)); // this object
-            if (transactionInterception.getDefinition() instanceof PojoDefinition) {
-                PojoDefinition pojoDefinition = (PojoDefinition)transactionInterception.getDefinition();
+            if (transactionInterception.getDefinition() instanceof MatchedDefinition) {
+                MatchedDefinition pojoDefinition = (MatchedDefinition)transactionInterception.getDefinition();
                 if (pojoDefinition.isTransferArguments()) {
                     for (Type type : Type.getArgumentTypes(pojoDefinition.getMethodSignature())) {
                         if (type.getSort() == Type.ARRAY || type.getSort() == Type.OBJECT) {
@@ -171,7 +171,7 @@ public class TargetClassGenerator {
         mv.visitLabel(startLabel);
 
         if (methodName.equals(ENTER)) {
-            if (transactionInterception.getDefinition() instanceof PojoDefinition) {
+            if (transactionInterception.getDefinition() instanceof MatchedDefinition) {
                 writePojoEnter(arguments, handlerInternalName, mv);
             } else {
                 writeOtherEnter(arguments, descriptor, handlerInternalName, mv);

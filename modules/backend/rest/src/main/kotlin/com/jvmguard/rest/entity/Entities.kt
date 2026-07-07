@@ -30,7 +30,7 @@ class TelemetryDescriptor(name: String, type: TelemetryType, description: String
 
     enum class TelemetryType(val namePrefix: String) {
         BASE(""),
-        DEVOPS("devops/"),
+        DECLARED("declared/"),
         MBEAN("mbean/"),
     }
 }

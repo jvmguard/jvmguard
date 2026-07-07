@@ -5,7 +5,7 @@ import com.jvmguard.agent.config.VmType
 import com.jvmguard.agent.config.base.EntityChangeListener
 import com.jvmguard.agent.config.recording.RecordingOptions
 import com.jvmguard.agent.config.telemetry.TelemetrySettings
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.agent.config.transactions.TransactionSettings
 import com.jvmguard.common.helper.GroupHelper
 import com.jvmguard.data.base.HierarchicalConfig
@@ -45,10 +45,10 @@ open class GroupConfig : HierarchicalConfig {
 
     private fun initDefault() {
         val transactionDefs = transactionSettings.transactionDefs
-        val devOpsAnnotatedTransactionDef = DevOpsAnnotatedTransactionDef()
-        devOpsAnnotatedTransactionDef.initDefault()
-        devOpsAnnotatedTransactionDef.id = 1L
-        transactionDefs.add(devOpsAnnotatedTransactionDef)
+        val declaredAnnotatedTransactionDef = DeclaredTransactionDef()
+        declaredAnnotatedTransactionDef.initDefault()
+        declaredAnnotatedTransactionDef.id = 1L
+        transactionDefs.add(declaredAnnotatedTransactionDef)
     }
 
     val groupIdentifier: VmIdentifier

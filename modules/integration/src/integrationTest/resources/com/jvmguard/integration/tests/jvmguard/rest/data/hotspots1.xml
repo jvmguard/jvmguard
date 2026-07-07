@@ -2,13 +2,13 @@
 <data endTime="2026-06-18T19:25:00.000Z" interval="3600000" vm="" vmType="VM Group">
   <hotSpots>
     <children>
-      <element name="RestTransactionWorkload.transaction2" time="18031575234" count="110" type="devops">
+      <element name="RestTransactionWorkload.transaction2" time="18031575234" count="110" type="declared">
         <children>
-          <element name="transaction Щ" time="15027568797" count="100" type="devops"/>
-          <element name="transaction Щ" time="3004006437" count="10" type="devops" policy="slow"/>
+          <element name="transaction Щ" time="15027568797" count="100" type="declared"/>
+          <element name="transaction Щ" time="3004006437" count="10" type="declared" policy="slow"/>
         </children>
       </element>
-      <element name="transaction Щ" time="15430949" count="110" type="devops"/>
+      <element name="transaction Щ" time="15430949" count="110" type="declared"/>
     </children>
   </hotSpots>
 </data>

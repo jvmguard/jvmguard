@@ -1,16 +1,16 @@
 package com.jvmguard.ui.views.settings.recording
 
 import com.jvmguard.agent.config.recording.RetransformationType
-import com.jvmguard.agent.config.transactions.CustomAnnotatedTransactionDef
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
-import com.jvmguard.agent.config.transactions.PojoTransactionDef
+import com.jvmguard.agent.config.transactions.MappedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
+import com.jvmguard.agent.config.transactions.MatchedTransactionDef
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.vmdata.VmIdentifier
 import com.jvmguard.ui.JvmGuardBrowserlessTest
 import com.jvmguard.ui.components.EnumSelect
-import com.jvmguard.ui.components.recording.CustomTransactionDefDialog
-import com.jvmguard.ui.components.recording.DevOpsTransactionDefDialog
-import com.jvmguard.ui.components.recording.PojoTransactionDefDialog
+import com.jvmguard.ui.components.recording.MappedTransactionDefDialog
+import com.jvmguard.ui.components.recording.DeclaredTransactionDefDialog
+import com.jvmguard.ui.components.recording.MatchedTransactionDefDialog
 import com.jvmguard.ui.components.recording.sets.SaveSetDialog
 import com.jvmguard.ui.server.MockConnections
 import com.jvmguard.ui.server.Sessions
@@ -56,46 +56,48 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
-    fun addingAPojoDefPersistsToTheGroup() {
-        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<Button>().all().first { it.text == "Add transaction" }).click()
-
-        val dialog = find<PojoTransactionDefDialog>().single()
-        use(find<TextField>(dialog).all().first { it.label == "Class or interface name" }).setValue("com.example.Service")
-        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
-
-        assertTrue(rootDefs().any { it is PojoTransactionDef && it.declaringClassName == "com.example.Service" })
-
-        use(shellSave()).click()
-        val saved = connection.groupConfigs.first { it.isRoot }.transactionSettings.transactionDefs
-        assertTrue(saved.any { it is PojoTransactionDef && it.declaringClassName == "com.example.Service" })
-    }
-
-    @Test
-    fun pojoMethodFieldsAppearOnlyForMethodInterception() {
-        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<Button>().all().first { it.text == "Add transaction" }).click()
-        val dialog = find<PojoTransactionDefDialog>().single()
-
-        assertFalse(find<TextField>(dialog).all().any { it.label == "Method name" })
-
-        @Suppress("UNCHECKED_CAST")
-        val target = find<Select<*>>(dialog).all().first { it.label == "Intercept" } as Select<PojoTransactionDef.InterceptionTarget>
-        target.value = PojoTransactionDef.InterceptionTarget.METHOD
-        assertTrue(find<TextField>(dialog).all().any { it.label == "Method name" })
-    }
-
-    @Test
-    fun addingADevOpsDefPersistsToTheGroup() {
+    fun addingAMatchedDefPersistsToTheGroup() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
         use(find<TabSheet>().single()).select(1)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
 
-        val dialog = find<DevOpsTransactionDefDialog>().single()
+        val dialog = find<MatchedTransactionDefDialog>().single()
+        use(find<TextField>(dialog).all().first { it.label == "Class or interface name" }).setValue("com.example.Service")
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+
+        assertTrue(rootDefs().any { it is MatchedTransactionDef && it.declaringClassName == "com.example.Service" })
+
+        use(shellSave()).click()
+        val saved = connection.groupConfigs.first { it.isRoot }.transactionSettings.transactionDefs
+        assertTrue(saved.any { it is MatchedTransactionDef && it.declaringClassName == "com.example.Service" })
+    }
+
+    @Test
+    fun matchedMethodFieldsAppearOnlyForMethodInterception() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(1)
+        use(find<Button>().all().first { it.text == "Add transaction" }).click()
+        val dialog = find<MatchedTransactionDefDialog>().single()
+
+        assertFalse(find<TextField>(dialog).all().any { it.label == "Method name" })
+
+        @Suppress("UNCHECKED_CAST")
+        val target = find<Select<*>>(dialog).all().first { it.label == "Intercept" } as Select<MatchedTransactionDef.InterceptionTarget>
+        target.value = MatchedTransactionDef.InterceptionTarget.METHOD
+        assertTrue(find<TextField>(dialog).all().any { it.label == "Method name" })
+    }
+
+    @Test
+    fun addingADeclaredDefPersistsToTheGroup() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(0)
+        use(find<Button>().all().first { it.text == "Add transaction" }).click()
+
+        val dialog = find<DeclaredTransactionDefDialog>().single()
         use(find<TextField>(dialog).all().first { it.label.orEmpty().startsWith("Restrict to group") }).setValue("checkout")
         use(find<Button>(dialog).all().first { it.text == "Save" }).click()
 
-        assertTrue(rootDefs().any { it is DevOpsAnnotatedTransactionDef && it.group.value == "checkout" })
+        assertTrue(rootDefs().any { it is DeclaredTransactionDef && it.group.value == "checkout" })
     }
 
     @Test
@@ -104,18 +106,19 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
         use(find<TabSheet>().single()).select(2)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
 
-        val dialog = find<CustomTransactionDefDialog>().single()
+        val dialog = find<MappedTransactionDefDialog>().single()
         use(find<TextField>(dialog).all().first { it.label == "Annotation class name" }).setValue("com.example.Traced")
         use(find<Button>(dialog).all().first { it.text == "Save" }).click()
 
-        assertTrue(rootDefs().any { it is CustomAnnotatedTransactionDef && it.annotationName == "com.example.Traced" })
+        assertTrue(rootDefs().any { it is MappedTransactionDef && it.annotationName == "com.example.Traced" })
     }
 
     @Test
     fun savingATransactionSetStoresItOnTheServer() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(1)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
-        val dialog = find<PojoTransactionDefDialog>().single()
+        val dialog = find<MatchedTransactionDefDialog>().single()
         use(find<TextField>(dialog).all().first { it.label == "Class or interface name" }).setValue("com.example.Service")
         use(find<Button>(dialog).all().first { it.text == "Save" }).click()
 

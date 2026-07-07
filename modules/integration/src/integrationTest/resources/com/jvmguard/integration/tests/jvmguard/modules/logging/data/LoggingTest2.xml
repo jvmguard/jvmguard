@@ -2,10 +2,10 @@
 <data timeUnit="milliseconds">
   <callTree>
     <children>
-      <element name="LoggingWorkload.javaLogging" count="5" type="devops"/>
-      <element name="LoggingWorkload.log4j1" count="5" type="devops"/>
-      <element name="LoggingWorkload.log4j2" count="5" type="devops"/>
-      <element name="LoggingWorkload.logback" count="5" type="devops"/>
+      <element name="LoggingWorkload.javaLogging" count="5" type="declared"/>
+      <element name="LoggingWorkload.log4j1" count="5" type="declared"/>
+      <element name="LoggingWorkload.log4j2" count="5" type="declared"/>
+      <element name="LoggingWorkload.logback" count="5" type="declared"/>
     </children>
   </callTree>
 </data>

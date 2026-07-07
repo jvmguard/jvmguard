@@ -6,7 +6,7 @@ import com.jvmguard.agent.instrument.model.InterceptionMethod;
 import com.jvmguard.agent.callee.Handler;
 import com.jvmguard.agent.instrument.Instrumenter;
 import com.jvmguard.agent.instrument.TargetClassGenerator;
-import com.jvmguard.agent.instrument.classInfo.DevOpsAnnotations;
+import com.jvmguard.agent.instrument.classInfo.DeclaredAnnotations;
 import com.jvmguard.agent.util.Logger;
 
 import java.lang.reflect.Method;
@@ -147,9 +147,9 @@ public abstract class ChangeCalculator<T extends TransactionDefinition> {
                     interceptionMethods.add(new InterceptionMethod(method.getName(), SignatureUtil.getSignature(method)));
                 }
             }
-            DevOpsAnnotations devOpsAnnotations = instrumenter.getDevOpsAnnotations(className);
-            if (devOpsAnnotations != null) {
-                interceptionMethods.removeAll(devOpsAnnotations.getNoTransactionMethods());
+            DeclaredAnnotations declaredAnnotations = instrumenter.getDeclaredAnnotations(className);
+            if (declaredAnnotations != null) {
+                interceptionMethods.removeAll(declaredAnnotations.getNoTransactionMethods());
             }
             for (TransactionDefinition transactionDefinition : transactionDefinitions) {
                 transactionDefinition.setDefinedMethods(interceptionMethods);

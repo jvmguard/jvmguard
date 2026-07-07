@@ -2,14 +2,14 @@
 <data endTime="2026-06-18T19:25:00.000Z" interval="3600000" vm="mygroup" vmType="VM Group">
   <callTree>
     <children>
-      <element name="transaction Щ" time="6014178058" count="40" type="devops">
+      <element name="transaction Щ" time="6014178058" count="40" type="declared">
         <children>
-          <element name="RestTransactionWorkload.transaction2" time="6010962297" count="40" type="devops"/>
+          <element name="RestTransactionWorkload.transaction2" time="6010962297" count="40" type="declared"/>
         </children>
       </element>
-      <element name="transaction Щ" time="1204338585" count="4" type="devops" policy="slow">
+      <element name="transaction Щ" time="1204338585" count="4" type="declared" policy="slow">
         <children>
-          <element name="RestTransactionWorkload.transaction2" time="1201524717" count="4" type="devops"/>
+          <element name="RestTransactionWorkload.transaction2" time="1201524717" count="4" type="declared"/>
         </children>
       </element>
     </children>

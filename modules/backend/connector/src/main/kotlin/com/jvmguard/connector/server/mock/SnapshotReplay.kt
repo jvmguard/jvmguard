@@ -242,7 +242,7 @@ class SnapshotReplay(snapshot: DemoSnapshot) {
         val bucket = bucketsFor(replayCursor.vmId?.let { vmById[it] }, replayCursor.interval)
             .firstOrNull { it.startTime == replayCursor.startTime }
         val treeDto = bucket?.let(selector)
-        val tree = if (treeDto != null) rebuildTree(treeDto) else TransactionTree(null, TransactionType.POJO, null)
+        val tree = if (treeDto != null) rebuildTree(treeDto) else TransactionTree(null, TransactionType.MATCHED, null)
         val cursorImpl = TransactionCursorImpl().apply {
             availability = if (replayCursor.available) DataAvailability.TRUE else DataAvailability.FALSE
             isLatest = replayCursor.latest

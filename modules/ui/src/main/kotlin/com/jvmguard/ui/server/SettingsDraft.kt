@@ -39,7 +39,7 @@ class SettingsDraft(val config: GlobalConfig) : SettingsModeDraft {
         }
         connection.setGlobalConfig(config)
         hiddenTelemetries?.let { hidden ->
-            connection.setDevOpsTelemetryNodeVisibilities(allTelemetryNodes.associateWith { it !in hidden })
+            connection.setDeclaredTelemetryNodeVisibilities(allTelemetryNodes.associateWith { it !in hidden })
         }
         if (users.hasChanges()) {
             connection.modifyUsers(users.toModification())

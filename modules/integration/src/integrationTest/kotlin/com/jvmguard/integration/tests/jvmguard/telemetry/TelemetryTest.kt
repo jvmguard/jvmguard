@@ -118,7 +118,7 @@ class TelemetryTest : JvmGuardTest() {
         time: Long
     ): CheckResult {
         val recordingMillis = getRecordingMillis(displayInterval, Telemetry.CUSTOM.mainId).toLong()
-        val identifier = serverConnection.customTelemetryNodes.first { it.name == name && it.type == CustomTelemetryNodeIdentifier.Type.DEVOPS }
+        val identifier = serverConnection.customTelemetryNodes.first { it.name == name && it.type == CustomTelemetryNodeIdentifier.Type.DECLARED }
         val telemetryData = serverConnection.getCustomTelemetryData(vm, identifier, displayInterval, time)
         checkTelemetryData(telemetryData, time, recordingMillis, displayInterval)
         return CheckResult(telemetryData, recordingMillis, telemetryData.nonNullTimestamps.size)

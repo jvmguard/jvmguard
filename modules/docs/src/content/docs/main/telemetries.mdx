@@ -14,12 +14,12 @@ transactions. This is not a direct measurement in the monitored VM, but an evalu
 * Telemetries that are measured inside the monitored VM, like the heap size, the CPU usage or the number of live
 threads.
 * MBean telemetries that were configured in the recording settings.
-* Devops telemetries where you have used the telemetry annotation from the jvmguard API.
+* Declared telemetries where you have used the telemetry annotation from the jvmguard API.
 
 ## Telemetry data view
 
 All telemetries are available from the "VM Data Views". Each standard telemetry has its own entry under the
-"Telemetries" node, and MBean and Devops telemetries are added under the "Custom telemetries" node. The latter is only
+"Telemetries" node, and MBean and Declared telemetries are added under the "Custom telemetries" node. The latter is only
 visible if at least one custom telemetry exists.
 
 Many telemetries are stacked area plots where the single lines add up to a total value. For example, the "Transactions"
@@ -133,7 +133,7 @@ ManagementFactory.getPlatformMBeanServer();
 
 in your application at startup to be sure that the telemetry will work after a restart of the monitored VM.
 
-## Devops telemetries
+## Declared telemetries
 
 To monitor any scalar value in your application, you can add a public static parameterless method that returns a
 numeric value, either a primitive or a primitive wrapper. Then, annotate the method with the `@Telemetry` annotation.
@@ -145,7 +145,7 @@ telemetries" node.
 
 Once an annotation telemetry was detected by jvmguard, it will always be shown in this list, regardless of whether the
 annotated method is currently available in a connected VM. When you retire such a telemetry, go to the general settings,
-open the Display tab and use the **Hidden DevOps telemetries** selector. Here you can hide selected telemetries. Note
+open the Display tab and use the **Hidden Declared telemetries** selector. Here you can hide selected telemetries. Note
 that the telemetries are matched by name and not by the annotated method.
 
 For more information, please see the Javadoc of the `com.jvmguard.annotation.Telemetry` class in the `api/doc` directory

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="Class1Sub1.m1" count="1" type="mapped">
+        <children>
+          <element name="Class1.m1" count="1" type="mapped"/>
+        </children>
+      </element>
+    </children>
+  </transactionTree>
+</data>

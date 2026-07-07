@@ -104,6 +104,18 @@ vaadin-grid.jvmguard-group-selector::part(cell)::before {
     font-size: var(--vaadin-font-size-s, 0.875em);
 }
 
+.jvmguard-transaction-type-info {
+    color: var(--vaadin-text-color-secondary);
+    /*noinspection CssUnresolvedCustomProperty*/
+    font-size: var(--vaadin-font-size-s, 0.875em);
+    padding-bottom: 0.75rem;
+    margin-top: 0;
+}
+
+vaadin-tabsheet.jvmguard-recording-tabsheet::part(tabs-container) {
+    padding-bottom: 0;
+}
+
 .jvmguard-row-detail {
     color: var(--vaadin-text-color-secondary);
 }

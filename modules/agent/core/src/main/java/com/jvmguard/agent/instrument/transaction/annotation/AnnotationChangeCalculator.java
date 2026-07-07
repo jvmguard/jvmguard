@@ -4,7 +4,7 @@ import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.instrument.Instrumenter;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo.HierarchyVisitor;
-import com.jvmguard.agent.instrument.classInfo.DevOpsAnnotationInfo;
+import com.jvmguard.agent.instrument.classInfo.DeclaredAnnotationInfo;
 import com.jvmguard.agent.instrument.model.InterceptionMethod;
 import com.jvmguard.agent.instrument.transaction.ChangeCalculator;
 import com.jvmguard.agent.instrument.transaction.DefinitionSite;
@@ -102,16 +102,16 @@ public class AnnotationChangeCalculator extends ChangeCalculator<AnnotationDefin
                     for (Object storedAnnotation : definedAnnotations) {
                         if (storedAnnotation instanceof String) {
                             String storedAnnotationName = (String)storedAnnotation;
-                            if (!inheritable || !DevOpsAnnotationDefinition.isDevOpsDescriptor(storedAnnotationName)) {
+                            if (!inheritable || !DeclaredAnnotationDefinition.isDeclaredDescriptor(storedAnnotationName)) {
                                 checkAffectedClasses(searchedAnnotations, storedAnnotationName, className);
                             }
-                        } else if (storedAnnotation instanceof DevOpsAnnotationInfo) { // inheritable
+                        } else if (storedAnnotation instanceof DeclaredAnnotationInfo) { // inheritable
                             if (inheritable) {
-                                DevOpsAnnotationInfo devOpsAnnotationInfo = (DevOpsAnnotationInfo)storedAnnotation;
-                                if (devOpsAnnotationInfo.matches(baseClassName)) {
-                                    Logger.log(Subsystem.INSTRUMENTATION, 20, false, "checking devops for %s, triggered by %s: %s\n", baseClassName, className, devOpsAnnotationInfo.getAnnotationDescriptor());
-                                    checkAffectedClasses(searchedAnnotations, devOpsAnnotationInfo.getAnnotationDescriptor(),
-                                        devOpsAnnotationInfo.getInheritance().value() == Mode.WITH_SUBCLASS_NAMES ? baseClassName : className);
+                                DeclaredAnnotationInfo declaredAnnotationInfo = (DeclaredAnnotationInfo)storedAnnotation;
+                                if (declaredAnnotationInfo.matches(baseClassName)) {
+                                    Logger.log(Subsystem.INSTRUMENTATION, 20, false, "checking declared for %s, triggered by %s: %s\n", baseClassName, className, declaredAnnotationInfo.getAnnotationDescriptor());
+                                    checkAffectedClasses(searchedAnnotations, declaredAnnotationInfo.getAnnotationDescriptor(),
+                                        declaredAnnotationInfo.getInheritance().value() == Mode.WITH_SUBCLASS_NAMES ? baseClassName : className);
                                 }
                             }
                         } else {
@@ -124,7 +124,7 @@ public class AnnotationChangeCalculator extends ChangeCalculator<AnnotationDefin
             private void checkAffectedClasses(Map<String, Set<AnnotationDefinition>> searchedAnnotations, String annotationDescriptor, String definedOn) {
                 Set<AnnotationDefinition> definitions = searchedAnnotations.get(annotationDescriptor);
                 if (definitions == null) {
-                    String matchAllName = DevOpsAnnotationDefinition.getMatchAllDescriptor(annotationDescriptor);
+                    String matchAllName = DeclaredAnnotationDefinition.getMatchAllDescriptor(annotationDescriptor);
                     if (matchAllName != null && !matchAllName.equals(annotationDescriptor)) {
                         annotationDescriptor = matchAllName;
                         definitions = searchedAnnotations.get(annotationDescriptor);
@@ -134,8 +134,8 @@ public class AnnotationChangeCalculator extends ChangeCalculator<AnnotationDefin
                 if (definitions != null) {
                     for (AnnotationDefinition definition : definitions) {
                         Set<DefinitionSite> classNames = affectedClasses.computeIfAbsent(definition, k -> new HashSet<>());
-                        if (definition instanceof CustomAnnotationDefinition) {
-                            CustomAnnotationDefinition customAnnotationDefinition = (CustomAnnotationDefinition)definition;
+                        if (definition instanceof MappedAnnotationDefinition) {
+                            MappedAnnotationDefinition customAnnotationDefinition = (MappedAnnotationDefinition)definition;
                             if (customAnnotationDefinition.isClassWithImplementingOnly()) {
                                 addClassWithDefiningMethods(definedOn.replace('/', '.'), definition);
                             }

@@ -9,7 +9,7 @@ public class AnnotationHandler extends Handler {
 
     public AnnotationHandler(ClassFilterTransactionDef policyTransaction, ClassFilterTransactionDef namingTransaction) {
         super(policyTransaction, namingTransaction);
-        transactionType = namingTransaction != null ? namingTransaction.getTransactionType() : TransactionType.ANNOTATED;
+        transactionType = namingTransaction != null ? namingTransaction.getTransactionType() : TransactionType.MAPPED;
     }
 
     public void enter(int namingId, String staticName, String className, String methodName, Object thisObject) {

@@ -118,7 +118,7 @@ is a multi-JVM workload generator: it spawns 10 child JVMs, each launched with
 `-javaagent:dist/agent/jvmguard.jar` (dev-mode fallback; `agent/jvmguard.jar` in a real install), each running
 one `com.jvmguard.demo.server.DemoService` role simulating an e-commerce "Online Boutique" fleet
 (Storefront, Catalog, Recommendation, Currency, Cart, Checkout, Payment, Shipping, Notification).
-Instrumentation is **DevOps annotations only** (`@MethodTransaction` operations + nested sub-steps,
+Instrumentation is **Declared annotations only** (`@MethodTransaction` operations + nested sub-steps,
 `@Telemetry` getters) — no JEE probes, no config required (annotations are auto-detected at class-load).
 All "work" is `Thread.sleep` (no CPU load); arrivals are Poisson and a `TrafficProfile`
 modulates the rate across multiple timescales (weekly/diurnal/hourly/short sines + daily

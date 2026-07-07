@@ -82,7 +82,7 @@ interface ServerConnection {
     @get:NoTransaction
     val customTelemetryInfo: CustomTelemetryInfo
 
-    val hiddenDevOpsTelemetryNodes: Collection<String>
+    val hiddenDeclaredTelemetryNodes: Collection<String>
 
     val isUseSsl: Boolean
     val dataDirectory: File
@@ -121,7 +121,7 @@ interface ServerConnection {
     fun getTelemetryData(vm: VM?, mainId: String, interval: TelemetryInterval, endTime: Long): TelemetryData
     fun getCustomTelemetryData(vm: VM?, nodeIdentifier: CustomTelemetryNodeIdentifier, interval: TelemetryInterval, endTime: Long): TelemetryData
 
-    fun setDevOpsTelemetryNodeVisibilities(nameToVisibility: Map<String, Boolean>)
+    fun setDeclaredTelemetryNodeVisibilities(nameToVisibility: Map<String, Boolean>)
 
     fun getPackageStats(vm: VM): Map<String, Int>?
     fun getClassNames(vm: VM, allClasses: Boolean): Collection<String>?

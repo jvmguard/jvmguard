@@ -31,8 +31,8 @@ import java.net.URI
 
 private const val MBEAN_TEL1_NAME = "Class MBean telemetry \u041B"
 private const val MBEAN_TEL2_NAME = "compilation time"
-private const val DEVOPS_TEL1_NAME = "vmNoSingle \u0429"
-private const val DEVOPS_TEL2_NAME = "group1"
+private const val DECLARED_TEL1_NAME = "vmNoSingle \u0429"
+private const val DECLARED_TEL2_NAME = "group1"
 private const val MBEAN_TEL1_LINE2 = "total loaded classes"
 
 class RestTelemetryTest : JvmGuardTest() {
@@ -120,15 +120,15 @@ class RestTelemetryTest : JvmGuardTest() {
         assertEqual(jsonNode.string("unit"), "\u00b5s")
         assertBetween(jsonNode.nonNullArray<JsonObject>("data").last().nonNullLong("value"), 3000, 2_500_000)
 
-        jsonNode = parseUrl("telemetries/devops/" + encodeURIComponent(DEVOPS_TEL1_NAME))
+        jsonNode = parseUrl("telemetries/declared/" + encodeURIComponent(DECLARED_TEL1_NAME))
         checkCurrentEndTime(jsonNode)
-        assertEqual(jsonNode.string("description"), DEVOPS_TEL1_NAME)
+        assertEqual(jsonNode.string("description"), DECLARED_TEL1_NAME)
         assertEqual(jsonNode.nonNullArray<JsonObject>("data").last().size, 2)
-        assertEqual(jsonNode.nonNullArray<JsonObject>("data").last()[DEVOPS_TEL1_NAME], 100)
+        assertEqual(jsonNode.nonNullArray<JsonObject>("data").last()[DECLARED_TEL1_NAME], 100)
 
-        jsonNode = parseUrl("telemetries/devops/" + encodeURIComponent(DEVOPS_TEL2_NAME))
+        jsonNode = parseUrl("telemetries/declared/" + encodeURIComponent(DECLARED_TEL2_NAME))
         checkCurrentEndTime(jsonNode)
-        assertEqual(jsonNode.string("description"), DEVOPS_TEL2_NAME)
+        assertEqual(jsonNode.string("description"), DECLARED_TEL2_NAME)
         assertEqual(jsonNode.nonNullArray<JsonObject>("data").last().size, 3)
         assertEqual(jsonNode.nonNullArray<JsonObject>("data").last().long("double"), 30)
 

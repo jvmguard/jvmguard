@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="Reentry1.m1: 5" count="4" type="matched"/>
+      <element name="Reentry1Sub.m1: 5" count="4" type="matched"/>
+      <element name="Reentry3.m1" count="4" type="matched">
+        <children>
+          <element name="Reentry3.m3" count="4" type="declared"/>
+        </children>
+      </element>
+      <element name="Reentry3Sub.m1" count="8" type="matched">
+        <children>
+          <element name="Reentry3.m3" count="8" type="declared"/>
+        </children>
+      </element>
+    </children>
+  </callTree>
+</data>

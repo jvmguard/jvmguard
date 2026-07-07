@@ -2,29 +2,29 @@ package com.jvmguard.agent.instrument;
 
 import com.jvmguard.agent.instrument.model.InterceptionMethod;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationTransactionDefList;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoTransactionDefList;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefList;
 
 import java.util.*;
 
 public class InstrumenterConfig {
-    private Map<InterceptionMethod, List<PojoTransactionDefList>> pojoMethodDefinitions = Collections.unmodifiableMap(new HashMap<>());
-    private Map<String, List<PojoTransactionDefList>> pojoClassDefinitions = Collections.unmodifiableMap(new HashMap<>());
+    private Map<InterceptionMethod, List<MatchedTransactionDefList>> pojoMethodDefinitions = Collections.unmodifiableMap(new HashMap<>());
+    private Map<String, List<MatchedTransactionDefList>> pojoClassDefinitions = Collections.unmodifiableMap(new HashMap<>());
     private Map<String, List<AnnotationTransactionDefList>> annotationDefinitions = Collections.unmodifiableMap(new HashMap<>());
     private Set<String> inheritableMethodAnnotations = Collections.unmodifiableSet(new HashSet<>());
 
-    public synchronized Map<InterceptionMethod, List<PojoTransactionDefList>> getPojoMethodDefinitions() {
+    public synchronized Map<InterceptionMethod, List<MatchedTransactionDefList>> getPojoMethodDefinitions() {
         return pojoMethodDefinitions;
     }
 
-    public synchronized void setPojoMethodDefinitions(Map<InterceptionMethod, List<PojoTransactionDefList>> pojoMethodDefinitions) {
+    public synchronized void setPojoMethodDefinitions(Map<InterceptionMethod, List<MatchedTransactionDefList>> pojoMethodDefinitions) {
         this.pojoMethodDefinitions = Collections.unmodifiableMap(pojoMethodDefinitions);
     }
 
-    public synchronized Map<String, List<PojoTransactionDefList>> getPojoClassDefinitions() {
+    public synchronized Map<String, List<MatchedTransactionDefList>> getPojoClassDefinitions() {
         return pojoClassDefinitions;
     }
 
-    public synchronized void setPojoClassDefinitions(Map<String, List<PojoTransactionDefList>> pojoClassDefinitions) {
+    public synchronized void setPojoClassDefinitions(Map<String, List<MatchedTransactionDefList>> pojoClassDefinitions) {
         this.pojoClassDefinitions = Collections.unmodifiableMap(pojoClassDefinitions);
     }
 

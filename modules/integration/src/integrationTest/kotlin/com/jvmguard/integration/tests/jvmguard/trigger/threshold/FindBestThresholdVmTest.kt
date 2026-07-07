@@ -23,7 +23,7 @@ class FindBestThresholdVmTest : JvmGuardTest() {
     override fun getVmCount(vmConfig: VMConfig, runNo: Int) = 10
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
-        val identifier = PersistentTelemetryIdentifier("cu", "", AgentConstants.TELEMETRY_TYPE_DEVOPS, "continuous")
+        val identifier = PersistentTelemetryIdentifier("cu", "", AgentConstants.TELEMETRY_TYPE_DECLARED, "continuous")
 
         rootConfig.thresholdSettings.thresholds.add(Threshold().apply {
             telemetryIdentifier = identifier

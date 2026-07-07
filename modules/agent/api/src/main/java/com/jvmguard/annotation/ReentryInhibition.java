@@ -58,15 +58,15 @@ public enum ReentryInhibition {
      */
     GROUP,
     /**
-     * Prevent all directly nested DevOps transactions.
+     * Prevent all directly nested Declared transactions.
      * <p>
-     * DevOps transactions are transactions created through this API via
+     * Declared transactions are transactions created through this API via
      * {@link ClassTransaction} or {@link MethodTransaction}.
      * Note that other transactions types that can be configured in the
-     * jvmguard UI, like POJO or EJB transactions, can still nest with DevOps transactions.
+     * jvmguard UI, like Matched or EJB transactions, can still nest with Declared transactions.
      * </p>
      */
-    DEV_OPS,
+    DECLARED,
     /**
      * Prevent all further nested transactions.
      */

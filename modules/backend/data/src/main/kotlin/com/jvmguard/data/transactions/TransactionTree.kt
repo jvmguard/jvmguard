@@ -8,7 +8,7 @@ import java.io.DataOutputStream
 
 class TransactionTree : AbstractTransactionTree<String, TransactionTree> {
 
-    private var transactionTypeValue: TransactionType = TransactionType.POJO
+    private var transactionTypeValue: TransactionType = TransactionType.MATCHED
     var nameId: Long = 0
 
     constructor()
@@ -44,7 +44,7 @@ class TransactionTree : AbstractTransactionTree<String, TransactionTree> {
 
     protected override fun createChildInt(lookupTree: TransactionTree?): TransactionTree {
         return if (lookupTree == null) {
-            TransactionTree(this, null, TransactionType.POJO, null)
+            TransactionTree(this, null, TransactionType.MATCHED, null)
         } else {
             TransactionTree(this, lookupTree.getName(), lookupTree.getTransactionType(), lookupTree.getPolicyTypeString())
                 .apply { nameId = lookupTree.nameId }

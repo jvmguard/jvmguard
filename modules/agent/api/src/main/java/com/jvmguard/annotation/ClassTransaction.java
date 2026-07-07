@@ -39,7 +39,7 @@ public @interface ClassTransaction {
 
     /**
      * Specify a group name for the jvmguard UI configuration.
-     * To configure options in the jvmguard UI that apply to different DevOps transactions, set the group parameter
+     * To configure options in the jvmguard UI that apply to different Declared transactions, set the group parameter
      * for those transactions to a common string. For example, policies are usually the same for a number
      * of transactions. By setting the group in the annotations, you can avoid multiple identical configuration
      * steps in UI.

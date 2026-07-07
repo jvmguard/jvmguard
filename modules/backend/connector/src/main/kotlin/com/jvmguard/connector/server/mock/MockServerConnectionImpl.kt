@@ -200,17 +200,17 @@ class MockServerConnectionImpl(override val user: User) : AbstractServerConnecti
         get() {
             val nodes = ArrayList(
                 listOf(
-                    CustomTelemetryNodeIdentifier(CustomTelemetryNodeIdentifier.Type.DEVOPS, "Request queue length"),
+                    CustomTelemetryNodeIdentifier(CustomTelemetryNodeIdentifier.Type.DECLARED, "Request queue length"),
                     CustomTelemetryNodeIdentifier(CustomTelemetryNodeIdentifier.Type.MBEAN, "Cache entries"),
                 ),
             )
             return CustomTelemetryInfo(nodes)
         }
 
-    override fun setDevOpsTelemetryNodeVisibilities(nameToVisibility: Map<String, Boolean>) {
+    override fun setDeclaredTelemetryNodeVisibilities(nameToVisibility: Map<String, Boolean>) {
     }
 
-    override val hiddenDevOpsTelemetryNodes: Collection<String>
+    override val hiddenDeclaredTelemetryNodes: Collection<String>
         get() = emptyList()
 
     override fun getTelemetryData(vm: VM?, mainId: String, interval: TelemetryInterval, endTime: Long): TelemetryData =

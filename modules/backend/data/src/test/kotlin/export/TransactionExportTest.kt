@@ -26,18 +26,18 @@ class TransactionExportTest {
             val lookup = TransactionTree()
 
             val transactionTree = TransactionTree()
-            val child = transactionTree.getOrCreateChild(lookup.init(0, "test", TransactionType.POJO, PolicyType.NORMAL.typeString))
+            val child = transactionTree.getOrCreateChild(lookup.init(0, "test", TransactionType.MATCHED, PolicyType.NORMAL.typeString))
             child.addTime(1000)
             child.addCount(100)
 
-            var subChild = child.getOrCreateChild(lookup.init(0, "sub", TransactionType.DEVOPS, PolicyType.VERY_SLOW.typeString))
+            var subChild = child.getOrCreateChild(lookup.init(0, "sub", TransactionType.DECLARED, PolicyType.VERY_SLOW.typeString))
             subChild.addTime(500)
             subChild.addCount(1)
-            subChild = child.getOrCreateChild(lookup.init(0, "sub", TransactionType.DEVOPS, PolicyType.SLOW.typeString))
+            subChild = child.getOrCreateChild(lookup.init(0, "sub", TransactionType.DECLARED, PolicyType.SLOW.typeString))
             subChild.addTime(200)
             subChild.addCount(1)
 
-            val errorChild = transactionTree.getOrCreateChild(lookup.init(0, "test 123", TransactionType.DEVOPS, "Error message"))
+            val errorChild = transactionTree.getOrCreateChild(lookup.init(0, "test 123", TransactionType.DECLARED, "Error message"))
             errorChild.addTime(1000)
             errorChild.addCount(100)
             return transactionTree

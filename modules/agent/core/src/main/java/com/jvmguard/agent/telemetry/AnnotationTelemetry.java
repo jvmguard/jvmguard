@@ -36,7 +36,7 @@ class AnnotationTelemetry extends CustomTelemetry {
 
     @Override
     protected int getType() {
-        return AgentConstants.TELEMETRY_TYPE_DEVOPS;
+        return AgentConstants.TELEMETRY_TYPE_DECLARED;
     }
 
     @Override

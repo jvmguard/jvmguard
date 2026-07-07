@@ -79,12 +79,14 @@ class RecordingConfigE2ETest : ConfigE2ETest() {
     }
 
     @Test
-    fun pojoTransactionPersists() = onPage {
+    fun matchedTransactionPersists() = onPage {
         freshServer()
         loginRealAndWaitForApp()
 
         openRecording("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
+        getByTestId("transaction-grid-matched").waitFor()
+        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Matched")).first().click()
+        getByTestId("transaction-grid-matched").waitFor()
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
         // The "Class or interface name" field has no test id; reach it by its label.
@@ -95,9 +97,9 @@ class RecordingConfigE2ETest : ConfigE2ETest() {
         applySettings()
 
         openRecording("recording/transactions")
-        getByTestId("transaction-grid-pojo").waitFor()
-        // A class-only POJO def is displayed as "<class>#*".
-        assertThat(getByTestId("transaction-grid-pojo").getByText("com.example.OrderService#*")).isVisible()
+        getByTestId("transaction-grid-matched").waitFor()
+        // A class-only Matched def is displayed as "<class>#*".
+        assertThat(getByTestId("transaction-grid-matched").getByText("com.example.OrderService#*")).isVisible()
     }
 
     private fun Page.openRecording(route: String) {

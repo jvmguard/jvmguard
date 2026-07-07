@@ -7,10 +7,10 @@ import com.jvmguard.agent.instrument.NameTransformation;
 import com.jvmguard.agent.instrument.TargetClassGenerator;
 import com.jvmguard.agent.instrument.bytecodeVisitors.MethodWrapper.WrappingProvider;
 import com.jvmguard.agent.instrument.interceptions.BaseInterception;
-import com.jvmguard.agent.instrument.interceptions.DevOpsInterception;
-import com.jvmguard.agent.instrument.interceptions.DevOpsInterception.NamingResult;
+import com.jvmguard.agent.instrument.interceptions.DeclaredInterception;
+import com.jvmguard.agent.instrument.interceptions.DeclaredInterception.NamingResult;
 import com.jvmguard.agent.instrument.interceptions.TransactionInterception;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoDefinition;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
 import com.jvmguard.agent.thread.StackEntry;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -50,10 +50,10 @@ public class InstrumentationWrappingProvider extends WrappingProvider {
                         String visibleMethodName = NameTransformation.transformMethod(dottedClassName, name, desc);
 
                         int parameterCount = 0;
-                        if (baseInterception instanceof DevOpsInterception) {
+                        if (baseInterception instanceof DeclaredInterception) {
                             boolean thisAvailable = addThis(mv);
 
-                            DevOpsInterception interception = (DevOpsInterception)baseInterception;
+                            DeclaredInterception interception = (DeclaredInterception)baseInterception;
                             NamingResult namingResults = interception.getNaming(visibleClassName, visibleMethodName, thisAvailable, mv.getArgumentTypes());
                             mv.visitLdcInsn(namingResults.getTransactionName());
                             if (namingResults.getGetterChain() == null) {
@@ -62,11 +62,11 @@ public class InstrumentationWrappingProvider extends WrappingProvider {
                                 mv.visitLdcInsn(namingResults.getGetterChain());
                             }
                             mv.visitLdcInsn(interception.getGroup());
-                            mv.visitLdcInsn(StackEntry.getDevOpsInhibitionId(interception.getReentryInhibition(), interception.getAnnotation()));
+                            mv.visitLdcInsn(StackEntry.getDeclaredInhibitionId(interception.getReentryInhibition(), interception.getAnnotation()));
 
                             int parameterIndex = namingResults.getParameterIndex();
-                            if (namingResults.getGetterChain() != null && parameterIndex != DevOpsInterception.NO_PARAMETERS) {
-                                if (parameterIndex == DevOpsInterception.ALL_PARAMETERS) {
+                            if (namingResults.getGetterChain() != null && parameterIndex != DeclaredInterception.NO_PARAMETERS) {
+                                if (parameterIndex == DeclaredInterception.ALL_PARAMETERS) {
                                     mv.loadArgArray();
                                     parameterCount = -1;
                                 } else if (parameterIndex < mv.getArgumentTypes().length) {
@@ -90,8 +90,8 @@ public class InstrumentationWrappingProvider extends WrappingProvider {
                             mv.visitLdcInsn(usedClassName);
                             mv.visitLdcInsn(visibleMethodName);
                             addThis(mv);
-                            if (transactionInterception.getDefinition() instanceof PojoDefinition) {
-                                PojoDefinition definition = (PojoDefinition)transactionInterception.getDefinition();
+                            if (transactionInterception.getDefinition() instanceof MatchedDefinition) {
+                                MatchedDefinition definition = (MatchedDefinition)transactionInterception.getDefinition();
                                 if (definition.isTransferArguments()) {
                                     mv.loadArgs();
                                 }

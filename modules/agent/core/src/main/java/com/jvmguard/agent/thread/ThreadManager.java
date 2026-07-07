@@ -1,7 +1,7 @@
 package com.jvmguard.agent.thread;
 
 import com.jvmguard.agent.RequestSession;
-import com.jvmguard.agent.callee.DevOpsHandler.GetterChainEntry;
+import com.jvmguard.agent.callee.DeclaredHandler.GetterChainEntry;
 import com.jvmguard.agent.config.transactions.PolicyDef;
 import com.jvmguard.agent.config.transactions.PolicyEventType;
 import com.jvmguard.agent.config.transactions.TransactionDef;
@@ -27,7 +27,7 @@ public class ThreadManager {
 
     private JvmGuardStack stack = new JvmGuardStack();
 
-    private IdentityHashMap<String, GetterChainEntry[]> devOpsGetterChainMap = new IdentityHashMap<>();
+    private IdentityHashMap<String, GetterChainEntry[]> declaredGetterChainMap = new IdentityHashMap<>();
 
     private WeakReference<Thread> threadRef;
 
@@ -37,19 +37,19 @@ public class ThreadManager {
         threadRef = new WeakReference<>(thread);
     }
 
-    public IdentityHashMap<String, GetterChainEntry[]> getDevOpsGetterChainMap() {
-        return devOpsGetterChainMap;
+    public IdentityHashMap<String, GetterChainEntry[]> getDeclaredGetterChainMap() {
+        return declaredGetterChainMap;
     }
 
     public Thread getThread() {
         return threadRef != null ? threadRef.get() : null;
     }
 
-    private long enterInterceptionMethod(String transactionName, Object transactionDetail, TransactionType transactionType, PolicyDef policyDef, TransactionDef namingTransaction, String devOpsGroupName, int devOpsInhibitionId, boolean countInvocation) {
+    private long enterInterceptionMethod(String transactionName, Object transactionDetail, TransactionType transactionType, PolicyDef policyDef, TransactionDef namingTransaction, String declaredGroupName, int declaredInhibitionId, boolean countInvocation) {
         try {
             synchronized (threadLock) {
                 StackEntry stackEntry = stack.peek();
-                if (stackEntry == null || stackEntry.shouldCreateNewTree(transactionName, namingTransaction, devOpsGroupName, devOpsInhibitionId)) {
+                if (stackEntry == null || stackEntry.shouldCreateNewTree(transactionName, namingTransaction, declaredGroupName, declaredInhibitionId)) {
                     AgentTransactionTree currentTree = rootTree;
                     if (stackEntry != null) {
                         currentTree = stackEntry.tree;
@@ -70,7 +70,7 @@ public class ThreadManager {
                         policyHandler = policyDef.getPolicyHandler();
                     }
 
-                    stack.push(startTime, -1, currentTree, policyHandler, namingTransaction, false, false, devOpsGroupName, devOpsInhibitionId, transactionDetail, countInvocation);
+                    stack.push(startTime, -1, currentTree, policyHandler, namingTransaction, false, false, declaredGroupName, declaredInhibitionId, transactionDetail, countInvocation);
                 }
             }
         } catch (Throwable t) {
@@ -79,8 +79,8 @@ public class ThreadManager {
         return Long.MAX_VALUE;
     }
 
-    public long enterInterceptionMethod(String transactionName, TransactionType transactionType, PolicyDef policyDef, TransactionDef namingTransaction, String devOpsGroupName, int devOpsInhibitionId) {
-        return enterInterceptionMethod(transactionName, null, transactionType, policyDef, namingTransaction, devOpsGroupName, devOpsInhibitionId, true);
+    public long enterInterceptionMethod(String transactionName, TransactionType transactionType, PolicyDef policyDef, TransactionDef namingTransaction, String declaredGroupName, int declaredInhibitionId) {
+        return enterInterceptionMethod(transactionName, null, transactionType, policyDef, namingTransaction, declaredGroupName, declaredInhibitionId, true);
     }
 
     public long enterInterceptionMethod(String transactionName, Object transactionDetail, TransactionType transactionType, PolicyDef policyDef, TransactionDef namingTransaction) {

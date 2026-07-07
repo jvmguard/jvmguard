@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="Anno2.m1" count="2" type="mapped"/>
+      <element name="Anno2.m2" count="2" type="mapped"/>
+      <element name="Anno2.m3" count="2" type="mapped"/>
+      <element name="Anno2.m4" count="2" type="mapped"/>
+      <element name="IncAnno1.m1" count="2" type="mapped"/>
+      <element name="IncAnno1.m3" count="2" type="mapped"/>
+      <element name="IncAnno1Sub1.m1" count="2" type="mapped"/>
+      <element name="IncAnno3Sub1.m1" count="2" type="mapped"/>
+    </children>
+  </transactionTree>
+</data>

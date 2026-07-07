@@ -9,7 +9,7 @@ import com.jvmguard.agent.instrument.bytecodeVisitors.SystemInstrVisitor;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo.HierarchyVisitor;
 import com.jvmguard.agent.instrument.classInfo.ClassFileInfo.PartiallyDefinedInfo;
-import com.jvmguard.agent.instrument.classInfo.DevOpsAnnotations;
+import com.jvmguard.agent.instrument.classInfo.DeclaredAnnotations;
 import com.jvmguard.agent.instrument.interceptions.BaseInterception;
 import com.jvmguard.agent.instrument.interceptions.TransactionInterception;
 import com.jvmguard.agent.instrument.model.InterceptionMethod;
@@ -18,9 +18,9 @@ import com.jvmguard.agent.instrument.transaction.TransactionDefinition;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationChangeCalculator;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationTransactionDefList;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoChangeCalculator;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoDefinition;
-import com.jvmguard.agent.instrument.transaction.pojo.PojoTransactionDefList;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedChangeCalculator;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
+import com.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefList;
 import com.jvmguard.agent.telemetry.TelemetryCollector;
 import com.jvmguard.agent.util.Logger;
 import com.jvmguard.agent.util.LoggingHandler;
@@ -94,20 +94,20 @@ public class Instrumenter {
     @GuardedBy("calleeMap")
     private final Map<DefinitionWithHandler, Class> usedCallees = new HashMap<>();
 
-    private final Map<String, DevOpsAnnotations> devOpsAnnotationMap = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, DeclaredAnnotations> declaredAnnotationMap = Collections.synchronizedMap(new HashMap<>());
 
     @GuardedBy("classesToStoredMethodAnnotations")
     private final Map<String, Map<String, Set<InterceptionMethod>>> classesToStoredMethodAnnotations = new HashMap<>();
 
     private final SystemInstrVisitor systemInstrVisitor = new SystemInstrVisitor();
 
-    public List<Class> calculateChanges(Map<PojoDefinition, PojoTransactionDefList> pojoInterceptionMap,
+    public List<Class> calculateChanges(Map<MatchedDefinition, MatchedTransactionDefList> pojoInterceptionMap,
                                         Map<AnnotationDefinition, AnnotationTransactionDefList> annotationInterceptionMap,
                                         Set<AnnotationDefinition> oldAnnotations,
-                                        Set<PojoDefinition> oldPojoDefinitions,
+                                        Set<MatchedDefinition> oldMatchedDefinitions,
                                         Instrumentation instrumentation) {
         List<Class> retransformClasses = new ArrayList<>();
-        PojoChangeCalculator pojoChangeCalculator;
+        MatchedChangeCalculator pojoChangeCalculator;
         AnnotationChangeCalculator annotationChangeCalculator;
 
         Logger.log(Subsystem.INSTRUMENTATION, 3, true, "pojo defs %s\n", pojoInterceptionMap);
@@ -115,7 +115,7 @@ public class Instrumenter {
         synchronized (calleeMap) {
             Logger.log(Subsystem.INSTRUMENTATION, 3, true, "old callees %s\n", calleeMap);
 
-            pojoChangeCalculator = new PojoChangeCalculator(pojoInterceptionMap, oldPojoDefinitions, this, calleeMap, usedCallees);
+            pojoChangeCalculator = new MatchedChangeCalculator(pojoInterceptionMap, oldMatchedDefinitions, this, calleeMap, usedCallees);
             annotationChangeCalculator = new AnnotationChangeCalculator(annotationInterceptionMap, oldAnnotations, this, calleeMap, usedCallees);
 
             clearCallees();
@@ -185,8 +185,8 @@ public class Instrumenter {
             if (!retransform) {
                 Set<BaseInterception> classInterceptions = new HashSet<>();
 
-                DevOpsAnnotations devOpsAnnotations = getDevOpsAnnotations(clazz.getName());
-                InterceptionClassHierarchyVisitor interceptionClassHierarchyVisitor = new InterceptionClassHierarchyVisitor(getPojoClassDefinitions(), getAnnotationDefinitions(), classInterceptions, devOpsAnnotations, this);
+                DeclaredAnnotations declaredAnnotations = getDeclaredAnnotations(clazz.getName());
+                InterceptionClassHierarchyVisitor interceptionClassHierarchyVisitor = new InterceptionClassHierarchyVisitor(getPojoClassDefinitions(), getAnnotationDefinitions(), classInterceptions, declaredAnnotations, this);
                 classFileInfo.visit(interceptionClassHierarchyVisitor);
                 retransform = classInterceptions.size() != partiallyDefinedInfo.getClassInterceptionCount();
                 if (Logger.isEnabled(Subsystem.INSTRUMENTATION, 10)) {
@@ -370,11 +370,11 @@ public class Instrumenter {
     }
 
 
-    public Map<InterceptionMethod, List<PojoTransactionDefList>> getPojoMethodDefinitions() {
+    public Map<InterceptionMethod, List<MatchedTransactionDefList>> getPojoMethodDefinitions() {
         return instrumenterConfig.getPojoMethodDefinitions();
     }
 
-    public Map<String, List<PojoTransactionDefList>> getPojoClassDefinitions() {
+    public Map<String, List<MatchedTransactionDefList>> getPojoClassDefinitions() {
         return instrumenterConfig.getPojoClassDefinitions();
     }
 
@@ -437,11 +437,11 @@ public class Instrumenter {
     }
 
 
-    public void setPojoMethodDefinitions(Map<InterceptionMethod, List<PojoTransactionDefList>> pojoMethodDefinitions) {
+    public void setPojoMethodDefinitions(Map<InterceptionMethod, List<MatchedTransactionDefList>> pojoMethodDefinitions) {
         instrumenterConfig.setPojoMethodDefinitions(pojoMethodDefinitions);
     }
 
-    public void setPojoClassDefinitions(Map<String, List<PojoTransactionDefList>> pojoClassDefinitions) {
+    public void setPojoClassDefinitions(Map<String, List<MatchedTransactionDefList>> pojoClassDefinitions) {
         instrumenterConfig.setPojoClassDefinitions(pojoClassDefinitions);
     }
 
@@ -475,16 +475,16 @@ public class Instrumenter {
         return retransformClasses;
     }
 
-    public void setDevOpsAnnotations(String className, DevOpsAnnotations annotations) {
+    public void setDeclaredAnnotations(String className, DeclaredAnnotations annotations) {
         if (annotations == null) {
-            devOpsAnnotationMap.remove(className);
+            declaredAnnotationMap.remove(className);
         } else {
-            devOpsAnnotationMap.put(className, annotations);
+            declaredAnnotationMap.put(className, annotations);
         }
     }
 
-    public DevOpsAnnotations getDevOpsAnnotations(String className) {
-        return devOpsAnnotationMap.get(className);
+    public DeclaredAnnotations getDeclaredAnnotations(String className) {
+        return declaredAnnotationMap.get(className);
     }
 
     public Set<InterceptionMethod> getMethodAnnotations(String className, String annotationName) {

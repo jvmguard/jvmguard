@@ -6,7 +6,7 @@ import com.jvmguard.agent.config.recording.RetransformationType
 import com.jvmguard.agent.config.telemetry.MBeanLineConfig
 import com.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
 import com.jvmguard.agent.config.telemetry.TelemetryUnit
-import com.jvmguard.agent.config.transactions.PojoTransactionDef
+import com.jvmguard.agent.config.transactions.MatchedTransactionDef
 import com.jvmguard.data.config.GroupConfig
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.user.User
@@ -95,7 +95,7 @@ class ExportRoundTripTest {
             groupConfig.agentGroupConfig.recordingOptions.setRetransformationType(RetransformationType.STARTUP)
             groupConfig.agentGroupConfig.transactionSettings.retransformationType = RetransformationType.ALWAYS
 
-            val pojo = PojoTransactionDef()
+            val pojo = MatchedTransactionDef()
             pojo.declaringClassName = "com.example.Foo"
             pojo.methodName = "bar"
             groupConfig.agentGroupConfig.transactionSettings.transactionDefs.add(pojo)
@@ -115,10 +115,10 @@ class ExportRoundTripTest {
             assertEquals(
                 2,
                 gcBack.agentGroupConfig.transactionSettings.transactionDefs.size,
-                "default DevOpsAnnotatedTransactionDef plus the added PojoTransactionDef must survive",
+                "default DeclaredTransactionDef plus the added MatchedTransactionDef must survive",
             )
-            assertInstanceOf(PojoTransactionDef::class.java, gcBack.agentGroupConfig.transactionSettings.transactionDefs[1])
-            val pojoBack = gcBack.agentGroupConfig.transactionSettings.transactionDefs[1] as PojoTransactionDef
+            assertInstanceOf(MatchedTransactionDef::class.java, gcBack.agentGroupConfig.transactionSettings.transactionDefs[1])
+            val pojoBack = gcBack.agentGroupConfig.transactionSettings.transactionDefs[1] as MatchedTransactionDef
             assertEquals("com.example.Foo", pojoBack.declaringClassName)
             assertEquals("bar", pojoBack.methodName)
 

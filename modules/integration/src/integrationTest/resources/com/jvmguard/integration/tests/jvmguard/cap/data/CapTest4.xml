@@ -2,35 +2,35 @@
 <data timeUnit="milliseconds">
   <callTree>
     <children>
-      <element name="transaction 40" count="1" type="devops">
+      <element name="transaction 40" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="select * from statement 40" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 41" count="1" type="devops">
+      <element name="transaction 41" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="select * from statement 41" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 42" count="1" type="devops">
+      <element name="transaction 42" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="select * from statement 42" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 43" count="1" type="devops">
+      <element name="transaction 43" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="select * from statement 43" count="1" server="uri"/>
           </jdbc>
         </payload>
       </element>
-      <element name="transaction 44" count="1" type="devops">
+      <element name="transaction 44" count="1" type="declared">
         <payload>
           <jdbc>
             <element name="select * from statement 44" count="1" server="uri"/>

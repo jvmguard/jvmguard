@@ -4,9 +4,9 @@
  * <b>What is this API for?</b>
  * <p>
  * In jvmguard, you can create transactions from any method invocation. When you configure these transactions in the UI,
- * they are called <b>POJO transactions</b>. They are most suitable for classes that you cannot modify.
+ * they are called <b>Matched transactions</b>. They are most suitable for classes that you cannot modify.
  * In your own code, it is easier and more maintainable to use annotations from the jvmguard API to configure
- * transactions. In jvmguard, these are called <b>DevOps transactions</b>. The annotations provided by jvmguard only
+ * transactions. In jvmguard, these are called <b>Declared transactions</b>. The annotations provided by jvmguard only
  * control the <b>naming of the transactions</b>, the policies have to be configured in the jvmguard UI.
  * See the corresponding help topics for more information on these concepts.
  * </p>

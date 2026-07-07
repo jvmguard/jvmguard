@@ -1,7 +1,7 @@
 package com.jvmguard.integration.tests.jvmguard.transactions
 
 import com.jvmguard.agent.config.VmType
-import com.jvmguard.agent.config.transactions.DevOpsAnnotatedTransactionDef
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.integration.JvmGuardTest
 import com.jvmguard.integration.Controller
 import com.jvmguard.integration.TestServerConnection
@@ -21,7 +21,7 @@ class TransactionNavigationTest : JvmGuardTest() {
     override fun getVmCount(vmConfig: VMConfig, runNo: Int) = 2
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
-        rootConfig.transactionSettings.transactionDefs.add(DevOpsAnnotatedTransactionDef().apply {
+        rootConfig.transactionSettings.transactionDefs.add(DeclaredTransactionDef().apply {
             initDefault()
             group.usedValue = "sample"
         })
