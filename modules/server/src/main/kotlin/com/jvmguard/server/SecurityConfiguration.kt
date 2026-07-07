@@ -2,9 +2,12 @@ package com.jvmguard.server
 
 import com.jvmguard.common.JvmGuardConfig
 import com.jvmguard.common.JvmGuardProperties
+import com.jvmguard.common.Loggers
 import com.jvmguard.connector.api.Server
+import com.jvmguard.connector.api.SsoLoginError
 import com.jvmguard.rest.restInterface.RestInterface
 import com.jvmguard.server.sso.JvmGuardOidcUserService
+import com.jvmguard.server.sso.SsoAuthenticationException
 import com.jvmguard.ui.server.JvmGuardPrincipal
 import com.jvmguard.ui.server.SecurityBridge
 import com.jvmguard.ui.views.login.LoginView
@@ -23,6 +26,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
@@ -75,8 +80,21 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
             oauth2.loginPage("/login")
             oauth2.userInfoEndpoint { it.oidcUserService(oidcUserService) }
             oauth2.successHandler(ssoSuccessHandler())
+            oauth2.failureHandler(ssoFailureHandler())
         }.build()
     }
+
+    private fun ssoFailureHandler(): AuthenticationFailureHandler =
+        AuthenticationFailureHandler { _, response, exception ->
+            val detail = (exception as? OAuth2AuthenticationException)?.error?.let { err ->
+                "${err.errorCode}${err.description?.let { ": $it" } ?: ""}"
+            } ?: exception.message
+            Loggers.SERVER.warn("SSO login failed: {}", detail, exception)
+            val error = generateSequence(exception as Throwable?) { it.cause }
+                .firstNotNullOfOrNull { (it as? SsoAuthenticationException)?.error }
+                ?: SsoLoginError.GENERIC
+            response.sendRedirect("/login?ssoError=${error.code}")
+        }
 
     private fun ssoSuccessHandler(): AuthenticationSuccessHandler =
         AuthenticationSuccessHandler { request, response, authentication ->

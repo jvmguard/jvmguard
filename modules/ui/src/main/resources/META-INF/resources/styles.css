@@ -332,6 +332,34 @@ vaadin-menu-bar.jvmguard-dropdown-button::part(container) {
     color: var(--vaadin-text-color-secondary);
 }
 
+.jvmguard-login-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    margin: 0.25rem 0;
+}
+
+.jvmguard-login-divider::before,
+.jvmguard-login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--vaadin-border-color-secondary);
+}
+
+.jvmguard-login-divider-label {
+    color: var(--vaadin-text-color-secondary);
+    font-size: var(--aura-font-size-s);
+    font-weight: var(--aura-font-weight-medium);
+    letter-spacing: 0.08em;
+}
+
+.jvmguard-sso-icon {
+    width: 18px;
+    height: 18px;
+}
+
 .jvmguard-vm-link {
     color: var(--aura-accent-color-light);
     cursor: pointer;

@@ -3,6 +3,7 @@ package com.jvmguard.server.sso
 import com.jvmguard.common.Loggers
 import com.jvmguard.common.config.ConfigChangeListener
 import com.jvmguard.common.config.ConfigManager
+import com.jvmguard.connector.api.SsoState
 import com.jvmguard.data.config.GlobalConfig
 import com.jvmguard.data.config.SsoPreset
 import com.jvmguard.data.config.SsoProviderConfig
@@ -51,6 +52,7 @@ class MutableClientRegistrationRepository(
             }
         }
         registrations = newRegistrations
+        SsoState.activeSlugs = newRegistrations.keys
         Loggers.SERVER.info("SSO client registrations refreshed: {} provider(s) active: {}",
             newRegistrations.size, newRegistrations.keys)
     }
@@ -83,12 +85,20 @@ class MutableClientRegistrationRepository(
                 .userInfoUri("https://openidconnect.googleapis.com/v1/userinfo")
                 .userNameAttributeName(provider.userNameAttribute)
 
-            else -> ClientRegistrations.fromIssuerLocation(issuerUri)
-                .registrationId(registrationId)
-                .clientId(provider.clientId.trim())
-                .clientSecret(provider.clientSecret.trim())
-                .clientName(provider.displayName)
-                .userNameAttributeName(provider.userNameAttribute)
+            else -> {
+                val normalized = issuerUri.trimEnd('/')
+                val discoveryBuilder = try {
+                    ClientRegistrations.fromIssuerLocation(normalized)
+                } catch (_: Exception) {
+                    ClientRegistrations.fromIssuerLocation("$normalized/")
+                }
+                discoveryBuilder
+                    .registrationId(registrationId)
+                    .clientId(provider.clientId.trim())
+                    .clientSecret(provider.clientSecret.trim())
+                    .clientName(provider.displayName)
+                    .userNameAttributeName(provider.userNameAttribute)
+            }
         }
 
         if (scopes.isNotEmpty()) {

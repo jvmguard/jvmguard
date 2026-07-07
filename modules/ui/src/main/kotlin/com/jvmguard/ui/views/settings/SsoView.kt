@@ -43,8 +43,7 @@ class SsoView : AbstractSettingsSectionView() {
 
     init {
         val hint = Span(
-            "Configure external identity providers (Google, Microsoft Entra ID, Okta, Keycloak, ...). " +
-                "Users sign in through the provider. Access rules control who gets in and at what role."
+            "Configure external identity providers. Add access rules to automatically map groups of users to roles."
         ).apply { addClassName("jvmguard-field-hint") }
         add(settingsSection("Single Sign-On", hint))
 

@@ -86,6 +86,13 @@ open class SsoProviderConfig : StoredConfig(), AuthenticationContainer {
             fireChanged(old, value)
         }
 
+    var requireVerifiedEmail: Boolean = true
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
     var accessRules: MutableList<SsoGroupMapping> = ArrayList()
 
     override fun toString(): String =

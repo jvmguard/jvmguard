@@ -1,16 +1,20 @@
 package com.jvmguard.ui.views.login
 
 import com.github.mvysny.karibudsl.v10.*
+import com.jvmguard.connector.api.SsoLoginError
 import com.jvmguard.ui.server.JvmGuardPrincipal
+import com.vaadin.flow.component.Component
 import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.server.UserSession
 import com.jvmguard.ui.views.setup.InstallWizardView
 import com.jvmguard.ui.views.vms.VmsView
 import com.vaadin.flow.component.Key
+import com.vaadin.flow.component.badge.Badge
+import com.vaadin.flow.component.badge.BadgeVariant
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
-import com.vaadin.flow.component.html.Anchor
-import com.vaadin.flow.component.html.Span
+import com.vaadin.flow.component.html.Image
+import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
@@ -31,7 +35,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
     internal lateinit var password: PasswordField
     internal lateinit var authCode: TextField
     internal lateinit var loginButton: Button
-    private lateinit var errorMessage: Span
+    private lateinit var errorMessage: Badge
 
     private val use2fa = Sessions.loginService().isUse2fa()
 
@@ -47,6 +51,13 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
 
             div { addClassName("jvmguard-login-logo") }
             h2("Welcome to jvmguard") { addClassName("jvmguard-login-title") }
+            errorMessage = Badge().apply {
+                addThemeVariants(BadgeVariant.ERROR)
+                testId = ID_ERROR
+                isVisible = false
+                style.set("align-self", "center")
+            }
+            add(errorMessage)
             span("Please log in to your account") { addClassName("jvmguard-login-subtitle") }
             userName = textField("Username") { testId = ID_USERNAME }
             password = passwordField("Password") { testId = ID_PASSWORD }
@@ -61,17 +72,23 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
                 addClickListener { doLogin() }
                 addClickShortcut(Key.ENTER)
             }
-            errorMessage = span { isVisible = false }
 
             val ssoProviders = Sessions.loginService().enabledSsoProviders()
             if (ssoProviders.isNotEmpty()) {
-                span("or") { addClassName("jvmguard-login-divider") }
+                div {
+                    addClassName("jvmguard-login-divider")
+                    span("OR") { addClassName("jvmguard-login-divider-label") }
+                }
                 ssoProviders.forEach { provider ->
-                    add(Anchor("/oauth2/authorization/${provider.registrationId}", "Sign in with ${provider.displayName}").apply {
-                        setRouterIgnore(true)
+                    val icon: Component = if (provider.google) {
+                        Image("icons/google.svg", "").apply { addClassName("jvmguard-sso-icon") }
+                    } else {
+                        VaadinIcon.SIGN_IN.create().apply { addClassName("jvmguard-sso-icon") }
+                    }
+                    val href = "/oauth2/authorization/${provider.registrationId}"
+                    add(Button("Sign in with ${provider.displayName}", icon).apply {
                         addClassName("jvmguard-sso-button")
-                        style.set("width", "100%")
-                        style.set("text-align", "center")
+                        addClickListener { ui.ifPresent { it.page.setLocation(href) } }
                     })
                 }
             }
@@ -89,6 +106,10 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
                 event.forwardTo(VmsView::class.java)
                 return
             }
+        }
+
+        event.location.queryParameters.parameters["ssoError"]?.firstOrNull()?.let { code ->
+            SsoLoginError.fromCode(code)?.let { showError(it.message) }
         }
 
         Sessions.captureMock(event.location.queryParameters)
@@ -121,5 +142,6 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
         const val ID_PASSWORD = "login-password"
         const val ID_AUTHCODE = "login-authcode"
         const val ID_SUBMIT = "login-submit"
+        const val ID_ERROR = "login-error"
     }
 }

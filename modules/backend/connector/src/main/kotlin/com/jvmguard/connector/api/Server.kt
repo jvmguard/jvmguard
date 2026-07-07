@@ -47,4 +47,4 @@ interface Server {
     }
 }
 
-data class SsoProviderInfo(val registrationId: String, val displayName: String)
+data class SsoProviderInfo(val registrationId: String, val displayName: String, val google: Boolean = false)

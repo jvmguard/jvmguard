@@ -20,7 +20,10 @@ import com.jvmguard.data.vmdata.VmIdentifier
 import com.jvmguard.connector.api.MockMode
 import com.jvmguard.connector.api.Server
 import com.jvmguard.connector.api.ServerConnection
+import com.jvmguard.connector.api.SsoLoginError
+import com.jvmguard.connector.api.SsoLoginException
 import com.jvmguard.connector.api.SsoProviderInfo
+import com.jvmguard.connector.api.SsoState
 import com.jvmguard.connector.server.mock.MockServerConnectionImpl
 import com.jvmguard.connector.server.mock.SnapshotReplayConnection
 import com.jvmguard.connector.totp.TOTP
@@ -57,8 +60,8 @@ class ServerImpl(
 
     override val enabledSsoProviders: List<SsoProviderInfo>
         get() = getGlobalConfig().ssoConfig.providers
-            .filter { it.enabled }
-            .map { SsoProviderInfo(SsoProviderConfig.slugify(it.displayName), it.displayName) }
+            .filter { it.enabled && SsoProviderConfig.slugify(it.displayName) in SsoState.activeSlugs }
+            .map { SsoProviderInfo(SsoProviderConfig.slugify(it.displayName), it.displayName, it.preset == SsoPreset.GOOGLE_WORKSPACE) }
 
     override fun createInitialUser(
         userName: String,
@@ -113,7 +116,8 @@ class ServerImpl(
     override fun authenticateSso(issuer: String, subject: String, email: String, name: String?, groups: List<String>): User {
         val providers = getGlobalConfig().ssoConfig.providers
         val provider = providers
-            .find { it.issuerUri.trim() == issuer.trim() && it.enabled }
+            // some IdPs (like Auth0) report an issuer with a trailing slash in their discovery metadata that is usually omitted in the config
+            .find { it.issuerUri.trim().trimEnd('/') == issuer.trim().trimEnd('/') && it.enabled }
             ?: run {
                 Loggers.SERVER.warn(
                     "SSO issuer '{}' not found among {} provider(s): {}",
@@ -127,7 +131,7 @@ class ServerImpl(
         if (provider.domainRestriction.isNotEmpty()) {
             val domain = email.substringAfter("@", "")
             if (domain.isBlank() || !domain.equals(provider.domainRestriction, ignoreCase = true)) {
-                throw FailedLoginException("Email domain does not match the configured restriction.")
+                throw SsoLoginException(SsoLoginError.DOMAIN_NOT_ALLOWED)
             }
         }
 
@@ -144,7 +148,7 @@ class ServerImpl(
         }
 
         val accessLevel = evaluateSsoAccessRules(provider, groups)
-            ?: throw FailedLoginException("Access denied. Contact your administrator.")
+            ?: throw SsoLoginException(SsoLoginError.NOT_AUTHORIZED)
 
         val newUser = User()
         newUser.loginName = email

@@ -6,11 +6,7 @@ import com.jvmguard.data.config.sets.TriggerSet
 import com.jvmguard.data.config.triggers.ThresholdTrigger
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.user.User
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertInstanceOf
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.ObjectMapper
 

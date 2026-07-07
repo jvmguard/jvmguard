@@ -27,6 +27,8 @@ dependencies {
     api(libs.h2)
     implementation(libs.flyway.core)
     addJunit6()
+    testImplementation("com.github.dasniko:testcontainers-keycloak:3.7.0")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.0")
     developmentOnly("com.vaadin:vaadin-dev")
 }
 

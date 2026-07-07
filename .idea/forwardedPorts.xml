@@ -20,6 +20,12 @@
           <option name="readOnly" value="false" />
         </ForwardedPortInfo>
       </entry>
+      <entry key="8180">
+        <ForwardedPortInfo>
+          <option name="hostPort" value="8180" />
+          <option name="readOnly" value="false" />
+        </ForwardedPortInfo>
+      </entry>
     </ports>
   </component>
 </project>

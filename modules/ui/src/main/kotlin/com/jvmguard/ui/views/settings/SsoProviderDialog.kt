@@ -49,6 +49,11 @@ class SsoProviderDialog(
         placeholder = "e.g. yourco.com"
         testId = ID_DOMAIN
     }
+    private val claimName = TextField("Group claim name").apply {
+        setWidthFull()
+        testId = ID_CLAIM_NAME
+    }
+    private val requireVerifiedEmail = Checkbox("Require verified email").apply { testId = ID_REQUIRE_VERIFIED_EMAIL }
     private val enabled = Checkbox("Enabled").apply { testId = ID_ENABLED }
     private var testButton: Button? = null
 
@@ -69,6 +74,7 @@ class SsoProviderDialog(
         bind()
         binder.readBean(provider)
         updatePresetFields()
+        accessRulesGrid.setItems(provider.accessRules)
 
         val addRule = Button("Add rule", VaadinIcon.PLUS.create()) { editRule(SsoGroupMapping(), true) }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
@@ -81,7 +87,7 @@ class SsoProviderDialog(
             isPadding = false
             expand(rulesTitle)
         }
-        val rulesHint = Span("(empty = only pre-created users can sign in)").apply {
+        val rulesHint = Span("(empty = only pre-created users user with type \"SSO\" can sign in)").apply {
             addClassName("jvmguard-field-hint")
         }
 
@@ -91,7 +97,7 @@ class SsoProviderDialog(
         testButton = testConnection
 
         add(VerticalLayout(
-            FormLayout(displayName, preset, issuerUri, clientId, clientSecret, domainRestriction, enabled).apply {
+            FormLayout(displayName, preset, issuerUri, clientId, clientSecret, domainRestriction, claimName, requireVerifiedEmail, enabled).apply {
                 setResponsiveSteps(FormLayout.ResponsiveStep("0", 1))
             },
             testConnection,
@@ -123,19 +129,26 @@ class SsoProviderDialog(
             .bind({ it.clientSecret }, { p, v -> p.clientSecret = v })
         binder.forField(domainRestriction)
             .bind({ it.domainRestriction }, { p, v -> p.domainRestriction = v })
+        binder.forField(claimName)
+            .bind({ it.claimName }, { p, v -> p.claimName = v })
+        binder.forField(requireVerifiedEmail)
+            .bind({ it.requireVerifiedEmail }, { p, v -> p.requireVerifiedEmail = v })
         binder.forField(enabled)
             .bind({ it.enabled }, { p, v -> p.enabled = v })
     }
 
     private fun updatePresetFields() {
         val p = preset.value ?: return
+        requireVerifiedEmail.isVisible = !p.emailAlwaysVerified
         if (p == SsoPreset.GOOGLE_WORKSPACE) {
             issuerUri.isVisible = false
             issuerUri.value = SsoPreset.defaultIssuer(p)
+            claimName.isVisible = false
             domainRestriction.label = "Hosted domain"
             domainRestriction.placeholder = "yourco.com"
         } else {
             issuerUri.isVisible = true
+            claimName.isVisible = (p == SsoPreset.GENERIC_OIDC)
             domainRestriction.label = "Domain / tenant"
             domainRestriction.placeholder = "e.g. yourco.com"
         }
@@ -154,7 +167,11 @@ class SsoProviderDialog(
                 accessLevel = rule.accessLevel
             }
         }
-        SsoGroupMappingDialog(workingCopy, isNew) { saved ->
+        val hasCatchAll = provider.accessRules.any { it.isCatchAll && it !== rule }
+        SsoGroupMappingDialog(workingCopy, isNew,
+            groupsSupported = provider.preset.supportsGroups,
+            catchAllExists = hasCatchAll,
+        ) { saved ->
             if (isNew) {
                 provider.accessRules.add(saved)
             } else {
@@ -216,6 +233,8 @@ class SsoProviderDialog(
         const val ID_CLIENT_ID = "sso-provider-client-id"
         const val ID_CLIENT_SECRET = "sso-provider-client-secret"
         const val ID_DOMAIN = "sso-provider-domain"
+        const val ID_CLAIM_NAME = "sso-provider-claim-name"
+        const val ID_REQUIRE_VERIFIED_EMAIL = "sso-provider-require-verified-email"
         const val ID_ENABLED = "sso-provider-enabled"
         const val ID_TEST_CONNECTION = "sso-provider-test-connection"
         const val ID_RULES_GRID = "sso-rules-grid"

@@ -1,0 +1,98 @@
+{
+  "realm": "jvmguard",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "clients": [
+    {
+      "clientId": "jvmguard",
+      "name": "jvmguard test client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "test-secret-12345",
+      "redirectUris": [
+        "http://localhost:8020/login/oauth2/code/keycloak",
+        "http://127.0.0.1:8020/login/oauth2/code/keycloak"
+      ],
+      "webOrigins": [],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "implicitFlowEnabled": false,
+      "frontchannelLogout": false,
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "claim.name": "groups"
+          }
+        }
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "+"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "jvmguard-admins",
+      "path": "/jvmguard-admins"
+    },
+    {
+      "name": "jvmguard-viewers",
+      "path": "/jvmguard-viewers"
+    }
+  ],
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "alice",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/jvmguard-admins"
+      ]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "bob@example.com",
+      "firstName": "Bob",
+      "lastName": "Viewer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "bob",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/jvmguard-viewers"
+      ]
+    }
+  ]
+}

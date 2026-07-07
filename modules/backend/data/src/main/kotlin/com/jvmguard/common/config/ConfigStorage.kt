@@ -10,6 +10,7 @@ import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitializat
 import org.springframework.stereotype.Component
 import tools.jackson.databind.DatabindContext
 import tools.jackson.databind.DefaultTyping
+import tools.jackson.databind.cfg.EnumFeature
 import tools.jackson.databind.JavaType
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.json.JsonMapper
@@ -25,6 +26,7 @@ class ConfigStorage(private val dataSource: DataSource) {
         var json: String? = null
         try {
             dataSource.connection.use { connection ->
+                @Suppress("SqlNoDataSourceInspection")
                 connection.prepareStatement("select content from $TABLE where bean_type=? and id=?").use { statement ->
                     statement.setString(1, beanType(clazz))
                     statement.setLong(2, id)
@@ -45,6 +47,7 @@ class ConfigStorage(private val dataSource: DataSource) {
         val ret = ArrayList<T>()
         try {
             dataSource.connection.use { connection ->
+                @Suppress("SqlNoDataSourceInspection")
                 connection.prepareStatement("select content, id from $TABLE where bean_type=?").use { statement ->
                     statement.setString(1, beanType(clazz))
                     statement.executeQuery().use { resultSet ->
@@ -65,6 +68,7 @@ class ConfigStorage(private val dataSource: DataSource) {
         if (bean.id == null) {
             try {
                 dataSource.connection.use { connection ->
+                    @Suppress("SqlNoDataSourceInspection")
                     connection.prepareStatement("insert into $TABLE (bean_type, content) values (?,?)", Statement.RETURN_GENERATED_KEYS).use { statement ->
                         statement.setString(1, beanType(clazz))
                         statement.setString(2, json)
@@ -82,6 +86,7 @@ class ConfigStorage(private val dataSource: DataSource) {
         } else {
             try {
                 dataSource.connection.use { connection ->
+                    @Suppress("SqlNoDataSourceInspection")
                     connection.prepareStatement("update $TABLE set content=? where id=?").use { statement ->
                         statement.setString(1, json)
                         statement.setLong(2, bean.id!!)
@@ -97,6 +102,7 @@ class ConfigStorage(private val dataSource: DataSource) {
     fun <T : StoredConfig> remove(clazz: Class<T>, id: Long) {
         try {
             dataSource.connection.use { connection ->
+                @Suppress("SqlNoDataSourceInspection")
                 connection.prepareStatement("delete from $TABLE where bean_type=? and id=?").use { statement ->
                     statement.setString(1, beanType(clazz))
                     statement.setLong(2, id)
@@ -111,6 +117,7 @@ class ConfigStorage(private val dataSource: DataSource) {
     fun <T : StoredConfig> removeAll(clazz: Class<T>) {
         try {
             dataSource.connection.use { connection ->
+                @Suppress("SqlNoDataSourceInspection")
                 connection.prepareStatement("delete from $TABLE where bean_type=?").use { statement ->
                     statement.setString(1, beanType(clazz))
                     statement.execute()
@@ -163,6 +170,7 @@ class ConfigStorage(private val dataSource: DataSource) {
 
         private val OBJECT_MAPPER: ObjectMapper = JsonMapper.builder()
             .activateDefaultTyping(PERMISSIVE_TYPE_VALIDATOR, DefaultTyping.NON_FINAL)
+            .enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
             .addMixIn(AbstractEntity::class.java, StoredBeanMixin::class.java)
             .changeDefaultVisibility { vc ->
                 vc

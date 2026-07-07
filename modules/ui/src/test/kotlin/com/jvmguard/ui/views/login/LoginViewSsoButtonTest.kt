@@ -6,7 +6,7 @@ import com.jvmguard.ui.server.DefaultLoginService
 import com.jvmguard.ui.server.LoginService
 import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.server.MockConnections
-import com.vaadin.flow.component.html.Anchor
+import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.UI
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -21,7 +21,7 @@ class LoginViewSsoButtonTest : JvmGuardBrowserlessTest() {
             override fun login(userName: String, password: String, authenticatorCode: String?) = MockConnections.create()
             override fun isUse2fa() = false
             override fun enabledSsoProviders() = listOf(
-                SsoProviderInfo("google", "Google"),
+                SsoProviderInfo("google", "Google", google = true),
                 SsoProviderInfo("okta", "Company Okta"),
             )
         })
@@ -32,13 +32,15 @@ class LoginViewSsoButtonTest : JvmGuardBrowserlessTest() {
         Sessions.setLoginService(DefaultLoginService())
     }
 
+    private fun ssoButtons() = find<Button>().all().filter { "jvmguard-sso-button" in it.classNames }
+
     @Test
     fun ssoButtonsRenderWhenProvidersConfigured() {
         val view = LoginView()
         UI.getCurrent().add(view)
 
-        val anchors = find<Anchor>().all()
-        assertEquals(2, anchors.size, "expected 2 SSO anchor buttons but found ${anchors.size}")
+        val buttons = ssoButtons()
+        assertEquals(2, buttons.size, "expected 2 SSO buttons but found ${buttons.size}")
     }
 
     @Test
@@ -52,7 +54,6 @@ class LoginViewSsoButtonTest : JvmGuardBrowserlessTest() {
         val view = LoginView()
         UI.getCurrent().add(view)
 
-        val anchors = find<Anchor>().all()
-        assertTrue(anchors.isEmpty(), "no SSO buttons when no providers")
+        assertTrue(ssoButtons().isEmpty(), "no SSO buttons when no providers")
     }
 }

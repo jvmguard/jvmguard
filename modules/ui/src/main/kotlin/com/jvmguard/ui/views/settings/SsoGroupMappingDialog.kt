@@ -14,6 +14,8 @@ import com.vaadin.flow.data.binder.Binder
 class SsoGroupMappingDialog(
     private val mapping: SsoGroupMapping,
     isNew: Boolean,
+    private val groupsSupported: Boolean = true,
+    private val catchAllExists: Boolean = false,
     private val onSave: (SsoGroupMapping) -> Unit,
 ) : JvmGuardDialog() {
 
@@ -36,17 +38,34 @@ class SsoGroupMappingDialog(
 
         bind()
         binder.readBean(mapping)
-        updateCatchAllVisibility()
-        catchAll.addValueChangeListener { updateCatchAllVisibility() }
 
-        val hint = Span("Matches a group/role claim value from the IdP token. Use the catch-all to allow anyone in the domain who doesn't match a specific rule.")
-            .apply { addClassName("jvmguard-field-hint") }
-        add(VerticalLayout(FormLayout(claimValue, catchAll, accessLevel).apply {
+        if (!groupsSupported) {
+            catchAll.value = true
+            catchAll.isEnabled = false
+            claimValue.isVisible = false
+            mapping.claimValue = SsoGroupMapping.CATCH_ALL
+        } else {
+            updateCatchAllVisibility()
+            catchAll.addValueChangeListener { updateCatchAllVisibility() }
+        }
+
+        val content = VerticalLayout(FormLayout(claimValue, catchAll, accessLevel).apply {
             setResponsiveSteps(FormLayout.ResponsiveStep("0", 1))
-        }, hint).apply {
-            isPadding = false
-            isSpacing = true
         })
+        if (!groupsSupported) {
+            content.add(Span("Google Workspace does not expose group claims via OpenID Connect. " +
+                "This rule applies to everyone in the configured domain.").apply {
+                addClassName("jvmguard-field-hint")
+            })
+        } else {
+            content.add(Span("Matches a group/role claim value from the IdP token. " +
+                "Use the catch-all to allow anyone in the domain who doesn't match a specific rule.").apply {
+                addClassName("jvmguard-field-hint")
+            })
+        }
+        content.isPadding = false
+        content.isSpacing = true
+        add(content)
 
         confirmFooter("Save", ID_SAVE) { save() }
     }
@@ -74,10 +93,18 @@ class SsoGroupMappingDialog(
     }
 
     private fun save() {
+        claimValue.isInvalid = false
         if (!binder.writeBeanIfValid(mapping)) {
             return
         }
-        if (!catchAll.value && mapping.claimValue.isBlank()) {
+        if (groupsSupported && !catchAll.value && mapping.claimValue.isBlank()) {
+            claimValue.isInvalid = true
+            claimValue.errorMessage = "Enter a group claim value."
+            return
+        }
+        if (mapping.isCatchAll && catchAllExists) {
+            claimValue.isInvalid = true
+            claimValue.errorMessage = "A catch-all rule already exists."
             return
         }
         onSave(mapping)

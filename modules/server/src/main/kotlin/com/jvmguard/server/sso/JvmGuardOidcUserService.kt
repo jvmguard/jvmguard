@@ -3,6 +3,8 @@ package com.jvmguard.server.sso
 import com.jvmguard.common.config.ConfigManager
 import com.jvmguard.connector.api.MockMode
 import com.jvmguard.connector.api.Server
+import com.jvmguard.connector.api.SsoLoginError
+import com.jvmguard.connector.api.SsoLoginException
 import com.jvmguard.data.config.SsoProviderConfig
 import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
@@ -10,6 +12,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.stereotype.Component
+import javax.security.auth.login.LoginException
 
 @Component
 class JvmGuardOidcUserService(
@@ -30,19 +33,26 @@ class JvmGuardOidcUserService(
         val email = claims["email"] as? String ?: ""
         val emailVerified = claims["email_verified"] as? Boolean ?: true
 
+        val providerConfig = configManager.getGlobalConfig(false).ssoConfig.providers
+            .find { it.issuerUri.trim().trimEnd('/') == issuer.trim().trimEnd('/') && it.enabled }
+
         if (email.isEmpty()) {
-            throw AuthenticationServiceException("IdP did not provide an email claim")
+            throw SsoAuthenticationException(SsoLoginError.EMAIL_MISSING)
         }
-        if (!emailVerified) {
-            throw AuthenticationServiceException("IdP email is not verified")
+        if (!emailVerified && providerConfig?.requireVerifiedEmail != false) {
+            throw SsoAuthenticationException(SsoLoginError.EMAIL_NOT_VERIFIED)
         }
 
-        val providerConfig = configManager.getGlobalConfig(false).ssoConfig.providers
-            .find { it.issuerUri.trim() == issuer.trim() && it.enabled }
         val groups = extractGroups(claims, providerConfig)
         val name = claims["name"] as? String
 
-        val user = server.authenticateSso(issuer, subject, email, name, groups)
+        val user = try {
+            server.authenticateSso(issuer, subject, email, name, groups)
+        } catch (e: SsoLoginException) {
+            throw SsoAuthenticationException(e.error)
+        } catch (e: LoginException) {
+            throw AuthenticationServiceException(e.message ?: "SSO login denied", e)
+        }
         val connection = server.connect(user, MockMode.NONE)
 
         return JvmGuardOidcUser(oidcUser, user.loginName, user.accessLevel, connection)
@@ -52,7 +62,8 @@ class JvmGuardOidcUserService(
         if (providerConfig == null || !providerConfig.preset.supportsGroups) {
             return emptyList()
         }
-        return when (val claim = claims[providerConfig.claimName]) {
+        val claimName = providerConfig.claimName
+        return when (val claim = claims[claimName]) {
             is List<*> -> claim.mapNotNull { it?.toString() }
             is String -> listOf(claim)
             else -> emptyList()
