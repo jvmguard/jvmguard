@@ -12,7 +12,7 @@ Transactions defined this way are called Declared transactions, because you decl
 with the jvmguard annotations.
 
 The jvmguard annotations are located in the JAR file `api/jvmguard-api.jar`, see the javadoc overview for how to download
-this JAR file with Maven, Ivy or Gradle.
+this JAR file with Maven or Gradle.
 
 All annotations have a class retention policy. This means that they are present in the class file, but the JVM does not
 load them into memory. Code that queries runtime annotations on a particular method cannot be confused by the additional

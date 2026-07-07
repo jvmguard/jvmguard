@@ -63,7 +63,7 @@ public enum ReentryInhibition {
      * Declared transactions are transactions created through this API via
      * {@link ClassTransaction} or {@link MethodTransaction}.
      * Note that other transactions types that can be configured in the
-     * jvmguard UI, like Matched or EJB transactions, can still nest with Declared transactions.
+     * jvmguard UI, like Matched or Mapped transactions, can still nest with Declared transactions.
      * </p>
      */
     DECLARED,

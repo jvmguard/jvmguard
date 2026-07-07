@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  *   &#064;MethodTransaction(inheritance = @Inheritance)</pre>
  * </li>
  * <li>
- * In a situation where a framework is creating <b>proxies</b> from an annotated class or interface, such as for an EJB, the
+ * In a situation where a framework is creating <b>proxies</b> from an annotated class or interface, such as for a managed bean, the
  * class name of the proxy class is not useful for monitoring. It often has an uninterpretable class name and changes
  * each time the VM is restarted or even more often. Similarly, you may be implementing your own interface, but the
  * implementations are all different implementations of the same task and should not be shown as separate transactions.
