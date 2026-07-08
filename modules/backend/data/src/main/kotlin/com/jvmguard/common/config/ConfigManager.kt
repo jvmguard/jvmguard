@@ -11,6 +11,7 @@ import com.jvmguard.data.config.GroupHierarchyWrapper
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.vmdata.VM
 import com.jvmguard.data.vmdata.VmIdentifier
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.LinkedHashSet
 import java.util.LinkedList
@@ -18,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class ConfigManager(private val configStorage: ConfigStorage) {
+
+    private val logger = LoggerFactory.getLogger(ConfigManager::class.java)
 
     private var globalConfig: GlobalConfig? = null
     private val idToGroupConfig: MutableMap<Long, GroupConfig> = ConcurrentHashMap()
@@ -30,6 +33,7 @@ class ConfigManager(private val configStorage: ConfigStorage) {
 
     fun init() {
         initGlobalConfig()
+        applyEnvVarOverrides()
         initGroupConfigs()
     }
 
@@ -192,6 +196,28 @@ class ConfigManager(private val configStorage: ConfigStorage) {
             val config = globalConfigs.first()
             globalConfig = config
             config.deobfuscate()
+        }
+    }
+
+    private fun applyEnvVarOverrides() {
+        val config = globalConfig ?: return
+
+        for (provider in config.ssoConfig.providers) {
+            val prefix = "JVMGUARD_SSO_" + provider.displayName.uppercase()
+                .replace(Regex("[^A-Z0-9]+"), "_").trim('_')
+            System.getenv("${prefix}_CLIENT_ID")?.let {
+                logger.info("SSO client ID for '{}' overridden by environment variable", provider.displayName)
+                provider.clientId = it
+            }
+            System.getenv("${prefix}_CLIENT_SECRET")?.let {
+                logger.info("SSO client secret for '{}' overridden by environment variable", provider.displayName)
+                provider.clientSecret = it
+            }
+        }
+
+        System.getenv("JVMGUARD_LDAP_PASSWORD")?.let {
+            logger.info("LDAP bind password overridden by environment variable")
+            config.ldapConfig.password = it
         }
     }
 
