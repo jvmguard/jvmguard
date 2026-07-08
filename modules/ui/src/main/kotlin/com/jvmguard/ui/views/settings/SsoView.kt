@@ -86,7 +86,11 @@ class SsoView : AbstractSettingsSectionView() {
         }
 
     private fun edit(provider: SsoProviderConfig, isNew: Boolean) {
-        SsoProviderDialog(provider, isNew) { saved ->
+        val existingNames = (Sessions.settingsDraft().ssoProviders.items() + Sessions.settingsDraft().config.ssoConfig.providers)
+            .map { it.displayName }
+            .toMutableSet()
+            .apply { if (!isNew) remove(provider.displayName) }
+        SsoProviderDialog(provider, isNew, existingNames) { saved ->
             if (isNew) {
                 providers.add(saved)
             } else {

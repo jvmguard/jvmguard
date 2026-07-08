@@ -31,6 +31,7 @@ import com.vaadin.flow.data.binder.Binder
 class SsoProviderDialog(
     private val provider: SsoProviderConfig,
     isNew: Boolean,
+    private val existingDisplayNames: Set<String> = emptySet(),
     private val onSave: (SsoProviderConfig) -> Unit,
 ) : JvmGuardDialog() {
 
@@ -115,6 +116,7 @@ class SsoProviderDialog(
     private fun bind() {
         binder.forField(displayName)
             .asRequired("Enter a display name.")
+            .withValidator({ it !in existingDisplayNames }, "A provider with this name already exists.")
             .bind({ it.displayName }, { p, v -> p.displayName = v })
         binder.forField(preset)
             .bind({ it.preset }, { p, v -> p.preset = v })
@@ -141,12 +143,15 @@ class SsoProviderDialog(
         val p = preset.value ?: return
         requireVerifiedEmail.isVisible = !p.emailAlwaysVerified
         if (p == SsoPreset.GOOGLE_WORKSPACE) {
+            displayName.value = "Google"
+            displayName.isEnabled = false
             issuerUri.isVisible = false
             issuerUri.value = SsoPreset.defaultIssuer(p)
             claimName.isVisible = false
             domainRestriction.label = "Hosted domain"
             domainRestriction.placeholder = "yourco.com"
         } else {
+            displayName.isEnabled = true
             issuerUri.isVisible = true
             claimName.isVisible = (p == SsoPreset.GENERIC_OIDC)
             domainRestriction.label = "Domain / tenant"
