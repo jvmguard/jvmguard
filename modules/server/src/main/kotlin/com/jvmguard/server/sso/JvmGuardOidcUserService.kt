@@ -37,10 +37,10 @@ class JvmGuardOidcUserService(
             .find { it.issuerUri.trim().trimEnd('/') == issuer.trim().trimEnd('/') && it.enabled }
 
         if (email.isEmpty()) {
-            throw SsoAuthenticationException(SsoLoginError.EMAIL_MISSING)
+            throw SsoAuthenticationException(SsoLoginError.EMAIL_MISSING, oidcUser.idToken.tokenValue)
         }
         if (!emailVerified && providerConfig?.requireVerifiedEmail != false) {
-            throw SsoAuthenticationException(SsoLoginError.EMAIL_NOT_VERIFIED)
+            throw SsoAuthenticationException(SsoLoginError.EMAIL_NOT_VERIFIED, oidcUser.idToken.tokenValue)
         }
 
         val groups = extractGroups(claims, providerConfig)
@@ -49,9 +49,9 @@ class JvmGuardOidcUserService(
         val user = try {
             server.authenticateSso(issuer, subject, email, name, groups)
         } catch (e: SsoLoginException) {
-            throw SsoAuthenticationException(e.error)
+            throw SsoAuthenticationException(e.error, oidcUser.idToken.tokenValue)
         } catch (e: LoginException) {
-            throw AuthenticationServiceException(e.message ?: "SSO login denied", e)
+            throw SsoAuthenticationException(SsoLoginError.GENERIC, oidcUser.idToken.tokenValue)
         }
         val connection = server.connect(user, MockMode.NONE)
 

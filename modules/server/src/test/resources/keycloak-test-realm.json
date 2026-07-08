@@ -18,7 +18,9 @@
       "secret": "test-secret-12345",
       "redirectUris": [
         "http://localhost:8020/login/oauth2/code/keycloak",
-        "http://127.0.0.1:8020/login/oauth2/code/keycloak"
+        "http://127.0.0.1:8020/login/oauth2/code/keycloak",
+        "http://localhost:8020/login",
+        "http://127.0.0.1:8020/login"
       ],
       "webOrigins": [],
       "standardFlowEnabled": true,

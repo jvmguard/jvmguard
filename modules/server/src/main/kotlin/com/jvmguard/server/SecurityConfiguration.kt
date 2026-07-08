@@ -11,6 +11,7 @@ import com.jvmguard.server.sso.SsoAuthenticationException
 import com.jvmguard.ui.server.JvmGuardPrincipal
 import com.jvmguard.ui.server.SecurityBridge
 import com.jvmguard.ui.views.login.LoginView
+import com.vaadin.flow.component.UI
 import com.vaadin.flow.spring.security.AuthenticationContext
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer
 import jakarta.servlet.http.HttpServletResponse
@@ -25,10 +26,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
@@ -66,6 +70,7 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
     fun vaadinSecurityFilterChain(
         http: HttpSecurity,
         oidcUserService: JvmGuardOidcUserService,
+        clientRegistrationRepository: ClientRegistrationRepository,
     ): SecurityFilterChain {
         http.authorizeHttpRequests { it.requestMatchers("/error", "/icons/**").permitAll() }
         if (JvmGuardConfig.isIntegrationTest || java.lang.Boolean.getBoolean("jvmguard.testControlFilter")) {
@@ -73,6 +78,7 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
         }
         return http.with(VaadinSecurityConfigurer.vaadin()) { configurer ->
             configurer.loginView(LoginView::class.java)
+            configurer.logoutSuccessHandler(ssoLogoutSuccessHandler(clientRegistrationRepository))
             configurer.addLogoutHandler { _, _, authentication ->
                 (authentication?.principal as? JvmGuardPrincipal)?.serverConnection?.logout()
             }
@@ -80,20 +86,44 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
             oauth2.loginPage("/login")
             oauth2.userInfoEndpoint { it.oidcUserService(oidcUserService) }
             oauth2.successHandler(ssoSuccessHandler())
-            oauth2.failureHandler(ssoFailureHandler())
+            oauth2.failureHandler(ssoFailureHandler(clientRegistrationRepository))
         }.build()
     }
 
-    private fun ssoFailureHandler(): AuthenticationFailureHandler =
-        AuthenticationFailureHandler { _, response, exception ->
+    private fun ssoFailureHandler(
+        clientRegistrationRepository: ClientRegistrationRepository,
+    ): AuthenticationFailureHandler =
+        AuthenticationFailureHandler { request, response, exception ->
             val detail = (exception as? OAuth2AuthenticationException)?.error?.let { err ->
-                "${err.errorCode}${err.description?.let { ": $it" } ?: ""}"
+                "${err.errorCode}${err.description?.let { d -> ": $d" } ?: ""}"
             } ?: exception.message
             Loggers.SERVER.warn("SSO login failed: {}", detail, exception)
             val error = generateSequence(exception as Throwable?) { it.cause }
                 .firstNotNullOfOrNull { (it as? SsoAuthenticationException)?.error }
                 ?: SsoLoginError.GENERIC
-            response.sendRedirect("/login?ssoError=${error.code}")
+
+            val registrationId = request.requestURI.substringAfter("/login/oauth2/code/", "")
+                .takeIf { it.isNotEmpty() }
+            val endSessionEndpoint = registrationId
+                ?.let { clientRegistrationRepository.findByRegistrationId(it) }
+                ?.providerDetails
+                ?.configurationMetadata
+                ?.get("end_session_endpoint") as? String
+
+            if (endSessionEndpoint != null) {
+                val baseUrl = "${request.scheme}://${request.serverName}:${request.serverPort}${request.contextPath}"
+                val postLogoutUri = java.net.URLEncoder.encode("$baseUrl/login", "UTF-8")
+                val idTokenHint = generateSequence(exception as Throwable?) { it.cause }
+                    .firstNotNullOfOrNull { (it as? SsoAuthenticationException)?.idTokenValue }
+                val params = buildString {
+                    append("post_logout_redirect_uri=$postLogoutUri")
+                    idTokenHint?.let { append("&id_token_hint=").append(java.net.URLEncoder.encode(it, "UTF-8")) }
+                }
+                request.session.setAttribute("ssoError", error.code)
+                response.sendRedirect("$endSessionEndpoint?$params")
+            } else {
+                response.sendRedirect("/login?ssoError=${error.code}")
+            }
         }
 
     private fun ssoSuccessHandler(): AuthenticationSuccessHandler =
@@ -105,6 +135,18 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
             repo.saveContext(context, request, response)
             response.sendRedirect("/")
         }
+
+    private fun ssoLogoutSuccessHandler(
+        clientRegistrationRepository: ClientRegistrationRepository,
+    ): LogoutSuccessHandler {
+        val handler = OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository)
+        handler.setPostLogoutRedirectUri("{baseUrl}/login")
+        handler.setDefaultTargetUrl("/login")
+        handler.setRedirectStrategy { _, _, url ->
+            UI.getCurrent()?.page?.setLocation(url)
+        }
+        return handler
+    }
 
     @Bean
     fun jvmguardAuthenticationProvider(server: Server): JvmGuardAuthenticationProvider = JvmGuardAuthenticationProvider(server)

@@ -9,11 +9,10 @@ import com.jvmguard.ui.server.UserSession
 import com.jvmguard.ui.views.setup.InstallWizardView
 import com.jvmguard.ui.views.vms.VmsView
 import com.vaadin.flow.component.Key
-import com.vaadin.flow.component.badge.Badge
-import com.vaadin.flow.component.badge.BadgeVariant
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.html.Image
+import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.PasswordField
@@ -35,7 +34,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
     internal lateinit var password: PasswordField
     internal lateinit var authCode: TextField
     internal lateinit var loginButton: Button
-    private lateinit var errorMessage: Badge
+    private lateinit var errorMessage: Span
 
     private val use2fa = Sessions.loginService().isUse2fa()
 
@@ -51,11 +50,12 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
 
             div { addClassName("jvmguard-login-logo") }
             h2("Welcome to jvmguard") { addClassName("jvmguard-login-title") }
-            errorMessage = Badge().apply {
-                addThemeVariants(BadgeVariant.ERROR)
+            errorMessage = Span().apply {
                 testId = ID_ERROR
                 isVisible = false
-                style.set("align-self", "center")
+                style.set("color", "var(--aura-red-text)")
+                style.set("text-align", "center")
+                style.set("font-size", "var(--vaadin-font-size-xs)")
             }
             add(errorMessage)
             span("Please log in to your account") { addClassName("jvmguard-login-subtitle") }
@@ -108,9 +108,11 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
             }
         }
 
-        event.location.queryParameters.parameters["ssoError"]?.firstOrNull()?.let { code ->
-            SsoLoginError.fromCode(code)?.let { showError(it.message) }
-        }
+        val httpRequest = (com.vaadin.flow.server.VaadinService.getCurrentRequest() as? com.vaadin.flow.server.VaadinServletRequest)?.httpServletRequest
+        val errorCode = event.location.queryParameters.parameters["ssoError"]?.firstOrNull()
+            ?: httpRequest?.session?.getAttribute("ssoError") as? String
+        errorCode?.let { httpRequest?.session?.removeAttribute("ssoError") }
+        errorCode?.let { code -> SsoLoginError.fromCode(code)?.let { showError(it.message) } }
 
         Sessions.captureMock(event.location.queryParameters)
         if (Sessions.isNewInstallation()) {
@@ -133,7 +135,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
     }
 
     private fun showError(message: String) {
-        errorMessage.text = message
+        errorMessage.text = message.substringBefore(". ") + if (message.contains(". ")) "." else ""
         errorMessage.isVisible = true
     }
 

@@ -150,6 +150,11 @@ class ServerImpl(
         val accessLevel = evaluateSsoAccessRules(provider, groups)
             ?: throw SsoLoginException(SsoLoginError.NOT_AUTHORIZED)
 
+        if (userManager.getByLoginName(email) != null) {
+            Loggers.SERVER.warn("SSO auto-provision skipped: login name '{}' is already registered", email)
+            throw SsoLoginException(SsoLoginError.ALREADY_REGISTERED)
+        }
+
         val newUser = User()
         newUser.loginName = email
         newUser.userType = UserType.OIDC
