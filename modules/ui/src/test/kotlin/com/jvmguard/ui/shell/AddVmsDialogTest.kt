@@ -43,7 +43,7 @@ class AddVmsDialogTest : JvmGuardBrowserlessTest() {
         AddRemoteVmsDialog().open()
         assertFalse(find<Select<*>>().all().isEmpty(), "an archive-format select is shown")
         assertFalse(find<Anchor>().all().isEmpty(), "an agent download link is shown")
-        assertTrue(codeBlocks().any { it.contains("server=") }, "the remote VM parameter references the server")
+        assertTrue(codeBlocks().any { it.contains("server=") }, "the remote JVM option references the server")
     }
 
     @Test

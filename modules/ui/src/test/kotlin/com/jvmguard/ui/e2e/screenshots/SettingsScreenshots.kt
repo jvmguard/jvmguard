@@ -53,6 +53,21 @@ class SettingsScreenshots : ScreenshotTest() {
     }
 
     @Test
+    fun ssoProvider() = onPage {
+        login()
+        open("settings/sso")
+        getByTestId(SsoView.ID_ADD_PROVIDER).click()
+        locator("vaadin-dialog-overlay").first().waitFor()
+        getByTestId(SsoProviderDialog.ID_DISPLAY_NAME).locator("input").fill("Keycloak")
+        getByTestId(SsoProviderDialog.ID_ISSUER_URI).locator("input").fill("https://keycloak.example.com/realms/main")
+        getByTestId(SsoProviderDialog.ID_CLIENT_ID).locator("input").fill("jvmguard")
+        getByTestId(SsoProviderDialog.ID_CLIENT_SECRET).locator("input").fill("secret-abc123")
+        getByTestId(SsoProviderDialog.ID_DOMAIN).locator("input").fill("example.com")
+        waitForTimeout(300.0)
+        locator("vaadin-dialog-overlay").first().capture("sso_provider")
+    }
+
+    @Test
     fun configExportServer() = onPage {
         login()
         open("settings/import-export")

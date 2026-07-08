@@ -34,7 +34,7 @@ overwritten. New agents are stored in the `$HOME/.jvmguard/agent2` directory. In
 for each monitored VM that in turn contain directories with the transferred agents.
 
 When a monitored JVM is started, it loads the `jvmguard.jar` Java agent that [you have specified](/docs/main/monitoring)
-in the `-javaagent` VM parameter. That Java agent bootstraps the actual implementation of the monitoring agent by
+in the `-javaagent` JVM option. That Java agent bootstraps the actual implementation of the monitoring agent by
 looking into `$HOME/.jvmguard/agent2` and selecting the most recent agent files for the monitored JVM. If no agents have
 been transferred, the implementation in the `lib` directory of the extracted agent archive is used.
 

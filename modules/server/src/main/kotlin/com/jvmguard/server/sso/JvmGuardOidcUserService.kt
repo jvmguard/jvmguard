@@ -50,7 +50,7 @@ class JvmGuardOidcUserService(
             server.authenticateSso(issuer, subject, email, name, groups)
         } catch (e: SsoLoginException) {
             throw SsoAuthenticationException(e.error, oidcUser.idToken.tokenValue)
-        } catch (e: LoginException) {
+        } catch (_: LoginException) {
             throw SsoAuthenticationException(SsoLoginError.GENERIC, oidcUser.idToken.tokenValue)
         }
         val connection = server.connect(user, MockMode.NONE)

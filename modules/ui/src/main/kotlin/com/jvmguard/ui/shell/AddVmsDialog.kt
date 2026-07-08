@@ -91,8 +91,8 @@ class AddLocalVmsDialog : JvmGuardDialog() {
             isPadding = false
             isSpacing = true
             setWidthFull()
-            add(subtitle("Monitoring a VM is easy. Just add a VM parameter to your start script."))
-            add(Span("Add the following VM parameter to the Java invocation in your start script:"))
+            add(subtitle("Monitoring a VM is easy. Just add a JVM option to your start script."))
+            add(Span("Add the following JVM option to the Java invocation in your start script:"))
             add(codeBlock(parameter))
             add(hint("Enhancement: to give the VM a proper name and group, append the following to the parameter above:"))
             add(codeBlock("${separator}name=$ISSUER_PLACEHOLDER,group=$GROUP_PLACEHOLDER"))
@@ -124,12 +124,12 @@ class AddRemoteVmsDialog : JvmGuardDialog() {
             isPadding = false
             isSpacing = true
             setWidthFull()
-            add(subtitle("Monitoring a VM is easy. Just add a VM parameter to your start script. The agent files can be downloaded below."))
+            add(subtitle("Monitoring a VM is easy. Just add a JVM option to your start script. The agent files can be downloaded below."))
             add(step(1, "Download the agent", agentDownloadRow()))
             add(step(2, "Copy the agent to the machine where the VM is running", Span(copyInstruction(useSsl))))
             add(
                 step(
-                    3, "Add the VM parameter to the Java invocation in your start script",
+                    3, "Add the JVM option to the Java invocation in your start script",
                     codeBlock("-javaagent:[path to jvmguard.jar]=server=[IP address or name of the jvmguard server],name=$ISSUER_PLACEHOLDER,group=$GROUP_PLACEHOLDER"),
                     hint("Advanced: for a pool of equivalent VMs, append \",pool=$POOL_PLACEHOLDER\" instead of name and group. Group and pool names can form a hierarchy such as level1/level2/level3.")
                 )

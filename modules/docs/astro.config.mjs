@@ -36,6 +36,7 @@ export default defineConfig({
       items: [
         { label: 'Server configuration', slug: 'config/server-config' },
         { label: 'Server administration', slug: 'config/admin' },
+        { label: 'Single sign-on', slug: 'config/sso' },
         { label: 'Import/Export', slug: 'config/impex' },
         { label: 'Unattended installations', slug: 'config/unattended-installations' },
         { label: 'Automatic agent update', slug: 'config/agent-update' },

@@ -11,19 +11,19 @@ After jvmguard is installed, the agent can be added to JVMs that run on the loca
 
 ## Basic mechanism
 
-The jvmguard agent is a **Java agent**. It is loaded into a VM by specifying the `-javaagent` VM parameter. Java agents
+The jvmguard agent is a **Java agent**. It is loaded into a VM by specifying the `-javaagent` JVM option. Java agents
 are able to instrument classes as they are loaded and to retransform classes that have already been loaded.
 
-To prepare a VM for monitoring, you need to know the actual VM parameter that needs to be inserted into the start script
+To prepare a VM for monitoring, you need to know the actual JVM option that needs to be inserted into the start script
 of your application server or your application. The jvmguard agent is already available in the jvmguard installation
-directory, and the jvmguard UI shows you how to construct the correct `-javaagent` VM parameter.
+directory, and the jvmguard UI shows you how to construct the correct `-javaagent` JVM option.
 
 To get started, click on the "Add VMs" button in the header.
 
 ## Adding a local VM
 
 Since the jvmguard agent is already available in the jvmguard installation directory, you can easily monitor a locally
-running VM. The "Add VMs" dialog displays the complete `-javaagent` VM parameter for the simplest case without any
+running VM. The "Add VMs" dialog displays the complete `-javaagent` JVM option for the simplest case without any
 further configuration. It is suitable for monitoring a single VM.
 
 <Figure src="ui/add_vms_local.png" />
@@ -34,7 +34,7 @@ regarding group and pool names are explained below.
 ## Naming VMs
 
 If you monitor multiple VMs, you have to give them names to be able to **identify them in the jvmguard UI**. To assign a
-VM name, pass the `name` option to the `-javaagent` VM parameter:
+VM name, pass the `name` option to the `-javaagent` JVM option:
 
 ```
 -javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name]
@@ -48,7 +48,7 @@ names, see the section on VM pools below.
      last-writer-wins: the new VM replaces the old one, which is disconnected. */}
 
 In addition to the VM name, you can group VMs into a hierarchy. By default, a VM is inserted into the top-level group.
-To assign it to another group, set the `group` option in the VM parameter:
+To assign it to another group, set the `group` option in the JVM option:
 
 ```
 -javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name],group=[group name]
@@ -92,7 +92,7 @@ A jvmguard server may be configured to use a different port by setting the
 [`vmPort` property](/docs/config/server-config) in `config/application.yaml`. This is necessary if the port is already in use or if you
 install multiple instances of jvmguard on the same machine.
 
-To tell the agent about such a non-default port, you have to add the `port` option to the `-javaagent` VM parameter. For
+To tell the agent about such a non-default port, you have to add the `port` option to the `-javaagent` JVM option. For
 example:
 
 ```
@@ -106,7 +106,7 @@ Windows. Log files are created on demand, if nothing is logged, no file is creat
 name>.log` where &lt;VM name&gt; is the value of the `name` or the `pool` parameter. If neither `name` nor `pool` is
 specified, the file is named `jvm.log`.
 
-To log to a different file, you can add the `logFile=<path to log file>` option to the `-javaagent` VM parameter. To
+To log to a different file, you can add the `logFile=<path to log file>` option to the `-javaagent` JVM option. To
 disable logging altogether, the option `logEnabled=false` can be appended.
 
 ## Encryption and authentication
