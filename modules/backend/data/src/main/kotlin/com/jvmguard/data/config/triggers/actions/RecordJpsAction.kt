@@ -12,7 +12,7 @@ open class RecordJpsAction : RecordArtifactAction {
             super(artifactName, createInboxItem, time, timeUnit)
 
     override val actionType: ActionType
-        get() = ActionType.RECORD_DATA
+        get() = ActionType.RECORD_JPS
 
-    override fun createDefaultArtifactName(): String = "Data snapshot"
+    override fun createDefaultArtifactName(): String = "JProfiler snapshot"
 }

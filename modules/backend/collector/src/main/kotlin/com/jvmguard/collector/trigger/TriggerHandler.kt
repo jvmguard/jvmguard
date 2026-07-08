@@ -147,7 +147,7 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
                                 )
                             )
 
-                            is RecordJpsAction -> commands.add(collectorContext.getRecordJpsCommand(lastVm, null, action))
+                            is RecordJpsAction -> collectorContext.recordJProfilerSnapshot(lastVm, null, action)
                             is RecordJfrAction -> commands.add(collectorContext.getRecordJfrCommand(lastVm, null, action))
                         }
                     }

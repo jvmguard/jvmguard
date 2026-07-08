@@ -1,6 +1,7 @@
 package com.jvmguard.collector.main
 
 import com.jvmguard.agent.JvmGuardAgent
+import com.jvmguard.agent.artifact.ArtifactKind
 import com.jvmguard.agent.comm.CommandType
 import com.jvmguard.agent.config.VmType
 import com.jvmguard.agent.data.*
@@ -222,7 +223,7 @@ class VmManagerImpl(
     }
 
     override fun recordJps(vm: VM, user: User, recordJpsAction: RecordJpsAction) {
-        collectorContext.executeLater(vm, setOf(collectorContext.getRecordJpsCommand(vm, user, recordJpsAction)))
+        collectorContext.recordJProfilerSnapshot(vm, user, recordJpsAction)
     }
 
     override fun getMBeanNames(vm: VM, createPlatformServer: Boolean): Collection<String> {
@@ -546,11 +547,12 @@ class VmManagerImpl(
                 socketAddress.port,
                 agentConnection.connectionInfo!!.buildVersion
             )
-            val availableAgentResult = agentConnection.executeCommand(
-                CommandType.CHECK_AVAILABLE_AGENT,
-                AvailableAgentParameter(JvmGuardAgent.getBuildVersion())
-            ) as AvailableAgentResult
-            if (!availableAgentResult.isAvailable) {
+            val agentKey = JvmGuardAgent.getBuildVersion().toString()
+            val checkResult = agentConnection.executeCommand(
+                CommandType.CHECK_ARTIFACT,
+                CheckArtifactParameter(ArtifactKind.AGENT, agentKey)
+            ) as CheckArtifactResult
+            if (!checkResult.isAvailable) {
                 val vmAddressVerbose = "${socketAddress.address.hostAddress}:${socketAddress.port}"
                 CONNECTION_LOGGER.info("transferring new agent to {}", vmAddressVerbose)
                 var file: File? = null
@@ -561,14 +563,14 @@ class VmManagerImpl(
                     CONNECTION_LOGGER.warn("exception while preparing agent archive", t)
                 }
                 if (file != null && file.isFile && file.length() > 0) {
-                    val updateAgentResult = agentConnection.executeCommand(
-                        CommandType.UPDATE_AGENT,
-                        UpdateAgentParameter(JvmGuardAgent.getBuildVersion(), file)
-                    ) as UpdateAgentResult
-                    if (updateAgentResult.isSuccess) {
+                    val pushResult = agentConnection.executeCommand(
+                        CommandType.PUSH_ARTIFACT,
+                        PushArtifactParameter(ArtifactKind.AGENT, agentKey, file)
+                    ) as PushArtifactResult
+                    if (pushResult.isSuccess) {
                         outdatedAgent = true
                     } else {
-                        CONNECTION_LOGGER.warn("could not update agent on {}: {}", vmAddressVerbose, updateAgentResult.errorMessage)
+                        CONNECTION_LOGGER.warn("could not update agent on {}: {}", vmAddressVerbose, pushResult.errorMessage)
                     }
                 }
             } else {
@@ -688,7 +690,7 @@ class VmManagerImpl(
             return when (commandType) {
                 CommandType.THREAD_DUMP -> SnapshotFileType.THREAD_DUMP
                 CommandType.HEAP_DUMP -> SnapshotFileType.HPZ
-                CommandType.JVMTI_RECORD -> SnapshotFileType.JPS
+                CommandType.RECORD_JPROFILER -> SnapshotFileType.JPS
                 CommandType.JFR_SNAPSHOT -> SnapshotFileType.JFR
                 else -> null
             }

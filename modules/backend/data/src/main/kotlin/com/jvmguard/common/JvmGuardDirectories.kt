@@ -42,6 +42,9 @@ class JvmGuardDirectories private constructor(dataDirectorySpec: String, integra
     val backupDirectory: File
         get() = File(dataDirectory, BACKUP_DIRECTORY)
 
+    val jprofilerPackagesDirectory: File
+        get() = File(File(dataDirectory, JPROFILER_DIRECTORY), PACKAGES_DIRECTORY)
+
     private data class Layout(
         val externalConfigDir: File,
         val distDirectory: File,
@@ -53,6 +56,8 @@ class JvmGuardDirectories private constructor(dataDirectorySpec: String, integra
         private const val DEMO_DIR_NAME = "demo"
         private const val DATABASE_DIRECTORY = "db"
         private const val BACKUP_DIRECTORY = "backup"
+        private const val JPROFILER_DIRECTORY = "jprofiler"
+        private const val PACKAGES_DIRECTORY = "packages"
 
         @Volatile
         private var instance: JvmGuardDirectories? = null

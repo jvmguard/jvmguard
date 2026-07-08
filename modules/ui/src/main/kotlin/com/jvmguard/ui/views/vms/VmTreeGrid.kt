@@ -15,10 +15,13 @@ import com.jvmguard.ui.components.recording.triggers.TriggerActionDialog
 import com.jvmguard.ui.components.sparkline.Sparkline
 import com.jvmguard.ui.components.sparkline.SparklineRenderers
 import com.jvmguard.ui.server.Sessions
+import com.jvmguard.ui.server.runInBackground
 import com.jvmguard.ui.views.data.mbeans.MBeansView
 import com.jvmguard.ui.views.data.telemetry.TelemetryNavigation
 import com.jvmguard.ui.views.data.transactions.TransactionsView
 import com.jvmguard.connector.api.ServerConnection
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.AuthenticationException
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.dependency.Uses
@@ -273,13 +276,13 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
             item("Run GC", { runGc(vm) }) { testId = ID_ACTION_GC }
             item("Heap dump…", { confirmHeapDump(vm) }) { testId = ID_ACTION_HEAP_DUMP }
             item("Thread dump…", { confirmThreadDump(vm) }) { testId = ID_ACTION_THREAD_DUMP }
-            item("Record fine-grained CPU data…", { recordJps(vm) }) { testId = ID_ACTION_RECORD_JPS }
+            item("Record JProfiler CPU snapshot…", { recordJps(vm) }) { testId = ID_ACTION_RECORD_JPS }
             item("Record JFR snapshot…", { recordJfr(vm) }) { testId = ID_ACTION_RECORD_JFR }
         }
 
     private fun recordJps(vm: VM) {
         val action = RecordJpsAction().apply { isCreateInboxItem = true }
-        TriggerActionDialog.create(action, "Record fine-grained CPU data") {
+        TriggerActionDialog.create(action, "Record JProfiler CPU snapshot") {
             dispatch("Recording started. The snapshot will be delivered to your inbox.") { it.recordJps(vm, action) }
         }.open()
     }
@@ -309,14 +312,17 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
     private fun dispatch(confirmation: String, action: (ServerConnection) -> Unit) {
         val connection = Sessions.current()?.serverConnection ?: return
         val ui = UI.getCurrent()
-        // Run the server command off the UI thread (it can block — the mock's runGC sleeps 5s) and
-        // confirm immediately; @Push delivers any error once the call returns.
         Notifications.show(confirmation)
-        Thread.ofVirtual().start {
+        runInBackground {
             try {
                 action(connection)
-            } catch (e: SecurityException) {
-                ui.access { Notifications.show("Not allowed: ${e.message}") }
+            } catch (e: Exception) {
+                // Surface permission denials as a toast; let real errors propagate (delivered via @Push).
+                if (e is SecurityException || e is AccessDeniedException || e is AuthenticationException) {
+                    ui.access { Notifications.show("Not allowed: ${e.message}") }
+                } else {
+                    throw e
+                }
             }
         }
     }

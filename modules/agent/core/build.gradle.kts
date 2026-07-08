@@ -15,6 +15,7 @@ dependencies {
     api(project(":agent:api"))
     implementation(project(":agent:java11"))
     api(libs.bundles.annotations)
+    implementation(libs.jprofiler.controller)
     implementation(libs.asm.commons)
     implementation(libs.nanojson)
     implementation(libs.fastutil)

@@ -1,3 +1,5 @@
+import com.jvmguard.build.*
+
 plugins {
     id("kotlin-module")
     kotlin("plugin.spring")
@@ -10,4 +12,9 @@ dependencies {
     api(project(":agent:bundle"))
     api("org.jooq:jool:0.9.14")
     implementation(libs.fastutil)
+    addJunit6()
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

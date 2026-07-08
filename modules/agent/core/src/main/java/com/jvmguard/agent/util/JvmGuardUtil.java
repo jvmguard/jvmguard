@@ -1,11 +1,10 @@
 package com.jvmguard.agent.util;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class JvmGuardUtil {
     @SuppressWarnings("DuplicatedCode")
@@ -20,6 +19,12 @@ public class JvmGuardUtil {
             count += toBeWritten;
         }
         return count;
+    }
+
+    public static String readToString(InputStream in) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        pumpStream(in, out, Long.MAX_VALUE);
+        return new String(out.toByteArray(), StandardCharsets.UTF_8);
     }
 
     public static void copyFile(File sourceFile, File targetFile, boolean compress) throws IOException {
@@ -74,26 +79,6 @@ public class JvmGuardUtil {
     public static void deleteDirectory(File dir, Set<File> excludedFiles) {
         emptyDirectory(dir, excludedFiles);
         dir.delete();
-    }
-
-    public static void unpack(File zipFile, File dir) throws IOException {
-        dir = dir.getCanonicalFile();
-        ZipInputStream in = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
-        ZipEntry entry = in.getNextEntry();
-        while (entry != null) {
-            File file = new File(dir, entry.getName()).getCanonicalFile();
-            if (file.getPath().startsWith(dir.getPath() + File.separator)) {
-                if (entry.isDirectory()) {
-                    file.mkdirs();
-                } else {
-                    OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-                    pumpStream(in, out, Long.MAX_VALUE);
-                    out.close();
-                }
-            }
-            entry = in.getNextEntry();
-        }
-        in.close();
     }
 
     public static String getCommandLineName(Enum<?> enumConstant, boolean capitalizeFirst) {

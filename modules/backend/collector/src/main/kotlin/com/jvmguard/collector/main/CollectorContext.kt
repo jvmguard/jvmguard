@@ -1,14 +1,19 @@
 package com.jvmguard.collector.main
 
+import com.jvmguard.agent.artifact.ArtifactKind
 import com.jvmguard.agent.comm.CommandType
 import com.jvmguard.agent.config.base.LogCategory
 import com.jvmguard.agent.data.*
-import com.jvmguard.agent.parameter.JfrRecordParameters
-import com.jvmguard.agent.parameter.JvmtiRecordParameters
+import com.jvmguard.agent.parameter.*
 import com.jvmguard.annotation.MethodTransaction
 import com.jvmguard.annotation.Part
+import com.jvmguard.agent.util.JvmGuardThreadFactory
 import com.jvmguard.collector.connection.AgentConnectionImpl.Handler
 import com.jvmguard.collector.connection.Command
+import com.jvmguard.collector.jprofiler.JProfilerPackageRepository
+import com.jvmguard.collector.jprofiler.JProfilerUnavailableException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import com.jvmguard.collector.telemetry.TelemetryManager
 import com.jvmguard.common.config.ConfigManager
 import com.jvmguard.common.helper.GroupHelper
@@ -38,7 +43,11 @@ class CollectorContext(
     private val configManager: ConfigManager,
     @param:Qualifier("messageScheduler") private val messageService: ThreadPoolTaskScheduler,
     private val mailService: MailService,
+    private val jprofilerPackageRepository: JProfilerPackageRepository,
 ) {
+
+    private val jprofilerExecutor: ExecutorService =
+        Executors.newCachedThreadPool(JvmGuardThreadFactory("jprofiler-provisioning", true, Thread.NORM_PRIORITY))
 
     fun getGroupVM(groupIdentifier: VmIdentifier): VM {
         return vmRegistry.getGroupVM(groupIdentifier)
@@ -53,25 +62,53 @@ class CollectorContext(
         return false
     }
 
-    fun getRecordJpsCommand(vm: VM, user: User?, recordJpsAction: RecordJpsAction): Command {
+    fun recordJProfilerSnapshot(vm: VM, user: User?, action: RecordJpsAction) {
         BaseResult.setTempDir(SnapshotFile.snapshotDirectory)
-        val parameter = JvmtiRecordParameters(getSeconds(recordJpsAction), false)
-        return Command(CommandType.JVMTI_RECORD, parameter, object : Handler<JpsResult>() {
-            override fun handle(result: JpsResult) {
-                val errorMessage = result.errorMessage
-                if (errorMessage != null) {
-                    handleSnapshotError(errorMessage, vm, user, SnapshotFileType.JPS)
-                } else {
-                    val snapshot =
-                        snapshotFileStorage.createSnapshotFile(vm, SnapshotFileType.JPS, System.currentTimeMillis(), recordJpsAction.artifactName, result)
-                    addArtifactInboxItem(user, recordJpsAction.isCreateInboxItem, vm, recordJpsAction.artifactName, snapshot)
-                }
-            }
+        val agentConnection = connectionRegistry.getLiveConnection(vm) ?: return
+        jprofilerExecutor.submit {
+            try {
+                val info = agentConnection.connectionInfo
+                    ?: throw JProfilerUnavailableException("no connection info for ${vm.verbose}")
+                val ref = jprofilerPackageRepository.resolveRef(info.osName, info.osArch)
 
-            override fun handleThrowable(t: Throwable) {
-                VmManagerImpl.CONNECTION_LOGGER.error("jps on {}", vm.verbose, t)
+                val checkResult = agentConnection.executeCommand(
+                    CommandType.CHECK_ARTIFACT,
+                    CheckArtifactParameter(ArtifactKind.JPROFILER, ref.artifactKey)
+                ) as CheckArtifactResult
+                if (!checkResult.isAvailable) {
+                    val file = jprofilerPackageRepository.download(ref)
+                    val pushResult = agentConnection.executeCommand(
+                        CommandType.PUSH_ARTIFACT,
+                        PushArtifactParameter(ArtifactKind.JPROFILER, ref.artifactKey, file)
+                    ) as PushArtifactResult
+                    if (!pushResult.isSuccess) {
+                        throw JProfilerUnavailableException(
+                            "could not transfer JProfiler package to ${vm.verbose}: ${pushResult.errorMessage}"
+                        )
+                    }
+                }
+
+                agentConnection.executeLater(
+                    CommandType.RECORD_JPROFILER,
+                    JProfilerRecordParameters(getSeconds(action), ref.artifactKey),
+                    object : Handler<JProfilerSnapshotResult>() {
+                        override fun handle(result: JProfilerSnapshotResult) {
+                            handleSnapshotToInboxItem(
+                                result, vm, user, action.isCreateInboxItem, action.artifactName, SnapshotFileType.JPS
+                            )
+                        }
+
+                        override fun handleThrowable(t: Throwable) {
+                            VmManagerImpl.CONNECTION_LOGGER.error("JProfiler recording on {}", vm.verbose, t)
+                        }
+                    }
+                )
+            } catch (e: JProfilerUnavailableException) {
+                handleSnapshotError(e.message ?: "JProfiler recording unavailable", vm, user, SnapshotFileType.JPS)
+            } catch (t: Throwable) {
+                handleSnapshotError("JProfiler recording failed: ${t.message}", vm, user, SnapshotFileType.JPS)
             }
-        })
+        }
     }
 
     fun getRecordJfrCommand(vm: VM, user: User?, recordJfrAction: RecordJfrAction): Command {

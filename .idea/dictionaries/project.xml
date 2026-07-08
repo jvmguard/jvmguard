@@ -11,10 +11,13 @@
       <w>bcpkix</w>
       <w>buildsys</w>
       <w>codeql</w>
+      <w>darwin</w>
       <w>echart</w>
       <w>echarts</w>
       <w>fastutil</w>
       <w>jdks</w>
+      <w>jpenable</w>
+      <w>jprofiler</w>
       <w>jvmguard</w>
       <w>karibu</w>
       <w>ldapsdk</w>

@@ -11,7 +11,7 @@ fun triggerTypeIcon(type: TriggerType): VaadinIcon = when (type) {
 }
 
 fun actionTypeIcon(type: ActionType): VaadinIcon = when (type) {
-    ActionType.RECORD_DATA -> VaadinIcon.CAMERA
+    ActionType.RECORD_JPS -> VaadinIcon.CAMERA
     ActionType.RECORD_JFR -> VaadinIcon.FILM
     ActionType.THREAD_DUMP -> VaadinIcon.LINES
     ActionType.HEAP_DUMP -> VaadinIcon.DATABASE

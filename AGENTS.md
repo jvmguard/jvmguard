@@ -133,7 +133,7 @@ shipped `dist-template/demo/jvmguard_demo.json` is a valid empty `recordingConfi
 `dist/agent/jvmguard.jar` (+ `dist/agent/lib/agent.jar`) must exist (the agent the demo VMs load), and the
 starter's working directory must resolve that path.
 
-**The demo VMs do NOT load `dist/agent/lib/agent.jar` directly — they load a copy from `~/.jvmguard/agent2/<hash>/<build-version>/agent.jar`.** The bootstrap (`AgentLocation`) extracts the agent there keyed by the manifest **build version**, and a dev rebuild keeps the *same* build number — so it reuses the stale cached copy and silently ignores your rebuild. After rebuilding the agent, **`rm -rf ~/.jvmguard/agent2`** (or the demo loads yesterday's bytecode). `-Djvmguard.debugBootstrap=true` makes `AgentLocation` print which jar it actually loaded (the demo starter forwards the flag to the workers).
+**The demo VMs do NOT load `dist/agent/lib/agent.jar` directly — they load a copy from `~/.jvmguard/agent/<hash>/<build-version>/agent.jar`.** The bootstrap (`AgentLocation`) extracts the agent there keyed by the manifest **build version**, and a dev rebuild keeps the *same* build number — so it reuses the stale cached copy and silently ignores your rebuild. After rebuilding the agent, **`rm -rf ~/.jvmguard/agent`** (or the demo loads yesterday's bytecode). `-Djvmguard.debugBootstrap=true` makes `AgentLocation` print which jar it actually loaded (the demo starter forwards the flag to the workers).
 
 **Why this matters (not just for demos):** the demo cluster is the only easy way to exercise the
 **real agent data path**, which differs from `?mock` in a way that bites the MBean browser. A real

@@ -14,7 +14,6 @@ public enum CommandType {
     CLASSES_INFO(ClassesInfoParameter.class, ClassesInfo.class, V1),
     KILL(null, KillResult.class, V1),
     SET_CONFIGURATION(ConfigurationParameter.class, null, V1),
-    JVMTI_RECORD(JvmtiRecordParameters.class, JpsResult.class, V1, true),
     RUN_GC(RunGcParameter.class, null, V1),
     FETCH_DEFERRED_DATA(null, DeferredDataResult.class, V1),
     HEAP_DUMP(null, HeapDumpResult.class, V1, true),
@@ -22,15 +21,16 @@ public enum CommandType {
     DATA_SET(DataSetParameter.class, DataSetResult.class, V1, true),
     RESET(ResetParameter.class, null, V1),
     METHOD_INFO(MethodInfoParameter.class, MethodInfoResult.class, V1),
-    CHECK_AVAILABLE_AGENT(AvailableAgentParameter.class, AvailableAgentResult.class, V1),
-    UPDATE_AGENT(UpdateAgentParameter.class, UpdateAgentResult.class, V1),
+    CHECK_ARTIFACT(CheckArtifactParameter.class, CheckArtifactResult.class, V8),
+    PUSH_ARTIFACT(PushArtifactParameter.class, PushArtifactResult.class, V8),
     ROUND_TRIP_PING(null, null, V1),
     REJECT(RejectParameter.class, RejectResult.class, V1),
     MBEAN_LIST(MBeanListParameter.class, MBeanListResult.class, V2),
     MBEAN_DATA(MBeanDataParameter.class, MBeanDataResult.class, V2),
     MBEAN_OPERATION(MBeanOperationParameter.class, MBeanOperationResult.class, V2, true),
     MBEAN_SET_ATTRIBUTE(MBeanSetAttributeParameter.class, MBeanSetAttributeResult.class, V2, true),
-    JFR_SNAPSHOT(JfrRecordParameters.class, JfrSnapshotResult.class, V7, true);
+    JFR_SNAPSHOT(JfrRecordParameters.class, JfrSnapshotResult.class, V7, true),
+    RECORD_JPROFILER(JProfilerRecordParameters.class, JProfilerSnapshotResult.class, V8, true);
 
     private final Class<? extends BaseParameter> parameterClass;
     private final Class<? extends BaseResult> resultClass;

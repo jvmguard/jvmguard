@@ -10,11 +10,11 @@ import com.jvmguard.ui.components.confirm
 import com.jvmguard.ui.components.editDeleteKeys
 import com.jvmguard.ui.components.menuButton
 import com.jvmguard.ui.server.Sessions
+import com.jvmguard.ui.server.runInBackground
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
-import org.springframework.security.core.context.SecurityContextHolder
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
@@ -215,18 +215,12 @@ class SsoProviderDialog(
         button.text = "Testing..."
         button.isEnabled = false
         val ui = UI.getCurrent()
-        val securityContext = SecurityContextHolder.getContext()
-        Thread.startVirtualThread {
-            SecurityContextHolder.setContext(securityContext)
-            try {
-                val result = connection.testSsoDiscovery(issuer)
-                ui.access {
-                    Notifications.show(result)
-                    button.text = "Test connection"
-                    button.isEnabled = true
-                }
-            } finally {
-                SecurityContextHolder.clearContext()
+        runInBackground {
+            val result = connection.testSsoDiscovery(issuer)
+            ui.access {
+                Notifications.show(result)
+                button.text = "Test connection"
+                button.isEnabled = true
             }
         }
     }

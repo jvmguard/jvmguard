@@ -23,6 +23,7 @@ tasks {
         "shadow"(libs.fastutil)
         "shadow"(libs.asm.commons)
         "shadow"(libs.nanojson)
+        "shadow"(libs.jprofiler.controller)
     }
 
     val distJar = register<ShadowJar>("distJar") {
@@ -40,7 +41,10 @@ tasks {
         }
 
         configurations.add(shadow)
-        minimize()
+        minimize {
+            // TODO: relocate once controller relocation is available
+            exclude(dependency("com.jprofiler:jprofiler-controller:.*"))
+        }
         exclude("module-info.class")
         // Relocate fastutil and ASM so they cannot collide with the profiled application's own
         // copies when the agent is attached to the same JVM.

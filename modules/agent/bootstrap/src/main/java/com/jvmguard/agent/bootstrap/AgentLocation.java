@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.jar.JarFile;
 
 public class AgentLocation {
-    private static final String AGENT_DIR = "agent2";
+    private static final String AGENT_DIR = "agent";
     private static final String USER_HOME = "user.home";
     private static final String JVMGUARD_USER_DIR = ".jvmguard";
 

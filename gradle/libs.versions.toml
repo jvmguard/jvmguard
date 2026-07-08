@@ -18,6 +18,7 @@ karibuDsl = "2.6.0"
 playwright = "1.61.0"
 servletApi = "6.1.0"
 install4j = "12.0.5"
+jprofiler = "16.1.1"
 shadow = "9.4.3"
 vanniktechPublish = "0.37.0"
 cyclonedx = "3.2.4"
@@ -47,6 +48,7 @@ jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrainsAnnotations" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 install4j-runtime = { module = "com.install4j:install4j-runtime", version.ref = "install4j" }
+jprofiler-controller = { module = "com.jprofiler:jprofiler-controller", version.ref = "jprofiler" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 h2 = { module = "com.h2database:h2", version.ref = "h2" }

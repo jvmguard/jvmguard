@@ -154,7 +154,7 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
                 addItem("View message") { viewMessage(item) }
             }
             if (item.snapshotFileId != null) {
-                addItem(downloadLink(item))
+                addItem("Download") { startDownload(item) }
             }
             addItem("Delete") { confirmDelete(listOf(item)) }
         }
@@ -255,12 +255,6 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
         val snapshotFileId = item.snapshotFileId ?: return
         activationDownload.setHref(DownloadHandler.fromInputStream { download(snapshotFileId) })
         activationDownload.element.callJsFunction("click")
-    }
-
-    private fun downloadLink(item: InboxItem): Anchor = Anchor().apply {
-        setText("Download")
-        element.setAttribute("download", true)
-        item.snapshotFileId?.let { id -> setHref(DownloadHandler.fromInputStream { download(id) }) }
     }
 
     private fun download(snapshotFileId: Long): DownloadResponse {

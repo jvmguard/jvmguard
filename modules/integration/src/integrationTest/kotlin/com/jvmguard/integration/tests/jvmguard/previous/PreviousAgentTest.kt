@@ -109,7 +109,7 @@ class PreviousAgentTest : JvmGuardTest() {
         assertTrue(
             File(
                 jvmguardUserDir,
-                "agent2/" + BootstrapFileUtil.getHashedPath(File(System.getProperty("distDir") + "/agent").canonicalPath) + "/" + JvmGuardAgent.getBuildVersion() + "/agent.jar"
+                "agent/" + BootstrapFileUtil.getHashedPath(File(System.getProperty("distDir") + "/agent").canonicalPath) + "/" + JvmGuardAgent.getBuildVersion() + "/agent.jar"
             ).isFile
         )
         // Verify each previous-agent VM downloaded and cached its agent
@@ -120,7 +120,7 @@ class PreviousAgentTest : JvmGuardTest() {
         assertTrue(
             File(
                 jvmguardUserDir,
-                "agent2/" + BootstrapFileUtil.getHashedPath(
+                "agent/" + BootstrapFileUtil.getHashedPath(
                     replaceAgent(
                         vmNo,
                         1,

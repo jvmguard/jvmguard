@@ -198,7 +198,7 @@ of jvmguard** and must never appear on the site, even obliquely.
   not in scope.
 - **The JProfiler JVMTI cross-over** is a capture that produces a JProfiler snapshot for handoff. Frame
   it as a capture-and-handoff, never as analysis inside jvmguard.
-- **Trigger actions the UI produces:** `RECORD_DATA`, `RECORD_JFR`, `THREAD_DUMP`, `HEAP_DUMP`, `EMAIL`,
+- **Trigger actions the UI produces:** `RECORD_JPS`, `RECORD_JFR`, `THREAD_DUMP`, `HEAP_DUMP`, `EMAIL`,
   `WEBHOOK`, `LOG`, `INBOX`.
 - **Telemetries** come from VM, MBean, and Declared sources.
 
@@ -310,7 +310,7 @@ Run this before marking any page done. Every box must hold.
       violations view, auto-detected web/EJB/Spring/RMI transactions.
 - [ ] Transactions are described as Matched / Declared / Mapped only; heap dumps as a trigger
       action only; the JVMTI cross-over as a capture-and-handoff only.
-- [ ] Trigger actions referenced are only `RECORD_DATA`, `RECORD_JFR`, `THREAD_DUMP`, `HEAP_DUMP`,
+- [ ] Trigger actions referenced are only `RECORD_JPS`, `RECORD_JFR`, `THREAD_DUMP`, `HEAP_DUMP`,
       `EMAIL`, `WEBHOOK`, `LOG`, `INBOX`.
 - [ ] The steady state is described accurately: lightweight telemetries and the transactions you
       configured, with low overhead. Never claim jvmguard "collects nothing". Deep artifacts are the

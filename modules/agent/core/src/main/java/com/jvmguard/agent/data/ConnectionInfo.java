@@ -16,6 +16,9 @@ public class ConnectionInfo extends BaseResult {
     private long instanceId;
     private Type type;
     private long buildVersion;
+    private String osName;
+    private String osArch;
+    private String osVersion;
 
     public ConnectionInfo() {
     }
@@ -44,6 +47,19 @@ public class ConnectionInfo extends BaseResult {
         return buildVersion;
     }
 
+    public String getOsName() {
+        return osName;
+    }
+
+    public String getOsArch() {
+        return osArch;
+    }
+
+    @SuppressWarnings("unused")
+    public String getOsVersion() {
+        return osVersion;
+    }
+
     @Override
     public void write(CommunicationContext context, DataOutputStream out) throws IOException {
         out.writeUTF(JvmGuardAgent.getVmName());
@@ -52,6 +68,9 @@ public class ConnectionInfo extends BaseResult {
         out.writeLong(JvmGuardAgent.getInstanceId());
         out.writeLong(JvmGuardAgent.getBuildVersion());
         out.writeUTF(context.getType().name());
+        out.writeUTF(getProperty("os.name"));
+        out.writeUTF(getProperty("os.arch"));
+        out.writeUTF(getProperty("os.version"));
     }
 
     @Override
@@ -63,6 +82,14 @@ public class ConnectionInfo extends BaseResult {
         buildVersion = in.readLong();
         type = CommunicationContext.Type.valueOf(in.readUTF());
         context.setType(type);
+        osName = in.readUTF();
+        osArch = in.readUTF();
+        osVersion = in.readUTF();
+    }
+
+    private static String getProperty(String name) {
+        String value = System.getProperty(name);
+        return value != null ? value : "";
     }
 
     @Override
