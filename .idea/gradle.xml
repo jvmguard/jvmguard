@@ -31,6 +31,7 @@
             <option value="$PROJECT_DIR$/modules/backend/collector" />
             <option value="$PROJECT_DIR$/modules/backend/connector" />
             <option value="$PROJECT_DIR$/modules/backend/data" />
+            <option value="$PROJECT_DIR$/modules/backend/mcp" />
             <option value="$PROJECT_DIR$/modules/backend/rest" />
             <option value="$PROJECT_DIR$/modules/demo" />
             <option value="$PROJECT_DIR$/modules/docs" />

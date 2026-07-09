@@ -734,6 +734,15 @@ vaadin-dialog-overlay:not([has-bounds-set])::part(content) {
     align-self: center;
 }
 
+.jvmguard-mcp-snippet {
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    user-select: all;
+    line-height: 1.4;
+    align-self: stretch;
+}
+
 .jvmguard-log-view {
     height: 100%;
 }

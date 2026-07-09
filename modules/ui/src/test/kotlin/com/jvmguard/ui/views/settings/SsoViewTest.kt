@@ -1,13 +1,11 @@
 package com.jvmguard.ui.views.settings
 
-import com.jvmguard.data.config.SsoGroupMapping
-import com.jvmguard.data.config.SsoPreset
+import com.jvmguard.connector.server.mock.MockServerConnectionImpl
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.ui.JvmGuardBrowserlessTest
 import com.jvmguard.ui.server.MockConnections
 import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.server.UserSession
-import com.jvmguard.connector.server.mock.MockServerConnectionImpl
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.textfield.PasswordField
@@ -45,6 +43,10 @@ class SsoViewTest : JvmGuardBrowserlessTest() {
         use(button("Add provider")).click()
 
         use(textField("Display name")).setValue("Company Okta")
+        assertTrue(
+            textField("Authorized redirect URI").value.endsWith("/login/oauth2/code/company-okta"),
+            "the redirect URI reflects the display-name slug",
+        )
         use(textField("Issuer URI")).setValue("https://yourco.okta.com")
         use(textField("Client ID")).setValue("client-123")
         use(passwordField("Client secret")).setValue("secret-456")

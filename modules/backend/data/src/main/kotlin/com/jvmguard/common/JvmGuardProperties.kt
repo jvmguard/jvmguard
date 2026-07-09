@@ -12,7 +12,8 @@ class JvmGuardProperties {
     var isReverseProxy: Boolean = false
     var reverseProxyHost: String = ""
     var contextPath: String = ""
-    var isRestApiEnabled: Boolean = false
+    var isRestApiEnabled: Boolean = true
+    var isMcpEnabled: Boolean = true
     var keystoreName: String = ""
     var keystorePassword: String = ""
     var vmPort: Int = 8847

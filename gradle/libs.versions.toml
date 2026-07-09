@@ -25,6 +25,7 @@ cyclonedx = "3.2.4"
 # TODO check if this can be removed after the next cyclonedx release
 # Pins the cyclonedx plugin's transitive Jackson (build tooling only) to a non-vulnerable release.
 jackson = "2.22.0"
+mcpSdk = "2.0.0"
 
 [libraries]
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -57,6 +58,7 @@ junit-bom = { module = "org.junit:junit-bom", version.ref = "junitBom" }
 karibu-dsl = { module = "com.github.mvysny.karibudsl:karibu-dsl", version.ref = "karibuDsl" }
 playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
 servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "servletApi" }
+mcp-sdk = { module = "io.modelcontextprotocol.sdk:mcp", version.ref = "mcpSdk" }
 
 [bundles]
 annotations = ["jetbrains-annotations", "jsr305"]

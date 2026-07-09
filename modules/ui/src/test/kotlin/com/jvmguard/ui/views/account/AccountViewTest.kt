@@ -7,6 +7,7 @@ import com.jvmguard.ui.server.UserSession
 import com.jvmguard.connector.server.mock.MockServerConnectionImpl
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
+import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
 import org.junit.jupiter.api.AfterEach
@@ -80,5 +81,24 @@ class AccountViewTest : JvmGuardBrowserlessTest() {
         use(shellSave()).click()
         assertTrue(find<AccountApiKeyView>().all().isEmpty()) // navigated away after save
         assertTrue(connection.user.apiKeyHash.isNotEmpty(), "the hashed key is persisted")
+    }
+
+    private fun mcpSnippet(): String =
+        find<Span>().all().first { "jvmguard-mcp-snippet" in it.classNames }.text
+
+    @Test
+    fun mcpSnippetShowsPlaceholderUntilAKeyIsGenerated() {
+        UI.getCurrent().navigate(AccountApiKeyView::class.java)
+        val before = mcpSnippet()
+        assertTrue("claude mcp add" in before, "default snippet is the Claude Code command: $before")
+        assertTrue("<YOUR_API_KEY>" in before, "snippet shows a placeholder before a key exists: $before")
+
+        use(button("Generate new API key")).click()
+        val key = field("API key").value
+        assertTrue(!key.isNullOrEmpty(), "a key is shown once")
+
+        val after = mcpSnippet()
+        assertTrue(key in after, "snippet embeds the freshly generated key: $after")
+        assertFalse("<YOUR_API_KEY>" in after, "placeholder is replaced once a key is visible: $after")
     }
 }

@@ -33,6 +33,7 @@ listOf(
     ":backend:collector",
     ":backend:connector",
     ":backend:rest",
+    ":backend:mcp",
     // frontend
     ":ui",
     // aggregate server

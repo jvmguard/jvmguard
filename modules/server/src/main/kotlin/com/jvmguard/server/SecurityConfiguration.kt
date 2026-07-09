@@ -66,7 +66,7 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
     }
 
     @Bean
-    @Order(1)
+    @Order(2)
     fun vaadinSecurityFilterChain(
         http: HttpSecurity,
         oidcUserService: JvmGuardOidcUserService,

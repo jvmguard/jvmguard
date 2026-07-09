@@ -120,7 +120,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     private val accountEntries = listOf(
         SettingsNavEntry("User information", AccountProfileView::class.java, VaadinIcon.USER),
         SettingsNavEntry("Two-factor authentication", AccountTwoFactorView::class.java, VaadinIcon.SHIELD),
-        SettingsNavEntry("API key", AccountApiKeyView::class.java, VaadinIcon.KEY),
+        SettingsNavEntry("External access", AccountApiKeyView::class.java, VaadinIcon.KEY),
     )
     private val generalSettingsNav = buildNav(generalSettingsEntries).apply { isVisible = false }
     private val recordingSettingsNav = buildNav(recordingSettingsEntries).apply { isVisible = false }

@@ -1833,24 +1833,36 @@ return configLevel == null || configLevel == 1;</property>
               </property>
             </serializedBean>
             <beans>
-              <screen name="REST API" id="5807" beanClass="com.install4j.runtime.beans.screens.FormScreen">
+              <screen name="External Access" id="5807" beanClass="com.install4j.runtime.beans.screens.FormScreen">
                 <serializedBean>
-                  <property name="subTitle" type="string">Please indicate if the REST API service should be enabled</property>
-                  <property name="title" type="string">REST API</property>
+                  <property name="subTitle" type="string">Configure external access to the jvmguard server</property>
+                  <property name="title" type="string">External Access</property>
                 </serializedBean>
                 <formComponents>
                   <formComponent id="5808" beanClass="com.install4j.runtime.beans.formcomponents.MultilineHtmlLabelComponent">
                     <serializedBean>
-                      <property name="labelHtml" type="string">The jvmguard REST API is served at the &lt;tt&gt;/api&lt;/tt&gt; path on the web server port.
-&lt;p&gt;
-The REST API uses the protocol (HTTP or HTTPS) that is configured for the web server.</property>
+                      <property name="labelHtml" type="string">The jvmguard server can expose external access interfaces on the web server port:
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;REST API&lt;/b&gt; at the &lt;tt&gt;/api&lt;/tt&gt; path — programmatic read access to monitoring data&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;MCP server&lt;/b&gt; at the &lt;tt&gt;/mcp&lt;/tt&gt; path — for AI assistants like Claude Code and Cursor&lt;/li&gt;
+&lt;/ul&gt;
+Both use the protocol (HTTP or HTTPS) that is configured for the web server and require API-key authentication.</property>
                     </serializedBean>
                   </formComponent>
                   <formComponent id="5809" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
                   <formComponent id="5811" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                     <serializedBean>
                       <property name="checkboxText" type="string">Enable REST API</property>
+                      <property name="initiallySelected" type="boolean" value="true" />
                       <property name="variableName" type="string">restApiEnabled</property>
+                    </serializedBean>
+                  </formComponent>
+                  <formComponent id="5915" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
+                  <formComponent id="5916" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                    <serializedBean>
+                      <property name="checkboxText" type="string">Enable MCP server</property>
+                      <property name="initiallySelected" type="boolean" value="true" />
+                      <property name="variableName" type="string">mcpEnabled</property>
                     </serializedBean>
                   </formComponent>
                 </formComponents>

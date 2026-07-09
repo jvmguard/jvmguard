@@ -29,6 +29,7 @@ export default defineConfig({
     { label: 'Triggers', slug: 'main/triggers' },
     { label: 'MBean browser', slug: 'main/mbean' },
     { label: 'REST export API', slug: 'main/rest' },
+    { label: 'MCP server', slug: 'main/mcp' },
     { label: 'Cross-over to profiling', slug: 'main/profiling' },
     {
       label: 'Configuration',

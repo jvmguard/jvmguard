@@ -9,6 +9,7 @@ import com.jvmguard.ui.components.Notifications
 import com.jvmguard.ui.components.confirm
 import com.jvmguard.ui.components.editDeleteKeys
 import com.jvmguard.ui.components.menuButton
+import com.jvmguard.ui.server.ServerUrls
 import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.server.runInBackground
 import com.vaadin.flow.component.Component
@@ -58,6 +59,12 @@ class SsoProviderDialog(
     private val enabled = Checkbox("Enabled").apply { testId = ID_ENABLED }
     private var testButton: Button? = null
 
+    private val redirectUri = TextField("Authorized redirect URI").apply {
+        isReadOnly = true
+        setWidthFull()
+        testId = ID_REDIRECT_URI
+    }
+
     private val accessRulesGrid = Grid(SsoGroupMapping::class.java, false).apply {
         testId = ID_RULES_GRID
         addColumn { if (it.isCatchAll) "* (everyone else)" else it.claimValue }.setHeader("Group claim value").setFlexGrow(1)
@@ -76,6 +83,18 @@ class SsoProviderDialog(
         binder.readBean(provider)
         updatePresetFields()
         accessRulesGrid.setItems(provider.accessRules)
+        displayName.addValueChangeListener { updateRedirectUri() }
+        updateRedirectUri()
+
+        val redirectRow = HorizontalLayout(redirectUri, copyRedirectButton()).apply {
+            setWidthFull()
+            setFlexGrow(1.0, redirectUri)
+            defaultVerticalComponentAlignment = FlexComponent.Alignment.END
+            isPadding = false
+        }
+        val redirectHint = Span(
+            "Register this exact URI as an authorized redirect URI in the console of the SSO provider. Renaming the provider changes it.",
+        ).apply { addClassName("jvmguard-field-hint") }
 
         val addRule = Button("Add rule", VaadinIcon.PLUS.create()) { editRule(SsoGroupMapping(), true) }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
@@ -101,6 +120,8 @@ class SsoProviderDialog(
             FormLayout(displayName, preset, issuerUri, clientId, clientSecret, domainRestriction, claimName, requireVerifiedEmail, enabled).apply {
                 setResponsiveSteps(FormLayout.ResponsiveStep("0", 1))
             },
+            redirectRow,
+            redirectHint,
             testConnection,
             rulesHeader,
             rulesHint,
@@ -113,6 +134,7 @@ class SsoProviderDialog(
         confirmFooter("Save", ID_SAVE) { save() }
     }
 
+    @Suppress("DuplicatedCode")
     private fun bind() {
         binder.forField(displayName)
             .asRequired("Enter a display name.")
@@ -157,6 +179,20 @@ class SsoProviderDialog(
             domainRestriction.label = "Domain / tenant"
             domainRestriction.placeholder = "e.g. yourco.com"
         }
+        updateRedirectUri()
+    }
+
+    private fun updateRedirectUri() {
+        val slug = SsoProviderConfig.slugify(displayName.value ?: "")
+        redirectUri.value = "${ServerUrls.baseUrl()}/login/oauth2/code/$slug"
+    }
+
+    private fun copyRedirectButton(): Button = Button(VaadinIcon.COPY.create()) {
+        redirectUri.element.executeJs("navigator.clipboard && navigator.clipboard.writeText(this.value)")
+    }.apply {
+        addThemeVariants(ButtonVariant.TERTIARY)
+        setAriaLabel("Copy redirect URI")
+        setTooltipText("Copy")
     }
 
     private fun ruleActions(rule: SsoGroupMapping): Component =
@@ -235,6 +271,7 @@ class SsoProviderDialog(
         const val ID_CLAIM_NAME = "sso-provider-claim-name"
         const val ID_REQUIRE_VERIFIED_EMAIL = "sso-provider-require-verified-email"
         const val ID_ENABLED = "sso-provider-enabled"
+        const val ID_REDIRECT_URI = "sso-provider-redirect-uri"
         const val ID_TEST_CONNECTION = "sso-provider-test-connection"
         const val ID_RULES_GRID = "sso-rules-grid"
         const val ID_ADD_RULE = "sso-add-rule"

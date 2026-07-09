@@ -30,7 +30,10 @@ jvmguard:
   contextPath: ""
 
   # Set to true to enable the REST API served at /api on the web server port.
-  restApiEnabled: false
+  restApiEnabled: true
+
+  # Set to true to enable the MCP server served at /mcp on the web server port.
+  mcpEnabled: true
 
   # Name of the keystore/PKCS12 file in the ssl directory used when useHttps is true.
   # Empty = ssl/web.pkcs12 or ssl/self_signed.ks.

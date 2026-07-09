@@ -1,0 +1,80 @@
+---
+title: MCP server
+---
+
+## Introduction
+
+jvmguard includes an MCP server that exposes its monitoring data and diagnostic actions to
+MCP-compatible AI coding assistants, such as Claude Code, Codex, Antigravity, OpenCode, and Cursor.
+The assistant connects over the Model Context Protocol and calls tools that list the monitored fleet,
+read telemetries and transaction data, and trigger diagnostic captures.
+
+The MCP server is served at the `/mcp` path on the same port as the web server and uses the same
+protocol, either HTTP or HTTPS. It uses the streamable HTTP transport.
+
+## Enabling the MCP server
+
+The MCP server is controlled by the **mcpEnabled** property in `config/application.yaml` and is
+enabled in the default configuration. Set it to `false` to disable the endpoint, in which case a
+request to `/mcp` returns a "404 Not Found". For the full list of server properties, see the
+[server configuration](/docs/config/server-config).
+
+## Authentication
+
+Access to the MCP server is protected with a bearer token. The token is an API key that you generate
+in the jvmguard UI, the same key that the [REST export API](/docs/main/rest) uses. The assistant sends
+it in the HTTP `Authorization` header:
+
+```
+Authorization: Bearer <API_KEY>
+```
+
+You create an API key on the "External access" page, reached from "Account settings" in the user
+drop-down at the top of the jvmguard UI. You will only see the generated key once. If you save it, the
+new key becomes active and any previous key becomes invalid.
+
+The access level of the user that owns the key governs what the assistant can do. Reading data is
+available to any user with an API key. The diagnostic tools that act on a VM, such as heap dumps and
+recordings, require profiler access.
+
+The key is sent as a bearer token, so it is only encrypted in transit when you use HTTPS. Use HTTPS
+for any assistant that connects over a network.
+
+## Connecting an assistant
+
+The "External access" page in the jvmguard UI has an integration helper. Select your assistant and it shows
+the exact command or configuration snippet, with your key filled in while the key is visible. The
+copy button copies the snippet to the clipboard.
+
+For a manual setup, register a remote MCP server with the streamable HTTP transport, the endpoint URL,
+and the authorization header. For example, with the Claude Code command line and a web server port of
+8020:
+
+```
+claude mcp add --transport http jvmguard http://localhost:8020/mcp --header "Authorization: Bearer <API_KEY>"
+```
+
+Assistants that read a configuration file instead take the endpoint URL and an `Authorization` header
+that carries the same bearer token.
+
+## Tools
+
+The assistant discovers the available tools when it connects. It can list the monitored groups and VMs,
+read telemetries and transaction data such as call  trees, hot spots, and overdue transactions, inspect MBeans
+and log files, and read the trigger inbox. It can also capture diagnostics on a VM, such as heap dumps, thread dumps,
+and JFR or JProfiler recordings, and it can request a garbage collection. The capture tools require profiler access,
+and a capture appears in the list of snapshot files once it is ready.
+
+VMs and groups are referenced by their hierarchy path, for example `Demo/Storefront`. The root group is the
+empty string. The telemetry and transaction intervals are the same as for the [REST export API](/docs/main/rest).
+
+## Analyzing captured artifacts
+
+The assistant can download a captured artifact and pass it to another tool for analysis. Binary artifact,
+such as a memory snapshots, JProfiler snapshots, or a JFR recordings, are returned as a download link that
+the assistant fetches to a local file.
+
+Once the file is local, the assistant analyzes it with a tool that understands the format. A JProfiler CPU
+snapshot can be opened through the [JProfiler MCP server](https://www.ej-technologies.com/jprofiler/mcp), which lets
+the assistant inspect its call tree, hot spots, heap and probes. A JFR recording can be read with JProfiler or the
+JFR tools in the JDK.

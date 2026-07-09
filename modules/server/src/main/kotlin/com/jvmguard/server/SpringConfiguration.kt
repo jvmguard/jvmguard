@@ -20,6 +20,7 @@ import java.io.File
     basePackages = [
         "com.jvmguard.common", "com.jvmguard.data", "com.jvmguard.collector",
         "com.jvmguard.database", "com.jvmguard.rest", "com.jvmguard.connector",
+        "com.jvmguard.mcp",
     ],
 )
 @Import(

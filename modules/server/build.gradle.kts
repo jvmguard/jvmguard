@@ -16,6 +16,7 @@ dependencies {
     api(project(":backend:data"))
     api(project(":backend:connector"))
     api(project(":backend:rest"))
+    api(project(":backend:mcp"))
     implementation(project(":ui"))
     implementation("com.vaadin:vaadin-spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
