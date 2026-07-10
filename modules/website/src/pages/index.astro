@@ -16,7 +16,7 @@ const steps = [
   {
     no: '03',
     title: 'Agent-driven',
-    body: 'Planned for 1.0. An AI agent will initiate captures through the REST API or MCP, within guardrails and with every operation audited.',
+    body: 'An AI agent starts a capture through the MCP server or the REST API. Guardrails and auditing make agent-driven capture safe for production.',
   },
 ];
 
@@ -84,11 +84,27 @@ const isNot = [
       <a class="btn btn--ghost" href={SITE.docs}>Read the docs</a>
       <a class="btn btn--ghost" href={SITE.repo}>View on GitHub</a>
     </div>
+    <p class="hero__cred">Open source under the Apache License 2.0, built by the team behind JProfiler.</p>
   </section>
 
   <section class="shell shell--wide">
     <div class="rule">
       <span class="rule__no">§ 01</span>
+      <span class="rule__label">What it does</span>
+    </div>
+    <div class="grid grid--2">
+      {features.map((f) => (
+        <article class="feature">
+          <h3>{f.title}</h3>
+          <p class="muted">{f.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
       <span class="rule__label">Three ways to capture</span>
     </div>
     <div class="grid grid--3 steps">
@@ -104,7 +120,7 @@ const isNot = [
 
   <section class="shell shell--wide">
     <div class="rule">
-      <span class="rule__no">§ 02</span>
+      <span class="rule__no">§ 03</span>
       <span class="rule__label">What jvmguard is not</span>
     </div>
     <div class="grid grid--3">
@@ -112,21 +128,6 @@ const isNot = [
         <article class="panel isnot">
           <h3>{item.k}</h3>
           <p class="muted">{item.v}</p>
-        </article>
-      ))}
-    </div>
-  </section>
-
-  <section class="shell shell--wide">
-    <div class="rule">
-      <span class="rule__no">§ 03</span>
-      <span class="rule__label">What it does</span>
-    </div>
-    <div class="grid grid--2">
-      {features.map((f) => (
-        <article class="feature">
-          <h3>{f.title}</h3>
-          <p class="muted">{f.body}</p>
         </article>
       ))}
     </div>
@@ -156,18 +157,19 @@ const isNot = [
   <section class="shell shell--wide">
     <div class="rule">
       <span class="rule__no">§ 05</span>
-      <span class="rule__label">Direction</span>
+      <span class="rule__label">Drive it from an AI agent</span>
     </div>
     <div class="panel roadmap">
-      <h3>Agent-driven profiling, planned</h3>
+      <h3>An MCP server for your fleet</h3>
       <p>
-        The intended next step is to make jvmguard drivable by AI agents, so the full loop runs with a
-        human supervising rather than operating it. Detect a problem, capture the right profile,
-        analyze it, recommend the next action.
+        jvmguard ships an MCP server. An AI agent connects to it to discover the fleet, read
+        telemetries, transactions, and MBeans, start a JFR recording or a heap or thread dump, and
+        retrieve the capture. The same operations that the UI exposes are also available to an agent.
       </p>
       <p class="muted">
-        This is a planned direction, built on the REST API, with first-class guardrails and auditing
-        of every operation an agent performs. It is not shipped yet.
+        The intended loop is to detect a problem, capture the right profile, analyze it, recommend the
+        next action, with a human supervising it. The guardrails, rate and overhead limits, and auditing
+        of every agent operation make agent-driven capture safe for production.
       </p>
     </div>
   </section>
@@ -204,6 +206,11 @@ const isNot = [
     .hero h1 br {
       display: inline;
     }
+  }
+  .hero__cred {
+    margin-top: var(--space-4);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
   }
   .step {
     border-top: 1px solid var(--rule);

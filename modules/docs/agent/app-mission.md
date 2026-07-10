@@ -1,4 +1,4 @@
-# Automatic Production Profiling (APP)
+# Automatic Production Profiling
 
 ## Mission
 
@@ -12,7 +12,7 @@ Automatic Production Profiling is a different category from Application Performa
 
 - **APM** continuously instruments frameworks and ships spans, metrics, and traces to a vendor. The
   steady state is "always collecting."
-- **APP** collects no application data in the steady state. It watches lightweight JVM-level signals,
+- **Automatic production profiling** collects no application data in the steady state. It watches lightweight JVM-level signals,
   and when an explicitly configured condition is met it takes a single targeted deep capture: a JFR
   recording, a heap dump, or a thread dump. The capture is a *profile*, not your business or trace
   data.
@@ -45,16 +45,18 @@ The web UI is a **control, trust, and audit plane**, not an analysis tool. It ex
 may be captured and under which conditions, to review what was captured (the inbox and the event log),
 and to make the consent and overhead story legible. Deep analysis happens elsewhere.
 
-## Direction: agentic integration (planned, not yet implemented)
+## Direction: agentic integration
 
-The next step is to make jvmguard drivable by AI agents, so the full loop can run with a human
-supervising rather than operating it:
+jvmguard is drivable by AI agents through an **MCP server** that exposes its read and capture
+operations: discover the fleet, read telemetries, transactions, and MBeans, and start a JFR
+recording, a heap dump, or a thread dump. The MCP server builds on the **REST API** and ships now. It
+makes the full loop possible:
 
 > detect a problem -> capture the right profile -> analyze it -> recommend or take the next action
 
-This will build on a **REST API**, with first-class **guardrails** (scope opt-in, rate and overhead
-limits) and **auditing** of every operation an agent performs. It is a planned direction and is not
-built yet.
+with a human supervising rather than operating it. The remaining 1.0 work is the **guardrails** (scope
+opt-in, rate and overhead limits) and **auditing** of every operation an agent performs that make
+agent-driven capture production-safe.
 
 ## What jvmguard is not
 

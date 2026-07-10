@@ -59,8 +59,8 @@ position jvmguard, state the category it invents, name what it is not, and expla
 These terms are **banned in the help docs** (docs-voice.md §5) but **expected on the website**. Use them
 where they carry weight, not on every line:
 
-- **Automatic Production Profiling / APP** — the category jvmguard invents. Use in the hero and on
-  `/compare`.
+- **Automatic Production Profiling** — the category jvmguard invents. Use as a phrase, never as an
+  acronym. Use in the hero and on `/compare`.
 - **capture-and-control** (plane) — what jvmguard is, as distinct from an analyzer or an APM.
 - **consent-first, minimal by default** — the data posture. Pairs with the `/security` page.
 - **profiles, not telemetry** — what is captured versus what an APM ships.
@@ -70,8 +70,9 @@ where they carry weight, not on every line:
 - Category and competitive framing: "not an APM", "a different category from Application Performance
   Monitoring", named comparisons to Cryostat, continuous profilers, and the JFR+jcmd baseline. Factual,
   never defensible (see §8).
-- Roadmap framing: "planned", "direction", "intended differentiator". Always labeled as not-yet-built
-  when that is the case (the agentic / MCP direction is planned for 1.0).
+- Roadmap framing: "planned", "direction". The MCP server ships now (read and capture operations), so
+  describe it as current. Label only the production-safe, guardrailed, audited agent-driven capture as
+  the 1.0 work.
 
 ---
 
@@ -216,14 +217,20 @@ reads as a feature, not as lock-in.
   analyzer.
 - **JProfiler is the complement, not the requirement.** "Analyze in JProfiler, JMC, or MAT" is the
   website voice. "Requires JProfiler" is not.
-- **The agentic / MCP direction is planned for 1.0.** Label it as a 1.0 feature, not as "not shipped".
-  Do not describe it as a current capability. State the loop (detect, capture, analyze, recommend) as
-  the 1.0 direction with guardrails and auditing, and stop. Overclaiming a roadmap item destroys
+- **The MCP server ships now; its guardrails are 1.0.** jvmguard exposes an MCP server today for
+  discovery, reads, and captures, so describe that as a current capability. The **guardrails** (scope
+  opt-in, rate and overhead limits) and **auditing** that make agent-driven capture production-safe,
+  and the supervised detect-capture-analyze-recommend loop, are the 1.0 work. Frame the MCP server as
+  a capable preview, not as production-safe autonomy. Overclaiming the guardrailed 1.0 destroys
   enterprise trust faster than the gap itself.
-- **Comparisons are factual, never defensible.** On `/compare`, one concrete paragraph each for Cryostat,
-  the JFR+jcmd baseline, and continuous profilers. Name the real difference (K8s-only versus not,
-  JFR-only versus heap/thread/MBean, target-matched versus threshold-driven, continuous collection
-  versus capture-on-trigger). No superlatives about either side.
+- **Comparisons are factual, never defensible.** On `/compare`, one concrete paragraph each for
+  Cryostat, Glowroot, the JFR+jcmd baseline, and continuous profilers. Name the real difference
+  (K8s-only versus not, auto-instrumented versus explicitly configured, JFR-only versus
+  heap/thread/MBean, target-matched versus threshold-driven, continuous collection versus
+  capture-on-trigger). No superlatives about either side.
+- **Pedigree is allowed, stated once.** "Built by the team behind JProfiler" is a factual credibility
+  line, appropriate in the footer and once near the hero. Do not repeat it on every page, and do not
+  imply JProfiler is required to use jvmguard.
 
 ---
 
@@ -303,8 +310,9 @@ Run this before marking any page done. Every box must hold.
 - [ ] No marketing filler (powerful, seamless, robust, comprehensive, modern-as-adjective, leverage,
       utilize, ultra-flexible, top-notch, premier, industry's most advanced, first-class, maximum/
       minimum-as-intensifiers, filler openers).
-- [ ] Mission vocabulary (APP, capture-and-control, consent-first, profiles-not-telemetry,
-      production-safe) is used where it carries weight, not pasted as a numbered manifesto.
+- [ ] Mission vocabulary (Automatic Production Profiling, capture-and-control, consent-first,
+      profiles-not-telemetry, production-safe) is used where it carries weight, not pasted as a
+      numbered manifesto. The "APP" acronym is never used.
 - [ ] No out-of-scope capability appears: dashboard, dashboard alerts, EUEM, any probe, method sampling,
       memory monitoring / memory views, call graph / cross-VM, historical comparisons, threshold-
       violations view, auto-detected web/EJB/Spring/RMI transactions.
@@ -315,8 +323,8 @@ Run this before marking any page done. Every box must hold.
 - [ ] The steady state is described accurately: lightweight telemetries and the transactions you
       configured, with low overhead. Never claim jvmguard "collects nothing". Deep artifacts are the
       exception, captured only on a trigger.
-- [ ] The JProfiler handoff is openness-first (JFR/HPROF open in JProfiler, JMC, MAT); MCP/agentic is
-      labeled as a 1.0 feature, never as "not shipped".
+- [ ] The JProfiler handoff is openness-first (JFR/HPROF open in JProfiler, JMC, MAT). The MCP server
+      is described as shipping now (reads and captures), with its guardrails and auditing labeled as 1.0.
 - [ ] Any comparison (Cryostat, JFR+jcmd, continuous profilers) is factual, with no superlatives on
       either side.
 - [ ] Sentences are subject-first where natural; the product is the subject for what jvmguard does;

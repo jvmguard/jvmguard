@@ -12,6 +12,15 @@ const comparisons = [
     ],
   },
   {
+    name: 'Glowroot',
+    base: 'Open source APM for Java. Self-hosted, with always-on transaction traces, response breakdowns, and JVM metrics.',
+    differs: [
+      'Glowroot auto-instruments common frameworks. jvmguard records only the transactions you define, Matched, Declared, or Mapped, so nothing is captured that you did not configure.',
+      'Beyond transaction timing, a jvmguard trigger takes a JFR recording, a heap dump, a thread dump, or reads MBean state, on a threshold across a fleet.',
+      'Deep analysis happens in a dedicated tool. Captures are standard JFR and HPROF, opened in JProfiler, JMC, or Eclipse MAT.',
+    ],
+  },
+  {
     name: 'Plain JFR and jcmd',
     base: 'The built-in baseline. JFR and JDK Mission Control are free, low-overhead, and scriptable.',
     differs: [

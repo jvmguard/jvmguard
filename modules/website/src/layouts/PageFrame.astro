@@ -97,6 +97,7 @@ import '../styles/global.css';
           <a href="/security">Security</a>
           <a href={SITE.licenseUrl}>License</a>
         </nav>
+        <p class="footer__note">Built by the team behind JProfiler.</p>
       </div>
     </footer>
 
@@ -217,6 +218,12 @@ import '../styles/global.css';
       }
       .footer__nav a {
         color: var(--ink-soft);
+      }
+      .footer__note {
+        flex-basis: 100%;
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: var(--step--1);
       }
     </style>
     <script is:inline>
