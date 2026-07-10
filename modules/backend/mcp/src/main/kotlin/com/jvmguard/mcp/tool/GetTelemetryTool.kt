@@ -1,10 +1,10 @@
 package com.jvmguard.mcp.tool
 
 import com.jvmguard.data.vmdata.TelemetryInterval
+import com.jvmguard.data.vmdata.TelemetryType
 import com.jvmguard.mcp.McpError
 import com.jvmguard.mcp.McpJson
 import com.jvmguard.mcp.McpToolContext
-import com.jvmguard.common.export.TelemetryExport
 import io.modelcontextprotocol.spec.McpSchema.Tool
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification
 
@@ -12,6 +12,7 @@ class GetTelemetryTool(ctx: McpToolContext) : McpTool(ctx) {
 
     companion object {
         const val NAME = "get_telemetry"
+        private const val DEFAULT_MAX_POINTS = 250
     }
 
     override fun createSpecification(): SyncToolSpecification {
@@ -20,7 +21,7 @@ class GetTelemetryTool(ctx: McpToolContext) : McpTool(ctx) {
             objectSchema(
                 mapOf(
                     "vm" to stringProperty("VM hierarchy path (from list_vms), or omit for all VMs."),
-                    "telemetry" to stringProperty("Telemetry name (from list_telemetries), e.g. \"cpu\", \"heap\", \"gc\"."),
+                    "telemetry" to stringProperty("Telemetry name (from list_telemetries), e.g. \"cpu\", \"hpu\", \"trt\"."),
                     "interval" to stringProperty(
                         "Time range for the data.",
                         TelemetryInterval.entries.map { it.exportId },
@@ -30,12 +31,18 @@ class GetTelemetryTool(ctx: McpToolContext) : McpTool(ctx) {
                                 "unless endTime is also given."
                     ),
                     "endTime" to integerProperty("End time as epoch milliseconds. Default: now."),
+                    "maxPoints" to integerProperty(
+                        "Cap the returned series at this many points, bucket-averaging longer windows. " +
+                                "Default: $DEFAULT_MAX_POINTS. Use 0 to disable downsampling."
+                    ),
                 ),
                 listOf("telemetry"),
             ),
         ).description(
-            "Retrieve a telemetry time series for a VM (or all VMs). " +
-                    "Returns JSON with timestamp/value rows."
+            "Retrieve one telemetry time series for a VM (or all VMs) in a compact columnar shape: " +
+                    "{ id, description, unit, interval, count, downsampled, t: [epochMillis...], v: [values...], " +
+                    "stats: { min, max, avg, last, count } }. 't' and 'v' are parallel arrays; trailing empty " +
+                    "padding is dropped and long windows are bucket-averaged down to maxPoints."
         ).annotations(readOnly("Get telemetry")).build()
         return SyncToolSpecification(tool) { _, request ->
             try {
@@ -45,6 +52,7 @@ class GetTelemetryTool(ctx: McpToolContext) : McpTool(ctx) {
                 val intervalId = (args["interval"] as? String) ?: "10min"
                 val interval = TelemetryInterval.fromExportId(intervalId)
                     ?: throw McpError("Unknown interval: $intervalId")
+                val maxPoints = (args["maxPoints"] as? Number)?.toInt() ?: DEFAULT_MAX_POINTS
 
                 // Epoch milliseconds exceed Int range
                 val startTime = (args["startTime"] as? Number)?.toLong()
@@ -66,11 +74,27 @@ class GetTelemetryTool(ctx: McpToolContext) : McpTool(ctx) {
 
                     val rootNode = data.rootNode
                     val timestamps = data.timestamps
-                    if (rootNode != null && timestamps != null) {
-                        val export = TelemetryExport(timestamps, rootNode)
-                        jsonResult(McpJson.exportToJson(export))
+                    val line = rootNode?.let { TelemetrySeries.selectLine(it, telemetryType.searchSubIdForTelemetry) }
+
+                    if (rootNode == null || timestamps == null || line == null) {
+                        jsonResult(McpJson.write(emptySeries(telemetryName, telemetryType, intervalId)))
                     } else {
-                        textResult("[]")
+                        val series = TelemetrySeries.build(timestamps, line, maxPoints)
+                        val result = buildMap<String, Any?> {
+                            put("id", telemetryName)
+                            put("description", telemetryType.name)
+                            put("unit", telemetryType.unit.name)
+                            put("interval", intervalId)
+                            put("count", series.timestamps.size)
+                            if (series.downsampled) {
+                                put("downsampled", true)
+                                put("rawCount", series.rawCount)
+                            }
+                            series.stats?.let { put("stats", it) }
+                            put("t", series.timestamps)
+                            put("v", series.values)
+                        }
+                        jsonResult(McpJson.write(result))
                     }
                 }
             } catch (e: Exception) {
@@ -78,4 +102,18 @@ class GetTelemetryTool(ctx: McpToolContext) : McpTool(ctx) {
             }
         }
     }
+
+    private fun emptySeries(
+        telemetryName: String,
+        telemetryType: TelemetryType,
+        intervalId: String,
+    ): Map<String, Any?> = mapOf(
+        "id" to telemetryName,
+        "description" to telemetryType.name,
+        "unit" to telemetryType.unit.name,
+        "interval" to intervalId,
+        "count" to 0,
+        "t" to emptyList<Long>(),
+        "v" to emptyList<Any?>(),
+    )
 }

@@ -23,24 +23,33 @@ class ListSnapshotFilesTool(ctx: McpToolContext) : McpTool(ctx) {
                         "Filter by snapshot type.",
                         SnapshotFileType.entries.map { it.name },
                     ),
+                    "since" to integerProperty(
+                        "Only return artifacts created at or after this epoch-millis time. Pass the triggeredAt " +
+                                "from a capture tool to isolate the artifact you just triggered."
+                    ),
                     "limit" to integerProperty("Maximum number of files to return. Default: 200."),
                 ),
             ),
         ).description(
-            "List captured diagnostic artifacts (memory snapshots, CPU snapshots, thread dumps, JFR recordings). " +
-                    "These are produced by heap_dump, thread_dump, record_jfr, record_jps, or by triggers. " +
-                    "Retrieve one with get_snapshot_file."
+            "List captured diagnostic artifacts (memory snapshots, CPU snapshots, thread dumps, JFR recordings), " +
+                    "newest first. These are produced by heap_dump, thread_dump, record_jfr, record_jps, or by " +
+                    "triggers. Retrieve one with get_snapshot_file."
         ).annotations(readOnly("List snapshot files")).build()
         return SyncToolSpecification(tool) { _, request ->
             try {
                 val args = request.arguments()
                 val vmPath = args["vm"] as? String
                 val typeStr = args["type"] as? String
+                val since = (args["since"] as? Number)?.toLong()
                 val limit = (args["limit"] as? Number)?.toInt() ?: 200
                 val type = typeStr?.let { runCatching { SnapshotFileType.valueOf(it) }.getOrNull() }
                 ctx.withConnection { conn ->
                     val vm = VmResolver.resolveVmOrNull(conn, vmPath)
-                    val files = conn.getSnapshotFiles(type, vm).take(limit).map { f ->
+                    val files = conn.getSnapshotFiles(type, vm)
+                        .filter { since == null || it.dateCreated.toEpochMilli() >= since }
+                        .sortedByDescending { it.dateCreated }
+                        .take(limit)
+                        .map { f ->
                         mapOf(
                             "id" to f.id,
                             // Pool members have a trailing slash which needs to be normalized.
@@ -82,7 +91,8 @@ class ListMbeansTool(ctx: McpToolContext) : McpTool(ctx) {
             ),
         ).description(
             "List MBean object names registered in the target VM's MBean server. " +
-                    "Use the returned names in get_mbean_data to inspect attributes."
+                    "Use the returned names in get_mbean_data to inspect attributes. " +
+                    "A pool path resolves to one connected member, since a pool has no MBean server of its own."
         ).annotations(readOnly("List MBeans")).build()
         return SyncToolSpecification(tool) { _, request ->
             try {
@@ -91,7 +101,7 @@ class ListMbeansTool(ctx: McpToolContext) : McpTool(ctx) {
                 val includePlatform = (args["includePlatform"] as? Boolean) ?: true
                 val limit = (args["limit"] as? Number)?.toInt() ?: 500
                 ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVm(conn, vmPath)
+                    val vm = VmResolver.resolveLiveVm(conn, vmPath)
                     val names = conn.getMBeanNames(vm, includePlatform).take(limit)
                     jsonResult(McpJson.write(names))
                 }
@@ -113,15 +123,21 @@ class GetMbeanDataTool(ctx: McpToolContext) : McpTool(ctx) {
             NAME,
             objectSchema(
                 mapOf(
-                    "vm" to stringProperty("VM hierarchy path."),
+                    "vm" to stringProperty("VM hierarchy path (a pool path resolves to one connected member)."),
                     "name" to stringProperty("MBean object name (from list_mbeans), e.g. \"java.lang:type=Memory\"."),
-                    "fetchValues" to booleanProperty("If true, fetch attribute values. Default: true."),
+                    "fetchValues" to booleanProperty(
+                        "If true (default), return each attribute's current value. " +
+                                "If false, return each attribute's declared type instead (schema only)."
+                    ),
                 ),
                 listOf("vm", "name"),
             ),
         ).description(
-            "Retrieve MBean attributes and structure for a specific MBean. " +
-                    "Returns attribute names, types, and current values."
+            "Read a specific MBean. Returns { objectName, attributes, operations }. With fetchValues=true " +
+                    "(default), 'attributes' maps each attribute name to its current value, decoded into native " +
+                    "JSON (composites become objects, arrays become lists, simple-key tabular data becomes a map). " +
+                    "With fetchValues=false, 'attributes' maps each name to its declared type instead. " +
+                    "'operations' lists invocable operation signatures such as \"listStores(int)\"."
         ).annotations(readOnly("Get MBean data")).build()
         return SyncToolSpecification(tool) { _, request ->
             try {
@@ -130,12 +146,29 @@ class GetMbeanDataTool(ctx: McpToolContext) : McpTool(ctx) {
                 val name = args["name"] as String
                 val fetchValues = (args["fetchValues"] as? Boolean) ?: true
                 ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVm(conn, vmPath)
+                    val vm = VmResolver.resolveLiveVm(conn, vmPath)
                     val data = conn.getMBeanData(vm, name, true, fetchValues)
-                    if (data != null) {
-                        jsonResult(McpJson.write(data))
-                    } else {
+                    val beanInfo = data?.beanInfo
+                    if (beanInfo == null || (beanInfo.attributes.isEmpty() && beanInfo.operations.isEmpty())) {
                         errorResult("MBean not found: $name")
+                    } else {
+                        val attributes = LinkedHashMap<String, Any?>()
+                        beanInfo.attributes.forEachIndexed { index, attribute ->
+                            attributes[attribute.name] = if (fetchValues) {
+                                McpMBeanData.decodeAttribute(attribute, data.values.getOrNull(index))
+                            } else {
+                                attribute.type
+                            }
+                        }
+                        val result = buildMap {
+                            put("objectName", name)
+                            put("attributes", attributes)
+                            val operations = McpMBeanData.operationSignatures(beanInfo)
+                            if (operations.isNotEmpty()) {
+                                put("operations", operations)
+                            }
+                        }
+                        jsonResult(McpJson.write(result))
                     }
                 }
             } catch (e: Exception) {
@@ -157,28 +190,45 @@ class ListLogFilesTool(ctx: McpToolContext) : McpTool(ctx) {
             objectSchema(
                 mapOf(
                     "type" to stringProperty(
-                        "Log file category.",
+                        "Log file category. Omit to list all categories.",
                         LogFileType.entries.map { it.name },
                     ),
                 ),
             ),
         ).description(
-            "List available log files (server log, event log, VM console logs, etc.). " +
-                    "Read one with get_log_file."
+            "List available log files across all categories (omit type) or one category. Each entry includes the " +
+                    "access level get_log_file needs to read it. Listing itself is not access-restricted, so an " +
+                    "empty result means no log files exist for the category (e.g. the server logs to the console " +
+                    "in dev), not that access was denied."
         ).annotations(readOnly("List log files")).build()
         return SyncToolSpecification(tool) { _, request ->
             try {
                 val typeStr = request.arguments()["type"] as? String
-                val type = typeStr?.let { runCatching { LogFileType.valueOf(it) }.getOrNull() }
-                    ?: LogFileType.SERVER
+                val requestedType = typeStr?.let { runCatching { LogFileType.valueOf(it) }.getOrNull() }
+                val types = requestedType?.let { listOf(it) } ?: LogFileType.entries
                 ctx.withConnection { conn ->
-                    val files = conn.getLogFileDescriptors(type).map { f ->
-                        mapOf(
-                            "fileName" to f.fileName,
-                            "description" to f.shortDescription,
-                        )
+                    val files = types.flatMap { type ->
+                        conn.getLogFileDescriptors(type).map { f ->
+                            mapOf(
+                                "fileName" to f.fileName,
+                                "type" to type.name,
+                                "description" to f.shortDescription,
+                                "readAccess" to type.minimumAccessLevel.name,
+                            )
+                        }
                     }
-                    jsonResult(McpJson.write(files))
+                    val result = buildMap<String, Any?> {
+                        put("files", files)
+                        if (files.isEmpty()) {
+                            put(
+                                "note",
+                                "No log files found. Listing is not access-restricted, so this means no file logs " +
+                                        "exist for this category (the server may be logging to the console, common " +
+                                        "in dev), not that access was denied.",
+                            )
+                        }
+                    }
+                    jsonResult(McpJson.write(result))
                 }
             } catch (e: Exception) {
                 handleError(e)
@@ -315,19 +365,28 @@ class GetInboxTool(ctx: McpToolContext) : McpTool(ctx) {
             NAME,
             objectSchema(emptyMap()),
         ).description(
-            "List trigger-generated inbox items (notifications about fired triggers, completed recordings, etc.)."
+            "List trigger-generated inbox items (notifications about fired triggers, completed recordings, etc.). " +
+                    "status is \"SNAPSHOT_READY\" when the item has an artifactId (fetch it with get_snapshot_file) " +
+                    "or \"MESSAGE\" for a plain notification, whose 'message' field carries the detail."
         ).annotations(readOnly("Get inbox")).build()
         return SyncToolSpecification(tool) { _, _ ->
             try {
                 ctx.withConnection { conn ->
                     val items = conn.inboxItems.map { item ->
-                        mapOf(
-                            "id" to item.id,
-                            "date" to item.date.toString(),
-                            "name" to item.name,
-                            "message" to item.message,
-                            "vm" to item.vm?.hierarchyPath,
-                        )
+                        val artifactId = item.snapshotFileId
+                        buildMap<String, Any?> {
+                            put("id", item.id)
+                            put("date", item.date.toString())
+                            put("status", if (artifactId != null) "SNAPSHOT_READY" else "MESSAGE")
+                            put("name", item.name)
+                            if (item.message.isNotBlank()) {
+                                put("message", item.message)
+                            }
+                            artifactId?.let { put("artifactId", it) }
+                            item.snapshotFileType?.let { put("snapshotType", it.name) }
+                            // Pool members have a trailing slash which needs to be normalized.
+                            put("vm", item.vm?.hierarchyPath?.trimEnd('/'))
+                        }
                     }
                     jsonResult(McpJson.write(items))
                 }

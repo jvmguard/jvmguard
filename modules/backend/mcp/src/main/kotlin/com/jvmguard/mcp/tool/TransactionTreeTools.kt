@@ -5,7 +5,6 @@ import com.jvmguard.data.transactions.TransactionTreeInterval
 import com.jvmguard.mcp.McpError
 import com.jvmguard.mcp.McpJson
 import com.jvmguard.mcp.McpToolContext
-import com.jvmguard.common.export.TransactionTreeExport
 import io.modelcontextprotocol.spec.McpSchema.Tool
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification
 
@@ -18,7 +17,8 @@ abstract class AbstractTransactionTreeTool(
 
     protected fun buildSpec(
         dataType: TransactionDataType,
-        exportType: TransactionTreeExport.DataType,
+        rootKey: String,
+        hotSpots: Boolean,
     ): SyncToolSpecification {
         val tool = Tool.builder(
             toolName,
@@ -46,18 +46,12 @@ abstract class AbstractTransactionTreeTool(
                 ctx.withConnection { conn ->
                     val vm = VmResolver.resolveVmOrNull(conn, vmPath)
                     val cursor = conn.getCurrentTransactionTreeCursor(vm, interval, dataType)
-                    val treeData = if (dataType == TransactionDataType.OVERDUE) {
+                    val treeData = if (hotSpots) {
                         conn.getHotspots(cursor, mergePolicies)
                     } else {
-                        @Suppress("USELESS_CAST")
-                        if (exportType == TransactionTreeExport.DataType.HOT_SPOTS) {
-                            conn.getHotspots(cursor, mergePolicies)
-                        } else {
-                            conn.getCallTree(cursor, mergePolicies)
-                        }
+                        conn.getCallTree(cursor, mergePolicies)
                     }
-                    val export = TransactionTreeExport(exportType, treeData.transactionTree)
-                    jsonResult(McpJson.exportToJson(export))
+                    jsonResult(McpJson.write(McpTransactionTree.toResult(rootKey, treeData.transactionTree)))
                 }
             } catch (e: Exception) {
                 handleError(e)
@@ -66,16 +60,22 @@ abstract class AbstractTransactionTreeTool(
     }
 }
 
+private const val TIME_FIELDS_DOC =
+    "Each node has count, totalMicros (cumulative), selfMicros (excluding children), and avgMicros " +
+            "(per invocation), all in microseconds; children are sorted heaviest-first. The call-point 'type' " +
+            "is reported once at the top level when uniform, or per node when the tree mixes types."
+
 class GetCallTreeTool(ctx: McpToolContext) : AbstractTransactionTreeTool(
     ctx,
     "get_call_tree",
     "Get call tree",
-    "Retrieve the call tree (transaction tree) for a VM or all VMs. " +
-            "Returns nested JSON with method names, execution time, invocation count, and type.",
+    "Retrieve the call tree (transaction tree) for a VM or all VMs, as a nested 'callTree' array. " +
+            TIME_FIELDS_DOC,
 ) {
     override fun createSpecification() = buildSpec(
         TransactionDataType.TRANSACTION,
-        TransactionTreeExport.DataType.CALL_TREE,
+        rootKey = "callTree",
+        hotSpots = false,
     )
 }
 
@@ -83,12 +83,13 @@ class GetHotspotsTool(ctx: McpToolContext) : AbstractTransactionTreeTool(
     ctx,
     "get_hotspots",
     "Get hot spots",
-    "Retrieve the hotspots (aggregated backtraces) for a VM or all VMs. " +
-            "Hotspots show where the most time is spent, aggregated across all call paths.",
+    "Retrieve the hotspots (aggregated backtraces) for a VM or all VMs, as a 'hotSpots' array showing " +
+            "where the most time is spent across all call paths. " + TIME_FIELDS_DOC,
 ) {
     override fun createSpecification() = buildSpec(
         TransactionDataType.TRANSACTION,
-        TransactionTreeExport.DataType.HOT_SPOTS,
+        rootKey = "hotSpots",
+        hotSpots = true,
     )
 }
 
@@ -96,11 +97,12 @@ class GetOverdueTransactionsTool(ctx: McpToolContext) : AbstractTransactionTreeT
     ctx,
     "get_overdue_transactions",
     "Get overdue transactions",
-    "Retrieve overdue transactions for a VM or all VMs. " +
-            "These are transactions that exceeded their configured time thresholds.",
+    "Retrieve transactions that exceeded their configured time thresholds, for a VM or all VMs, as an " +
+            "'overdue' array. An empty array means none were overdue in the interval (healthy). " + TIME_FIELDS_DOC,
 ) {
     override fun createSpecification() = buildSpec(
         TransactionDataType.OVERDUE,
-        TransactionTreeExport.DataType.OVERDUE,
+        rootKey = "overdue",
+        hotSpots = true,
     )
 }

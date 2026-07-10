@@ -34,6 +34,13 @@ abstract class McpTool(protected val ctx: McpToolContext) {
     protected fun integerProperty(description: String): Map<String, Any> =
         mapOf("type" to "integer", "description" to description)
 
+    protected fun stringArrayProperty(description: String, enumValues: List<String>): Map<String, Any> =
+        mapOf(
+            "type" to "array",
+            "description" to description,
+            "items" to mapOf("type" to "string", "enum" to enumValues),
+        )
+
     protected fun booleanProperty(description: String): Map<String, Any> =
         mapOf("type" to "boolean", "description" to description)
 

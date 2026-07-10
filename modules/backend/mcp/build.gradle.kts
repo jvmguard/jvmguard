@@ -16,3 +16,7 @@ dependencies {
     compileOnly(libs.bundles.annotations)
     addJunit6()
 }
+
+tasks.test {
+    useJUnitPlatform()
+}

@@ -57,7 +57,7 @@ public class JProfilerRecorder {
             JvmGuardAgent.log("JProfiler snapshot saved: " + size + " bytes");
             if (size == 0L) {
                 snapshot.delete();
-                throw new IOException("JProfiler produced an empty snapshot; the profiling agent may "
+                throw new IOException("JProfiler produced an empty snapshot. The profiling agent may "
                     + "not have attached (check the JProfiler version and the jpenable output)");
             }
             return snapshot;
