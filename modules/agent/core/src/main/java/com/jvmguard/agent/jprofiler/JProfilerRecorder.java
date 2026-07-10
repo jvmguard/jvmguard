@@ -53,7 +53,13 @@ public class JProfilerRecorder {
             applyDumps(heapDump, heapDumpFullGc, mbeanSnapshot, monitorDump);
             File snapshot = File.createTempFile("jvmguard_jprofiler", ".jps");
             Controller.saveSnapshot(snapshot);
-            JvmGuardAgent.log("JProfiler snapshot saved: " + snapshot.length() + " bytes");
+            long size = snapshot.length();
+            JvmGuardAgent.log("JProfiler snapshot saved: " + size + " bytes");
+            if (size == 0L) {
+                snapshot.delete();
+                throw new IOException("JProfiler produced an empty snapshot; the profiling agent may "
+                    + "not have attached (check the JProfiler version and the jpenable output)");
+            }
             return snapshot;
         } finally {
             applyRecordings(effective, false);
@@ -187,10 +193,16 @@ public class JProfilerRecorder {
         drain.join(1000);
 
         int exitValue = process.exitValue();
+        String outputText = output.toString();
         if (exitValue != 0) {
-            throw new IOException("jpenable failed (exit " + exitValue + "): " + output);
+            throw new IOException("jpenable failed (exit " + exitValue + "): " + outputText);
         }
-        JvmGuardAgent.log("jpenable loaded JProfiler agent: " + output);
+        String lower = outputText.toLowerCase();
+        if (lower.contains("usage error") || lower.contains("unknown option")) {
+            throw new IOException("jpenable did not attach the profiling agent, possibly because the "
+                + "JProfiler version is incompatible: " + outputText.trim());
+        }
+        JvmGuardAgent.log("jpenable loaded JProfiler agent: " + outputText);
     }
 
     private static String controllerPackage() {
