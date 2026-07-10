@@ -43,14 +43,14 @@ class RecordingTransactionsView : AbstractRecordingSettingsView() {
         val settings = transactionSettings(selection) ?: return
         retransformation.value = settings.retransformationType
         val declaredGrid = TransactionDefGrid(TransactionType.DECLARED, false, { settings.transactionDefs }, ::markChanged)
-        val matchedGrid = TransactionDefGrid(TransactionType.MATCHED, true, { settings.transactionDefs }, ::markChanged)
         val mappedGrid = TransactionDefGrid(TransactionType.MAPPED, true, { settings.transactionDefs }, ::markChanged)
+        val matchedGrid = TransactionDefGrid(TransactionType.MATCHED, true, { settings.transactionDefs }, ::markChanged)
         val tabSheet = TabSheet().apply {
             setWidthFull()
             addClassName("jvmguard-recording-tabsheet")
             add("Declared", declaredGrid)
-            add("Matched", matchedGrid)
             add("Mapped", mappedGrid)
+            add("Matched", matchedGrid)
         }
         content.removeAll()
         content.add(tabSheet, Span("Higher rows are matched first.").apply { addClassName("jvmguard-field-hint") }, retransformation)
@@ -59,8 +59,9 @@ class RecordingTransactionsView : AbstractRecordingSettingsView() {
             val add = Button("Add transaction", VaadinIcon.PLUS.create()) {
                 when (tabSheet.selectedIndex) {
                     0 -> declaredGrid
-                    2 -> mappedGrid
-                    else -> matchedGrid
+                    1 -> mappedGrid
+                    2 -> matchedGrid
+                    else -> throw IllegalStateException()
                 }.addDef()
             }.apply {
                 addThemeVariants(ButtonVariant.PRIMARY)
@@ -74,8 +75,8 @@ class RecordingTransactionsView : AbstractRecordingSettingsView() {
     private fun setSpec(
         settings: TransactionSettings,
         declaredGrid: TransactionDefGrid,
-        matchedGrid: TransactionDefGrid,
         mappedGrid: TransactionDefGrid,
+        matchedGrid: TransactionDefGrid,
     ): SetSpec<TransactionDef, TransactionDefSet> =
         SetSpec(
             setClass = TransactionDefSet::class.java,
@@ -91,9 +92,9 @@ class RecordingTransactionsView : AbstractRecordingSettingsView() {
             appendItems = { items ->
                 settings.transactionDefs.addAll(items)
                 markChanged()
-                matchedGrid.refresh()
                 declaredGrid.refresh()
                 mappedGrid.refresh()
+                matchedGrid.refresh()
             },
         )
 
