@@ -276,13 +276,13 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
             item("Run GC", { runGc(vm) }) { testId = ID_ACTION_GC }
             item("Heap dump…", { confirmHeapDump(vm) }) { testId = ID_ACTION_HEAP_DUMP }
             item("Thread dump…", { confirmThreadDump(vm) }) { testId = ID_ACTION_THREAD_DUMP }
-            item("Record JProfiler CPU snapshot…", { recordJps(vm) }) { testId = ID_ACTION_RECORD_JPS }
+            item("Record JProfiler snapshot…", { recordJps(vm) }) { testId = ID_ACTION_RECORD_JPS }
             item("Record JFR snapshot…", { recordJfr(vm) }) { testId = ID_ACTION_RECORD_JFR }
         }
 
     private fun recordJps(vm: VM) {
         val action = RecordJpsAction().apply { isCreateInboxItem = true }
-        TriggerActionDialog.create(action, "Record JProfiler CPU snapshot") {
+        TriggerActionDialog.create(action, "Record JProfiler snapshot") {
             dispatch("Recording started. The snapshot will be delivered to your inbox.") { it.recordJps(vm, action) }
         }.open()
     }

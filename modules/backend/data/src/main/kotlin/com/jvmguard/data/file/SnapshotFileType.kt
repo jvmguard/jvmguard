@@ -8,7 +8,7 @@ enum class SnapshotFileType(
     val databaseId: Int,
 ) {
     HPZ("Memory snapshot", "hpz", 1),
-    JPS("CPU snapshot", "jps", 2),
+    JPS("JProfiler snapshot", "jps", 2),
     THREAD_DUMP("Thread dump", "txt", 3),
     JFR("JFR snapshot", "jfr", 4);
 

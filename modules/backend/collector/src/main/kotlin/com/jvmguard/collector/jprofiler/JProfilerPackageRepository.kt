@@ -42,15 +42,21 @@ class JProfilerPackageRepository(private val directories: JvmGuardDirectories) {
     private var cachedAtNanos: Long = 0
 
     fun resolveRef(osName: String, osArch: String): PackageRef {
-        val token = JProfilerPlatform.downloadToken(osName, osArch)
+        val downloadToken = JProfilerPlatform.downloadToken(osName, osArch)
             ?: throw JProfilerUnavailableException("JProfiler recording is not supported on $osName / $osArch")
-        val prefix = "jprofiler_agent_${token}_"
+
+        System.getProperty(VERSION_OVERRIDE_PROPERTY)?.trim()?.takeIf { it.isNotEmpty() }?.let { version ->
+            val fileName = "$AGENT_FILE_PREFIX${downloadToken}_${version.replace('.', '_')}${JProfilerPlatform.archiveExtension(downloadToken)}"
+            return PackageRef(downloadToken, JProfilerPackage(fileName, version, -1L, "$DOWNLOAD_BASE_URL/$fileName"))
+        }
+
+        val prefix = "$AGENT_FILE_PREFIX${downloadToken}_"
         val pkg = try {
             descriptor().firstOrNull { it.fileName.startsWith(prefix) }
         } catch (e: Exception) {
             throw JProfilerUnavailableException("Could not read JProfiler update descriptor $updatesUrl: ${e.message}", e)
-        } ?: throw JProfilerUnavailableException("No JProfiler agent package for platform '$token' in $updatesUrl")
-        return PackageRef(token, pkg)
+        } ?: throw JProfilerUnavailableException("No JProfiler agent package for platform '$downloadToken' in $updatesUrl")
+        return PackageRef(downloadToken, pkg)
     }
 
     fun download(ref: PackageRef): File = ensureDownloaded(ref.pkg)
@@ -63,7 +69,7 @@ class JProfilerPackageRepository(private val directories: JvmGuardDirectories) {
         val descriptor = UpdateChecker.getUpdateDescriptor(updatesUrl, ApplicationDisplayMode.UNATTENDED)
         val packages = descriptor.entries
             .filter { it.fileName.startsWith(AGENT_FILE_PREFIX) }
-            .map { JProfilerPackage(it.fileName, it.newVersion, it.fileSize, it.getURL().toString()) }
+            .map { JProfilerPackage(it.fileName, it.newVersion, it.fileSize, it.url.toString()) }
         cachedPackages = packages
         cachedAtNanos = System.nanoTime()
         return packages
@@ -87,8 +93,13 @@ class JProfilerPackageRepository(private val directories: JvmGuardDirectories) {
             if (response.statusCode() != 200) {
                 throw JProfilerUnavailableException("HTTP ${response.statusCode()} downloading ${pkg.downloadUrl}")
             }
-            if (pkg.fileSize > 0 && temp.length() != pkg.fileSize) {
-                throw JProfilerUnavailableException("Size mismatch for ${pkg.fileName}: expected ${pkg.fileSize}, got ${temp.length()}")
+            val expectedSize = if (pkg.fileSize > 0) {
+                pkg.fileSize
+            } else {
+                response.headers().firstValueAsLong("content-length").orElse(-1L)
+            }
+            if (expectedSize > 0 && temp.length() != expectedSize) {
+                throw JProfilerUnavailableException("Size mismatch for ${pkg.fileName}: expected $expectedSize, got ${temp.length()}")
             }
             if (!temp.renameTo(target)) {
                 temp.copyTo(target, overwrite = true)
@@ -107,6 +118,7 @@ class JProfilerPackageRepository(private val directories: JvmGuardDirectories) {
 
     companion object {
         const val DOWNLOAD_BASE_URL = "https://download.ej-technologies.com/jprofiler"
+        const val VERSION_OVERRIDE_PROPERTY = "jvmguard.jprofilerVersionOverride"
         private const val AGENT_FILE_PREFIX = "jprofiler_agent_"
         private val DESCRIPTOR_TTL: Duration = Duration.ofHours(6)
         private val LOGGER = LoggerFactory.getLogger(JProfilerPackageRepository::class.java)

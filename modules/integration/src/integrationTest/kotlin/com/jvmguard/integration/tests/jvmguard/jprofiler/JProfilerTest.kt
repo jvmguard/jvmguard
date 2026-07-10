@@ -2,6 +2,7 @@ package com.jvmguard.integration.tests.jvmguard.jprofiler
 
 import com.jvmguard.data.config.triggers.TimeUnit
 import com.jvmguard.data.config.triggers.actions.RecordJpsAction
+import com.jvmguard.collector.jprofiler.JProfilerPackageRepository
 import com.jvmguard.data.file.SnapshotFileType
 import com.jvmguard.integration.Controller
 import com.jvmguard.integration.JvmGuardTest
@@ -21,6 +22,8 @@ class JProfilerTest : JvmGuardTest() {
     override fun isFailOnLog(vmConfig: VMConfig, runNo: Int, vmNo: Int, libraryNo: Int) = false
 
     override fun connect(vmManager: TestVmManager, serverConnection: TestServerConnection, controller: Controller) {
+        // TODO remove when 16.1.2 is released
+        System.setProperty(JProfilerPackageRepository.VERSION_OVERRIDE_PROPERTY, "16.1.2")
         val vms = waitForConnections(serverConnection)
         try {
             println("recording JProfiler snapshot")

@@ -16,7 +16,10 @@ public class JProfilerSnapshotResult extends OrderedSnapshotTransferResult {
         final JProfilerRecordParameters parameters =
             (JProfilerRecordParameters)context.getProperty(CommunicationContext.PROPERTY_PARAMETER);
         return SnapshotRecorder.execute(() ->
-            JProfilerRecorder.record(parameters.getArtifactKey(), parameters.getSeconds()));
+            JProfilerRecorder.record(
+                parameters.getArtifactKey(), parameters.getSeconds(), parameters.getSubsystems(),
+                parameters.isHeapDump(), parameters.isHeapDumpFullGc(),
+                parameters.isMbeanSnapshot(), parameters.isMonitorDump()));
     }
 
     @Override

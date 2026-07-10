@@ -3,7 +3,7 @@ package com.jvmguard.data.config.triggers.actions
 import com.install4j.runtime.beans.actions.net.HttpRequestMethod as Install4jHttpRequestMethod
 
 enum class ActionType(private val verbose: String, private val actionClass: Class<out TriggerAction>) {
-    RECORD_JPS("Record CPU snapshot with JProfiler", RecordJpsAction::class.java),
+    RECORD_JPS("Record JProfiler snapshot", RecordJpsAction::class.java),
     RECORD_JFR("Record JDK Flight Recorder snapshot", RecordJfrAction::class.java),
     THREAD_DUMP("Save thread dump", ThreadDumpAction::class.java),
     HEAP_DUMP("Save HPROF memory snapshot", HeapDumpAction::class.java),

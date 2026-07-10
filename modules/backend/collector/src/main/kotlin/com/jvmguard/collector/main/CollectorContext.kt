@@ -90,7 +90,10 @@ class CollectorContext(
 
                 agentConnection.executeLater(
                     CommandType.RECORD_JPROFILER,
-                    JProfilerRecordParameters(getSeconds(action), ref.artifactKey),
+                    JProfilerRecordParameters(
+                        getSeconds(action), ref.artifactKey, action.subsystems.toTypedArray(),
+                        action.heapDump, action.heapDumpFullGc, action.mbeanSnapshot, action.monitorDump
+                    ),
                     object : Handler<JProfilerSnapshotResult>() {
                         override fun handle(result: JProfilerSnapshotResult) {
                             handleSnapshotToInboxItem(

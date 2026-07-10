@@ -10,11 +10,13 @@
       <w>authz</w>
       <w>bcpkix</w>
       <w>buildsys</w>
+      <w>cassandra</w>
       <w>codeql</w>
       <w>darwin</w>
       <w>echart</w>
       <w>echarts</w>
       <w>fastutil</w>
+      <w>grpc</w>
       <w>jdks</w>
       <w>jpenable</w>
       <w>jprofiler</w>

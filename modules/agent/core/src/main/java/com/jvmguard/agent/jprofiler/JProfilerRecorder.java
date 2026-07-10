@@ -1,6 +1,8 @@
 package com.jvmguard.agent.jprofiler;
 
 import com.jprofiler.api.controller.Controller;
+import com.jprofiler.api.controller.HeapDumpOptions;
+import com.jprofiler.api.controller.TrackingOptions;
 import com.jvmguard.agent.JvmGuardAgent;
 import com.jvmguard.agent.artifact.ArtifactHandler;
 import com.jvmguard.agent.artifact.ArtifactHandlers;
@@ -10,36 +12,27 @@ import com.jvmguard.agent.util.ProcessHelper;
 import com.jvmguard.agent.util.Util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.lang.management.ManagementFactory;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Records a JProfiler CPU snapshot from inside the monitored JVM
- * - loads the JProfiler agent from the cached package with jpenable
- * - drives CPU recording and snapshot saving through the Controller API
+ * Records a JProfiler snapshot from inside the monitored JVM:
+ * - loads the JProfiler agent from the cached package with jpenable (config-less offline mode)
+ * - drives recording of the selected subsystems and saves the snapshot through the Controller API
  */
 public class JProfilerRecorder {
 
-    //TODO remove offline config once jpenable inline config is available
-    private static final String OFFLINE_CONFIG =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<config version=\"10.0\">\n" +
-            "  <licenseKey key=\"\"/>\n" +
-            "  <sessions>\n" +
-            "    <session id=\"1\" name=\"jvmguard\"/>\n" +
-            "  </sessions>\n" +
-            "</config>\n";
-    private static final int OFFLINE_SESSION_ID = 1;
+    // System property read by the JProfiler native agent to locate the shadowed controller API
+    private static final String PROPNAME_CONTROLLER_PACKAGE = "jprofiler.controllerPackage";
+
     private static final long JPENABLE_TIMEOUT_SECONDS = 120;
 
     private static volatile String enabledArtifactKey = null;
 
-    public static File record(String artifactKey, int seconds) throws Exception {
+    public static File record(String artifactKey, int seconds, String[] subsystems,
+                              boolean heapDump, boolean heapDumpFullGc,
+                              boolean mbeanSnapshot, boolean monitorDump) throws Exception {
         ArtifactHandler handler = ArtifactHandlers.get(ArtifactKind.JPROFILER);
         File packageDir = handler.getInstallDir(artifactKey);
         if (!handler.isReady(packageDir)) {
@@ -48,14 +41,89 @@ public class JProfilerRecorder {
 
         ensureProfilingEnabled(packageDir, artifactKey);
 
-        Controller.startCPURecording(true);
+        // The snapshot should not be empty
+        String[] effective = subsystems.length == 0
+            ? new String[] {JProfilerRecordingNames.SUBSYSTEM_CPU} : subsystems;
+
         try {
+            applyRecordings(effective, true);
             Thread.sleep(Math.max(0L, seconds) * 1000L);
+            // Point-in-time captures at the end of the recording window, folded into the same snapshot.
+            // Each is independent so one failure cannot abort the snapshot.
+            applyDumps(heapDump, heapDumpFullGc, mbeanSnapshot, monitorDump);
             File snapshot = File.createTempFile("jvmguard_jprofiler", ".jps");
             Controller.saveSnapshot(snapshot);
+            JvmGuardAgent.log("JProfiler snapshot saved: " + snapshot.length() + " bytes");
             return snapshot;
         } finally {
-            Controller.stopCPURecording();
+            applyRecordings(effective, false);
+        }
+    }
+
+    /**
+     * Triggers the optional point-in-time dumps that are stored alongside the windowed recording. The heap
+     * dump is the expensive one (full-JVM pause plus a large in-snapshot payload); the MBean and monitor
+     * dumps are cheap. Each is guarded independently so an unavailable capture cannot lose the snapshot.
+     */
+    private static void applyDumps(boolean heapDump, boolean heapDumpFullGc,
+                                   boolean mbeanSnapshot, boolean monitorDump) {
+        if (heapDump) {
+            try {
+                Controller.triggerHeapDump(heapDumpFullGc ? HeapDumpOptions.DEFAULT : HeapDumpOptions.NO_FULL_GC);
+            } catch (Throwable t) {
+                JvmGuardAgent.log(t);
+            }
+        }
+        if (mbeanSnapshot) {
+            try {
+                Controller.triggerMBeanSnapshot(null, null);
+            } catch (Throwable t) {
+                JvmGuardAgent.log(t);
+            }
+        }
+        if (monitorDump) {
+            try {
+                Controller.triggerMonitorDump();
+            } catch (Throwable t) {
+                JvmGuardAgent.log(t);
+            }
+        }
+    }
+
+    private static void applyRecordings(String[] subsystems, boolean start) {
+        for (String subsystem : subsystems) {
+            try {
+                if (JProfilerRecordingNames.SUBSYSTEM_CPU.equals(subsystem)) {
+                    if (start) {
+                        Controller.startCPURecording(true);
+                    } else {
+                        Controller.stopCPURecording();
+                    }
+                } else if (JProfilerRecordingNames.SUBSYSTEM_ALLOCATION.equals(subsystem)) {
+                    if (start) {
+                        Controller.startAllocRecording(true);
+                    } else {
+                        Controller.stopAllocRecording();
+                    }
+                } else if (JProfilerRecordingNames.SUBSYSTEM_MONITORS.equals(subsystem)) {
+                    if (start) {
+                        Controller.startMonitorRecording();
+                    } else {
+                        Controller.stopMonitorRecording();
+                    }
+                } else {
+                    String probeName = JProfilerRecordingNames.probeName(subsystem);
+                    if (probeName != null) {
+                        if (start) {
+                            Controller.startProbeRecording(probeName, false);
+                        } else {
+                            Controller.stopProbeRecording(probeName);
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                JvmGuardAgent.log(t);
+            }
         }
     }
 
@@ -72,19 +140,12 @@ public class JProfilerRecorder {
             if (enabledArtifactKey != null) {
                 return;
             }
-            File configFile = writeOfflineConfig();
-            try {
-                enableProfiling(packageDir, currentPid(), configFile);
-                enabledArtifactKey = artifactKey;
-            } finally {
-                if (!configFile.delete()) {
-                    configFile.deleteOnExit();
-                }
-            }
+            enableProfiling(packageDir, currentPid());
+            enabledArtifactKey = artifactKey;
         }
     }
 
-    private static void enableProfiling(File packageDir, long pid, File configFile) throws IOException, InterruptedException {
+    private static void enableProfiling(File packageDir, long pid) throws IOException, InterruptedException {
         File home = JProfilerLayout.resolveHome(packageDir);
         if (home == null) {
             throw new IOException("JProfiler package is incomplete at " + packageDir);
@@ -95,12 +156,13 @@ public class JProfilerRecorder {
         }
         jpenable.setExecutable(true);
 
+        System.setProperty(PROPNAME_CONTROLLER_PACKAGE, controllerPackage());
+
         ProcessBuilder processBuilder = new ProcessBuilder(
             jpenable.getAbsolutePath(),
             "--offline",
             "--pid=" + pid,
-            "--config=" + configFile.getAbsolutePath(),
-            "--id=" + OFFLINE_SESSION_ID,
+            "--call-tree-mode=sampling",
             "--noinput"
         );
         processBuilder.environment().put("INSTALL4J_JAVA_HOME_OVERRIDE", System.getProperty("java.home"));
@@ -131,22 +193,20 @@ public class JProfilerRecorder {
         JvmGuardAgent.log("jpenable loaded JProfiler agent: " + output);
     }
 
-    private static File writeOfflineConfig() throws IOException {
-        File configFile = File.createTempFile("jprofiler_config", ".xml");
-        try (Writer out = new OutputStreamWriter(new FileOutputStream(configFile), StandardCharsets.UTF_8)) {
-            out.write(OFFLINE_CONFIG);
-        }
-        return configFile;
+    private static String controllerPackage() {
+        // Use a class that does not initialize the Controller class
+        String name = TrackingOptions.class.getName();
+        int lastDot = name.lastIndexOf('.');
+        return name.substring(0, lastDot);
     }
 
     private static long currentPid() {
         if (Util.JAVA_MAJOR_VERSION >= 11) {
             return ProcessHelper.currentPid();
-        } else {
-            // Java 8 fallback: the RuntimeMXBean name is "<pid>@<host>".
-            String name = ManagementFactory.getRuntimeMXBean().getName();
-            int at = name.indexOf('@');
-            return Long.parseLong(at > 0 ? name.substring(0, at) : name);
         }
+        // Java 8 fallback: the RuntimeMXBean name is "<pid>@<host>".
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        int at = name.indexOf('@');
+        return Long.parseLong(at > 0 ? name.substring(0, at) : name);
     }
 }

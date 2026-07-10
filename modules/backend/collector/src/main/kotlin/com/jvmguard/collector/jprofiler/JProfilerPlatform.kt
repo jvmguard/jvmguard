@@ -19,4 +19,12 @@ object JProfilerPlatform {
             else -> null
         }
     }
+
+    fun archiveExtension(downloadToken: String): String =
+        @Suppress("SpellCheckingInspection")
+        when {
+            downloadToken.startsWith("windows") -> ".zip"
+            downloadToken == "macos" -> ".tgz"
+            else -> ".tar.gz"
+        }
 }

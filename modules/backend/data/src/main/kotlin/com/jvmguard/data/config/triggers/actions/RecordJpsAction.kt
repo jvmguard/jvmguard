@@ -5,6 +5,41 @@ import com.jvmguard.data.config.triggers.TimeUnit
 
 open class RecordJpsAction : RecordArtifactAction {
 
+    var subsystems: Set<String> = JProfilerSubsystem.DEFAULT_IDS
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
+    var heapDump: Boolean = false
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
+    var heapDumpFullGc: Boolean = true
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
+    var mbeanSnapshot: Boolean = false
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
+    var monitorDump: Boolean = false
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
     @DefaultConstructor
     constructor()
 

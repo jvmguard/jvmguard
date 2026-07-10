@@ -42,15 +42,15 @@ tasks {
 
         configurations.add(shadow)
         minimize {
-            // TODO: relocate once controller relocation is available
             exclude(dependency("com.jprofiler:jprofiler-controller:.*"))
         }
         exclude("module-info.class")
-        // Relocate fastutil and ASM so they cannot collide with the profiled application's own
-        // copies when the agent is attached to the same JVM.
+        // Relocate bundled libraries so they cannot collide with the profiled application's own copies
+        // when the agent is attached to the same JVM.
         relocate("it.unimi.dsi.fastutil", "com.${project.rootProject.name}.agent.fastutil")
         relocate("org.objectweb.asm", "com.jvmguard.agent.asm")
         relocate("com.grack.nanojson", "com.jvmguard.agent.json")
+        relocate("com.jprofiler.api.controller", "com.jvmguard.agent.jpcontroller")
     }
 
     // Pass -PvmName to set the name of the VM, -PvmGroup to set the group of the VM

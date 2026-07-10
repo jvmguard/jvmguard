@@ -11,6 +11,7 @@ import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
+import com.vaadin.flow.component.combobox.MultiSelectComboBox
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup
 import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.TextArea
@@ -122,22 +123,56 @@ private abstract class RecordArtifactActionDialog protected constructor(
     }
 }
 
-private class RecordJpsActionDialog(action: RecordJpsAction, title: String, onSave: () -> Unit) :
+private class RecordJpsActionDialog(private val action: RecordJpsAction, title: String, onSave: () -> Unit) :
     RecordArtifactActionDialog(action, title, onSave) {
 
+    private val unknownSubsystems = action.subsystems.filter { JProfilerSubsystem.fromId(it) == null }.toSet()
+
+    private val subsystems = MultiSelectComboBox<JProfilerSubsystem>("Recorded subsystems").apply {
+        setItems(*JProfilerSubsystem.entries.toTypedArray())
+        setItemLabelGenerator { it.label }
+        setWidthFull()
+        value = action.subsystems.mapNotNull { JProfilerSubsystem.fromId(it) }.toSet()
+        addClassName("jvmguard-settings-gap-before")
+    }
+
+    // Point-in-time captures taken at the end of the recording window and stored in the same snapshot.
+    private val heapDump = Checkbox("Include heap dump").apply {
+        value = action.heapDump
+        addClassName("jvmguard-settings-gap-before")
+    }
+
+    private val heapDumpFullGc = Checkbox("Run a full GC before the heap dump").apply {
+        value = action.heapDumpFullGc
+        isEnabled = action.heapDump
+    }
+
+    private val mbeanSnapshot = Checkbox("Include MBean snapshot").apply { value = action.mbeanSnapshot }
+
+    private val monitorDump = Checkbox("Include monitor dump").apply { value = action.monitorDump }
+
     init {
+        heapDump.addValueChangeListener { heapDumpFullGc.isEnabled = it.value }
         build()
     }
 
     override fun populate() {
-        body.add(artifact, timeRow(time, unit), inbox)
+        body.add(artifact, timeRow(time, unit), inbox, subsystems, heapDump, heapDumpFullGc, mbeanSnapshot, monitorDump)
     }
 
     override fun writeBack(): Boolean {
         if (!validateRecordArtifact()) {
             return false
         }
+        if (subsystems.value.isEmpty()) {
+            return fail(subsystems, "Select at least one subsystem.")
+        }
         writeRecordArtifact()
+        action.subsystems = subsystems.value.map { it.id }.toSet() + unknownSubsystems
+        action.heapDump = heapDump.value
+        action.heapDumpFullGc = heapDumpFullGc.value
+        action.mbeanSnapshot = mbeanSnapshot.value
+        action.monitorDump = monitorDump.value
         return true
     }
 }
