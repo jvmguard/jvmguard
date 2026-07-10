@@ -19,7 +19,9 @@ import java.io.Serial
 @StoredType("group_config")
 open class GroupConfig : HierarchicalConfig {
 
-    val groupType: VmType
+    // needs to be var for persistence
+    var groupType: VmType
+        private set
 
     var agentGroupConfig: AgentGroupConfig = AgentGroupConfig()
         private set

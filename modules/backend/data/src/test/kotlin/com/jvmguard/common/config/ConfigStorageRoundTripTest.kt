@@ -1,11 +1,13 @@
 package com.jvmguard.common.config
 
+import com.jvmguard.agent.config.VmType
 import com.jvmguard.data.config.GlobalConfig
 import com.jvmguard.data.config.GroupConfig
 import com.jvmguard.data.config.sets.TriggerSet
 import com.jvmguard.data.config.triggers.ThresholdTrigger
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.user.User
+import com.jvmguard.data.vmdata.VmIdentifier
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.ObjectMapper
@@ -58,6 +60,15 @@ class ConfigStorageRoundTripTest {
         assertEquals("ts", back.name)
         assertEquals(1, back.items.size)
         assertInstanceOf(ThresholdTrigger::class.java, back.items.first())
+    }
+
+    @Test
+    fun poolGroupConfigIdentityRoundTrips() {
+        val gc = GroupConfig.createDefault(VmIdentifier("Demo/Storefront", VmType.POOL))
+        val back = roundTrip(gc, GroupConfig::class.java)
+        assertEquals("Demo/Storefront", back.hierarchyPath, "hierarchyPath must survive the round trip")
+        assertEquals(VmType.POOL, back.groupType, "groupType must survive so a pool is not reclassified as GROUP")
+        assertEquals(gc.groupIdentifier, back.groupIdentifier, "the group identifier must be stable across reload")
     }
 
     private fun <T> roundTrip(bean: T, type: Class<T>): T =
