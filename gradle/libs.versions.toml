@@ -12,19 +12,19 @@ jetbrainsAnnotations = "26.1.0"
 commonsCompress = "1.28.0"
 json = "20260522"
 h2 = "2.4.240"
-flyway = "12.10.0"
+flyway = "12.11.0"
 junitBom = "6.1.1"
 karibuDsl = "2.6.0"
 playwright = "1.61.0"
 servletApi = "6.1.0"
 install4j = "12.0.5"
 jprofiler = "16.1.1"
-shadow = "9.4.3"
+shadow = "9.5.1"
 vanniktechPublish = "0.37.0"
 cyclonedx = "3.2.4"
 # TODO check if this can be removed after the next cyclonedx release
 # Pins the cyclonedx plugin's transitive Jackson (build tooling only) to a non-vulnerable release.
-jackson = "2.22.0"
+jackson = "2.22.1"
 mcpSdk = "2.0.0"
 
 [libraries]
