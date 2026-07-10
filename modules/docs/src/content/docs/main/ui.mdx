@@ -27,8 +27,19 @@ messages, the inbox entry in the side-navigation shows a notification badge.
 
 <Figure src="ui/inbox.png" />
 
-The server logs are available from the side-navigation as well and let you inspect the server, connection and event logs
-without leaving the UI.
+The server logs are available from the side-navigation as well and let you inspect the **server**, **connection**,
+**audit** and **event** logs without leaving the UI. Each has a different scope and a different required access level:
+
+* The **event log** (viewer access) is the monitoring feed for your applications. An entry is written whenever a
+[trigger](/docs/main/triggers) fires or a diagnostic snapshot is captured, in addition to any trigger with an
+explicit "write to the event log" action. It stays empty until one of these happens.
+* The **connection log** (profiler access) records agent connectivity and data-collection activity.
+* The **audit log** (administrator access) records security-relevant API access, artifact downloads, and
+authentication failures and authorization denials, so you can reconstruct what an API client or AI agent did.
+* The **server log** (administrator access) contains the general server diagnostics.
+
+When you run jvmguard from a development build, the server logs to the console instead of to files, so these views can
+be empty even though you have access.
 
 ## Configuration
 

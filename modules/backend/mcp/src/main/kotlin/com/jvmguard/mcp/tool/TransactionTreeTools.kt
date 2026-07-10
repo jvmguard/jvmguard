@@ -34,27 +34,23 @@ abstract class AbstractTransactionTreeTool(
             ),
         ).description(toolDescription).annotations(readOnly(toolTitle)).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val vmPath = args["vm"] as? String
-                val intervalId = (args["interval"] as? String) ?: "10min"
-                val mergePolicies = (args["mergePolicies"] as? Boolean) ?: false
+            val args = request.arguments()
+            val vmPath = args["vm"] as? String
+            val intervalId = (args["interval"] as? String) ?: "10min"
+            val mergePolicies = (args["mergePolicies"] as? Boolean) ?: false
 
-                val interval = TransactionTreeInterval.fromExportId(intervalId)
-                    ?: throw McpError("Unknown interval: $intervalId")
+            val interval = TransactionTreeInterval.fromExportId(intervalId)
+                ?: throw McpError("Unknown interval: $intervalId")
 
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVmOrNull(conn, vmPath)
-                    val cursor = conn.getCurrentTransactionTreeCursor(vm, interval, dataType)
-                    val treeData = if (hotSpots) {
-                        conn.getHotspots(cursor, mergePolicies)
-                    } else {
-                        conn.getCallTree(cursor, mergePolicies)
-                    }
-                    jsonResult(McpJson.write(McpTransactionTree.toResult(rootKey, treeData.transactionTree)))
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveVmOrNull(conn, vmPath)
+                val cursor = conn.getCurrentTransactionTreeCursor(vm, interval, dataType)
+                val treeData = if (hotSpots) {
+                    conn.getHotspots(cursor, mergePolicies)
+                } else {
+                    conn.getCallTree(cursor, mergePolicies)
                 }
-            } catch (e: Exception) {
-                handleError(e)
+                jsonResult(McpJson.write(McpTransactionTree.toResult(rootKey, treeData.transactionTree)))
             }
         }
     }

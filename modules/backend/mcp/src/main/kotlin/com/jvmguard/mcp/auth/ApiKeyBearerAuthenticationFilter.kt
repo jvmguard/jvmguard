@@ -1,5 +1,6 @@
 package com.jvmguard.mcp.auth
 
+import com.jvmguard.common.AuditLog
 import com.jvmguard.common.helper.PasswordHelper
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.user.UserManager
@@ -41,12 +42,12 @@ class ApiKeyBearerAuthenticationFilter(
 
         val bearerToken = extractBearerToken(request)
         if (bearerToken != null) {
-            resolveApiKey(bearerToken)?.let { SecurityContextHolder.getContext().authentication = it }
+            resolveApiKey(bearerToken, request.remoteAddr)?.let { SecurityContextHolder.getContext().authentication = it }
         }
         filterChain.doFilter(request, response)
     }
 
-    private fun resolveApiKey(apiKey: String): Authentication? {
+    private fun resolveApiKey(apiKey: String, clientIp: String?): Authentication? {
         val cacheKey = sha256(apiKey)
         val now = System.currentTimeMillis()
 
@@ -63,6 +64,8 @@ class ApiKeyBearerAuthenticationFilter(
             }
         }
         store(cacheKey, CacheEntry(null, now + negativeTtlMillis))
+        // Log the failed attempt once per negative-cache window, so a repeated bad token does not flood the log
+        AuditLog.record("mcp", null, "auth", AuditLog.Outcome.AUTH_FAILED, detail = "invalid api key", clientIp = clientIp)
         return null
     }
 

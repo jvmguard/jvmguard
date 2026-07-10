@@ -15,6 +15,7 @@ import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridVariant
 import com.vaadin.flow.component.html.Anchor
+import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
@@ -41,6 +42,10 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
     private data class LogLine(val sequence: Long, val text: String)
 
     override val logTitle: String get() = logFileType.toString()
+
+    protected open val emptyStateHint: String get() = "No entries in this log yet."
+
+    private val emptyStateLabel = Span().apply { addClassName("jvmguard-field-hint") }
 
     private val fileSelect = Select<LogFileDescriptor>().apply {
         label = null
@@ -77,6 +82,7 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
         addThemeVariants(GridVariant.NO_ROW_BORDERS, GridVariant.NO_BORDER)
         addColumn(LogLine::text).setKey(COLUMN_LINE)
         setSelectionMode(Grid.SelectionMode.NONE)
+        setEmptyStateComponent(emptyStateLabel)
     }
 
     private val lines = ArrayList<LogLine>()
@@ -165,6 +171,11 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
 
     private fun loadDescriptors() {
         val descriptors = Sessions.current()?.serverConnection?.getLogFileDescriptors(logFileType).orEmpty()
+        emptyStateLabel.text = if (descriptors.isEmpty()) {
+            "No $logTitle files found. In development the server logs to the console."
+        } else {
+            emptyStateHint
+        }
         fileSelect.setItems(descriptors)
         fileSelect.value = descriptors.firstOrNull()
     }

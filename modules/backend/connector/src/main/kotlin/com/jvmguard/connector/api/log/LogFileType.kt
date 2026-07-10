@@ -9,6 +9,7 @@ enum class LogFileType(
 ) {
     EVENT("Event Log", "event", AccessLevel.VIEWER),
     CONNECTION("Connection Log", "connection", AccessLevel.PROFILER),
+    AUDIT("Audit Log", "audit", AccessLevel.ADMIN),
     SERVER("Server Log", null, AccessLevel.ADMIN);
 
     override fun toString(): String = verbose

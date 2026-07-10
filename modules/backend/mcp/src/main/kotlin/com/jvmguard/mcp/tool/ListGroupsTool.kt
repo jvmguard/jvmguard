@@ -22,27 +22,23 @@ class ListGroupsTool(ctx: McpToolContext) : McpTool(ctx) {
                     "Use these paths in list_vms and other tools to target specific groups."
         ).annotations(readOnly("List groups")).build()
         return SyncToolSpecification(tool) { _, _ ->
-            try {
-                ctx.withConnection { conn ->
-                    // dedup
-                    val byPath = LinkedHashMap<String, GroupConfig>()
-                    for (config in conn.groupConfigs) {
-                        val existing = byPath[config.hierarchyPath]
-                        if (existing == null || config.groupType == VmType.POOL) {
-                            byPath[config.hierarchyPath] = config
-                        }
+            ctx.withConnection { conn ->
+                // dedup
+                val byPath = LinkedHashMap<String, GroupConfig>()
+                for (config in conn.groupConfigs) {
+                    val existing = byPath[config.hierarchyPath]
+                    if (existing == null || config.groupType == VmType.POOL) {
+                        byPath[config.hierarchyPath] = config
                     }
-                    val groups = byPath.values.map { config ->
-                        mapOf(
-                            "path" to config.hierarchyPath.ifEmpty { "<root>" },
-                            "type" to config.groupType.name,
-                            "isRoot" to config.isRoot,
-                        )
-                    }
-                    jsonResult(McpJson.write(groups))
                 }
-            } catch (e: Exception) {
-                handleError(e)
+                val groups = byPath.values.map { config ->
+                    mapOf(
+                        "path" to config.hierarchyPath.ifEmpty { "<root>" },
+                        "type" to config.groupType.name,
+                        "isRoot" to config.isRoot,
+                    )
+                }
+                jsonResult(McpJson.write(groups))
             }
         }
     }

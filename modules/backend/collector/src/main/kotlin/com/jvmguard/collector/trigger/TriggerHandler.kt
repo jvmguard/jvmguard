@@ -1,5 +1,6 @@
 package com.jvmguard.collector.trigger
 
+import com.jvmguard.agent.config.base.LogCategory
 import com.jvmguard.collector.connection.Command
 import com.jvmguard.collector.main.CollectorContext
 import com.jvmguard.data.config.triggers.DataTrigger
@@ -87,7 +88,7 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
     }
 
     protected open fun executeActions(snapshotTimeStamp: Long, collectorContext: CollectorContext) {
-        executeActions(collectorContext, triggerData.triggerActions, lastVm, groupVm)
+        executeActions(collectorContext, triggerData.triggerActions, lastVm, groupVm, triggerData.description)
     }
 
     private fun resetCounter() {
@@ -117,7 +118,12 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
             triggerActions: Collection<TriggerAction>,
             lastVm: VM?,
             groupVm: VM?,
+            triggerDescription: String,
         ) {
+            // every trigger firing leaves exactly one event log entry
+            if (triggerActions.none { it is LogAction }) {
+                collectorContext.logEvent(groupVm, lastVm, LogCategory.INFO, "Trigger fired: $triggerDescription")
+            }
             var commands: MutableList<Command>? = null
             for (action in triggerActions) {
                 when {

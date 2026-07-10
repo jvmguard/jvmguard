@@ -23,7 +23,9 @@ class McpConfiguration {
             .mcpEndpoint("/mcp")
             .contextExtractor { request ->
                 val auth = request.getHeader("Authorization") ?: ""
-                McpTransportContext.create(mapOf("authorization" to auth, "baseUrl" to baseUrl(request)))
+                McpTransportContext.create(
+                    mapOf("authorization" to auth, "baseUrl" to baseUrl(request), "clientIp" to (request.remoteAddr ?: "")),
+                )
             }
             .build()
 

@@ -30,7 +30,7 @@ class ConnectionTriggerHandler(var trigger: ConnectionTrigger, private val group
                 (lastTimeTriggeredNanos == Long.MIN_VALUE || nanoTime - lastTimeTriggeredNanos >= trigger.inhibitionInterval.getNanos(trigger.inhibitionTime))
             ) {
                 lastTimeTriggeredNanos = nanoTime
-                TriggerHandler.executeActions(collectorContext, trigger.triggerActions, null, groupVm)
+                TriggerHandler.executeActions(collectorContext, trigger.triggerActions, null, groupVm, trigger.description)
             }
         } else {
             firstTimeReachedNanos = Long.MIN_VALUE

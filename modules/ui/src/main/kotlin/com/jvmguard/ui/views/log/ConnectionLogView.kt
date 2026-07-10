@@ -12,6 +12,10 @@ import jakarta.annotation.security.RolesAllowed
 @PageTitle("jvmguard: Connection Log")
 class ConnectionLogView : AbstractLogView(LogFileType.CONNECTION, ID) {
 
+    override val emptyStateHint: String
+        get() = "No connections yet. Entries appear here when a monitored JVM connects to the jvmguard server."
+
+
     companion object {
         const val ID = "log-view-connection"
     }

@@ -20,20 +20,16 @@ class ListTelemetriesTool(ctx: McpToolContext) : McpTool(ctx) {
                     "Use the returned telemetry name in get_telemetry."
         ).annotations(readOnly("List telemetries")).build()
         return SyncToolSpecification(tool) { _, _ ->
-            try {
-                ctx.withConnection { conn ->
-                    val items = conn.idToTelemetryType.entries.map { (name, type) ->
-                        mapOf(
-                            "name" to name,
-                            "category" to type.categoryName,
-                            "displayName" to type.name,
-                            "unit" to type.unit.name,
-                        )
-                    }
-                    jsonResult(McpJson.write(items))
+            ctx.withConnection { conn ->
+                val items = conn.idToTelemetryType.entries.map { (name, type) ->
+                    mapOf(
+                        "name" to name,
+                        "category" to type.categoryName,
+                        "displayName" to type.name,
+                        "unit" to type.unit.name,
+                    )
                 }
-            } catch (e: Exception) {
-                handleError(e)
+                jsonResult(McpJson.write(items))
             }
         }
     }

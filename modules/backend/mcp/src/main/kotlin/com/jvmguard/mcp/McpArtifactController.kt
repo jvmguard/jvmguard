@@ -1,5 +1,7 @@
 package com.jvmguard.mcp
 
+import com.jvmguard.common.AuditLog
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
@@ -27,14 +29,31 @@ class McpArtifactController(
     fun download(
         @PathVariable id: Long,
         @RequestParam(name = "dl", required = false) dl: String?,
+        request: HttpServletRequest,
     ): ResponseEntity<Resource> {
+        val clientIp = request.remoteAddr
         val loginName = (if (dl != null) downloadTokens.consume(dl, id) else authenticatedLogin())
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            ?: run {
+                AuditLog.record(
+                    "mcp", authenticatedLogin(), "download", AuditLog.Outcome.DENIED,
+                    target = "artifact=$id", detail = "unauthorized", clientIp = clientIp,
+                )
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
         return toolContext.withConnectionForPrincipal(loginName) { conn ->
             val file = conn.getSnapshotFile(id)
             if (file == null || !file.file.isFile) {
+                AuditLog.record(
+                    "mcp", loginName, "download", AuditLog.Outcome.ERROR,
+                    target = "artifact=$id", detail = "not found", clientIp = clientIp,
+                )
                 ResponseEntity.notFound().build()
             } else {
+                AuditLog.record(
+                    "mcp", loginName, "download", AuditLog.Outcome.OK,
+                    target = "artifact=$id", detail = "type=${file.type.name} bytes=${file.file.length()}",
+                    clientIp = clientIp,
+                )
                 val resource: Resource = FileSystemResource(file.file)
                 ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${file.targetFileName}\"")

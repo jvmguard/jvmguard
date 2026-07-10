@@ -11,6 +11,9 @@ import jakarta.annotation.security.PermitAll
 @PageTitle("jvmguard: Event Log")
 class EventLogView : AbstractLogView(LogFileType.EVENT, ID) {
 
+    override val emptyStateHint: String
+        get() = "No events yet. Entries appear here when a trigger fires or a diagnostic snapshot is captured."
+
     companion object {
         const val ID = "log-view-event"
     }

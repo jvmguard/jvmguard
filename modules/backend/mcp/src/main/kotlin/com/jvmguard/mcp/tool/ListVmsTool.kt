@@ -30,30 +30,26 @@ class ListVmsTool(ctx: McpToolContext) : McpTool(ctx) {
                     "the pool path. Pool members share a path, so use connected=true to see individual instances."
         ).annotations(readOnly("List VMs")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val connected = (request.arguments()["connected"] as? Boolean) ?: false
-                ctx.withConnection { conn ->
-                    val connectedPaths = conn.connectedVms.map { it.hierarchyPath.trimEnd('/') }.toSet()
-                    val vms = (if (connected) conn.connectedVms else conn.namedVms)
-                        .filter { it.type != VmType.GROUP }
-                        .map { vm ->
-                            mapOf(
-                                "path" to vm.hierarchyPath.trimEnd('/'),
-                                "name" to vm.name,
-                                "kind" to when (vm.type) {
-                                    VmType.POOL -> "pool"
-                                    VmType.POOLED -> "instance"
-                                    else -> "vm"
-                                },
-                                "host" to vm.hostName,
-                                "port" to vm.port,
-                                "connected" to (vm.hierarchyPath.trimEnd('/') in connectedPaths),
-                            )
-                        }
-                    jsonResult(McpJson.write(vms))
-                }
-            } catch (e: Exception) {
-                handleError(e)
+            val connected = (request.arguments()["connected"] as? Boolean) ?: false
+            ctx.withConnection { conn ->
+                val connectedPaths = conn.connectedVms.map { it.hierarchyPath.trimEnd('/') }.toSet()
+                val vms = (if (connected) conn.connectedVms else conn.namedVms)
+                    .filter { it.type != VmType.GROUP }
+                    .map { vm ->
+                        mapOf(
+                            "path" to vm.hierarchyPath.trimEnd('/'),
+                            "name" to vm.name,
+                            "kind" to when (vm.type) {
+                                VmType.POOL -> "pool"
+                                VmType.POOLED -> "instance"
+                                else -> "vm"
+                            },
+                            "host" to vm.hostName,
+                            "port" to vm.port,
+                            "connected" to (vm.hierarchyPath.trimEnd('/') in connectedPaths),
+                        )
+                    }
+                jsonResult(McpJson.write(vms))
             }
         }
     }

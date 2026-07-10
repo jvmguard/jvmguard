@@ -1,5 +1,6 @@
 package com.jvmguard.server
 
+import com.jvmguard.common.AuditLog
 import com.jvmguard.common.JvmGuardConfig
 import com.jvmguard.common.JvmGuardProperties
 import com.jvmguard.common.Loggers
@@ -29,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
@@ -55,7 +57,16 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
                 .build()
         }
         val restAuthenticationManager = ProviderManager(RestApiKeyAuthenticationProvider(restInterface, properties))
-        val entryPoint = BasicAuthenticationEntryPoint().apply { setRealmName("jvmguard api") }
+        val basicEntryPoint = BasicAuthenticationEntryPoint().apply { setRealmName("jvmguard api") }
+        val entryPoint = AuthenticationEntryPoint { request, response, authException ->
+            if (request.getHeader("Authorization") != null) {
+                AuditLog.record(
+                    "rest", null, "auth", AuditLog.Outcome.AUTH_FAILED,
+                    detail = "invalid credentials", clientIp = request.remoteAddr,
+                )
+            }
+            basicEntryPoint.commence(request, response, authException)
+        }
         return http
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { it.anyRequest().authenticated() }

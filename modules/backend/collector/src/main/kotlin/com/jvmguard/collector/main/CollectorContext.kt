@@ -143,6 +143,7 @@ class CollectorContext(
         return Command(CommandType.THREAD_DUMP, null, object : Handler<ThreadDumpResult>() {
             override fun handle(result: ThreadDumpResult) {
                 val snapshot = snapshotFileStorage.createSnapshotFile(vm, SnapshotFileType.THREAD_DUMP, System.currentTimeMillis(), name, result)
+                logEvent(vm, null, LogCategory.INFO, "Recorded ${SnapshotFileType.THREAD_DUMP} \"$name\"")
                 addArtifactInboxItem(user, inboxAll, vm, name, snapshot)
             }
         })
@@ -165,12 +166,15 @@ class CollectorContext(
             handleSnapshotError(errorMessage, vm, user, snapshotFileType)
         } else {
             val snapshot = snapshotFileStorage.createSnapshotFile(vm, snapshotFileType, System.currentTimeMillis(), name, result)
+            logEvent(vm, null, LogCategory.INFO, "Recorded $snapshotFileType \"$name\"")
             addArtifactInboxItem(user, inboxAll, vm, name, snapshot)
         }
     }
 
     private fun handleSnapshotError(errorMessage: String, vm: VM, user: User?, snapshotFileType: SnapshotFileType) {
         VmManagerImpl.CONNECTION_LOGGER.error("{} error: {} on {}", snapshotFileType.name, errorMessage, vm.verbose)
+        // generic info for the viewer-visible event log
+        logEvent(vm, null, LogCategory.ERROR, "Failed to record $snapshotFileType")
         if (user != null) {
             val subject = "Failed to record $snapshotFileType on ${vm.name}"
             val body = "The following error occurred:\n\n$errorMessage"

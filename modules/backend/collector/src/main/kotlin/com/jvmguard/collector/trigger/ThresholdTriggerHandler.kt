@@ -29,7 +29,7 @@ class ThresholdTriggerHandler(trigger: ThresholdTrigger, private val groupData: 
             groupData.visitConnectedVmTelemetryValue(telemetryIdentifier, bestTelemetryValueVisitor.init())
             usedLastVm = bestTelemetryValueVisitor.bestVm
         }
-        executeActions(collectorContext, triggerData.triggerActions, usedLastVm, groupVm)
+        executeActions(collectorContext, triggerData.triggerActions, usedLastVm, groupVm, triggerData.description)
     }
 
     private inner class BestTelemetryValueVisitor : TelemetryValueVisitor {

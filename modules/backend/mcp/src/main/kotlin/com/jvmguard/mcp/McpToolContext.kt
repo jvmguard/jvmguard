@@ -23,11 +23,20 @@ class McpToolContext(
     companion object {
         val authTokenHolder: ThreadLocal<String> = ThreadLocal()
         val baseUrlHolder: ThreadLocal<String> = ThreadLocal()
+        val clientIpHolder: ThreadLocal<String> = ThreadLocal()
 
         private const val MAX_CACHE_ENTRIES = 10_000
     }
 
     fun currentBaseUrl(): String? = baseUrlHolder.get()?.takeIf { it.isNotBlank() }
+
+    fun currentClientIp(): String? = clientIpHolder.get()?.takeIf { it.isNotBlank() }
+
+    // must not read the SecurityContext
+    fun currentPrincipal(): String? {
+        val token = authTokenHolder.get()?.removePrefix("Bearer ")?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        return resolveUser(token)?.loginName
+    }
 
     fun createDownloadToken(fileId: Long): String {
         val loginName = SecurityContextHolder.getContext().authentication?.name

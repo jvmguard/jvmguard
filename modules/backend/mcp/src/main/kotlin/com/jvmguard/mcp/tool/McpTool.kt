@@ -54,12 +54,14 @@ abstract class McpTool(protected val ctx: McpToolContext) {
             .content(listOf(TextContent.builder(text).build()))
             .build()
 
-    protected fun errorResult(message: String): CallToolResult =
-        CallToolResult.builder()
-            .isError(true)
-            .content(listOf(TextContent.builder(message).build()))
-            .build()
-
-    protected fun handleError(e: Throwable): CallToolResult =
-        errorResult(e.message ?: e.javaClass.simpleName)
+    protected fun errorResult(message: String): CallToolResult = toErrorResult(message)
 }
+
+internal fun toErrorResult(message: String): CallToolResult =
+    CallToolResult.builder()
+        .isError(true)
+        .content(listOf(TextContent.builder(message).build()))
+        .build()
+
+internal fun toErrorResult(e: Throwable): CallToolResult =
+    toErrorResult(e.message ?: e.javaClass.simpleName)

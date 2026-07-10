@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.fastutil)
     implementation(libs.nanojson)
     addJunit6()
+    testImplementation(libs.h2)
 }
 
 tasks.test {

@@ -36,20 +36,19 @@ class ListSnapshotFilesTool(ctx: McpToolContext) : McpTool(ctx) {
                     "triggers. Retrieve one with get_snapshot_file."
         ).annotations(readOnly("List snapshot files")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val vmPath = args["vm"] as? String
-                val typeStr = args["type"] as? String
-                val since = (args["since"] as? Number)?.toLong()
-                val limit = (args["limit"] as? Number)?.toInt() ?: 200
-                val type = typeStr?.let { runCatching { SnapshotFileType.valueOf(it) }.getOrNull() }
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVmOrNull(conn, vmPath)
-                    val files = conn.getSnapshotFiles(type, vm)
-                        .filter { since == null || it.dateCreated.toEpochMilli() >= since }
-                        .sortedByDescending { it.dateCreated }
-                        .take(limit)
-                        .map { f ->
+            val args = request.arguments()
+            val vmPath = args["vm"] as? String
+            val typeStr = args["type"] as? String
+            val since = (args["since"] as? Number)?.toLong()
+            val limit = (args["limit"] as? Number)?.toInt() ?: 200
+            val type = typeStr?.let { runCatching { SnapshotFileType.valueOf(it) }.getOrNull() }
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveVmOrNull(conn, vmPath)
+                val files = conn.getSnapshotFiles(type, vm)
+                    .filter { since == null || it.dateCreated.toEpochMilli() >= since }
+                    .sortedByDescending { it.dateCreated }
+                    .take(limit)
+                    .map { f ->
                         mapOf(
                             "id" to f.id,
                             // Pool members have a trailing slash which needs to be normalized.
@@ -61,10 +60,7 @@ class ListSnapshotFilesTool(ctx: McpToolContext) : McpTool(ctx) {
                             "size" to f.uncompressedLength,
                         )
                     }
-                    jsonResult(McpJson.write(files))
-                }
-            } catch (e: Exception) {
-                handleError(e)
+                jsonResult(McpJson.write(files))
             }
         }
     }
@@ -95,18 +91,14 @@ class ListMbeansTool(ctx: McpToolContext) : McpTool(ctx) {
                     "A pool path resolves to one connected member, since a pool has no MBean server of its own."
         ).annotations(readOnly("List MBeans")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val vmPath = args["vm"] as String
-                val includePlatform = (args["includePlatform"] as? Boolean) ?: true
-                val limit = (args["limit"] as? Number)?.toInt() ?: 500
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveLiveVm(conn, vmPath)
-                    val names = conn.getMBeanNames(vm, includePlatform).take(limit)
-                    jsonResult(McpJson.write(names))
-                }
-            } catch (e: Exception) {
-                handleError(e)
+            val args = request.arguments()
+            val vmPath = args["vm"] as String
+            val includePlatform = (args["includePlatform"] as? Boolean) ?: true
+            val limit = (args["limit"] as? Number)?.toInt() ?: 500
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveLiveVm(conn, vmPath)
+                val names = conn.getMBeanNames(vm, includePlatform).take(limit)
+                jsonResult(McpJson.write(names))
             }
         }
     }
@@ -140,39 +132,35 @@ class GetMbeanDataTool(ctx: McpToolContext) : McpTool(ctx) {
                     "'operations' lists invocable operation signatures such as \"listStores(int)\"."
         ).annotations(readOnly("Get MBean data")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val vmPath = args["vm"] as String
-                val name = args["name"] as String
-                val fetchValues = (args["fetchValues"] as? Boolean) ?: true
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveLiveVm(conn, vmPath)
-                    val data = conn.getMBeanData(vm, name, true, fetchValues)
-                    val beanInfo = data?.beanInfo
-                    if (beanInfo == null || (beanInfo.attributes.isEmpty() && beanInfo.operations.isEmpty())) {
-                        errorResult("MBean not found: $name")
-                    } else {
-                        val attributes = LinkedHashMap<String, Any?>()
-                        beanInfo.attributes.forEachIndexed { index, attribute ->
-                            attributes[attribute.name] = if (fetchValues) {
-                                McpMBeanData.decodeAttribute(attribute, data.values.getOrNull(index))
-                            } else {
-                                attribute.type
-                            }
+            val args = request.arguments()
+            val vmPath = args["vm"] as String
+            val name = args["name"] as String
+            val fetchValues = (args["fetchValues"] as? Boolean) ?: true
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveLiveVm(conn, vmPath)
+                val data = conn.getMBeanData(vm, name, true, fetchValues)
+                val beanInfo = data?.beanInfo
+                if (beanInfo == null || (beanInfo.attributes.isEmpty() && beanInfo.operations.isEmpty())) {
+                    errorResult("MBean not found: $name")
+                } else {
+                    val attributes = LinkedHashMap<String, Any?>()
+                    beanInfo.attributes.forEachIndexed { index, attribute ->
+                        attributes[attribute.name] = if (fetchValues) {
+                            McpMBeanData.decodeAttribute(attribute, data.values.getOrNull(index))
+                        } else {
+                            attribute.type
                         }
-                        val result = buildMap {
-                            put("objectName", name)
-                            put("attributes", attributes)
-                            val operations = McpMBeanData.operationSignatures(beanInfo)
-                            if (operations.isNotEmpty()) {
-                                put("operations", operations)
-                            }
-                        }
-                        jsonResult(McpJson.write(result))
                     }
+                    val result = buildMap {
+                        put("objectName", name)
+                        put("attributes", attributes)
+                        val operations = McpMBeanData.operationSignatures(beanInfo)
+                        if (operations.isNotEmpty()) {
+                            put("operations", operations)
+                        }
+                    }
+                    jsonResult(McpJson.write(result))
                 }
-            } catch (e: Exception) {
-                handleError(e)
             }
         }
     }
@@ -202,36 +190,32 @@ class ListLogFilesTool(ctx: McpToolContext) : McpTool(ctx) {
                     "in dev), not that access was denied."
         ).annotations(readOnly("List log files")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val typeStr = request.arguments()["type"] as? String
-                val requestedType = typeStr?.let { runCatching { LogFileType.valueOf(it) }.getOrNull() }
-                val types = requestedType?.let { listOf(it) } ?: LogFileType.entries
-                ctx.withConnection { conn ->
-                    val files = types.flatMap { type ->
-                        conn.getLogFileDescriptors(type).map { f ->
-                            mapOf(
-                                "fileName" to f.fileName,
-                                "type" to type.name,
-                                "description" to f.shortDescription,
-                                "readAccess" to type.minimumAccessLevel.name,
-                            )
-                        }
+            val typeStr = request.arguments()["type"] as? String
+            val requestedType = typeStr?.let { runCatching { LogFileType.valueOf(it) }.getOrNull() }
+            val types = requestedType?.let { listOf(it) } ?: LogFileType.entries
+            ctx.withConnection { conn ->
+                val files = types.flatMap { type ->
+                    conn.getLogFileDescriptors(type).map { f ->
+                        mapOf(
+                            "fileName" to f.fileName,
+                            "type" to type.name,
+                            "description" to f.shortDescription,
+                            "readAccess" to type.minimumAccessLevel.name,
+                        )
                     }
-                    val result = buildMap<String, Any?> {
-                        put("files", files)
-                        if (files.isEmpty()) {
-                            put(
-                                "note",
-                                "No log files found. Listing is not access-restricted, so this means no file logs " +
-                                        "exist for this category (the server may be logging to the console, common " +
-                                        "in dev), not that access was denied.",
-                            )
-                        }
-                    }
-                    jsonResult(McpJson.write(result))
                 }
-            } catch (e: Exception) {
-                handleError(e)
+                val result = buildMap<String, Any?> {
+                    put("files", files)
+                    if (files.isEmpty()) {
+                        put(
+                            "note",
+                            "No log files found. Listing is not access-restricted, so this means no file logs " +
+                                    "exist for this category (the server may be logging to the console, common " +
+                                    "in dev), not that access was denied.",
+                        )
+                    }
+                }
+                jsonResult(McpJson.write(result))
             }
         }
     }
@@ -259,30 +243,32 @@ class GetLogFileTool(ctx: McpToolContext) : McpTool(ctx) {
                     "admin access."
         ).annotations(readOnly("Get log file")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val fileName = args["fileName"] as String
-                val maxLines = (args["maxLines"] as? Number)?.toInt() ?: 200
-                ctx.withConnection { conn ->
-                    // Only allow file names the user is actually allowed to list, which also blocks path traversal.
-                    val allowed = LogFileType.entries
-                        .flatMap { runCatching { conn.getLogFileDescriptors(it) }.getOrDefault(emptyList()) }
-                        .map { it.fileName }
-                        .toSet()
-                    if (fileName !in allowed) {
-                        errorResult("Unknown or inaccessible log file: $fileName")
-                    } else {
-                        val logFile = conn.getLogFile(fileName)
-                        try {
-                            val lines = logFile.componentDelta().lines
+            val args = request.arguments()
+            val fileName = args["fileName"] as String
+            val maxLines = (args["maxLines"] as? Number)?.toInt() ?: 200
+            ctx.withConnection { conn ->
+                // Only allow file names the user is actually allowed to list, which also blocks path traversal.
+                val allowed = LogFileType.entries
+                    .flatMap { runCatching { conn.getLogFileDescriptors(it) }.getOrDefault(emptyList()) }
+                    .map { it.fileName }
+                    .toSet()
+                if (fileName !in allowed) {
+                    errorResult("Unknown or inaccessible log file: $fileName")
+                } else {
+                    val logFile = conn.getLogFile(fileName)
+                    try {
+                        val lines = logFile.componentDelta().lines
+                        if (lines.isEmpty()) {
+                            textResult(
+                                "The log file \"$fileName\" has no entries yet."
+                            )
+                        } else {
                             textResult(lines.takeLast(maxLines).joinToString("\n"))
-                        } finally {
-                            logFile.close()
                         }
+                    } finally {
+                        logFile.close()
                     }
                 }
-            } catch (e: Exception) {
-                handleError(e)
             }
         }
     }
@@ -309,24 +295,20 @@ class GetSnapshotFileTool(ctx: McpToolContext) : McpTool(ctx) {
                     "single-use token and needs no extra authentication; run the downloadCommand to save the file."
         ).annotations(readOnly("Get snapshot file")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val id = (request.arguments()["id"] as? Number)?.toLong()
-                if (id == null) {
-                    errorResult("Missing snapshot file id")
-                } else {
-                    ctx.withConnection { conn ->
-                        val file = conn.getSnapshotFile(id)
-                        if (file == null) {
-                            errorResult("Snapshot file not found: $id")
-                        } else if (file.type == SnapshotFileType.THREAD_DUMP && file.file.length() <= MAX_INLINE_TEXT_BYTES) {
-                            textResult(file.file.readText())
-                        } else {
-                            jsonResult(McpJson.write(binaryArtifactMetadata(id, file)))
-                        }
+            val id = (request.arguments()["id"] as? Number)?.toLong()
+            if (id == null) {
+                errorResult("Missing snapshot file id")
+            } else {
+                ctx.withConnection { conn ->
+                    val file = conn.getSnapshotFile(id)
+                    if (file == null) {
+                        errorResult("Snapshot file not found: $id")
+                    } else if (file.type == SnapshotFileType.THREAD_DUMP && file.file.length() <= MAX_INLINE_TEXT_BYTES) {
+                        textResult(file.file.readText())
+                    } else {
+                        jsonResult(McpJson.write(binaryArtifactMetadata(id, file)))
                     }
                 }
-            } catch (e: Exception) {
-                handleError(e)
             }
         }
     }
@@ -370,28 +352,24 @@ class GetInboxTool(ctx: McpToolContext) : McpTool(ctx) {
                     "or \"MESSAGE\" for a plain notification, whose 'message' field carries the detail."
         ).annotations(readOnly("Get inbox")).build()
         return SyncToolSpecification(tool) { _, _ ->
-            try {
-                ctx.withConnection { conn ->
-                    val items = conn.inboxItems.map { item ->
-                        val artifactId = item.snapshotFileId
-                        buildMap<String, Any?> {
-                            put("id", item.id)
-                            put("date", item.date.toString())
-                            put("status", if (artifactId != null) "SNAPSHOT_READY" else "MESSAGE")
-                            put("name", item.name)
-                            if (item.message.isNotBlank()) {
-                                put("message", item.message)
-                            }
-                            artifactId?.let { put("artifactId", it) }
-                            item.snapshotFileType?.let { put("snapshotType", it.name) }
-                            // Pool members have a trailing slash which needs to be normalized.
-                            put("vm", item.vm?.hierarchyPath?.trimEnd('/'))
+            ctx.withConnection { conn ->
+                val items = conn.inboxItems.map { item ->
+                    val artifactId = item.snapshotFileId
+                    buildMap<String, Any?> {
+                        put("id", item.id)
+                        put("date", item.date.toString())
+                        put("status", if (artifactId != null) "SNAPSHOT_READY" else "MESSAGE")
+                        put("name", item.name)
+                        if (item.message.isNotBlank()) {
+                            put("message", item.message)
                         }
+                        artifactId?.let { put("artifactId", it) }
+                        item.snapshotFileType?.let { put("snapshotType", it.name) }
+                        // Pool members have a trailing slash which needs to be normalized.
+                        put("vm", item.vm?.hierarchyPath?.trimEnd('/'))
                     }
-                    jsonResult(McpJson.write(items))
                 }
-            } catch (e: Exception) {
-                handleError(e)
+                jsonResult(McpJson.write(items))
             }
         }
     }

@@ -45,60 +45,56 @@ class GetTelemetryTool(ctx: McpToolContext) : McpTool(ctx) {
                     "padding is dropped and long windows are bucket-averaged down to maxPoints."
         ).annotations(readOnly("Get telemetry")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val vmPath = args["vm"] as? String
-                val telemetryName = args["telemetry"] as String
-                val intervalId = (args["interval"] as? String) ?: "10min"
-                val interval = TelemetryInterval.fromExportId(intervalId)
-                    ?: throw McpError("Unknown interval: $intervalId")
-                val maxPoints = (args["maxPoints"] as? Number)?.toInt() ?: DEFAULT_MAX_POINTS
+            val args = request.arguments()
+            val vmPath = args["vm"] as? String
+            val telemetryName = args["telemetry"] as String
+            val intervalId = (args["interval"] as? String) ?: "10min"
+            val interval = TelemetryInterval.fromExportId(intervalId)
+                ?: throw McpError("Unknown interval: $intervalId")
+            val maxPoints = (args["maxPoints"] as? Number)?.toInt() ?: DEFAULT_MAX_POINTS
 
-                // Epoch milliseconds exceed Int range
-                val startTime = (args["startTime"] as? Number)?.toLong()
-                val endTime = (args["endTime"] as? Number)?.toLong()
-                    ?: startTime?.let { it + interval.timeExtent }
-                    ?: System.currentTimeMillis()
+            // Epoch milliseconds exceed Int range
+            val startTime = (args["startTime"] as? Number)?.toLong()
+            val endTime = (args["endTime"] as? Number)?.toLong()
+                ?: startTime?.let { it + interval.timeExtent }
+                ?: System.currentTimeMillis()
 
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVmOrNull(conn, vmPath)
-                    val telemetryType = conn.idToTelemetryType[telemetryName]
-                        ?: throw McpError("Unknown telemetry: $telemetryName")
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveVmOrNull(conn, vmPath)
+                val telemetryType = conn.idToTelemetryType[telemetryName]
+                    ?: throw McpError("Unknown telemetry: $telemetryName")
 
-                    val data = conn.getTelemetryData(
-                        vm,
-                        telemetryType.telemetryIdentifier.mainId,
-                        interval,
-                        endTime,
-                    )
+                val data = conn.getTelemetryData(
+                    vm,
+                    telemetryType.telemetryIdentifier.mainId,
+                    interval,
+                    endTime,
+                )
 
-                    val rootNode = data.rootNode
-                    val timestamps = data.timestamps
-                    val line = rootNode?.let { TelemetrySeries.selectLine(it, telemetryType.searchSubIdForTelemetry) }
+                val rootNode = data.rootNode
+                val timestamps = data.timestamps
+                val line = rootNode?.let { TelemetrySeries.selectLine(it, telemetryType.searchSubIdForTelemetry) }
 
-                    if (rootNode == null || timestamps == null || line == null) {
-                        jsonResult(McpJson.write(emptySeries(telemetryName, telemetryType, intervalId)))
-                    } else {
-                        val series = TelemetrySeries.build(timestamps, line, maxPoints)
-                        val result = buildMap<String, Any?> {
-                            put("id", telemetryName)
-                            put("description", telemetryType.name)
-                            put("unit", telemetryType.unit.name)
-                            put("interval", intervalId)
-                            put("count", series.timestamps.size)
-                            if (series.downsampled) {
-                                put("downsampled", true)
-                                put("rawCount", series.rawCount)
-                            }
-                            series.stats?.let { put("stats", it) }
-                            put("t", series.timestamps)
-                            put("v", series.values)
+                if (rootNode == null || timestamps == null || line == null) {
+                    jsonResult(McpJson.write(emptySeries(telemetryName, telemetryType, intervalId)))
+                } else {
+                    val series = TelemetrySeries.build(timestamps, line, maxPoints)
+                    val result = buildMap<String, Any?> {
+                        put("id", telemetryName)
+                        put("description", telemetryType.name)
+                        put("unit", telemetryType.unit.name)
+                        put("interval", intervalId)
+                        put("count", series.timestamps.size)
+                        if (series.downsampled) {
+                            put("downsampled", true)
+                            put("rawCount", series.rawCount)
                         }
-                        jsonResult(McpJson.write(result))
+                        series.stats?.let { put("stats", it) }
+                        put("t", series.timestamps)
+                        put("v", series.values)
                     }
+                    jsonResult(McpJson.write(result))
                 }
-            } catch (e: Exception) {
-                handleError(e)
             }
         }
     }

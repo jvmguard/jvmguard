@@ -1,5 +1,6 @@
 package com.jvmguard.rest.provider
 
+import com.jvmguard.common.AuditLog
 import com.jvmguard.common.Loggers
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpHeaders
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.nio.charset.StandardCharsets
@@ -20,8 +22,13 @@ class RestExceptionHandler {
     // before Spring Security's ExceptionTranslationFilter. Map it to 403 here, otherwise the Throwable handler
     // below would turn it into a 500.
     @ExceptionHandler(AccessDeniedException::class)
-    fun handleAccessDenied(@Suppress("unused") ex: AccessDeniedException): ResponseEntity<Void> =
-        ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+    fun handleAccessDenied(@Suppress("unused") ex: AccessDeniedException, request: HttpServletRequest): ResponseEntity<Void> {
+        AuditLog.record(
+            "rest", SecurityContextHolder.getContext().authentication?.name,
+            "${request.method} ${request.requestURI}", AuditLog.Outcome.DENIED, clientIp = request.remoteAddr,
+        )
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+    }
 
     @ExceptionHandler(RestException::class)
     fun handleRestException(ex: RestException): ResponseEntity<String> {

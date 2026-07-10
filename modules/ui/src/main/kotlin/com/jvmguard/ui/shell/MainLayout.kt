@@ -14,6 +14,7 @@ import com.jvmguard.ui.views.data.mbeans.MBeansView
 import com.jvmguard.ui.views.data.telemetry.VmTelemetryView
 import com.jvmguard.ui.views.data.transactions.TransactionsView
 import com.jvmguard.ui.views.inbox.InboxView
+import com.jvmguard.ui.views.log.AuditLogView
 import com.jvmguard.ui.views.log.ConnectionLogView
 import com.jvmguard.ui.views.log.EventLogView
 import com.jvmguard.ui.views.log.LogModeView
@@ -87,6 +88,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
 
     private val logEntries = listOf(
         LogNavEntry("Server Log", ServerLogView::class.java, VaadinIcon.FILE_TEXT_O, AccessLevel.ADMIN, ID_LOG_NAV_SERVER),
+        LogNavEntry("Audit Log", AuditLogView::class.java, VaadinIcon.CLIPBOARD_CHECK, AccessLevel.ADMIN, ID_LOG_NAV_AUDIT),
         LogNavEntry("Connection Log", ConnectionLogView::class.java, VaadinIcon.CONNECT, AccessLevel.PROFILER, ID_LOG_NAV_CONNECTION),
         LogNavEntry("Event Log", EventLogView::class.java, VaadinIcon.BELL, AccessLevel.VIEWER, ID_LOG_NAV_EVENT),
     )
@@ -446,6 +448,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         const val ID_INBOX_BADGE = "inbox-badge"
         const val ID_LOG_CLOSE = "log-close"
         const val ID_LOG_NAV_SERVER = "log-nav-server"
+        const val ID_LOG_NAV_AUDIT = "log-nav-audit"
         const val ID_LOG_NAV_CONNECTION = "log-nav-connection"
         const val ID_LOG_NAV_EVENT = "log-nav-event"
         const val ID_ACCOUNT = "account-menu-item"

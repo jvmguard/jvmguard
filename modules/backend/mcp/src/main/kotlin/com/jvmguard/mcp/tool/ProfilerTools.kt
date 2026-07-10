@@ -53,16 +53,12 @@ class HeapDumpTool(ctx: McpToolContext) : McpTool(ctx) {
                     "the dump appears in list_snapshot_files when ready."
         ).annotations(action("Heap dump")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val vmPath = request.arguments()["vm"] as String
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVm(conn, vmPath)
-                    val triggeredAt = System.currentTimeMillis()
-                    conn.heapDump(vm)
-                    jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.HPZ, triggeredAt, estimatedSeconds = 5)))
-                }
-            } catch (e: Exception) {
-                handleError(e)
+            val vmPath = request.arguments()["vm"] as String
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveVm(conn, vmPath)
+                val triggeredAt = System.currentTimeMillis()
+                conn.heapDump(vm)
+                jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.HPZ, triggeredAt, estimatedSeconds = 5)))
             }
         }
     }
@@ -87,16 +83,12 @@ class ThreadDumpTool(ctx: McpToolContext) : McpTool(ctx) {
                     "returns it as text)."
         ).annotations(action("Thread dump")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val vmPath = request.arguments()["vm"] as String
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVm(conn, vmPath)
-                    val triggeredAt = System.currentTimeMillis()
-                    conn.threadDump(vm)
-                    jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.THREAD_DUMP, triggeredAt, estimatedSeconds = 2)))
-                }
-            } catch (e: Exception) {
-                handleError(e)
+            val vmPath = request.arguments()["vm"] as String
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveVm(conn, vmPath)
+                val triggeredAt = System.currentTimeMillis()
+                conn.threadDump(vm)
+                jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.THREAD_DUMP, triggeredAt, estimatedSeconds = 2)))
             }
         }
     }
@@ -119,15 +111,11 @@ class RunGcTool(ctx: McpToolContext) : McpTool(ctx) {
             "Request a garbage collection on the specified VM. Requires profiler access."
         ).annotations(action("Run GC")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val vmPath = request.arguments()["vm"] as String
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVm(conn, vmPath)
-                    conn.runGC(vm)
-                    textResult("GC requested for $vmPath")
-                }
-            } catch (e: Exception) {
-                handleError(e)
+            val vmPath = request.arguments()["vm"] as String
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveVm(conn, vmPath)
+                conn.runGC(vm)
+                textResult("GC requested for $vmPath")
             }
         }
     }
@@ -157,24 +145,20 @@ class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
                     "list_snapshot_files when complete."
         ).annotations(action("Record JFR")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val vmPath = args["vm"] as String
-                val durationSeconds = (args["durationSeconds"] as? Int) ?: 60
-                ctx.withConnection { conn ->
-                    val vm = VmResolver.resolveVm(conn, vmPath)
-                    val action = RecordJfrAction().apply {
-                        time = durationSeconds
-                        timeUnit = TimeUnit.SECONDS
-                        isCreateInboxItem = true
-                        artifactName = vm.rawName
-                    }
-                    val triggeredAt = System.currentTimeMillis()
-                    conn.recordJfr(vm, action)
-                    jsonResult(McpJson.write(captureAck("recording", vmPath, SnapshotFileType.JFR, triggeredAt, durationSeconds + 5, durationSeconds)))
+            val args = request.arguments()
+            val vmPath = args["vm"] as String
+            val durationSeconds = (args["durationSeconds"] as? Int) ?: 60
+            ctx.withConnection { conn ->
+                val vm = VmResolver.resolveVm(conn, vmPath)
+                val action = RecordJfrAction().apply {
+                    time = durationSeconds
+                    timeUnit = TimeUnit.SECONDS
+                    isCreateInboxItem = true
+                    artifactName = vm.rawName
                 }
-            } catch (e: Exception) {
-                handleError(e)
+                val triggeredAt = System.currentTimeMillis()
+                conn.recordJfr(vm, action)
+                jsonResult(McpJson.write(captureAck("recording", vmPath, SnapshotFileType.JFR, triggeredAt, durationSeconds + 5, durationSeconds)))
             }
         }
     }
@@ -220,52 +204,48 @@ class RecordJpsTool(ctx: McpToolContext) : McpTool(ctx) {
                     "list_snapshot_files when complete."
         ).annotations(action("Record JProfiler snapshot")).build()
         return SyncToolSpecification(tool) { _, request ->
-            try {
-                val args = request.arguments()
-                val vmPath = args["vm"] as String
-                val durationSeconds = (args["durationSeconds"] as? Int) ?: 60
-                val requestedSubsystems = (args["subsystems"] as? List<*>)?.map { it.toString() }
-                val unknown = requestedSubsystems?.filter { JProfilerSubsystem.fromId(it) == null }.orEmpty()
-                if (unknown.isNotEmpty()) {
-                    errorResult(
-                        "Unknown subsystem(s): ${unknown.joinToString(", ")}. " +
-                                "Valid ids: ${JProfilerSubsystem.entries.joinToString(", ") { it.id }}."
-                    )
-                } else {
-                    ctx.withConnection { conn ->
-                        val vm = VmResolver.resolveVm(conn, vmPath)
-                        val action = RecordJpsAction().apply {
-                            time = durationSeconds
-                            timeUnit = TimeUnit.SECONDS
-                            isCreateInboxItem = true
-                            artifactName = vm.rawName
-                            requestedSubsystems?.let { subsystems = it.toSet() }
-                            (args["heapDump"] as? Boolean)?.let { heapDump = it }
-                            (args["heapDumpFullGc"] as? Boolean)?.let { heapDumpFullGc = it }
-                            (args["mbeanSnapshot"] as? Boolean)?.let { mbeanSnapshot = it }
-                            (args["monitorDump"] as? Boolean)?.let { monitorDump = it }
-                        }
-                        val triggeredAt = System.currentTimeMillis()
-                        conn.recordJps(vm, action)
-                        jsonResult(
-                            McpJson.write(
-                                captureAck(
-                                    "recording", vmPath, SnapshotFileType.JPS, triggeredAt, durationSeconds + 5,
-                                    durationSeconds,
-                                    extras = mapOf(
-                                        "subsystems" to action.subsystems.toList(),
-                                        "heapDump" to action.heapDump,
-                                        "heapDumpFullGc" to action.heapDumpFullGc,
-                                        "mbeanSnapshot" to action.mbeanSnapshot,
-                                        "monitorDump" to action.monitorDump,
-                                    ),
-                                )
+            val args = request.arguments()
+            val vmPath = args["vm"] as String
+            val durationSeconds = (args["durationSeconds"] as? Int) ?: 60
+            val requestedSubsystems = (args["subsystems"] as? List<*>)?.map { it.toString() }
+            val unknown = requestedSubsystems?.filter { JProfilerSubsystem.fromId(it) == null }.orEmpty()
+            if (unknown.isNotEmpty()) {
+                errorResult(
+                    "Unknown subsystem(s): ${unknown.joinToString(", ")}. " +
+                            "Valid ids: ${JProfilerSubsystem.entries.joinToString(", ") { it.id }}."
+                )
+            } else {
+                ctx.withConnection { conn ->
+                    val vm = VmResolver.resolveVm(conn, vmPath)
+                    val action = RecordJpsAction().apply {
+                        time = durationSeconds
+                        timeUnit = TimeUnit.SECONDS
+                        isCreateInboxItem = true
+                        artifactName = vm.rawName
+                        requestedSubsystems?.let { subsystems = it.toSet() }
+                        (args["heapDump"] as? Boolean)?.let { heapDump = it }
+                        (args["heapDumpFullGc"] as? Boolean)?.let { heapDumpFullGc = it }
+                        (args["mbeanSnapshot"] as? Boolean)?.let { mbeanSnapshot = it }
+                        (args["monitorDump"] as? Boolean)?.let { monitorDump = it }
+                    }
+                    val triggeredAt = System.currentTimeMillis()
+                    conn.recordJps(vm, action)
+                    jsonResult(
+                        McpJson.write(
+                            captureAck(
+                                "recording", vmPath, SnapshotFileType.JPS, triggeredAt, durationSeconds + 5,
+                                durationSeconds,
+                                extras = mapOf(
+                                    "subsystems" to action.subsystems.toList(),
+                                    "heapDump" to action.heapDump,
+                                    "heapDumpFullGc" to action.heapDumpFullGc,
+                                    "mbeanSnapshot" to action.mbeanSnapshot,
+                                    "monitorDump" to action.monitorDump,
+                                ),
                             )
                         )
-                    }
+                    )
                 }
-            } catch (e: Exception) {
-                handleError(e)
             }
         }
     }
