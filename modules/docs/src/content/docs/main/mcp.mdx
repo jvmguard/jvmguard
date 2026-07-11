@@ -69,8 +69,9 @@ that carries the same bearer token.
 The assistant discovers the available tools when it connects. It can list the monitored groups and VMs,
 read telemetries and transaction data such as call  trees, hot spots, and overdue transactions, inspect MBeans
 and log files, and read the trigger inbox. It can also capture diagnostics on a VM, such as heap dumps, thread dumps,
-and JFR or JProfiler recordings, and it can request a garbage collection. The capture tools require profiler access,
-and a capture appears in the list of snapshot files once it is ready.
+and JFR or JProfiler recordings, and it can request a garbage collection. Beyond reading MBeans it can also set a
+writable MBean attribute and invoke an MBean operation. These mutating tools require profiler access and the capture
+tools additionally deposit their result in the list of snapshot files once it is ready.
 
 VMs and groups are referenced by their hierarchy path, for example `Demo/Storefront`. The root group is the
 empty string. The telemetry and transaction intervals are the same as for the [REST export API](/docs/main/rest).

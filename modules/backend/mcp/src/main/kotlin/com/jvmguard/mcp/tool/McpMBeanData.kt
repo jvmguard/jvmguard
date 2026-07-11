@@ -5,6 +5,7 @@ import com.jvmguard.mbean.common.MBeanHelper
 import javax.management.Descriptor
 import javax.management.MBeanAttributeInfo
 import javax.management.MBeanInfo
+import javax.management.MBeanOperationInfo
 import javax.management.openmbean.ArrayType
 import javax.management.openmbean.CompositeType
 import javax.management.openmbean.OpenType
@@ -15,11 +16,16 @@ object McpMBeanData {
     fun decodeAttribute(attribute: MBeanAttributeInfo, value: Any?): Any? =
         decode(value, openTypeOf(attribute.descriptor))
 
+    fun decodeReturnValue(operation: MBeanOperationInfo, value: Any?): Any? =
+        decode(value, openTypeOf(operation.descriptor))
+
     fun operationSignatures(beanInfo: MBeanInfo): List<String> =
-        beanInfo.operations.orEmpty().map { operation ->
-            val params = operation.signature.orEmpty().joinToString(",") { it.type.substringAfterLast('.') }
-            "${operation.name}($params)"
-        }
+        beanInfo.operations.orEmpty().map { signatureOf(it) }
+
+    fun signatureOf(operation: MBeanOperationInfo): String {
+        val params = operation.signature.orEmpty().joinToString(",") { it.type.substringAfterLast('.') }
+        return "${operation.name}($params)"
+    }
 
     private fun decode(value: Any?, openType: OpenType<*>?): Any? {
         if (value == null) {

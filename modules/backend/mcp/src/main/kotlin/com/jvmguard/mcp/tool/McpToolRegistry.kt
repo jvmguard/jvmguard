@@ -94,6 +94,8 @@ object McpToolRegistry {
         RecordJpsTool(ctx),
         ListMbeansTool(ctx),
         GetMbeanDataTool(ctx),
+        SetMbeanAttributeTool(ctx),
+        InvokeMbeanOperationTool(ctx),
         ListSnapshotFilesTool(ctx),
         GetSnapshotFileTool(ctx),
         ListLogFilesTool(ctx),

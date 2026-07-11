@@ -78,6 +78,14 @@ class McpToolContext(
         }
     }
 
+    fun requireMbeanMutationAllowed(vm: VM) {
+        if (!guardrailsFor(vm).allowMbeanMutations) {
+            throw GuardrailException(
+                "Setting MBean attributes and invoking MBean operations is disabled for \"${vm.hierarchyPath}\".",
+            )
+        }
+    }
+
     fun recordCapture(vm: VM) = captureRateLimiter.recordCapture(vm.hierarchyPath)
 
     fun currentBaseUrl(): String? = baseUrlHolder.get()?.takeIf { it.isNotBlank() }

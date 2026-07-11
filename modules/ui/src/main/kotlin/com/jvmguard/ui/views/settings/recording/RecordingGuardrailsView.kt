@@ -26,6 +26,8 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
     private val allowJps = checkbox("Allow JProfiler snapshots", ID_ALLOW_JPS) { s, v -> s.allowJps = v }
     private val allowJfr = checkbox("Allow JFR recordings", ID_ALLOW_JFR) { s, v -> s.allowJfr = v }
     private val allowRunGc = checkbox("Allow forced garbage collection", ID_ALLOW_RUN_GC) { s, v -> s.allowRunGc = v }
+    private val allowMbeanMutations =
+        checkbox("Allow MBean attribute writes and operations", ID_ALLOW_MBEAN_MUTATIONS) { s, v -> s.allowMbeanMutations = v }
 
     private val maxRecordingMinutes =
         integerField("Maximum recording duration (minutes, 0 = no limit)", ID_MAX_RECORDING, 1000) { s, v ->
@@ -43,7 +45,7 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
             content.removeAll()
             content.add(
                 settingsSection("Diagnostic captures", allowHeapDump, allowJps, allowJfr, maxRecordingMinutes, captureCooldown),
-                settingsSection("Mutating actions", allowRunGc),
+                settingsSection("Mutating actions", allowRunGc, allowMbeanMutations),
             )
             contentBuilt = true
         }
@@ -53,6 +55,7 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
         allowJps.value = settings.allowJps
         allowJfr.value = settings.allowJfr
         allowRunGc.value = settings.allowRunGc
+        allowMbeanMutations.value = settings.allowMbeanMutations
         maxRecordingMinutes.value = settings.maxRecordingSeconds / 60
         captureCooldown.value = settings.captureCooldownSeconds
     }
@@ -96,6 +99,7 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
         const val ID_ALLOW_JPS = "guardrails-allow-jps"
         const val ID_ALLOW_JFR = "guardrails-allow-jfr"
         const val ID_ALLOW_RUN_GC = "guardrails-allow-run-gc"
+        const val ID_ALLOW_MBEAN_MUTATIONS = "guardrails-allow-mbean-mutations"
         const val ID_MAX_RECORDING = "guardrails-max-recording"
         const val ID_CAPTURE_COOLDOWN = "guardrails-capture-cooldown"
     }

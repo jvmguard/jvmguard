@@ -60,6 +60,15 @@ class RecordingGuardrailsTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
+    fun togglingMbeanMutationsStagesToTheRootGroup() {
+        UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
+
+        use(checkbox(RecordingGuardrailsView.ID_ALLOW_MBEAN_MUTATIONS)).click()
+
+        assertFalse(rootGuardrails().allowMbeanMutations)
+    }
+
+    @Test
     fun maxRecordingMinutesAreStoredAsSeconds() {
         UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
 

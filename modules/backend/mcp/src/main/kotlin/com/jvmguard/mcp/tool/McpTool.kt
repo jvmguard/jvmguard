@@ -44,6 +44,13 @@ abstract class McpTool(protected val ctx: McpToolContext) {
     protected fun booleanProperty(description: String): Map<String, Any> =
         mapOf("type" to "boolean", "description" to description)
 
+    // A free-form value (string, number or boolean) — its JMX type is resolved from the MBean metadata.
+    protected fun anyProperty(description: String): Map<String, Any> =
+        mapOf("description" to description)
+
+    protected fun anyArrayProperty(description: String): Map<String, Any> =
+        mapOf("type" to "array", "description" to description, "items" to mapOf<String, Any>())
+
     protected fun jsonResult(json: String): CallToolResult =
         CallToolResult.builder()
             .content(listOf(TextContent.builder(json).build()))
