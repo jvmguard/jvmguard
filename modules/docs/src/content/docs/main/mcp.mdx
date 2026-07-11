@@ -40,10 +40,12 @@ recordings, require profiler access.
 The key is sent as a bearer token, so it is only encrypted in transit when you use HTTPS. Use HTTPS
 for any assistant that connects over a network.
 
-Beyond access levels, administrators can further restrict what an assistant may do on the **Agent guardrails**
-tab in the [general settings](/docs/main/ui#agent-guardrails): a read-only mode, per-type toggles and limits for
-diagnostic captures, and an IP allowlist. Everything is permissive by default. When a guardrail blocks a call, the
-assistant receives a message explaining the reason so it can comply.
+Beyond access levels, what an assistant may do can be further restricted in two places. Server-wide settings live on
+the **Network** tab in the [general settings](/docs/main/ui#network): an MCP read-only mode and an IP allowlist.
+Per-VM-group toggles and limits for individual captures and mutating actions live in the recording settings under
+[Agent guardrails](/docs/main/ui#agent-guardrails), so a "profiler" can manage them for their own groups. Everything is
+permissive by default. When a guardrail blocks a call, the assistant receives a message explaining the reason so it can
+comply.
 
 ## Connecting an assistant
 

@@ -10,6 +10,7 @@ import com.jvmguard.agent.config.transactions.TransactionSettings
 import com.jvmguard.common.helper.GroupHelper
 import com.jvmguard.data.base.HierarchicalConfig
 import com.jvmguard.data.base.StoredType
+import com.jvmguard.data.config.guardrails.GuardrailSettings
 import com.jvmguard.data.config.thresholds.ThresholdSettings
 import com.jvmguard.data.config.triggers.TriggerSettings
 import com.jvmguard.data.vmdata.VmIdentifier
@@ -88,6 +89,14 @@ open class GroupConfig : HierarchicalConfig {
             value.addChangeListener(beanChangeAdapter)
         }
 
+    var guardrailSettings: GuardrailSettings
+        get() = serverGroupConfig.guardrailSettings
+        set(value) {
+            guardrailSettings.removeChangeListener(beanChangeAdapter)
+            serverGroupConfig.guardrailSettings = value
+            value.addChangeListener(beanChangeAdapter)
+        }
+
     val recordingOptions: RecordingOptions
         get() = agentGroupConfig.recordingOptions
 
@@ -103,6 +112,7 @@ open class GroupConfig : HierarchicalConfig {
         recordingOptions.addChangeListener(adapter)
         thresholdSettings.addChangeListener(adapter)
         triggerSettings.addChangeListener(adapter)
+        guardrailSettings.addChangeListener(adapter)
         telemetrySettings.addChangeListener(adapter)
     }
 

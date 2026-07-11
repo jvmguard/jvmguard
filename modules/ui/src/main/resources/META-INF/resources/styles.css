@@ -677,6 +677,7 @@ vaadin-button.jvmguard-filter-active vaadin-icon {
 
 .jvmguard-recording-toolbar {
     margin-bottom: 1rem;
+    padding-left: 0;
 }
 
 .jvmguard-recording-override {

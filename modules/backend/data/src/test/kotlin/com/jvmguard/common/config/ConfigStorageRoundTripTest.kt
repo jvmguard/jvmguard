@@ -44,18 +44,11 @@ class ConfigStorageRoundTripTest {
     fun guardrailConfigRoundTrips() {
         val config = GlobalConfig()
         config.guardrailConfig.mcpReadOnly = true
-        config.guardrailConfig.maxRecordingSeconds = 120
-        config.guardrailConfig.allowHeapDump = false
-        config.guardrailConfig.allowRunGc = false
         config.guardrailConfig.apiAllowedIps = "10.0.0.0/8, ::1"
 
         val back = roundTrip(config, GlobalConfig::class.java)
 
         assertTrue(back.guardrailConfig.mcpReadOnly)
-        assertEquals(120, back.guardrailConfig.maxRecordingSeconds)
-        assertFalse(back.guardrailConfig.allowHeapDump)
-        assertFalse(back.guardrailConfig.allowRunGc)
-        assertTrue(back.guardrailConfig.allowJps, "unset toggles keep their permissive default")
         assertEquals("10.0.0.0/8, ::1", back.guardrailConfig.apiAllowedIps)
     }
 
@@ -66,6 +59,23 @@ class ConfigStorageRoundTripTest {
         assertNotNull(back.agentGroupConfig)
         assertNotNull(back.agentGroupConfig.recordingOptions)
         assertNotNull(back.agentGroupConfig.transactionSettings)
+    }
+
+    @Test
+    fun groupGuardrailSettingsRoundTrip() {
+        val gc = GroupConfig.createDefault()
+        gc.guardrailSettings.isUsed = true
+        gc.guardrailSettings.allowHeapDump = false
+        gc.guardrailSettings.allowRunGc = false
+        gc.guardrailSettings.maxRecordingSeconds = 120
+
+        val back = roundTrip(gc, GroupConfig::class.java)
+
+        assertTrue(back.guardrailSettings.isUsed)
+        assertFalse(back.guardrailSettings.allowHeapDump)
+        assertFalse(back.guardrailSettings.allowRunGc)
+        assertEquals(120, back.guardrailSettings.maxRecordingSeconds)
+        assertTrue(back.guardrailSettings.allowJps, "unset toggles keep their permissive default")
     }
 
     @Test

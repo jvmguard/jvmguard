@@ -72,6 +72,7 @@ class RecordingGroupSelectorDialog(
             OverrideCategory("Transactions") { it.transactionSettings.isUsed },
             OverrideCategory("Telemetries") { it.telemetrySettings.isUsed },
             OverrideCategory("Thresholds") { it.thresholdSettings.isUsed },
+            OverrideCategory("Agent guardrails") { it.guardrailSettings.isUsed },
         )
     }
 }

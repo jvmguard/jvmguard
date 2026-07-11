@@ -6,9 +6,11 @@ import com.jvmguard.connector.api.MockMode
 import com.jvmguard.connector.api.Server
 import com.jvmguard.connector.api.ServerConnection
 import com.jvmguard.data.config.GuardrailConfig
+import com.jvmguard.data.config.guardrails.GuardrailSettings
 import com.jvmguard.data.file.SnapshotFileType
 import com.jvmguard.data.user.User
 import com.jvmguard.data.user.UserManager
+import com.jvmguard.data.vmdata.VM
 import com.jvmguard.mcp.auth.McpAuthorities
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -33,44 +35,50 @@ class McpToolContext(
         private const val MAX_CACHE_ENTRIES = 10_000
     }
 
-    fun guardrails(): GuardrailConfig = configManager.getGlobalConfig(false).guardrailConfig
+    // Server-wide guardrails (MCP read-only switch, IP allowlist). Per-VM-group capture/action toggles live
+    // in the group's GuardrailSettings and are resolved with guardrailsFor(vm).
+    fun globalGuardrails(): GuardrailConfig = configManager.getGlobalConfig(false).guardrailConfig
 
-    fun cappedRecordingSeconds(requestedSeconds: Int): Int {
-        val max = guardrails().maxRecordingSeconds
+    // Effective per-group guardrails for the VM, inheriting with override semantics up the group hierarchy.
+    fun guardrailsFor(vm: VM): GuardrailSettings = configManager.getGroupHierarchyWrapper(vm).guardrailSettings
+
+    fun cappedRecordingSeconds(vm: VM, requestedSeconds: Int): Int {
+        val max = guardrailsFor(vm).maxRecordingSeconds
         return if (max > 0) minOf(requestedSeconds, max) else requestedSeconds
     }
 
-    fun requireCaptureAllowed(type: SnapshotFileType, vmPath: String) {
+    fun requireCaptureAllowed(type: SnapshotFileType, vm: VM) {
+        val guardrails = guardrailsFor(vm)
         val allowed = when (type) {
-            SnapshotFileType.HPZ -> guardrails().allowHeapDump
-            SnapshotFileType.JPS -> guardrails().allowJps
-            SnapshotFileType.JFR -> guardrails().allowJfr
+            SnapshotFileType.HPZ -> guardrails.allowHeapDump
+            SnapshotFileType.JPS -> guardrails.allowJps
+            SnapshotFileType.JFR -> guardrails.allowJfr
             else -> true
         }
         if (!allowed) {
-            throw GuardrailException("$type captures are disabled by an administrator.")
+            throw GuardrailException("$type captures are disabled for \"${vm.hierarchyPath}\".")
         }
-        requireCaptureCooldown(vmPath)
+        requireCaptureCooldown(vm)
     }
 
-    fun requireCaptureCooldown(vmPath: String) {
-        val cooldownSeconds = guardrails().captureCooldownSeconds
-        val within = captureRateLimiter.secondsSinceLastWithinCooldown(vmPath, cooldownSeconds)
+    fun requireCaptureCooldown(vm: VM) {
+        val cooldownSeconds = guardrailsFor(vm).captureCooldownSeconds
+        val within = captureRateLimiter.secondsSinceLastWithinCooldown(vm.hierarchyPath, cooldownSeconds)
         if (within != null) {
             throw GuardrailException(
-                "A capture on \"$vmPath\" was taken ${within}s ago; the minimum interval is " +
+                "A capture on \"${vm.hierarchyPath}\" was taken ${within}s ago; the minimum interval is " +
                         "${cooldownSeconds}s. Retry later.",
             )
         }
     }
 
-    fun requireRunGcAllowed() {
-        if (!guardrails().allowRunGc) {
-            throw GuardrailException("Forced garbage collection is disabled by an administrator.")
+    fun requireRunGcAllowed(vm: VM) {
+        if (!guardrailsFor(vm).allowRunGc) {
+            throw GuardrailException("Forced garbage collection is disabled for \"${vm.hierarchyPath}\".")
         }
     }
 
-    fun recordCapture(vmPath: String) = captureRateLimiter.recordCapture(vmPath)
+    fun recordCapture(vm: VM) = captureRateLimiter.recordCapture(vm.hierarchyPath)
 
     fun currentBaseUrl(): String? = baseUrlHolder.get()?.takeIf { it.isNotBlank() }
 

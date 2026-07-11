@@ -3,6 +3,7 @@ package com.jvmguard.data.config
 import com.jvmguard.agent.config.recording.RecordingOptions
 import com.jvmguard.agent.config.telemetry.TelemetrySettings
 import com.jvmguard.agent.config.transactions.TransactionSettings
+import com.jvmguard.data.config.guardrails.GuardrailSettings
 import com.jvmguard.data.config.thresholds.Threshold
 import com.jvmguard.data.config.thresholds.Threshold.Target
 import java.util.*
@@ -25,6 +26,10 @@ class GroupHierarchyWrapper(private val groupConfigPath: LinkedList<GroupConfig>
     val recordingOptions: RecordingOptions
         get() = groupConfigPath.map { it.recordingOptions }.firstOrNull { it.isUsed }
             ?: rootConfig.recordingOptions
+
+    val guardrailSettings: GuardrailSettings
+        get() = groupConfigPath.map { it.guardrailSettings }.firstOrNull { it.isUsed }
+            ?: rootConfig.guardrailSettings
 
     private val rootConfig: GroupConfig
         get() = groupConfigPath.last()

@@ -61,12 +61,12 @@ class HeapDumpTool(ctx: McpToolContext) : McpTool(ctx) {
         ).annotations(action("Heap dump")).build()
         return SyncToolSpecification(tool) { _, request ->
             val vmPath = request.arguments()["vm"] as String
-            ctx.requireCaptureAllowed(SnapshotFileType.HPZ, vmPath)
             ctx.withConnection { conn ->
                 val vm = VmResolver.resolveVm(conn, vmPath)
+                ctx.requireCaptureAllowed(SnapshotFileType.HPZ, vm)
                 val triggeredAt = System.currentTimeMillis()
                 conn.heapDump(vm)
-                ctx.recordCapture(vmPath)
+                ctx.recordCapture(vm)
                 jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.HPZ, triggeredAt, estimatedSeconds = 5)))
             }
         }
@@ -93,12 +93,12 @@ class ThreadDumpTool(ctx: McpToolContext) : McpTool(ctx) {
         ).annotations(action("Thread dump")).build()
         return SyncToolSpecification(tool) { _, request ->
             val vmPath = request.arguments()["vm"] as String
-            ctx.requireCaptureCooldown(vmPath)
             ctx.withConnection { conn ->
                 val vm = VmResolver.resolveVm(conn, vmPath)
+                ctx.requireCaptureCooldown(vm)
                 val triggeredAt = System.currentTimeMillis()
                 conn.threadDump(vm)
-                ctx.recordCapture(vmPath)
+                ctx.recordCapture(vm)
                 jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.THREAD_DUMP, triggeredAt, estimatedSeconds = 2)))
             }
         }
@@ -123,12 +123,12 @@ class RunGcTool(ctx: McpToolContext) : McpTool(ctx) {
         ).annotations(action("Run GC")).build()
         return SyncToolSpecification(tool) { _, request ->
             val vmPath = request.arguments()["vm"] as String
-            ctx.requireRunGcAllowed()
-            ctx.requireCaptureCooldown(vmPath)
             ctx.withConnection { conn ->
                 val vm = VmResolver.resolveVm(conn, vmPath)
+                ctx.requireRunGcAllowed(vm)
+                ctx.requireCaptureCooldown(vm)
                 conn.runGC(vm)
-                ctx.recordCapture(vmPath)
+                ctx.recordCapture(vm)
                 textResult("GC requested for $vmPath")
             }
         }
@@ -162,10 +162,10 @@ class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
             val args = request.arguments()
             val vmPath = args["vm"] as String
             val requestedSeconds = (args["durationSeconds"] as? Int) ?: 60
-            ctx.requireCaptureAllowed(SnapshotFileType.JFR, vmPath)
-            val durationSeconds = ctx.cappedRecordingSeconds(requestedSeconds)
             ctx.withConnection { conn ->
                 val vm = VmResolver.resolveVm(conn, vmPath)
+                ctx.requireCaptureAllowed(SnapshotFileType.JFR, vm)
+                val durationSeconds = ctx.cappedRecordingSeconds(vm, requestedSeconds)
                 val action = RecordJfrAction().apply {
                     time = durationSeconds
                     timeUnit = TimeUnit.SECONDS
@@ -174,7 +174,7 @@ class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
                 }
                 val triggeredAt = System.currentTimeMillis()
                 conn.recordJfr(vm, action)
-                ctx.recordCapture(vmPath)
+                ctx.recordCapture(vm)
                 jsonResult(
                     McpJson.write(
                         captureAck(
@@ -239,10 +239,10 @@ class RecordJpsTool(ctx: McpToolContext) : McpTool(ctx) {
                             "Valid ids: ${JProfilerSubsystem.entries.joinToString(", ") { it.id }}."
                 )
             } else {
-                ctx.requireCaptureAllowed(SnapshotFileType.JPS, vmPath)
-                val durationSeconds = ctx.cappedRecordingSeconds(requestedSeconds)
                 ctx.withConnection { conn ->
                     val vm = VmResolver.resolveVm(conn, vmPath)
+                    ctx.requireCaptureAllowed(SnapshotFileType.JPS, vm)
+                    val durationSeconds = ctx.cappedRecordingSeconds(vm, requestedSeconds)
                     val action = RecordJpsAction().apply {
                         time = durationSeconds
                         timeUnit = TimeUnit.SECONDS
@@ -256,7 +256,7 @@ class RecordJpsTool(ctx: McpToolContext) : McpTool(ctx) {
                     }
                     val triggeredAt = System.currentTimeMillis()
                     conn.recordJps(vm, action)
-                    ctx.recordCapture(vmPath)
+                    ctx.recordCapture(vm)
                     jsonResult(
                         McpJson.write(
                             captureAck(

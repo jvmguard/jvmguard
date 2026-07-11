@@ -107,7 +107,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         SettingsNavEntry("Users & Roles", UsersView::class.java, VaadinIcon.USERS),
         SettingsNavEntry("LDAP / Active Directory", LdapView::class.java, VaadinIcon.CONNECT),
         SettingsNavEntry("Single Sign-On", SsoView::class.java, VaadinIcon.SIGN_IN_ALT),
-        SettingsNavEntry("Agent guardrails", AgentGuardrailsView::class.java, VaadinIcon.SHIELD),
+        SettingsNavEntry("Network", NetworkView::class.java, VaadinIcon.GLOBE),
         SettingsNavEntry("Data retention", DataSettingsView::class.java, VaadinIcon.DATABASE),
         SettingsNavEntry("E-Mail", SmtpSettingsView::class.java, VaadinIcon.ENVELOPE),
         SettingsNavEntry("Display", DisplaySettingsView::class.java, VaadinIcon.DESKTOP),
@@ -119,6 +119,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         SettingsNavEntry("Telemetries", RecordingTelemetriesView::class.java, VaadinIcon.CHART),
         SettingsNavEntry("Thresholds", RecordingThresholdsView::class.java, VaadinIcon.DASHBOARD),
         SettingsNavEntry("Triggers", RecordingTriggersView::class.java, VaadinIcon.BOLT),
+        SettingsNavEntry("Agent guardrails", RecordingGuardrailsView::class.java, VaadinIcon.SHIELD),
     )
     private val accountEntries = listOf(
         SettingsNavEntry("User information", AccountProfileView::class.java, VaadinIcon.USER),

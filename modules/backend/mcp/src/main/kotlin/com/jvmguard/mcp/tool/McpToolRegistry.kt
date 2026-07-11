@@ -25,7 +25,7 @@ object McpToolRegistry {
                 McpToolContext.baseUrlHolder.set(baseUrl)
                 McpToolContext.clientIpHolder.set(clientIp)
                 try {
-                    if (audited && ctx.guardrails().mcpReadOnly) {
+                    if (audited && ctx.globalGuardrails().mcpReadOnly) {
                         throw GuardrailException("MCP is in read-only mode; the '$toolName' tool is disabled by an administrator.")
                     }
                     val result = originalHandler.apply(exchange, request)
