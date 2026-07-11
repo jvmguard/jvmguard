@@ -38,7 +38,7 @@ object McpToolRegistry {
                     if (audited || outcome == AuditLog.Outcome.DENIED) {
                         AuditLog.record(
                             "mcp", ctx.currentPrincipal(), toolName, outcome,
-                            target = request.arguments()["vm"] as? String, detail = e.message,
+                            target = targetOf(request), detail = e.message,
                             clientIp = ctx.currentClientIp(),
                         )
                     }
@@ -47,21 +47,28 @@ object McpToolRegistry {
                     McpToolContext.authTokenHolder.remove()
                     McpToolContext.baseUrlHolder.remove()
                     McpToolContext.clientIpHolder.remove()
+                    McpToolContext.auditDetailHolder.remove()
                 }
             }
         }
 
     private fun auditResult(ctx: McpToolContext, toolName: String, request: CallToolRequest, result: CallToolResult) {
-        val target = request.arguments()["vm"] as? String
+        val target = targetOf(request)
         val principal = ctx.currentPrincipal()
         val clientIp = ctx.currentClientIp()
         if (result.isError() != true) {
-            AuditLog.record("mcp", principal, toolName, AuditLog.Outcome.OK, target = target, clientIp = clientIp)
+            AuditLog.record(
+                "mcp", principal, toolName, AuditLog.Outcome.OK,
+                target = target, detail = McpToolContext.auditDetailHolder.get(), clientIp = clientIp,
+            )
         } else {
             val text = result.content().filterIsInstance<TextContent>().joinToString(" ") { it.text() }
             AuditLog.record("mcp", principal, toolName, AuditLog.Outcome.ERROR, target = target, detail = text, clientIp = clientIp)
         }
     }
+
+    private fun targetOf(request: CallToolRequest): String? =
+        request.arguments()["vm"] as? String ?: request.arguments()["group"] as? String
 
     private fun classify(e: Throwable): AuditLog.Outcome =
         if (isDenial(e)) AuditLog.Outcome.DENIED else AuditLog.Outcome.ERROR

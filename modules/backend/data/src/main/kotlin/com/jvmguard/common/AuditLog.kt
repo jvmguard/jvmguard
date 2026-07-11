@@ -28,7 +28,8 @@ object AuditLog {
      * @param action the tool name, endpoint, or "download" / "auth"
      * @param outcome OK / ERROR / DENIED / AUTH_FAILED
      * @param target optional subject, e.g. a VM path or artifact id
-     * @param detail optional extra context (byte count, error/denial reason); redact secrets before passing
+     * @param detail optional extra context (byte count, error/denial reason, or a structured map describing what a
+     *   mutating call changed); a map nests as a JSON object, a string stays a string. Redact secrets before passing.
      * @param clientIp the remote address of the caller, when known
      */
     fun record(
@@ -37,7 +38,7 @@ object AuditLog {
         action: String,
         outcome: Outcome,
         target: String? = null,
-        detail: String? = null,
+        detail: Any? = null,
         clientIp: String? = null,
     ) {
         val event = LinkedHashMap<String, Any?>()
@@ -58,7 +59,7 @@ object AuditLog {
         action: String,
         outcome: Outcome,
         target: String?,
-        detail: String?,
+        detail: Any?,
         clientIp: String?,
     ): Map<String, Any?> = LinkedHashMap<String, Any?>().apply {
         put("source", source)

@@ -3,8 +3,10 @@ package com.jvmguard.mcp.tool
 import com.jvmguard.agent.comm.CodecEntity
 import com.jvmguard.agent.comm.CodecRegistry
 import com.jvmguard.agent.comm.CodecTypes
+import com.jvmguard.agent.config.VmType
 import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.agent.config.recording.RecordingOptions
+import com.jvmguard.agent.config.transactions.ComparisonType
 import com.jvmguard.agent.config.telemetry.MBeanLineConfig
 import com.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
 import com.jvmguard.agent.config.telemetry.TelemetrySettings
@@ -22,7 +24,9 @@ import com.jvmguard.agent.config.transactions.naming.InstanceElement
 import com.jvmguard.agent.config.transactions.naming.MethodNameElement
 import com.jvmguard.agent.config.transactions.naming.MethodParameterElement
 import com.jvmguard.agent.config.transactions.naming.TextElement
+import com.jvmguard.data.config.GroupConfig
 import com.jvmguard.data.config.external.ConfigDocKeys
+import com.jvmguard.data.config.external.RecordingConfig
 import com.jvmguard.data.config.thresholds.Threshold
 import com.jvmguard.data.config.thresholds.ThresholdSettings
 import com.jvmguard.data.config.triggers.ConnectionTrigger
@@ -31,6 +35,7 @@ import com.jvmguard.data.config.triggers.ThresholdTrigger
 import com.jvmguard.data.config.triggers.Trigger
 import com.jvmguard.data.config.triggers.TriggerSettings
 import com.jvmguard.data.config.triggers.TriggerType
+import com.jvmguard.data.config.triggers.actions.ActionType
 import com.jvmguard.data.config.triggers.actions.EmailAction
 import com.jvmguard.data.config.triggers.actions.HeapDumpAction
 import com.jvmguard.data.config.triggers.actions.InboxAction
@@ -38,9 +43,11 @@ import com.jvmguard.data.config.triggers.actions.LogAction
 import com.jvmguard.data.config.triggers.actions.RecordJfrAction
 import com.jvmguard.data.config.triggers.actions.RecordJpsAction
 import com.jvmguard.data.config.triggers.actions.ThreadDumpAction
+import com.jvmguard.data.config.triggers.actions.TriggerAction
 import com.jvmguard.data.config.triggers.actions.WebhookAction
 import com.jvmguard.data.vmdata.PersistentTelemetryIdentifier
 import com.jvmguard.data.vmdata.ThresholdIdentifier
+import com.jvmguard.data.vmdata.VmIdentifier
 import java.lang.reflect.Field
 
 object GroupConfigSchema {
@@ -101,11 +108,20 @@ object GroupConfigSchema {
             "sections",
             editableBeans.mapNotNull { bean ->
                 val fields = docFields(bean.type, bean.serializedKeys())
-                if (fields.isEmpty()) null else mapOf("type" to bean.type.simpleName, "fields" to fields)
+                if (fields.isEmpty()) {
+                    null
+                } else buildMap<String, Any?> {
+                    put("type", bean.type.simpleName)
+                    // serverConfig beans are written as [className, {...}] tuples, so the agent needs the FQN
+                    if (!bean.codec) put("className", bean.type.name)
+                    put("fields", fields)
+                }
             },
         )
         put("transactionTypes", transactionVariants())
         put("triggerTypes", triggerVariants())
+        put("actionTypes", actionVariants())
+        put("example", exampleConfigJson())
     }
 
     private fun docFields(clazz: Class<*>, serializedKeys: Set<String>): List<Map<String, Any?>> {
@@ -170,9 +186,45 @@ object GroupConfigSchema {
                 put("type", triggerType.name)
                 put("name", triggerType.toString())
                 put("class", triggerClass.simpleName)
+                put("className", triggerClass.name)
                 classDoc(triggerClass)?.let { put("description", it) }
             }
         }
+
+    private fun actionVariants(): List<Map<String, Any?>> =
+        ActionType.entries.map { actionType ->
+            val actionClass = actionType.createAction().javaClass
+            buildMap {
+                put("type", actionType.name)
+                put("name", actionType.toString())
+                put("class", actionClass.simpleName)
+                put("className", actionClass.name)
+                classDoc(actionClass)?.let { put("description", it) }
+            }
+        }
+
+    private fun exampleConfigJson(): String {
+        val group = GroupConfig.createDefault(VmIdentifier("Example/Group", VmType.GROUP))
+        val server = group.serverGroupConfig
+        val actions: MutableList<TriggerAction> = ActionType.entries.mapTo(ArrayList()) { it.createAction() }
+        actions.forEachIndexed { index, action -> action.id = (index + 1).toLong() }
+        val policyTrigger = PolicyTrigger().apply {
+            filter = "*"
+            comparisonType = ComparisonType.WILDCARD
+            isVerySlow = true
+            isError = true
+            interval = Trigger.Interval.MINUTE
+            count = 5
+            inhibitionInterval = Trigger.Interval.HOUR
+            inhibitionTime = 1
+            triggerActions = actions
+        }
+        // Leaving the trigger ids null lets the setter assign them and advance lastId, so the example shows a
+        // consistent id/lastId pairing to copy.
+        server.triggerSettings.triggers = arrayListOf<Trigger>(policyTrigger, ConnectionTrigger(), ThresholdTrigger())
+        server.thresholdSettings.thresholds = arrayListOf(Threshold().apply { id = 1L })
+        return RecordingConfig.groupToJsonString(group, includeGuardrails = false)
+    }
 
     private fun classDoc(clazz: Class<*>): String? = clazz.getAnnotation(ConfigDoc::class.java)?.value
 
@@ -186,5 +238,12 @@ object GroupConfigSchema {
                 "settings are fixed by the server and ignored on write. 'sections' documents the fields of each bean " +
                 "type, see transactionTypes and triggerTypes for the polymorphic variants and their discriminators. " +
                 "A field whose 'type' is not one of enum, boolean, integer, string or array is the name of another " +
-                "entry in 'sections': it is a nested object whose fields are documented under that entry."
+                "entry in 'sections': it is a nested object whose fields are documented under that entry. " +
+                "In serverConfig every object is a two element array of the form [className, fields] where className " +
+                "is the fully qualified class name given as 'className' in the matching 'sections' entry and, for the " +
+                "polymorphic 'triggers' and 'triggerActions' lists, in 'triggerTypes' and 'actionTypes'. The " +
+                "'example' field is a complete populated group config in the same format as 'config', so you can copy " +
+                "a trigger, action or threshold from it, keep its enum encoding, list wrappers and id numbering, and " +
+                "change only the values. Give each new element a unique 'id' as shown there and keep the enclosing " +
+                "'lastId' at least as high as the largest id you use."
 }

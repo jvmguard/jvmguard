@@ -72,8 +72,9 @@ and log files, and read the trigger inbox. It can also capture diagnostics on a 
 and JFR or JProfiler recordings. Beyond reading MBeans it can also set a
 writable MBean attribute and invoke an MBean operation. It can read a VM group's recording configuration as a JSON
 string and write it back after editing. The read result includes a generated schema that explains the fields, enums
-and polymorphic types. These mutating tools require profiler access and the capture tools additionally deposit their
-result in the list of snapshot files once it is ready.
+and polymorphic types, along with a fully worked example configuration that the agent can copy from. These mutating
+tools require profiler access and the capture tools additionally deposit their result in the list of snapshot files
+once it is ready.
 
 VMs and groups are referenced by their hierarchy path, for example `Demo/Storefront`. The root group is the
 empty string. The telemetry and transaction intervals are the same as for the [REST export API](/docs/main/rest).

@@ -36,8 +36,11 @@ explicit "write to the event log" action. It stays empty until one of these happ
 * The **connection log** (profiler access) records agent connectivity and data-collection activity.
 * The **audit log** (administrator access) records security-relevant API access, artifact downloads, and
 authentication failures and authorization denials, so you can reconstruct what an API client or AI agent did.
-If you see unwanted activity, you can revoke the API key of the offending user with the **Revoke API key** row action
-in Users &amp; Roles.
+Each entry is a single-line JSON object with the caller, the client address and the outcome. A state-changing
+call also records what it changed: an MBean attribute write logs the object name, attribute, prior value and new
+value, an operation invocation logs the signature, arguments and return value, and a configuration edit logs the
+group with before and after content hashes. If you see unwanted activity, you can revoke the API key of the
+offending user with the **Revoke API key** row action in Users &amp; Roles.
 * The **server log** (administrator access) contains the general server diagnostics.
 
 When you run jvmguard from a development build, the server logs to the console instead of to files, so these views can

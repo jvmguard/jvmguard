@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.json.JsonMapper
 
 class AuditLogTest {
 
@@ -46,6 +47,30 @@ class AuditLogTest {
         assertFalse(event.containsKey("target"))
         assertFalse(event.containsKey("detail"))
         assertEquals("auth_failed", event["outcome"])
+    }
+
+    @Test
+    fun structuredDetailSerializesAsANestedObjectNotAnEscapedString() {
+        val event = AuditLog.buildEvent(
+            source = "mcp",
+            principal = "alice",
+            action = "set_mbean_attribute",
+            outcome = AuditLog.Outcome.OK,
+            target = "Demo/Purchase/Payment",
+            detail = linkedMapOf(
+                "objectName" to "com.example:type=Cache",
+                "attribute" to "OpenStores",
+                "priorValue" to 3,
+                "newValue" to 4,
+            ),
+            clientIp = "10.0.0.5",
+        )
+
+        val json = JsonMapper.builder().build().writeValueAsString(event)
+        // The detail is a real JSON object, so a SIEM can read detail.newValue directly.
+        assertTrue(json.contains("\"detail\":{"), "structured detail must nest as an object: $json")
+        assertTrue(json.contains("\"priorValue\":3"))
+        assertTrue(json.contains("\"newValue\":4"))
     }
 
     @Test

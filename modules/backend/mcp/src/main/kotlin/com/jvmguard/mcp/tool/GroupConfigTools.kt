@@ -101,7 +101,17 @@ class SetGroupConfigTool(ctx: McpToolContext) : McpTool(ctx) {
                 val updated = GroupConfig(existing.groupIdentifier, parsed.agentGroupConfig, parsed.serverGroupConfig)
                 updated.id = existing.id
                 updated.guardrailSettings = existing.guardrailSettings
+                val priorHash = McpAuditDetail.sha256(RecordingConfig.groupToJsonString(existing, includeGuardrails = false))
+                val newHash = McpAuditDetail.sha256(RecordingConfig.groupToJsonString(updated, includeGuardrails = false))
                 conn.modifyGroupConfigs(ListModification(listOf(updated), emptyList(), emptyList(), GroupConfig::class.java))
+                ctx.recordAuditDetail(
+                    mapOf(
+                        "group" to group,
+                        "priorConfigSha256" to priorHash,
+                        "newConfigSha256" to newHash,
+                        "changed" to (priorHash != newHash),
+                    )
+                )
                 jsonResult(McpJson.write(mapOf("status" to "ok", "group" to group)))
             }
         }

@@ -11,8 +11,8 @@ public abstract class AbstractEntity implements Identifiable, EntityChangeListen
 
     private transient List<EntityChangeListener> changeListeners;
     private transient boolean modified = false;
-    @ConfigDoc("Stable numeric bean id assigned by the server. Keep it unchanged on existing elements and use " +
-            "0 for new ones.")
+    @ConfigDoc("Stable numeric bean id. Keep it unchanged on existing elements and give each new element its own " +
+            "unique positive number, updating the enclosing lastId counter where one exists.")
     private Long id;
 
     protected AbstractEntity() {

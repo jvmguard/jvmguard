@@ -33,14 +33,15 @@ class McpToolContext(
         val baseUrlHolder: ThreadLocal<String> = ThreadLocal()
         val clientIpHolder: ThreadLocal<String> = ThreadLocal()
 
+        val auditDetailHolder: ThreadLocal<Any?> = ThreadLocal()
+
         private const val MAX_CACHE_ENTRIES = 10_000
     }
 
-    // Server-wide guardrails (MCP read-only switch, IP allowlist). Per-VM-group capture/action toggles live
-    // in the group's GuardrailSettings and are resolved with guardrailsFor(vm).
+    fun recordAuditDetail(detail: Any?) = auditDetailHolder.set(detail)
+
     fun globalGuardrails(): GuardrailConfig = configManager.getGlobalConfig(false).guardrailConfig
 
-    // Effective per-group guardrails for the VM, inheriting with override semantics up the group hierarchy.
     fun guardrailsFor(vm: VM): GuardrailSettings = configManager.getGroupHierarchyWrapper(vm).guardrailSettings
 
     fun cappedRecordingSeconds(vm: VM, requestedSeconds: Int): Int {

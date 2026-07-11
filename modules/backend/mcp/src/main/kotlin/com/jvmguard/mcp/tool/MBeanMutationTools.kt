@@ -42,21 +42,36 @@ class SetMbeanAttributeTool(ctx: McpToolContext) : McpTool(ctx) {
             ctx.withConnection { conn ->
                 val vm = VmResolver.resolveLiveVm(conn, vmPath)
                 ctx.requireMbeanMutationAllowed(vm)
-                val beanInfo = conn.getMBeanData(vm, name, true, false)?.beanInfo
-                    ?: throw McpError("MBean not found: $name")
-                val attribute = beanInfo.attributes.orEmpty().firstOrNull { it.name == attributeName }
-                    ?: throw McpError(
+                val data = conn.getMBeanData(vm, name, true, true)
+                val beanInfo = data?.beanInfo ?: throw McpError("MBean not found: $name")
+                val attributes = beanInfo.attributes.orEmpty()
+                val index = attributes.indexOfFirst { it.name == attributeName }
+                if (index < 0) {
+                    throw McpError(
                         "Attribute '$attributeName' not found on $name. " +
-                                "Writable attributes: ${beanInfo.attributes.orEmpty().filter { it.isWritable }.joinToString(", ") { it.name }}."
+                                "Writable attributes: ${attributes.filter { it.isWritable }.joinToString(", ") { it.name }}."
                     )
+                }
+                val attribute = attributes[index]
                 if (!attribute.isWritable) {
                     throw McpError("Attribute '$attributeName' on $name is not writable.")
                 }
-                val result = conn.setMBeanAttribute(vm, name, attribute, McpMBeanValues.coerce(attribute.type, rawValue))
+                val priorValue = runCatching { McpMBeanData.decodeAttribute(attribute, data.values.getOrNull(index)) }.getOrNull()
+                val coerced = McpMBeanValues.coerce(attribute.type, rawValue)
+                val result = conn.setMBeanAttribute(vm, name, attribute, coerced)
                 result.errorMessage?.let { throw McpError("Failed to set '$attributeName' on $name: $it") }
+                val newValue = runCatching { McpMBeanData.decodeAttribute(attribute, coerced) }.getOrDefault(rawValue)
+                ctx.recordAuditDetail(
+                    buildMap {
+                        put("objectName", name)
+                        put("attribute", attributeName)
+                        put("priorValue", McpAuditDetail.cap(priorValue))
+                        put("newValue", McpAuditDetail.cap(newValue))
+                    }
+                )
                 jsonResult(
                     McpJson.write(
-                        mapOf("status" to "ok", "objectName" to name, "attribute" to attributeName, "value" to rawValue)
+                        mapOf("status" to "ok", "objectName" to name, "attribute" to attributeName, "value" to newValue)
                     )
                 )
             }
@@ -131,6 +146,16 @@ class InvokeMbeanOperationTool(ctx: McpToolContext) : McpTool(ctx) {
                     .toTypedArray()
                 val result = conn.invokeMBeanOperation(vm, name, operation, parameters)
                 result.errorMessage?.let { throw McpError("Operation '$operationName' on $name failed: $it") }
+                val returnValue =
+                    if (operation.returnType != "void") McpMBeanData.decodeReturnValue(operation, result.returnValue) else null
+                ctx.recordAuditDetail(
+                    buildMap {
+                        put("objectName", name)
+                        put("operation", McpMBeanData.signatureOf(operation))
+                        put("arguments", McpAuditDetail.cap(rawParameters))
+                        if (operation.returnType != "void") put("returnValue", McpAuditDetail.cap(returnValue))
+                    }
+                )
                 jsonResult(
                     McpJson.write(
                         buildMap {
@@ -138,7 +163,7 @@ class InvokeMbeanOperationTool(ctx: McpToolContext) : McpTool(ctx) {
                             put("objectName", name)
                             put("operation", McpMBeanData.signatureOf(operation))
                             if (operation.returnType != "void") {
-                                put("returnValue", McpMBeanData.decodeReturnValue(operation, result.returnValue))
+                                put("returnValue", returnValue)
                             }
                         }
                     )
