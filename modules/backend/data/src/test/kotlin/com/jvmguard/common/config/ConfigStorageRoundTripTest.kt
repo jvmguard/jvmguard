@@ -41,6 +41,23 @@ class ConfigStorageRoundTripTest {
     }
 
     @Test
+    fun guardrailConfigRoundTrips() {
+        val config = GlobalConfig()
+        config.guardrailConfig.mcpReadOnly = true
+        config.guardrailConfig.maxRecordingSeconds = 120
+        config.guardrailConfig.allowHeapDump = false
+        config.guardrailConfig.apiAllowedIps = "10.0.0.0/8, ::1"
+
+        val back = roundTrip(config, GlobalConfig::class.java)
+
+        assertTrue(back.guardrailConfig.mcpReadOnly)
+        assertEquals(120, back.guardrailConfig.maxRecordingSeconds)
+        assertFalse(back.guardrailConfig.allowHeapDump)
+        assertTrue(back.guardrailConfig.allowJps, "unset toggles keep their permissive default")
+        assertEquals("10.0.0.0/8, ::1", back.guardrailConfig.apiAllowedIps)
+    }
+
+    @Test
     fun groupConfigRoundTripsNestedAgentBeans() {
         val gc = GroupConfig.createDefault()
         val back = roundTrip(gc, GroupConfig::class.java)

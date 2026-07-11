@@ -23,6 +23,9 @@ open class GlobalConfig : StoredConfig() {
     var ssoConfig: SsoConfig = SsoConfig()
         private set
 
+    var guardrailConfig: GuardrailConfig = GuardrailConfig()
+        private set
+
     var infiniteTransactionDays: Boolean = false
         set(value) {
             val old = field

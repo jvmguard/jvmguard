@@ -58,7 +58,7 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     @Test
     fun addingAMatchedDefPersistsToTheGroup() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<TabSheet>().single()).select(1)
+        use(find<TabSheet>().single()).select(2)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
 
         val dialog = find<MatchedTransactionDefDialog>().single()
@@ -75,7 +75,7 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     @Test
     fun matchedMethodFieldsAppearOnlyForMethodInterception() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<TabSheet>().single()).select(1)
+        use(find<TabSheet>().single()).select(2)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
         val dialog = find<MatchedTransactionDefDialog>().single()
 
@@ -103,7 +103,7 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     @Test
     fun addingACustomAnnotationDefPersistsToTheGroup() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<TabSheet>().single()).select(2)
+        use(find<TabSheet>().single()).select(1)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
 
         val dialog = find<MappedTransactionDefDialog>().single()
@@ -116,7 +116,7 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     @Test
     fun savingATransactionSetStoresItOnTheServer() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<TabSheet>().single()).select(1)
+        use(find<TabSheet>().single()).select(2)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
         val dialog = find<MatchedTransactionDefDialog>().single()
         use(find<TextField>(dialog).all().first { it.label == "Class or interface name" }).setValue("com.example.Service")

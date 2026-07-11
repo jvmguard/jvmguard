@@ -107,6 +107,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         SettingsNavEntry("Users & Roles", UsersView::class.java, VaadinIcon.USERS),
         SettingsNavEntry("LDAP / Active Directory", LdapView::class.java, VaadinIcon.CONNECT),
         SettingsNavEntry("Single Sign-On", SsoView::class.java, VaadinIcon.SIGN_IN_ALT),
+        SettingsNavEntry("Agent guardrails", AgentGuardrailsView::class.java, VaadinIcon.SHIELD),
         SettingsNavEntry("Data retention", DataSettingsView::class.java, VaadinIcon.DATABASE),
         SettingsNavEntry("E-Mail", SmtpSettingsView::class.java, VaadinIcon.ENVELOPE),
         SettingsNavEntry("Display", DisplaySettingsView::class.java, VaadinIcon.DESKTOP),

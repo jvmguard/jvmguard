@@ -35,7 +35,8 @@ abstract class BaseSsoTest {
 
     @BeforeEach
     fun setUpBase() {
-        dataSource = JdbcConnectionPool.create("jdbc:h2:mem:sso-test;DB_CLOSE_DELAY=-1", "sa", "")
+        val dbName = "sso-test-${DB_COUNTER.incrementAndGet()}"
+        dataSource = JdbcConnectionPool.create("jdbc:h2:mem:$dbName;DB_CLOSE_DELAY=-1", "sa", "")
         dataSource.connection.use { conn ->
             @Suppress("SqlNoDataSourceInspection")
             conn.createStatement().execute(
@@ -72,6 +73,7 @@ abstract class BaseSsoTest {
 
     @AfterEach
     fun tearDownBase() {
+        runCatching { dataSource.connection.use { it.createStatement().execute("SHUTDOWN") } }
         (dataSource as JdbcConnectionPool).dispose()
     }
 
@@ -97,6 +99,8 @@ abstract class BaseSsoTest {
     }
 
     companion object {
+        private val DB_COUNTER = java.util.concurrent.atomic.AtomicLong()
+
         @Suppress("UNCHECKED_CAST")
         private fun <T : Any> dummyObjectProvider(): ObjectProvider<T> = object : ObjectProvider<T> {
             override fun getObject(vararg args: Any?): T = throw UnsupportedOperationException()

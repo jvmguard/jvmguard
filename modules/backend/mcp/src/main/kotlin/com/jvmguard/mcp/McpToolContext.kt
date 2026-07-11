@@ -1,9 +1,12 @@
 package com.jvmguard.mcp
 
+import com.jvmguard.common.config.ConfigManager
 import com.jvmguard.common.helper.PasswordHelper
 import com.jvmguard.connector.api.MockMode
 import com.jvmguard.connector.api.Server
 import com.jvmguard.connector.api.ServerConnection
+import com.jvmguard.data.config.GuardrailConfig
+import com.jvmguard.data.file.SnapshotFileType
 import com.jvmguard.data.user.User
 import com.jvmguard.data.user.UserManager
 import com.jvmguard.mcp.auth.McpAuthorities
@@ -18,6 +21,8 @@ class McpToolContext(
     private val server: Server,
     private val userManager: UserManager,
     private val downloadTokens: McpDownloadTokens,
+    private val configManager: ConfigManager,
+    private val captureRateLimiter: CaptureRateLimiter,
 ) {
 
     companion object {
@@ -27,6 +32,39 @@ class McpToolContext(
 
         private const val MAX_CACHE_ENTRIES = 10_000
     }
+
+    fun guardrails(): GuardrailConfig = configManager.getGlobalConfig(false).guardrailConfig
+
+    fun cappedRecordingSeconds(requestedSeconds: Int): Int {
+        val max = guardrails().maxRecordingSeconds
+        return if (max > 0) minOf(requestedSeconds, max) else requestedSeconds
+    }
+
+    fun requireCaptureAllowed(type: SnapshotFileType, vmPath: String) {
+        val allowed = when (type) {
+            SnapshotFileType.HPZ -> guardrails().allowHeapDump
+            SnapshotFileType.JPS -> guardrails().allowJps
+            SnapshotFileType.JFR -> guardrails().allowJfr
+            else -> true
+        }
+        if (!allowed) {
+            throw GuardrailException("$type captures are disabled by an administrator.")
+        }
+        requireCaptureCooldown(vmPath)
+    }
+
+    fun requireCaptureCooldown(vmPath: String) {
+        val cooldownSeconds = guardrails().captureCooldownSeconds
+        val within = captureRateLimiter.secondsSinceLastWithinCooldown(vmPath, cooldownSeconds)
+        if (within != null) {
+            throw GuardrailException(
+                "A capture on \"$vmPath\" was taken ${within}s ago; the minimum interval is " +
+                        "${cooldownSeconds}s. Retry later.",
+            )
+        }
+    }
+
+    fun recordCapture(vmPath: String) = captureRateLimiter.recordCapture(vmPath)
 
     fun currentBaseUrl(): String? = baseUrlHolder.get()?.takeIf { it.isNotBlank() }
 
@@ -65,7 +103,7 @@ class McpToolContext(
         }
     }
 
-    // Opens a connection for an authenticated login name.
+    // Opens a connection for an authenticated login name
     fun <R> withConnectionForPrincipal(loginName: String, block: (ServerConnection) -> R): R {
         val user = userManager.getByLoginName(loginName) ?: throw McpError("Unknown user: $loginName")
         val connection = server.connect(user, MockMode.NONE)

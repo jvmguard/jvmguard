@@ -1,6 +1,7 @@
 package com.jvmguard.mcp.tool
 
 import com.jvmguard.common.AuditLog
+import com.jvmguard.mcp.GuardrailException
 import com.jvmguard.mcp.McpToolContext
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest
@@ -24,6 +25,9 @@ object McpToolRegistry {
                 McpToolContext.baseUrlHolder.set(baseUrl)
                 McpToolContext.clientIpHolder.set(clientIp)
                 try {
+                    if (audited && ctx.guardrails().mcpReadOnly) {
+                        throw GuardrailException("MCP is in read-only mode; the '$toolName' tool is disabled by an administrator.")
+                    }
                     val result = originalHandler.apply(exchange, request)
                     if (audited) {
                         auditResult(ctx, toolName, request, result)
@@ -66,7 +70,7 @@ object McpToolRegistry {
         var cause = throwable
         var depth = 0
         while (cause != null && depth < 5) {
-            if (cause is AccessDeniedException || cause is SecurityException) {
+            if (cause is AccessDeniedException || cause is SecurityException || cause is GuardrailException) {
                 return true
             }
             cause = cause.cause
