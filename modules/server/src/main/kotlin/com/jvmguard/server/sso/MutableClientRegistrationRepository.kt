@@ -37,7 +37,8 @@ class MutableClientRegistrationRepository(
         val config = configManager.getGlobalConfig(false)
         val newRegistrations = LinkedHashMap<String, ClientRegistration>()
         for (provider in config.ssoConfig.providers.filter { it.enabled }) {
-            if (provider.issuerUri.isBlank() || provider.clientId.isBlank()) {
+            val needsIssuer = provider.preset != SsoPreset.GOOGLE_WORKSPACE
+            if (provider.clientId.isBlank() || (needsIssuer && provider.issuerUri.isBlank())) {
                 continue
             }
             try {

@@ -8,6 +8,7 @@ import com.jvmguard.data.base.StoredConfig
 import com.jvmguard.data.config.GlobalConfig
 import com.jvmguard.data.config.GroupConfig
 import com.jvmguard.data.config.GroupHierarchyWrapper
+import com.jvmguard.data.config.SsoPreset
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.vmdata.VM
 import com.jvmguard.data.vmdata.VmIdentifier
@@ -60,6 +61,7 @@ class ConfigManager(private val configStorage: ConfigStorage) {
                 globalConfig.id = oldConfig.id
             }
             newConfig = DeepCopy.clone(globalConfig)
+            normalizeSsoProviders(newConfig)
             this.globalConfig = newConfig
 
             configStorage.store(GlobalConfig::class.java, if (obfuscated) newConfig else getGlobalConfig(true))
@@ -196,7 +198,21 @@ class ConfigManager(private val configStorage: ConfigStorage) {
             val config = globalConfigs.first()
             globalConfig = config
             config.deobfuscate()
+            if (normalizeSsoProviders(config)) {
+                configStorage.store(GlobalConfig::class.java, config.toObfuscatedConfig())
+            }
         }
+    }
+
+    private fun normalizeSsoProviders(config: GlobalConfig): Boolean {
+        var changed = false
+        for (provider in config.ssoConfig.providers) {
+            if (provider.preset == SsoPreset.GOOGLE_WORKSPACE && provider.issuerUri.isBlank()) {
+                provider.issuerUri = SsoPreset.defaultIssuer(provider.preset)
+                changed = true
+            }
+        }
+        return changed
     }
 
     private fun applyEnvVarOverrides() {
