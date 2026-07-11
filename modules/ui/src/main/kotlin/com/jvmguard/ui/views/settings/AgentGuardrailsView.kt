@@ -20,7 +20,7 @@ class AgentGuardrailsView : AbstractSettingsSectionView() {
 
     private val mcpEnabledInConfig = JvmGuardConfig.properties().isMcpEnabled
 
-    private val mcpReadOnly = Checkbox("MCP read-only mode (block mutating and capture tools)").apply {
+    private val mcpReadOnly = Checkbox("MCP read-only mode (blocks mutating actions and diagnostic captures)").apply {
         testId = ID_MCP_READ_ONLY
         isEnabled = mcpEnabledInConfig
     }
@@ -31,7 +31,7 @@ class AgentGuardrailsView : AbstractSettingsSectionView() {
         isVisible = !mcpEnabledInConfig
     }
 
-    private val maxRecordingMinutes = IntegerField("Maximum recording duration (minutes, 0 = unlimited)").apply {
+    private val maxRecordingMinutes = IntegerField("Maximum recording duration (minutes, 0 = no limit)").apply {
         testId = ID_MAX_RECORDING
         addClassName("jvmguard-nowrap-label")
         min = 0

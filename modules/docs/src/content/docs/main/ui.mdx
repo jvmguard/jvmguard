@@ -36,6 +36,8 @@ explicit "write to the event log" action. It stays empty until one of these happ
 * The **connection log** (profiler access) records agent connectivity and data-collection activity.
 * The **audit log** (administrator access) records security-relevant API access, artifact downloads, and
 authentication failures and authorization denials, so you can reconstruct what an API client or AI agent did.
+If you see unwanted activity, you can revoke the API key of the offending user with the **Revoke API key** row action
+in Users &amp; Roles.
 * The **server log** (administrator access) contains the general server diagnostics.
 
 When you run jvmguard from a development build, the server logs to the console instead of to files, so these views can
@@ -70,8 +72,7 @@ In addition, you can export and import the entire server configuration.
 The **Agent guardrails** tab holds opt-in restrictions on what an AI agent over the
 [MCP server](/docs/main/mcp) or a REST client may do. All settings are permissive by default.
 
-* **MCP read-only mode** blocks all mutating and capturing tools, leaving only read access. When the MCP server is
-disabled in the server configuration, this setting is shown but has no effect.
+* **MCP read-only mode** blocks all mutating and capturing tools, leaving only read access.
 * **Diagnostic captures**  are toggles to deny heap dumps, JProfiler snapshots and JFR recordings
 individually, a cap on recording duration, and a minimum interval between captures on the same VM.
 * **Network** — an allowlist of IPv4/IPv6 addresses or CIDR ranges permitted to talk to the MCP server and the REST API.

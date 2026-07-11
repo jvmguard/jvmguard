@@ -15,6 +15,9 @@ class AuditLogView : AbstractLogView(LogFileType.AUDIT, ID) {
     override val emptyStateHint: String
         get() = "No audited API access yet."
 
+    override val infoText: String
+        get() = "You can revoke API keys under Users & Roles in the general settings with the \"Revoke API key\" row action."
+
     companion object {
         const val ID = "log-view-audit"
     }

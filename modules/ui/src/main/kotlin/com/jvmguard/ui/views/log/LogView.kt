@@ -45,6 +45,8 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
 
     protected open val emptyStateHint: String get() = "No entries in this log yet."
 
+    protected open val infoText: String? get() = null
+
     private val emptyStateLabel = Span().apply { addClassName("jvmguard-field-hint") }
 
     private val fileSelect = Select<LogFileDescriptor>().apply {
@@ -107,6 +109,7 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
             defaultVerticalComponentAlignment = FlexComponent.Alignment.BASELINE
             expand(searchField)
         }
+        infoText?.let { add(Span(it).apply { addClassName("jvmguard-field-hint") }) }
         add(toolbar, grid)
         expand(grid)
     }

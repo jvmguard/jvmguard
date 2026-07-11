@@ -88,8 +88,23 @@ class UsersView : AbstractSettingsSectionView() {
     private fun rowActions(user: User): Component =
         menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions for ${user.loginName}", "$ID_ROW_MENU-${user.loginName}") {
             addItem("Edit") { edit(user) }
+            if (user.apiKeyHash.isNotEmpty()) {
+                addItem("Revoke API key") { confirmRevokeApiKey(user) }
+            }
             addItem("Delete") { confirmDelete(user) }
         }
+
+    private fun confirmRevokeApiKey(user: User) {
+        confirm(
+            "Revoke API key",
+            "Revoke the API key for \"${user.loginName}\"? The current key will stop working once you save the current changes.",
+            "Revoke",
+        ) {
+            user.apiKeyHash = ""
+            users.markModified(user)
+            Notifications.show("The API key for \"${user.loginName}\" will be revoked when you save the current changes.")
+        }
+    }
 
     private fun edit(user: User) {
         val isNew = user.loginName.isEmpty()
