@@ -171,6 +171,8 @@ class ConfigStorage(private val dataSource: DataSource) {
         private val OBJECT_MAPPER: ObjectMapper = JsonMapper.builder()
             .activateDefaultTyping(PERMISSIVE_TYPE_VALIDATOR, DefaultTyping.NON_FINAL)
             .enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+            .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
+            .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
             .addMixIn(AbstractEntity::class.java, StoredBeanMixin::class.java)
             .changeDefaultVisibility { vc ->
                 vc
