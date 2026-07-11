@@ -69,7 +69,7 @@ that carries the same bearer token.
 The assistant discovers the available tools when it connects. It can list the monitored groups and VMs,
 read telemetries and transaction data such as call  trees, hot spots, and overdue transactions, inspect MBeans
 and log files, and read the trigger inbox. It can also capture diagnostics on a VM, such as heap dumps, thread dumps,
-and JFR or JProfiler recordings, and it can request a garbage collection. Beyond reading MBeans it can also set a
+and JFR or JProfiler recordings. Beyond reading MBeans it can also set a
 writable MBean attribute and invoke an MBean operation. It can read a VM group's recording configuration as a JSON
 string and write it back after editing. The read result includes a generated schema that explains the fields, enums
 and polymorphic types. These mutating tools require profiler access and the capture tools additionally deposit their

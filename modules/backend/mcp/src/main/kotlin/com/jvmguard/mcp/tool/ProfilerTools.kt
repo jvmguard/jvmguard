@@ -105,36 +105,6 @@ class ThreadDumpTool(ctx: McpToolContext) : McpTool(ctx) {
     }
 }
 
-class RunGcTool(ctx: McpToolContext) : McpTool(ctx) {
-
-    companion object {
-        const val NAME = "run_gc"
-    }
-
-    override fun createSpecification(): SyncToolSpecification {
-        val tool = Tool.builder(
-            NAME,
-            objectSchema(
-                mapOf("vm" to stringProperty("VM hierarchy path (from list_vms).")),
-                listOf("vm"),
-            ),
-        ).description(
-            "Request a garbage collection on the specified VM. Requires profiler access."
-        ).annotations(action("Run GC")).build()
-        return SyncToolSpecification(tool) { _, request ->
-            val vmPath = request.arguments()["vm"] as String
-            ctx.withConnection { conn ->
-                val vm = VmResolver.resolveVm(conn, vmPath)
-                ctx.requireRunGcAllowed(vm)
-                ctx.requireCaptureCooldown(vm)
-                conn.runGC(vm)
-                ctx.recordCapture(vm)
-                textResult("GC requested for $vmPath")
-            }
-        }
-    }
-}
-
 class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
 
     companion object {

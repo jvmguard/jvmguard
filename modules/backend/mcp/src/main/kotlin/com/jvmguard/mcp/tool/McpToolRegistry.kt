@@ -89,7 +89,6 @@ object McpToolRegistry {
         GetOverdueTransactionsTool(ctx),
         HeapDumpTool(ctx),
         ThreadDumpTool(ctx),
-        RunGcTool(ctx),
         RecordJfrTool(ctx),
         RecordJpsTool(ctx),
         ListMbeansTool(ctx),

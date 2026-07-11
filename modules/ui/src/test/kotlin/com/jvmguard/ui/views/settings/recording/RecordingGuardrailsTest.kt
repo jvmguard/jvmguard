@@ -51,15 +51,6 @@ class RecordingGuardrailsTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
-    fun togglingRunGcStagesToTheRootGroup() {
-        UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
-
-        use(checkbox(RecordingGuardrailsView.ID_ALLOW_RUN_GC)).click()
-
-        assertFalse(rootGuardrails().allowRunGc)
-    }
-
-    @Test
     fun togglingMbeanMutationsStagesToTheRootGroup() {
         UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
 

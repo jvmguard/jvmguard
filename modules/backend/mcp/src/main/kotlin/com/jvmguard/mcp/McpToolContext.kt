@@ -73,12 +73,6 @@ class McpToolContext(
         }
     }
 
-    fun requireRunGcAllowed(vm: VM) {
-        if (!guardrailsFor(vm).allowRunGc) {
-            throw GuardrailException("Forced garbage collection is disabled for \"${vm.hierarchyPath}\".")
-        }
-    }
-
     fun requireMbeanMutationAllowed(vm: VM) {
         if (!guardrailsFor(vm).allowMbeanMutations) {
             throw GuardrailException(

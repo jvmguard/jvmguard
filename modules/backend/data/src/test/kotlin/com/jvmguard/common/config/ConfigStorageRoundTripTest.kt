@@ -66,7 +66,6 @@ class ConfigStorageRoundTripTest {
         val gc = GroupConfig.createDefault()
         gc.guardrailSettings.isUsed = true
         gc.guardrailSettings.allowHeapDump = false
-        gc.guardrailSettings.allowRunGc = false
         gc.guardrailSettings.allowMbeanMutations = false
         gc.guardrailSettings.allowConfigEdit = false
         gc.guardrailSettings.maxRecordingSeconds = 120
@@ -75,7 +74,6 @@ class ConfigStorageRoundTripTest {
 
         assertTrue(back.guardrailSettings.isUsed)
         assertFalse(back.guardrailSettings.allowHeapDump)
-        assertFalse(back.guardrailSettings.allowRunGc)
         assertFalse(back.guardrailSettings.allowMbeanMutations)
         assertFalse(back.guardrailSettings.allowConfigEdit)
         assertEquals(120, back.guardrailSettings.maxRecordingSeconds)
