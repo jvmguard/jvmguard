@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.transactions;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.transactions.naming.ClassNameElement;
 import com.jvmguard.agent.config.transactions.naming.InstanceElement;
 import com.jvmguard.agent.config.transactions.naming.MethodParameterElement;
@@ -12,6 +13,9 @@ import java.io.DataOutputStream;
 
 public abstract class ClassFilterTransactionDef extends WildcardTransactionDef {
 
+    @ConfigDoc("Class or interface name filter selecting which classes this definition applies to. It is " +
+            "matched as a wildcard or regular expression per comparisonType, and a wildcard may be a " +
+            "comma-separated list.")
     private String className = "*";
 
     @Override

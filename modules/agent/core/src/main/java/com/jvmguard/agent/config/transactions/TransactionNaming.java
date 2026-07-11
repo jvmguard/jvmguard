@@ -3,6 +3,7 @@ package com.jvmguard.agent.config.transactions;
 import com.jvmguard.agent.comm.*;
 import com.jvmguard.agent.config.base.AbstractEntity;
 import com.jvmguard.agent.config.base.CheckedString;
+import com.jvmguard.agent.config.base.ConfigDoc;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,9 +14,14 @@ public class TransactionNaming extends AbstractEntity implements AgentSerializab
 
     private static final List<List<NamingElement>> uniqueNamings = new ArrayList<>();
 
+    @ConfigDoc("Whether custom transaction naming is active (else an automatic name is used).")
     private boolean active = true;
+    @ConfigDoc("On recursive re-entry into instrumented code, which further entries are suppressed.")
     private ReentryInhibition reentryInhibition = ReentryInhibition.NAME;
+    @ConfigDoc("Optional transaction group name for this definition, provided as an object with a boolean " +
+            "'checked' and a string 'value', where the value applies only when checked is true.")
     private CheckedString group = new CheckedString();
+    @ConfigDoc("Ordered list of naming elements concatenated to build each transaction's name.")
     private List<NamingElement> namingElements = new ArrayList<>();
 
     private int namingIdentifier;

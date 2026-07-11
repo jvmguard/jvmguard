@@ -68,6 +68,7 @@ class ConfigStorageRoundTripTest {
         gc.guardrailSettings.allowHeapDump = false
         gc.guardrailSettings.allowRunGc = false
         gc.guardrailSettings.allowMbeanMutations = false
+        gc.guardrailSettings.allowConfigEdit = false
         gc.guardrailSettings.maxRecordingSeconds = 120
 
         val back = roundTrip(gc, GroupConfig::class.java)
@@ -76,6 +77,7 @@ class ConfigStorageRoundTripTest {
         assertFalse(back.guardrailSettings.allowHeapDump)
         assertFalse(back.guardrailSettings.allowRunGc)
         assertFalse(back.guardrailSettings.allowMbeanMutations)
+        assertFalse(back.guardrailSettings.allowConfigEdit)
         assertEquals(120, back.guardrailSettings.maxRecordingSeconds)
         assertTrue(back.guardrailSettings.allowJps, "unset toggles keep their permissive default")
     }

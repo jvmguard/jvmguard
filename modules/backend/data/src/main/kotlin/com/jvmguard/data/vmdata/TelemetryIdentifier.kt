@@ -1,11 +1,14 @@
 package com.jvmguard.data.vmdata
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.agent.config.base.DefaultConstructor
 import java.io.Serializable
 
 open class TelemetryIdentifier : Serializable, Comparable<TelemetryIdentifier> {
 
+    @field:ConfigDoc("Primary telemetry key (the metric id).")
     var mainId: String = ""
+    @field:ConfigDoc("Secondary telemetry key (the sub-metric id).")
     var subId: String = ""
 
     @DefaultConstructor

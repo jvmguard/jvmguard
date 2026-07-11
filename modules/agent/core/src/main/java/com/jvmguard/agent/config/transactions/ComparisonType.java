@@ -1,7 +1,11 @@
 package com.jvmguard.agent.config.transactions;
 
+import com.jvmguard.agent.config.base.ConfigDoc;
+
 public enum ComparisonType {
+    @ConfigDoc("Match using wildcard patterns.")
     WILDCARD("Wildcard comparison"),
+    @ConfigDoc("Match using a regular expression.")
     REGEX("Regular expression");
 
     private final String verbose;

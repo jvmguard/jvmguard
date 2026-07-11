@@ -1,10 +1,13 @@
 package com.jvmguard.data.config.triggers.actions
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.agent.config.base.DefaultConstructor
 import com.jvmguard.agent.config.base.LogCategory
 
+@ConfigDoc("Sends an email notification.")
 open class EmailAction : TextAction {
 
+    @field:ConfigDoc("Recipient email address.")
     var email: String = ""
         set(value) {
             val old = field
@@ -12,6 +15,7 @@ open class EmailAction : TextAction {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("Severity label of the email (Info/Warning/Error).")
     var category: String = LogCategory.WARNING.toString()
         set(value) {
             val old = field

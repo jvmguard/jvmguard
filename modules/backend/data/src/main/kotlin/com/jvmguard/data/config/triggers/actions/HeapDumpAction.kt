@@ -1,5 +1,8 @@
 package com.jvmguard.data.config.triggers.actions
 
+import com.jvmguard.agent.config.base.ConfigDoc
+
+@ConfigDoc("Captures a heap (memory) snapshot.")
 open class HeapDumpAction : ArtifactAction() {
 
     override val actionType: ActionType

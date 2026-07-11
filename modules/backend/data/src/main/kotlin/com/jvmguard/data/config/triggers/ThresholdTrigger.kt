@@ -1,9 +1,12 @@
 package com.jvmguard.data.config.triggers
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.data.vmdata.ThresholdIdentifier
 
+@ConfigDoc("Fires when a configured threshold is violated.")
 open class ThresholdTrigger : DataTrigger() {
 
+    @field:ConfigDoc("Identifies which threshold's violations this trigger counts.")
     var thresholdIdentifier: ThresholdIdentifier? = null
         set(value) {
             val old = field

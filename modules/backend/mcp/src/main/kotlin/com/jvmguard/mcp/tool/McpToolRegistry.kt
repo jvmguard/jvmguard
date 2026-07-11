@@ -96,6 +96,8 @@ object McpToolRegistry {
         GetMbeanDataTool(ctx),
         SetMbeanAttributeTool(ctx),
         InvokeMbeanOperationTool(ctx),
+        GetGroupConfigTool(ctx),
+        SetGroupConfigTool(ctx),
         ListSnapshotFilesTool(ctx),
         GetSnapshotFileTool(ctx),
         ListLogFilesTool(ctx),

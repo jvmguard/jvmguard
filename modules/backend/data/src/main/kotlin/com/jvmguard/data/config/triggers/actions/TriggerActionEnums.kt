@@ -1,5 +1,6 @@
 package com.jvmguard.data.config.triggers.actions
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.install4j.runtime.beans.actions.net.HttpRequestMethod as Install4jHttpRequestMethod
 
 enum class ActionType(private val verbose: String, private val actionClass: Class<out TriggerAction>) {
@@ -18,7 +19,9 @@ enum class ActionType(private val verbose: String, private val actionClass: Clas
 }
 
 enum class BodyContentType(private val verbose: String) {
+    @ConfigDoc("Request body is form data.")
     FORM_DATA("Form data"),
+    @ConfigDoc("Request body is JSON.")
     JSON("JSON");
 
     override fun toString(): String = verbose
@@ -26,12 +29,19 @@ enum class BodyContentType(private val verbose: String) {
 
 @Suppress("unused")
 enum class HttpRequestMethod(val httpRequestMethod: Install4jHttpRequestMethod) {
+    @ConfigDoc("HTTP GET request.")
     GET(Install4jHttpRequestMethod.GET),
+    @ConfigDoc("HTTP POST request.")
     POST(Install4jHttpRequestMethod.POST),
+    @ConfigDoc("HTTP HEAD request.")
     HEAD(Install4jHttpRequestMethod.HEAD),
+    @ConfigDoc("HTTP OPTIONS request.")
     OPTIONS(Install4jHttpRequestMethod.OPTIONS),
+    @ConfigDoc("HTTP PUT request.")
     PUT(Install4jHttpRequestMethod.PUT),
+    @ConfigDoc("HTTP DELETE request.")
     DELETE(Install4jHttpRequestMethod.DELETE),
+    @ConfigDoc("HTTP TRACE request.")
     TRACE(Install4jHttpRequestMethod.TRACE);
 
     val isBodyFormData: Boolean
@@ -39,7 +49,9 @@ enum class HttpRequestMethod(val httpRequestMethod: Install4jHttpRequestMethod) 
 }
 
 enum class JfrConfigMode(private val verbose: String) {
+    @ConfigDoc("Use a predefined JFR profile.")
     PREDEFINED("Predefined profile"),
+    @ConfigDoc("Use an explicit JFR config file.")
     CONFIG_FILE("Config file");
 
     override fun toString(): String = verbose

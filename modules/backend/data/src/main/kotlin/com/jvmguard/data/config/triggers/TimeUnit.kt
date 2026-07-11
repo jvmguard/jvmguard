@@ -1,13 +1,18 @@
 package com.jvmguard.data.config.triggers
 
+import com.jvmguard.agent.config.base.ConfigDoc
+
 enum class TimeUnit(
     private val verbose: String,
     private val singular: String,
     private val plural: String,
     private val secondMultiplier: Int,
 ) {
+    @ConfigDoc("Seconds.")
     SECONDS("seconds", "second", "seconds", 1),
+    @ConfigDoc("Minutes.")
     MINUTES("minutes", "minute", "minutes", 60),
+    @ConfigDoc("Hours.")
     HOURS("hours", "hour", "hours", 60 * 60);
 
     fun getMillis(time: Int): Long = getSeconds(time).toLong() * 1000

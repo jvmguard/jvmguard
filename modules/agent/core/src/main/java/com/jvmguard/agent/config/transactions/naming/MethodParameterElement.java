@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.transactions.naming;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 import com.jvmguard.agent.config.transactions.EnvironmentException;
 import com.jvmguard.agent.config.transactions.NamingElement;
@@ -8,8 +9,10 @@ import com.jvmguard.agent.config.transactions.NamingElement;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+@ConfigDoc("Adds a value obtained by a getter/field chain on a selected method parameter.")
 public class MethodParameterElement extends AbstractGetterElement {
 
+    @ConfigDoc("Zero-based index of the method parameter whose value contributes the name segment.")
     private int parameterIndex = 0;
 
     @DefaultConstructor

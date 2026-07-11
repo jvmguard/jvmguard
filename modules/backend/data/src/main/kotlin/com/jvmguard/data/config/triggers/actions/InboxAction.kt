@@ -1,7 +1,9 @@
 package com.jvmguard.data.config.triggers.actions
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.agent.config.base.DefaultConstructor
 
+@ConfigDoc("Creates an inbox item.")
 open class InboxAction : TextAction {
 
     @DefaultConstructor

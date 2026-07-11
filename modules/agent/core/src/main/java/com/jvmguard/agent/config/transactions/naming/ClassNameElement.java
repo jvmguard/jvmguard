@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.transactions.naming;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 import com.jvmguard.agent.config.transactions.EnvironmentException;
 import com.jvmguard.agent.config.transactions.NamingElement;
@@ -8,8 +9,10 @@ import com.jvmguard.agent.config.transactions.NamingElement;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+@ConfigDoc("Adds the declared class name (optionally with package) as a name segment.")
 public class ClassNameElement extends NamingElement {
 
+    @ConfigDoc("How much of the package to include in the class-name segment.")
     private PackageMode packageMode = PackageMode.NONE;
 
     public PackageMode getPackageMode() {
@@ -116,8 +119,11 @@ public class ClassNameElement extends NamingElement {
 
     // do not rename enums
     public enum PackageMode {
+        @ConfigDoc("Class name without package.")
         NONE("Without package name"),
+        @ConfigDoc("Abbreviated package (e.g. c.e.g.Type).")
         ABBREVIATED("With abbreviated package name (e.g. \"c.e.g.t\")"),
+        @ConfigDoc("Fully-qualified class name.")
         FULL("With full package name");
 
         private final String verbose;

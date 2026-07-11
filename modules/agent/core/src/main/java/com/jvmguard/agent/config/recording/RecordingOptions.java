@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.recording;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.OptionalConfig;
 
 import java.io.DataInputStream;
@@ -8,6 +9,7 @@ import java.io.DataOutputStream;
 
 public class RecordingOptions extends OptionalConfig implements AgentSerializable, CodecEntity {
 
+    @ConfigDoc("When configuration changes are applied to classes that are already loaded in the monitored VM.")
     private RetransformationType retransformationType = RetransformationType.ALWAYS;
 
     public void setRetransformationType(RetransformationType retransformationType) {

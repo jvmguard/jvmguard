@@ -1,8 +1,11 @@
 package com.jvmguard.agent.config.transactions;
 
-// do not rename enums
+import com.jvmguard.agent.config.base.ConfigDoc;
+
 public enum DurationType {
+    @ConfigDoc("Value is a percentage slower than the running average.")
     PERCENT("% slower than average"),
+    @ConfigDoc("Value is an absolute duration in milliseconds.")
     MILLIS("ms and slower");
 
     private final String verbose;

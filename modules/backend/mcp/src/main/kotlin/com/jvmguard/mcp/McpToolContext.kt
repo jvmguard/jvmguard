@@ -11,6 +11,7 @@ import com.jvmguard.data.file.SnapshotFileType
 import com.jvmguard.data.user.User
 import com.jvmguard.data.user.UserManager
 import com.jvmguard.data.vmdata.VM
+import com.jvmguard.data.vmdata.VmIdentifier
 import com.jvmguard.mcp.auth.McpAuthorities
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -82,6 +83,17 @@ class McpToolContext(
         if (!guardrailsFor(vm).allowMbeanMutations) {
             throw GuardrailException(
                 "Setting MBean attributes and invoking MBean operations is disabled for \"${vm.hierarchyPath}\".",
+            )
+        }
+    }
+
+    fun guardrailsForGroup(groupIdentifier: VmIdentifier): GuardrailSettings =
+        configManager.getGroupHierarchyWrapper(groupIdentifier).guardrailSettings
+
+    fun requireConfigEditAllowed(groupIdentifier: VmIdentifier) {
+        if (!guardrailsForGroup(groupIdentifier).allowConfigEdit) {
+            throw GuardrailException(
+                "Editing the recording configuration is disabled for group \"${groupIdentifier.name}\".",
             )
         }
     }

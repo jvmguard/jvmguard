@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.telemetry;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.OptionalConfig;
 
 import java.io.DataInputStream;
@@ -10,6 +11,7 @@ import java.util.List;
 
 public class TelemetrySettings extends OptionalConfig implements AgentSerializable, CodecEntity {
 
+    @ConfigDoc("Custom MBean-based telemetry charts to collect from monitored JVMs.")
     private List<MBeanTelemetryConfig> mbeanTelemetries = new ArrayList<>();
 
     public List<MBeanTelemetryConfig> getMbeanTelemetries() {

@@ -1,25 +1,36 @@
 package com.jvmguard.agent.config.transactions;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+@ConfigDoc("Intercepts a class or a specific method matched by name, using the declaring class and an optional " +
+        "method name. The most direct way to instrument specific code.")
 public class MatchedTransactionDef extends MethodInterceptionTransactionDef {
 
     public static String getDefaultName(String className, String methodName) {
         return className + "#" + methodName;
     }
 
+    @ConfigDoc("Name of the class/interface that declares the method to intercept (the match root).")
     private String declaringClassName = "";
 
+    @ConfigDoc("Whether to intercept a whole class/interface or a single named method.")
     private InterceptionTarget interceptionTarget = InterceptionTarget.CLASS;
+    @ConfigDoc("If true, also intercept implementing/derived classes.")
     private boolean interceptSubclasses = false;
+    @ConfigDoc("If true, also instrument static methods.")
     private boolean staticMethods = false;
+    @ConfigDoc("Which methods of matched classes to instrument (only implementing/overriding public methods, " +
+            "or all public methods).")
     private MethodInterceptionMode methodInterceptionMode = MethodInterceptionMode.IMPLEMENTING_PUBLIC;
 
+    @ConfigDoc("Method name to intercept when interceptionTarget=METHOD.")
     private String methodName = "";
+    @ConfigDoc("Optional method descriptor/signature to disambiguate overloads when interceptionTarget=METHOD.")
     private String methodSignature = "";
 
     public MatchedTransactionDef() {
@@ -157,7 +168,9 @@ public class MatchedTransactionDef extends MethodInterceptionTransactionDef {
     }
 
     public enum InterceptionTarget {
+        @ConfigDoc("Intercept a class or interface.")
         CLASS("Class or interface"),
+        @ConfigDoc("Intercept a single named method of a class/interface.")
         METHOD("Single method of a class or interface");
 
         private final String verbose;
@@ -173,7 +186,9 @@ public class MatchedTransactionDef extends MethodInterceptionTransactionDef {
     }
 
     public enum MethodInterceptionMode {
+        @ConfigDoc("Only implementing/overriding public methods.")
         IMPLEMENTING_PUBLIC("Implementing or overriding public methods"),
+        @ConfigDoc("All public methods of implementing/derived classes.")
         ALL_PUBLIC("All public methods of implementing or derived classes");
 
         private final String verbose;

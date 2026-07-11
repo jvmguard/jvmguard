@@ -4,6 +4,7 @@ import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.comm.*;
 import com.jvmguard.agent.config.base.AbstractEntity;
 import com.jvmguard.agent.config.base.CheckedString;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.EntityChangeListener;
 import com.jvmguard.agent.config.base.Hierarchical;
 import com.jvmguard.agent.config.transactions.naming.MethodParameterElement;
@@ -28,13 +29,21 @@ public abstract class TransactionDef extends AbstractEntity implements Hierarchi
         }
     }
 
+    @ConfigDoc("Optional custom display name for the transaction, provided as an object with a boolean " +
+            "'checked' and a string 'value', where the value applies only when checked is true.")
     private CheckedString description;
 
+    @ConfigDoc("If true, matching calls are discarded (not recorded as transactions), to carve exceptions out " +
+            "of a broader match.")
     private boolean discard = false;
 
+    @ConfigDoc("The health/threshold policy (slow / very-slow / overdue / error rules) applied to matching " +
+            "transactions.")
     private Policy policy;
+    @ConfigDoc("Per-transaction-name policy overrides, evaluated in order before the default policy.")
     private List<PolicySubDef> policySubDefs = new ArrayList<>();
 
+    @ConfigDoc("How the transaction name is constructed (naming elements, group, reentry inhibition).")
     private TransactionNaming naming;
 
     private transient PolicyHandler policyHandler;

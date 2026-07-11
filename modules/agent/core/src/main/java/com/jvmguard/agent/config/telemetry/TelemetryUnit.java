@@ -1,19 +1,27 @@
 package com.jvmguard.agent.config.telemetry;
 
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.annotation.Unit;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public enum TelemetryUnit {
+    @ConfigDoc("Plain, dimensionless count.")
     PLAIN("plain", Unit.PLAIN, 3, ""),
+    @ConfigDoc("A rate that scales per second, minute or hour.")
     PER_SECOND("per second", Unit.PER_SECOND, 4, "per second", "per minute", "per hour"),
+    @ConfigDoc("A percentage.")
     PERCENT("percent", Unit.PERCENT, 3, "%"),
+    @ConfigDoc("Time in milliseconds (scales to seconds).")
     MILLISECONDS("milliseconds", Unit.MILLISECONDS, 4, "ms", "s"),
+    @ConfigDoc("Time in microseconds.")
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     MICROSECONDS("microseconds", Unit.MICROSECONDS, 4, "\u00b5s", "ms", "s"),
+    @ConfigDoc("Time in nanoseconds.")
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     NANOSECONDS("nanoseconds", Unit.NANOSECONDS, 4, "ns", "\u00b5s", "ms", "s"),
+    @ConfigDoc("Data size in bytes (scales to KB/MB/GB).")
     BYTES("bytes", Unit.BYTES, 4, "b", "KB", "MB", "GB");
 
     private final int displayDigits;

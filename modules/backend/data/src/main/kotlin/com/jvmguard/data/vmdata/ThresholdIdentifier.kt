@@ -1,13 +1,16 @@
 package com.jvmguard.data.vmdata
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.agent.config.base.DefaultConstructor
 import java.io.Serializable
 import java.util.*
 
 open class ThresholdIdentifier : Serializable, Comparable<ThresholdIdentifier> {
 
+    @field:ConfigDoc("The telemetry series the referenced threshold watches.")
     var telemetryIdentifier: PersistentTelemetryIdentifier? = null
 
+    @field:ConfigDoc("Custom name of the referenced threshold (null if none).")
     var customName: String? = null
         set(value) {
             field = if (value.isNullOrEmpty()) null else value

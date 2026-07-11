@@ -3,6 +3,7 @@ package com.jvmguard.agent.config.transactions.naming;
 import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.comm.*;
 import com.jvmguard.agent.config.base.CheckedString;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.transactions.EnvironmentException;
 import com.jvmguard.agent.config.transactions.NamingElement;
 import com.jvmguard.agent.config.transactions.naming.ClassNameElement.PackageMode;
@@ -21,6 +22,9 @@ public abstract class AbstractGetterElement extends NamingElement {
     private static final String SPECIAL_SIMPLE_FIELD = "simpleName";
     private static final String SPECIAL_ABBREV_FIELD = "abbrevName";
 
+    @ConfigDoc("Dot-separated getter or field chain evaluated on the intercepted instance or method parameter " +
+            "to produce a name segment, provided as an object with a boolean 'checked' and a string 'value', " +
+            "where the value applies only when checked is true.")
     private CheckedString getterChain = new CheckedString();
 
     private transient Getter[] getters;

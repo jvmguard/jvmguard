@@ -108,8 +108,8 @@ VM group can manage them without administrator access.
 
 * **Diagnostic captures**  deny heap dumps, JProfiler snapshots or JFR recordings individually, cap the recording
 duration, and set a minimum interval between captures on the same VM.
-* **Mutating actions**  deny actions that change a running VM without producing an artifact, such as forcing a
-garbage collection or invoking MBean operations.
+* **Mutating actions**  deny actions that change a running VM without producing an artifact, such as invoking MBean
+operations or editing the recording configuration of a VM group.
 
 Like the other recording settings, a group inherits its parent's guardrails until you select **Override agent guardrails
 for this group**, and the server-wide [read-only mode](#network) still overrides everything. When a guardrail blocks a

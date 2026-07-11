@@ -1,7 +1,9 @@
 package com.jvmguard.agent.config.transactions.naming;
 
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 
+@ConfigDoc("Adds the runtime instance's class name (optionally with package) as a name segment.")
 public class InstanceClassNameElement extends ClassNameElement {
 
     @DefaultConstructor

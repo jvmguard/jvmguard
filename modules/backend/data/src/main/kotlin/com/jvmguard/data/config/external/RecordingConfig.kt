@@ -64,6 +64,28 @@ class RecordingConfig() : ExternalConfig {
     }
 
     companion object {
+
+        fun groupToJsonString(groupConfig: GroupConfig, includeGuardrails: Boolean): String {
+            val json = groupToJson(groupConfig)
+            if (!includeGuardrails) {
+                stripKey(json, "guardrailSettings")
+            }
+            return JsonWriter.string(json)
+        }
+
+        fun groupFromJsonString(json: String): GroupConfig =
+            groupFromJson(JsonParser.`object`().from(json))
+
+        private fun stripKey(node: Any?, key: String) {
+            when (node) {
+                is JsonObject -> {
+                    node.remove(key)
+                    node.values.forEach { stripKey(it, key) }
+                }
+                is JsonArray -> node.forEach { stripKey(it, key) }
+            }
+        }
+
         fun groupToJson(groupConfig: GroupConfig): JsonObject {
             val groupEntry = JsonObject()
             groupEntry[ConfigFileFormat.KEY_PATH] = groupConfig.hierarchyPath

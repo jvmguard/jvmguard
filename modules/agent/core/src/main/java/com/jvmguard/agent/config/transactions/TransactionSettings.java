@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.transactions;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.OptionalConfig;
 import com.jvmguard.agent.config.recording.RetransformationType;
 
@@ -31,8 +32,11 @@ public class TransactionSettings extends OptionalConfig implements TransactionDe
         }
     }
 
+    @ConfigDoc("The ordered list of transaction definitions (MATCHED/MAPPED/DECLARED) that select which " +
+            "methods/classes are instrumented as transactions.")
     private List<TransactionDef> transactionDefs = new ArrayList<>();
 
+    @ConfigDoc("When the agent re-instruments already-loaded classes after this transaction config changes.")
     private RetransformationType retransformationType = RetransformationType.ALWAYS;
 
     public TransactionSettings() {

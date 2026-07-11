@@ -40,6 +40,13 @@ open class GuardrailSettings @DefaultConstructor constructor() : OptionalConfig(
             fireChanged(old, value)
         }
 
+    var allowConfigEdit: Boolean = true
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
     var maxRecordingSeconds: Int = 600
         set(value) {
             val old = field

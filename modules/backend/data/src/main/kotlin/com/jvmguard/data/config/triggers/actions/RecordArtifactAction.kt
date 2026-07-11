@@ -1,9 +1,11 @@
 package com.jvmguard.data.config.triggers.actions
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.data.config.triggers.TimeUnit
 
 abstract class RecordArtifactAction : ArtifactAction {
 
+    @field:ConfigDoc("Recording duration.")
     var time: Int = 1
         set(value) {
             val old = field
@@ -11,6 +13,7 @@ abstract class RecordArtifactAction : ArtifactAction {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("Unit of the recording duration.")
     var timeUnit: TimeUnit = TimeUnit.MINUTES
         set(value) {
             val old = field

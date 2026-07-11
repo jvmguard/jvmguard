@@ -1,11 +1,14 @@
 package com.jvmguard.data.config.triggers
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.agent.config.transactions.ComparisonType
 import com.jvmguard.agent.helper.matcher.RegexPatternMatcher
 import java.util.regex.Pattern
 
+@ConfigDoc("Fires on transaction policy events (slow / very slow / overdue / error).")
 open class PolicyTrigger : DataTrigger() {
 
+    @field:ConfigDoc("Transaction-name filter selecting which transactions' policy events are counted.")
     var filter: String = "*"
         @Synchronized set(value) {
             val old = field
@@ -14,6 +17,7 @@ open class PolicyTrigger : DataTrigger() {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("Whether filter is wildcard or regex.")
     var comparisonType: ComparisonType = ComparisonType.WILDCARD
         set(value) {
             val old = field
@@ -21,10 +25,15 @@ open class PolicyTrigger : DataTrigger() {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("Count NORMAL-status policy events.")
     private var normal: Boolean = false
+    @field:ConfigDoc("Count SLOW policy events.")
     private var slow: Boolean = false
+    @field:ConfigDoc("Count VERY-SLOW policy events.")
     private var verySlow: Boolean = true
+    @field:ConfigDoc("Count OVERDUE policy events.")
     private var overdue: Boolean = false
+    @field:ConfigDoc("Count ERROR policy events.")
     private var error: Boolean = false
 
     var isNormal: Boolean

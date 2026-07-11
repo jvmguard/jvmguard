@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.transactions;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.instrument.transaction.DefinitionSite;
 import com.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import com.jvmguard.agent.instrument.transaction.annotation.MappedAnnotationDefinition;
@@ -8,14 +9,21 @@ import com.jvmguard.agent.instrument.transaction.annotation.MappedAnnotationDefi
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+@ConfigDoc("Marks classes/methods as transactions by the presence of a given annotation type.")
 public class MappedTransactionDef extends AnnotatedTransactionDef {
 
+    @ConfigDoc("Fully-qualified annotation type name whose presence marks classes/methods as transactions.")
     private String annotationName = "";
+    @ConfigDoc("Whether the annotation is expected on classes or on methods.")
     private AnnotatedTarget annotatedTarget = AnnotatedTarget.CLASS;
 
+    @ConfigDoc("If true, the annotation is inherited by subclasses/implementations.")
     private boolean interceptSubclasses = false;
 
+    @ConfigDoc("For class-level annotations, which methods to instrument (implementing/overriding public, or " +
+            "all public).")
     private MethodInterceptionMode methodInterceptionMode = MethodInterceptionMode.ALL_PUBLIC;
+    @ConfigDoc("If true, match against the declaring class rather than the concrete/runtime class.")
     private boolean useDeclaringClassName = false;
 
     @Override
@@ -130,7 +138,9 @@ public class MappedTransactionDef extends AnnotatedTransactionDef {
     }
 
     public enum AnnotatedTarget {
+        @ConfigDoc("The annotation is on classes.")
         CLASS("Annotated classes"),
+        @ConfigDoc("The annotation is on methods.")
         METHOD("Annotated methods");
 
         private final String verbose;
@@ -146,7 +156,9 @@ public class MappedTransactionDef extends AnnotatedTransactionDef {
     }
 
     public enum MethodInterceptionMode {
+        @ConfigDoc("Only implementing/overriding public methods.")
         IMPLEMENTING_PUBLIC("Implementing or overriding public methods"),
+        @ConfigDoc("All public methods of implementing/derived classes.")
         ALL_PUBLIC("All public methods of implementing or derived classes");
 
         private final String verbose;

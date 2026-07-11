@@ -1,6 +1,7 @@
 package com.jvmguard.agent.config.transactions;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.helper.matcher.PatternMatcher;
 
 import java.io.DataInputStream;
@@ -8,6 +9,7 @@ import java.io.DataOutputStream;
 
 public abstract class WildcardTransactionDef extends TransactionDef implements ComparisonTypeContainer {
 
+    @ConfigDoc("Whether className (and filters) are matched as a wildcard pattern or a regular expression.")
     private ComparisonType comparisonType = ComparisonType.WILDCARD;
 
     private transient PatternMatcher patternMatcher;

@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.Serializable;
 
 public class CheckedString implements Serializable {
+    @ConfigDoc("Whether 'value' is in effect (true) or a default should be used (false).")
     private boolean checked;
+    @ConfigDoc("The string value, used only when checked=true.")
     private String value = "";
 
     public CheckedString(boolean checked, String value) {

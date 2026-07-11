@@ -1,10 +1,17 @@
 package com.jvmguard.agent.config.transactions;
 
+import com.jvmguard.agent.config.base.ConfigDoc;
+
 public enum ReentryInhibition {
+    @ConfigDoc("Suppress re-entrant entries with the same name.")
     NAME("With the same name"),
+    @ConfigDoc("Suppress entries matching this same definition.")
     DEF("That match this entry"),
+    @ConfigDoc("Suppress entries with the same group name.")
     GROUP("With the same group name"),
+    @ConfigDoc("Suppress entries of the same transaction type.")
     TYPE("Of the same transaction type"),
+    @ConfigDoc("Suppress all further nested entries.")
     ALL("All further entries");
 
     private final String verbose;

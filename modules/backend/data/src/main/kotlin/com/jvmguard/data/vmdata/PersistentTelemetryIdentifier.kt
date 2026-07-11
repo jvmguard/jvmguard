@@ -1,11 +1,14 @@
 package com.jvmguard.data.vmdata
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.agent.config.base.DefaultConstructor
 
 open class PersistentTelemetryIdentifier : TelemetryIdentifier {
 
+    @field:ConfigDoc("Discriminator for an additional telemetry dimension (0 = none).")
     var additionalType: Int = DEFAULT_ADDITIONAL_TYPE
         private set
+    @field:ConfigDoc("Name of the additional telemetry dimension.")
     var additionalName: String = DEFAULT_ADDITIONAL_NAME
         private set
 

@@ -2,14 +2,18 @@ package com.jvmguard.agent.config.telemetry;
 
 import com.jvmguard.agent.comm.*;
 import com.jvmguard.agent.config.base.AbstractEntity;
+import com.jvmguard.agent.config.base.ConfigDoc;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
 public class MBeanLineConfig extends AbstractEntity implements AgentSerializable, CodecEntity {
 
+    @ConfigDoc("ObjectName of the MBean to read.")
     private String beanName = "";
+    @ConfigDoc("Attribute (optionally a path into a composite value) read from the MBean.")
     private String attributePath = "";
+    @ConfigDoc("Display name of this line/series in the chart.")
     private String lineName = "";
 
     public MBeanLineConfig() {

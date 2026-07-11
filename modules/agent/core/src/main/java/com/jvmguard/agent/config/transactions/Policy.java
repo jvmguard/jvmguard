@@ -2,30 +2,45 @@ package com.jvmguard.agent.config.transactions;
 
 import com.jvmguard.agent.comm.*;
 import com.jvmguard.agent.config.base.AbstractEntity;
+import com.jvmguard.agent.config.base.ConfigDoc;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
 public class Policy extends AbstractEntity implements AgentSerializable, CodecEntity {
 
+    @ConfigDoc("Whether this policy is active (health evaluation / thresholds applied to matching transactions).")
     private boolean active = true;
 
+    @ConfigDoc("Interpretation of slowValue: PERCENT (percent slower than the running average) or MILLIS " +
+            "(absolute ms).")
     private DurationType slowDurationType = DurationType.PERCENT;
+    @ConfigDoc("Threshold above which a call is classified slow (unit per slowDurationType).")
     private int slowValue = 500; // percent or ms
 
+    @ConfigDoc("Interpretation of verySlowValue (percent-over-average vs absolute ms).")
     private DurationType verySlowDurationType = DurationType.PERCENT;
+    @ConfigDoc("Threshold above which a call is classified very slow.")
     private int verySlowValue = 1000; // percent or ms
 
+    @ConfigDoc("Interpretation of overdueValue (percent vs ms) for a still-running call.")
     private DurationType overdueDurationType = DurationType.MILLIS;
+    @ConfigDoc("Duration after which an in-progress call is flagged overdue.")
     private int overdueValue = 500000; // percent or ms
 
+    @ConfigDoc("Treat thrown checked exceptions as transaction errors.")
     private boolean checkedExceptionAsError = false;
+    @ConfigDoc("Treat thrown runtime exceptions as transaction errors.")
     private boolean runtimeExceptionAsError = true;
+    @ConfigDoc("Treat thrown java.lang.Error throwables as transaction errors.")
     private boolean errorThrowableAsError = true;
 
+    @ConfigDoc("Treat logged WARN-level messages during the call as transaction errors.")
     private boolean loggedWarningAsError = false;
+    @ConfigDoc("Treat logged ERROR-level messages during the call as transaction errors.")
     private boolean loggedErrorAsError = true;
 
+    @ConfigDoc("Whether to split the call tree at this transaction boundary.")
     private boolean splitTree = true;
 
     public boolean isActive() {

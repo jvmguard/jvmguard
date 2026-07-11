@@ -1,7 +1,10 @@
 package com.jvmguard.data.config.triggers.actions
 
+import com.jvmguard.agent.config.base.ConfigDoc
+
 abstract class ArtifactAction : TriggerAction {
 
+    @field:ConfigDoc("Display name given to the produced artifact (snapshot/dump).")
     var artifactName: String = ""
         set(value) {
             val old = field
@@ -9,6 +12,7 @@ abstract class ArtifactAction : TriggerAction {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("If true, an inbox item is created linking the artifact.")
     private var createInboxItem: Boolean = false
 
     var isCreateInboxItem: Boolean

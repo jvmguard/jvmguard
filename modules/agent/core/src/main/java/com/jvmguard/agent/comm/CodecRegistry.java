@@ -1,11 +1,21 @@
 package com.jvmguard.agent.comm;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class CodecRegistry {
     private static final Map<String, Supplier<? extends CodecEntity>> FACTORIES = new LinkedHashMap<>();
+
+    public static List<CodecEntity> registeredPrototypes() {
+        List<CodecEntity> prototypes = new ArrayList<>(FACTORIES.size());
+        for (Supplier<? extends CodecEntity> factory : FACTORIES.values()) {
+            prototypes.add(factory.get());
+        }
+        return prototypes;
+    }
 
     @SafeVarargs
     public static void register(Supplier<? extends CodecEntity>... factories) {

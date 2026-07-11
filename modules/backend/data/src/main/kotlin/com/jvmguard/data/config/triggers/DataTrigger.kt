@@ -1,7 +1,10 @@
 package com.jvmguard.data.config.triggers
 
+import com.jvmguard.agent.config.base.ConfigDoc
+
 abstract class DataTrigger : Trigger() {
 
+    @field:ConfigDoc("Counting window over which 'count' events are accumulated.")
     var interval: Interval = Interval.HOUR
         set(value) {
             val old = field

@@ -2,6 +2,7 @@ package com.jvmguard.agent.config.telemetry;
 
 import com.jvmguard.agent.comm.*;
 import com.jvmguard.agent.config.base.AbstractEntity;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 
 import java.io.DataInputStream;
@@ -11,13 +12,19 @@ import java.util.List;
 
 public class MBeanTelemetryConfig extends AbstractEntity implements AgentSerializable, CodecEntity {
 
+    @ConfigDoc("Display name of this telemetry chart.")
     private String name = "";
 
+    @ConfigDoc("Measurement unit of the values (drives axis scaling and labels).")
     private TelemetryUnit unit = TelemetryUnit.PLAIN;
+    @ConfigDoc("Power-of-ten scale factor applied to raw MBean values before display.")
     private int scale = 0;
+    @ConfigDoc("If true, values are averaged across the VM group. If false, they are plotted per VM.")
     private boolean groupAveraged = true;
+    @ConfigDoc("If true, the chart lines are drawn stacked.")
     private boolean stacked = false;
 
+    @ConfigDoc("The individual MBean-attribute series that make up this chart.")
     private List<MBeanLineConfig> lines = new ArrayList<>();
 
     public MBeanTelemetryConfig(String name, TelemetryUnit unit, int scale, boolean groupAveraged, boolean stacked) {

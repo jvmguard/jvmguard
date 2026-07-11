@@ -1,10 +1,12 @@
 package com.jvmguard.data.config.triggers
 
+import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.data.base.StoredConfig
 import com.jvmguard.data.config.triggers.actions.TriggerAction
 
 abstract class Trigger protected constructor() : StoredConfig(), Cloneable {
 
+    @field:ConfigDoc("Whether the trigger is active.")
     private var enabled: Boolean = true
 
     var isEnabled: Boolean
@@ -15,8 +17,10 @@ abstract class Trigger protected constructor() : StoredConfig(), Cloneable {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("Actions executed when the trigger fires.")
     var triggerActions: MutableList<TriggerAction> = ArrayList()
 
+    @field:ConfigDoc("Number of qualifying events required to fire the trigger.")
     var count: Int = 10
         set(value) {
             val old = field
@@ -24,6 +28,7 @@ abstract class Trigger protected constructor() : StoredConfig(), Cloneable {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("Time window for the inhibition/rate limit.")
     var inhibitionInterval: Interval = Interval.HOUR
         set(value) {
             val old = field
@@ -31,6 +36,7 @@ abstract class Trigger protected constructor() : StoredConfig(), Cloneable {
             fireChanged(old, value)
         }
 
+    @field:ConfigDoc("Duration (in inhibitionInterval units) during which re-firing is suppressed.")
     var inhibitionTime: Int = 12
         set(value) {
             val old = field
@@ -66,9 +72,13 @@ abstract class Trigger protected constructor() : StoredConfig(), Cloneable {
         val multipleVerbose: String,
         private val secondMultiplier: Int,
     ) {
+        @ConfigDoc("Per-minute window.")
         MINUTE("minute", "minutes", 60),
+        @ConfigDoc("Per-hour window.")
         HOUR("hour", "hours", 60 * 60),
+        @ConfigDoc("Per-day window.")
         DAY("day", "days", 60 * 60 * 24),
+        @ConfigDoc("No time window (absolute count).")
         NONE("", "", 0);
 
         fun getSeconds(time: Int): Int = secondMultiplier * time

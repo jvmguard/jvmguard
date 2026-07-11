@@ -3,6 +3,7 @@ package com.jvmguard.agent.config.transactions;
 import com.jvmguard.agent.comm.*;
 import com.jvmguard.agent.config.base.AbstractEntity;
 import com.jvmguard.agent.config.base.CheckedString;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 import com.jvmguard.agent.config.base.EntityChangeListener;
 import com.jvmguard.agent.helper.matcher.PatternMatcher;
@@ -13,11 +14,16 @@ import java.io.DataOutputStream;
 
 public class PolicySubDef extends AbstractEntity implements PolicyDef, AgentSerializable, CodecEntity {
 
+    @ConfigDoc("If true, transactions matching this sub-def's filter are discarded instead of policy-evaluated.")
     private boolean discard = false;
+    @ConfigDoc("The policy applied to transaction names matching this sub-def's filter.")
     private Policy policy;
 
+    @ConfigDoc("Transaction-name filter selecting which named transactions this override applies to.")
     private String filter = "";
+    @ConfigDoc("Whether filter is a wildcard or a regular expression.")
     private ComparisonType comparisonType = ComparisonType.WILDCARD;
+    @ConfigDoc("If true, a wildcard filter is treated as a comma-separated list of alternatives.")
     private boolean wildcardCommaSeparated = true;
     private CheckedString description = new CheckedString(false, "");
 

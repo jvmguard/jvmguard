@@ -69,6 +69,15 @@ class RecordingGuardrailsTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
+    fun togglingConfigEditStagesToTheRootGroup() {
+        UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
+
+        use(checkbox(RecordingGuardrailsView.ID_ALLOW_CONFIG_EDIT)).click()
+
+        assertFalse(rootGuardrails().allowConfigEdit)
+    }
+
+    @Test
     fun maxRecordingMinutesAreStoredAsSeconds() {
         UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
 

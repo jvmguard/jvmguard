@@ -1,14 +1,17 @@
 package com.jvmguard.agent.config.transactions.naming;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 import com.jvmguard.agent.config.transactions.NamingElement;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+@ConfigDoc("Adds a literal text segment to the transaction name.")
 public class TextElement extends NamingElement {
 
+    @ConfigDoc("A literal text segment inserted verbatim into the transaction name.")
     private String text = "";
 
     public TextElement(String text) {

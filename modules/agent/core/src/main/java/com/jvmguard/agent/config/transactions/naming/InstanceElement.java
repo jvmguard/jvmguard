@@ -1,8 +1,10 @@
 package com.jvmguard.agent.config.transactions.naming;
 
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 import com.jvmguard.agent.config.transactions.EnvironmentException;
 
+@ConfigDoc("Adds a value obtained by a getter/field chain on the intercepted instance.")
 public class InstanceElement extends AbstractGetterElement {
 
     @DefaultConstructor

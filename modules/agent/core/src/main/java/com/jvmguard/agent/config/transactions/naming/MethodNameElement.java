@@ -1,11 +1,13 @@
 package com.jvmguard.agent.config.transactions.naming;
 
 import com.jvmguard.agent.comm.*;
+import com.jvmguard.agent.config.base.ConfigDoc;
 import com.jvmguard.agent.config.transactions.NamingElement;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+@ConfigDoc("Adds the intercepted method's name as a name segment.")
 public class MethodNameElement extends NamingElement {
 
     @Override
