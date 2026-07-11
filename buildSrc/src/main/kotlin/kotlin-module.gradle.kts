@@ -21,7 +21,7 @@ tasks {
                 jvmTarget.set(JvmTarget.JVM_21)
             }
             freeCompilerArgs = listOf("-Xskip-metadata-version-check")
-            if (!isIdeaActive() && compileTask.project.usedJavaVersion == JAVA_BASELINE_VERSION.toString()) {
+            if (!isIdeaSyncActive() && compileTask.project.usedJavaVersion == JAVA_BASELINE_VERSION.toString()) {
                 (compileTask as UsesKotlinJavaToolchain).kotlinJavaToolchain.jdk.use(
                     compileTask.project.getJavaHome(JAVA_BASELINE_VERSION),
                     JAVA_BASELINE_VERSION

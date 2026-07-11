@@ -42,7 +42,7 @@ tasks {
 }
 
 fun JavaCompile.applyJavaVersion(javaVersion: String, classFileVersion: String? = null) {
-    if (isIdeaActive() && !javaVersion.startsWith("1.") && classFileVersion?.startsWith("1.") != true) {
+    if (isIdeaSyncActive() && !javaVersion.startsWith("1.") && classFileVersion?.startsWith("1.") != true) {
         // contents of "java.se" (which IDEA does not handle)
         compileOptions.compilerArgs.addAll(
             listOf(

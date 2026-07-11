@@ -59,7 +59,7 @@ tasks {
 
 
     classes {
-        if (System.getProperty("idea.active") == "true" && System.getProperty("idea.sync.active") != "true") {
+        if (isIdeaRunActive()) {
             println("Configuring for IDE run")
             dependsOn(":ui:vaadinBuildFrontend")
         }

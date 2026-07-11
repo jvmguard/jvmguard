@@ -12,7 +12,7 @@ dependencies {
 
 tasks {
     classes {
-        if (System.getProperty("idea.active") == "true" && System.getProperty("idea.sync.active") != "true") {
+        if (isIdeaRunActive()) {
             println("Configuring Demo for IDE run")
             dependsOn(":agent:bootstrap:dist")
         }

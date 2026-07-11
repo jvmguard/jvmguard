@@ -79,7 +79,7 @@ fun getBuildVersion(): Long {
     val revisionNumber = try {
         getCommittedRevisionNumber()
     } catch (e: IOException) {
-        if (isIdeaActive()) 0L else throw e
+        if (isIdeaSyncActive()) 0L else throw e
     }
     return major * 10000000 + minor * 1000000 + revisionNumber
 }

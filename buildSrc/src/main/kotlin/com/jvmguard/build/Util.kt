@@ -160,8 +160,10 @@ fun Project.getReleaseRevision(product: String, fullVersion: String): Int? {
     }
 }
 
-fun isIdeaActive() = java.lang.Boolean.getBoolean("idea.sync.active")
+fun isIdeaActive() = java.lang.Boolean.getBoolean("idea.active")
+fun isIdeaSyncActive() = java.lang.Boolean.getBoolean("idea.sync.active")
 fun isIdeaScriptParserActive() = System.getProperty("org.gradle.kotlin.dsl.provider.mode") != null
+fun isIdeaRunActive() = isIdeaActive() && !isIdeaSyncActive()
 
 fun isWindows() = System.getProperty("os.name").lowercase(Locale.getDefault()).startsWith("win")
 fun isMacos() = System.getProperty("os.name").lowercase(Locale.getDefault()).startsWith("mac")
