@@ -46,6 +46,13 @@ open class GuardrailConfig : StoredConfig() {
             fireChanged(old, value)
         }
 
+    var allowRunGc: Boolean = true
+        set(value) {
+            val old = field
+            field = value
+            fireChanged(old, value)
+        }
+
     var apiAllowedIps: String = ""
         set(value) {
             val old = field

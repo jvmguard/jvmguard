@@ -123,6 +123,7 @@ class RunGcTool(ctx: McpToolContext) : McpTool(ctx) {
         ).annotations(action("Run GC")).build()
         return SyncToolSpecification(tool) { _, request ->
             val vmPath = request.arguments()["vm"] as String
+            ctx.requireRunGcAllowed()
             ctx.requireCaptureCooldown(vmPath)
             ctx.withConnection { conn ->
                 val vm = VmResolver.resolveVm(conn, vmPath)

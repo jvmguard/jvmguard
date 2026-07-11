@@ -75,7 +75,14 @@ The **Agent guardrails** tab holds opt-in restrictions on what an AI agent over 
 * **MCP read-only mode** blocks all mutating and capturing tools, leaving only read access.
 * **Diagnostic captures**  are toggles to deny heap dumps, JProfiler snapshots and JFR recordings
 individually, a cap on recording duration, and a minimum interval between captures on the same VM.
-* **Network** — an allowlist of IPv4/IPv6 addresses or CIDR ranges permitted to talk to the MCP server and the REST API.
+* **Mutating actions** are toggles for tools that change a running VM without producing an artifact, such as
+forcing a garbage collection.
+* **Network** contains an allowlist of IPv4/IPv6 addresses or CIDR ranges permitted to talk to the MCP server and
+the REST API.
+
+When the MCP server is disabled in the server configuration (`application.yaml`), the read-only, capture and
+mutating-action settings have no effect and are shown disabled. The IP allowlist also guards the REST API, so it stays
+active as long as either the MCP server or the REST API is enabled, and is only disabled when both are off.
 
 When a guardrail blocks a request, the reason is returned to the client so an agent can adjust its operations, and the
 denial is written to the audit log.

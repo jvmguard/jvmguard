@@ -4,6 +4,7 @@ import com.jvmguard.common.JvmGuardConfig
 import com.jvmguard.data.config.GlobalConfig
 import com.jvmguard.data.user.Roles
 import com.jvmguard.ui.shell.MainLayout
+import com.vaadin.flow.component.HasEnabled
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.textfield.IntegerField
@@ -19,13 +20,15 @@ import jakarta.annotation.security.RolesAllowed
 class AgentGuardrailsView : AbstractSettingsSectionView() {
 
     private val mcpEnabledInConfig = JvmGuardConfig.properties().isMcpEnabled
+    private val restEnabledInConfig = JvmGuardConfig.properties().isRestApiEnabled
 
     private val mcpReadOnly = Checkbox("MCP read-only mode (blocks mutating actions and diagnostic captures)").apply {
         testId = ID_MCP_READ_ONLY
         isEnabled = mcpEnabledInConfig
     }
     private val mcpDisabledNote = Span(
-        "The MCP server is disabled in the server configuration (application.yaml), so this setting has no effect."
+        "The MCP server is disabled in the server configuration (application.yaml). MCP-only guardrails " +
+            "have no effect.",
     ).apply {
         addClassName("jvmguard-field-hint")
         isVisible = !mcpEnabledInConfig
@@ -49,18 +52,41 @@ class AgentGuardrailsView : AbstractSettingsSectionView() {
     private val allowJps = Checkbox("Allow JProfiler snapshots").apply { testId = ID_ALLOW_JPS }
     private val allowJfr = Checkbox("Allow JFR recordings").apply { testId = ID_ALLOW_JFR }
 
+    private val allowRunGc = Checkbox("Allow forced garbage collection").apply { testId = ID_ALLOW_RUN_GC }
+
+    private val networkEnabledInConfig = mcpEnabledInConfig || restEnabledInConfig
+
     private val apiAllowedIps = TextField("Allowed API client IP addresses").apply {
         testId = ID_ALLOWED_IPS
         setWidthFull()
+        isEnabled = networkEnabledInConfig
         helperText = "Comma-separated IPv4/IPv6 addresses or CIDR ranges for the MCP server and REST API. Empty allows any address."
     }
+    private val networkDisabledNote = Span(
+        "Both the MCP server and the REST API are disabled in the server configuration (application.yaml), " +
+            "so the IP allowlist has no effect.",
+    ).apply {
+        addClassName("jvmguard-field-hint")
+        isVisible = !networkEnabledInConfig
+    }
+
+    private val toolControls: List<HasEnabled> =
+        listOf(allowHeapDump, allowJps, allowJfr, maxRecordingMinutes, captureCooldown, allowRunGc)
 
     init {
         add(
             settingsSection("MCP access", mcpReadOnly, mcpDisabledNote),
             settingsSection("Diagnostic captures", allowHeapDump, allowJps, allowJfr, maxRecordingMinutes, captureCooldown),
-            settingsSection("Network", apiAllowedIps),
+            settingsSection("Mutating actions", allowRunGc),
+            settingsSection("Network", apiAllowedIps, networkDisabledNote),
         )
+        mcpReadOnly.addValueChangeListener { updateToolControlsEnabled() }
+        updateToolControlsEnabled()
+    }
+
+    private fun updateToolControlsEnabled() {
+        val enabled = mcpEnabledInConfig && !mcpReadOnly.value
+        toolControls.forEach { it.isEnabled = enabled }
     }
 
     override fun bind(binder: Binder<GlobalConfig>) {
@@ -79,6 +105,8 @@ class AgentGuardrailsView : AbstractSettingsSectionView() {
             .bind({ it.guardrailConfig.allowJps }, { config, value -> config.guardrailConfig.allowJps = value })
         binder.forField(allowJfr)
             .bind({ it.guardrailConfig.allowJfr }, { config, value -> config.guardrailConfig.allowJfr = value })
+        binder.forField(allowRunGc)
+            .bind({ it.guardrailConfig.allowRunGc }, { config, value -> config.guardrailConfig.allowRunGc = value })
         binder.forField(apiAllowedIps)
             .bind({ it.guardrailConfig.apiAllowedIps }, { config, value -> config.guardrailConfig.apiAllowedIps = value.trim() })
     }
@@ -90,6 +118,7 @@ class AgentGuardrailsView : AbstractSettingsSectionView() {
         const val ID_ALLOW_HEAP_DUMP = "guardrails-allow-heap-dump"
         const val ID_ALLOW_JPS = "guardrails-allow-jps"
         const val ID_ALLOW_JFR = "guardrails-allow-jfr"
+        const val ID_ALLOW_RUN_GC = "guardrails-allow-run-gc"
         const val ID_ALLOWED_IPS = "guardrails-allowed-ips"
     }
 }

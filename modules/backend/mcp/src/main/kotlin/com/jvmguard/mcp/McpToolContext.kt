@@ -64,6 +64,12 @@ class McpToolContext(
         }
     }
 
+    fun requireRunGcAllowed() {
+        if (!guardrails().allowRunGc) {
+            throw GuardrailException("Forced garbage collection is disabled by an administrator.")
+        }
+    }
+
     fun recordCapture(vmPath: String) = captureRateLimiter.recordCapture(vmPath)
 
     fun currentBaseUrl(): String? = baseUrlHolder.get()?.takeIf { it.isNotBlank() }
