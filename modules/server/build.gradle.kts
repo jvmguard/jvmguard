@@ -72,6 +72,7 @@ tasks {
         from(zipTree(jar.flatMap { it.archiveFile }))
         archiveAppendix.set("server")
         archiveBaseName.set("jvmguard")
+        exclude("META-INF/*.kotlin_module")
     }
 
     projectsEvaluated(serverJar) {
