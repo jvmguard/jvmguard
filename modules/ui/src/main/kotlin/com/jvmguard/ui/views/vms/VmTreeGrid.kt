@@ -45,7 +45,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
     private var focusedColumn: Column<VmTreeItem>? = null
     private var lastSortColumn: Column<VmTreeItem>
     private var lastSortDirection = SortDirection.ASCENDING
-    private var defaultExpansionApplied = false
+    private val seededExpansionKeys = HashSet<String>()
     private var canProfile: Boolean? = null
     private var currentTime = 0L
     private var currentRange = SparkLineRange.LAST_HOUR
@@ -125,10 +125,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
         treeData.clear()
         treeData.addItems(roots) { it.children }
         dataProvider.refreshAll()
-        if (!defaultExpansionApplied) {
-            defaultExpansionApplied = true
-            applyDefaultExpansion(roots)
-        }
+        applyDefaultExpansion(roots)
     }
 
     private fun activateFocusedCell() {
@@ -141,15 +138,21 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
     }
 
     private fun applyDefaultExpansion(roots: List<VmTreeItem>) {
-        roots.minWithOrNull(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })?.let { expand(it) }
+        roots.minWithOrNull(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })?.let { seedExpansion(it) }
         expandSingleChildChains(roots)
     }
 
     private fun expandSingleChildChains(siblings: List<VmTreeItem>) {
         if (siblings.size == 1) {
             val only = siblings.first()
-            expand(only)
+            seedExpansion(only)
             expandSingleChildChains(only.children)
+        }
+    }
+
+    private fun seedExpansion(item: VmTreeItem) {
+        if (seededExpansionKeys.add(item.key)) {
+            expand(item)
         }
     }
 

@@ -27,6 +27,8 @@ import com.jvmguard.common.JvmGuardProperties
 import com.jvmguard.common.config.ConfigChangeListener
 import com.jvmguard.common.config.ConfigManager
 import com.jvmguard.common.notification.InboxManager
+import com.jvmguard.common.notification.ModificationEvent
+import com.jvmguard.common.notification.ModificationType
 import com.jvmguard.data.agent.UpdateArchiveFile
 import com.jvmguard.data.config.GlobalConfig
 import com.jvmguard.data.config.GroupHierarchyWrapper
@@ -41,6 +43,7 @@ import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.SmartLifecycle
 import org.springframework.stereotype.Component
 import java.io.File
@@ -73,6 +76,7 @@ class VmManagerImpl(
     @param:Qualifier("agentDirectory") private val agentDirectory: File,
     private val properties: JvmGuardProperties,
     private val dataSource: DataSource,
+    private val eventPublisher: ApplicationEventPublisher,
 ) : VmManager, ConfigChangeListener, SmartLifecycle {
 
     private val triggerLock = Any()
@@ -495,6 +499,8 @@ class VmManagerImpl(
         setVmConfig(connectionEntry, groupHierarchyWrapper, true)
 
         addPushHandler(agentConnection, vm)
+
+        eventPublisher.publishEvent(ModificationEvent(this, null, ModificationType.VMS))
     }
 
     override fun deleteVM(vm: VM): Boolean {
@@ -582,6 +588,7 @@ class VmManagerImpl(
 
     private fun addCloseListener(agentConnection: AgentConnectionImpl, vm: VM) {
         agentConnection.setCloseListener {
+            var disconnected = false
             synchronized(connectionRegistry) {
                 val connectionEntry = connectionRegistry.get(vm)
                 if (connectionEntry != null && connectionEntry.agentConnection === agentConnection) {
@@ -591,7 +598,11 @@ class VmManagerImpl(
                     connectionRegistry.removeInstanceVm(agentConnection.connectionInfo!!.instanceId)
                     vmRegistry.rootVmGroupData.disconnectVm(ArrayDeque(connectionEntry.groupNames.toList()), vm, System.nanoTime())
                     connectionEntry.connection.endTime = endTime
+                    disconnected = true
                 }
+            }
+            if (disconnected) {
+                eventPublisher.publishEvent(ModificationEvent(this@VmManagerImpl, null, ModificationType.VMS))
             }
         }
     }
