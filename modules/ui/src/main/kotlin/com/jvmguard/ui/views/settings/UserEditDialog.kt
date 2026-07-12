@@ -1,5 +1,6 @@
 package com.jvmguard.ui.views.settings
 
+import com.jvmguard.common.helper.GroupHelper
 import com.jvmguard.common.helper.PasswordHelper
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.user.User
@@ -53,7 +54,8 @@ class UserEditDialog(
         testId = ID_ACCESS_LEVEL
     }
     private val associatedGroups = MultiSelectComboBox<String>("Associated VM groups").apply {
-        setItems(groupPaths)
+        setItems(listOf(GroupHelper.ROOT_GROUP_ID) + groupPaths)
+        setItemLabelGenerator { if (it == GroupHelper.ROOT_GROUP_ID) ALL_GROUPS_LABEL else it }
         setWidthFull()
     }
 
@@ -201,6 +203,7 @@ class UserEditDialog(
     }
 
     companion object {
+        const val ALL_GROUPS_LABEL = "All VM groups"
         const val ID_LOGIN_NAME = "user-login-name"
         const val ID_SSO_EMAIL = "user-sso-email"
         const val ID_LDAP_DN = "user-ldap-dn"
