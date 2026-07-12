@@ -2,7 +2,7 @@ package com.jvmguard.data.config.triggers.actions
 
 import com.jvmguard.agent.config.base.ConfigDoc
 
-abstract class ArtifactAction : TriggerAction {
+sealed class ArtifactAction : TriggerAction {
 
     @field:ConfigDoc("Display name given to the produced artifact (snapshot/dump).")
     var artifactName: String = ""

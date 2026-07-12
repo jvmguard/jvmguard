@@ -2,20 +2,21 @@ package com.jvmguard.common.config
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.jvmguard.agent.config.base.AbstractEntity
 import com.jvmguard.common.Loggers
 import com.jvmguard.data.base.StoredConfig
 import com.jvmguard.data.base.StoredType
+import com.jvmguard.data.config.triggers.Trigger
+import com.jvmguard.data.config.triggers.actions.TriggerAction
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization
 import org.springframework.stereotype.Component
-import tools.jackson.databind.DatabindContext
-import tools.jackson.databind.DefaultTyping
 import tools.jackson.databind.cfg.EnumFeature
-import tools.jackson.databind.JavaType
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.json.JsonMapper
-import tools.jackson.databind.jsontype.PolymorphicTypeValidator
+import tools.jackson.databind.jsontype.NamedType
 import java.sql.Statement
+import kotlin.reflect.KClass
 import javax.sql.DataSource
 
 @Component
@@ -159,30 +160,27 @@ class ConfigStorage(private val dataSource: DataSource) {
 
         private const val TABLE = "config_storage"
 
-        // Default typing is required because the stored graphs are polymorphic
-        private val PERMISSIVE_TYPE_VALIDATOR: PolymorphicTypeValidator = object : PolymorphicTypeValidator.Base() {
-            override fun validateBaseType(ctx: DatabindContext, baseType: JavaType): Validity = Validity.ALLOWED
-
-            override fun validateSubClassName(ctx: DatabindContext, baseType: JavaType, subClassName: String): Validity = Validity.ALLOWED
-
-            override fun validateSubType(ctx: DatabindContext, baseType: JavaType, subType: JavaType): Validity = Validity.ALLOWED
-        }
-
         private val OBJECT_MAPPER: ObjectMapper = JsonMapper.builder()
-            .activateDefaultTyping(PERMISSIVE_TYPE_VALIDATOR, DefaultTyping.NON_FINAL)
+            .addModule(CodecEntityJacksonModule())
+            .registerSubtypes(*(sealedSubtypes(Trigger::class) + sealedSubtypes(TriggerAction::class)).toTypedArray())
             .enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
             .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
             .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
             .addMixIn(AbstractEntity::class.java, StoredBeanMixin::class.java)
+            .changeDefaultPropertyInclusion { it.withValueInclusion(JsonInclude.Include.NON_NULL) }
             .changeDefaultVisibility { vc ->
-                vc
-                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                vc.withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                     .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
                     .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
             }
             .build()
 
         fun objectMapper(): ObjectMapper = OBJECT_MAPPER
+
+        private fun sealedSubtypes(root: KClass<*>): List<NamedType> =
+            root.sealedSubclasses.flatMap { sub ->
+                if (sub.isAbstract) sealedSubtypes(sub) else listOf(NamedType(sub.java, sub.simpleName))
+            }
 
         private fun <T : StoredConfig> beanType(clazz: Class<T>): String {
             val storedType = clazz.getAnnotation(StoredType::class.java)

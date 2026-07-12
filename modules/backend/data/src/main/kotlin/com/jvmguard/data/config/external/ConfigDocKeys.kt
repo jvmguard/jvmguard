@@ -1,6 +1,5 @@
 package com.jvmguard.data.config.external
 
-import com.grack.nanojson.JsonArray
 import com.grack.nanojson.JsonObject
 import com.grack.nanojson.JsonParser
 import com.jvmguard.agent.comm.CodecEntity
@@ -18,10 +17,7 @@ object ConfigDocKeys {
     fun jacksonKeys(bean: Any): Set<String> =
         keysOf(JsonParser.any().from(ConfigStorage.objectMapper().writeValueAsString(bean)))
 
-    // Jackson default typing may wrap an object as ["<class>", {...}]
-    private fun keysOf(node: Any?): Set<String> = when (node) {
-        is JsonObject -> node.keys.toSet()
-        is JsonArray -> node.filterIsInstance<JsonObject>().firstOrNull()?.keys?.toSet() ?: emptySet()
-        else -> emptySet()
-    }
+    // "@type" is the polymorphic discriminator
+    private fun keysOf(node: Any?): Set<String> =
+        if (node is JsonObject) node.keys.toSet() - "@type" else emptySet()
 }

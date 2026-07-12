@@ -124,10 +124,6 @@ class TriggerDialog(
             }
             writer
         }
-
-        else -> {
-            { true }
-        }
     }
 
     private fun save() {

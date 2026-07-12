@@ -1,8 +1,10 @@
 package com.jvmguard.data.config.triggers.actions
 
+import com.jvmguard.data.base.PolymorphicJson
 import com.jvmguard.data.base.StoredConfig
 
-abstract class TriggerAction : StoredConfig(), Cloneable {
+@PolymorphicJson
+sealed class TriggerAction : StoredConfig(), Cloneable {
 
     abstract val actionType: ActionType
 

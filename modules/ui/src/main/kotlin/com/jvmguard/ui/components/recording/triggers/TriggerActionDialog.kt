@@ -65,7 +65,6 @@ abstract class TriggerActionDialog protected constructor(
                 is WebhookAction -> WebhookActionDialog(action, title, onSave)
                 is LogAction -> LogActionDialog(action, title, onSave)
                 is InboxAction -> InboxActionDialog(action, title, onSave)
-                else -> throw IllegalArgumentException("No editor for action type ${action.actionType}")
             }
     }
 }

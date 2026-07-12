@@ -1,20 +1,32 @@
 package com.jvmguard.common.config
 
+import com.jvmguard.agent.comm.CodecTypes
 import com.jvmguard.agent.config.VmType
+import com.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import com.jvmguard.data.config.GlobalConfig
 import com.jvmguard.data.config.GroupConfig
+import com.jvmguard.data.config.sets.ActionSet
+import com.jvmguard.data.config.sets.TransactionDefSet
 import com.jvmguard.data.config.sets.TriggerSet
 import com.jvmguard.data.config.triggers.ThresholdTrigger
+import com.jvmguard.data.config.triggers.actions.WebhookAction
 import com.jvmguard.data.user.AccessLevel
 import com.jvmguard.data.user.User
 import com.jvmguard.data.vmdata.VmIdentifier
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.ObjectMapper
 
 class ConfigStorageRoundTripTest {
 
     private val mapper: ObjectMapper = ConfigStorage.objectMapper()
+
+    companion object {
+        @BeforeAll
+        @JvmStatic
+        fun registerCodecTypes() = CodecTypes.registerAll()
+    }
 
     @Test
     fun userRoundTrips() {
@@ -94,12 +106,50 @@ class ConfigStorageRoundTripTest {
     }
 
     @Test
+    fun polymorphicActionSetRoundTrips() {
+        val set = ActionSet()
+        set.items.add(WebhookAction())
+        val json = mapper.writeValueAsString(set)
+        assertTrue(json.contains("\"@type\":\"WebhookAction\""), "TriggerAction polymorphism uses a short @type name")
+        val back = mapper.readValue(json, ActionSet::class.java)
+        assertEquals(1, back.items.size)
+        assertInstanceOf(WebhookAction::class.java, back.items.first())
+    }
+
+    @Test
+    fun codecBridgedTransactionDefSetRoundTrips() {
+        val set = TransactionDefSet()
+        set.items.add(DeclaredTransactionDef())
+        val json = mapper.writeValueAsString(set)
+        assertTrue(json.contains("\"@type\":\"DeclaredTransactionDef\""), "the nested agent bean is serialized through the codec bridge")
+        assertFalse(json.contains("com.jvmguard"), "no fully-qualified class names from the bridged agent bean")
+        val back = mapper.readValue(json, TransactionDefSet::class.java)
+        assertEquals(1, back.items.size)
+        assertInstanceOf(DeclaredTransactionDef::class.java, back.items.first())
+    }
+
+    @Test
     fun poolGroupConfigIdentityRoundTrips() {
         val gc = GroupConfig.createDefault(VmIdentifier("Demo/Storefront", VmType.POOL))
         val back = roundTrip(gc, GroupConfig::class.java)
         assertEquals("Demo/Storefront", back.hierarchyPath, "hierarchyPath must survive the round trip")
         assertEquals(VmType.POOL, back.groupType, "groupType must survive so a pool is not reclassified as GROUP")
         assertEquals(gc.groupIdentifier, back.groupIdentifier, "the group identifier must be stable across reload")
+    }
+
+    @Test
+    fun serializedShapeIsCompactAndStable() {
+        val gc = GroupConfig.createDefault()
+        gc.triggerSettings.triggers.add(ThresholdTrigger())
+        val json = mapper.writeValueAsString(gc)
+
+        // Polymorphism is a compact inline discriminator, on both the server and the agent side.
+        assertTrue(json.contains("\"@type\":\"ThresholdTrigger\""), "server polymorphism uses a short @type name")
+        assertTrue(json.contains("\"@type\":\"DeclaredTransactionDef\""), "agent beans keep their codec @type name")
+        // No blanket default typing: no fully-qualified class names, no wrapper arrays around monomorphic values.
+        assertFalse(json.contains("com.jvmguard"), "no fully-qualified class names embedded in the config")
+        assertFalse(json.contains("java.util.ArrayList"), "collections are not type-tagged")
+        assertFalse(json.contains("\"id\":null"), "null ids are omitted")
     }
 
     private fun <T> roundTrip(bean: T, type: Class<T>): T =

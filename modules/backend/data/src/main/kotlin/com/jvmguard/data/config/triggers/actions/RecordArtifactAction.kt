@@ -3,7 +3,7 @@ package com.jvmguard.data.config.triggers.actions
 import com.jvmguard.agent.config.base.ConfigDoc
 import com.jvmguard.data.config.triggers.TimeUnit
 
-abstract class RecordArtifactAction : ArtifactAction {
+sealed class RecordArtifactAction : ArtifactAction {
 
     @field:ConfigDoc("Recording duration.")
     var time: Int = 1

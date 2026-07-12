@@ -1,10 +1,12 @@
 package com.jvmguard.data.config.triggers
 
 import com.jvmguard.agent.config.base.ConfigDoc
+import com.jvmguard.data.base.PolymorphicJson
 import com.jvmguard.data.base.StoredConfig
 import com.jvmguard.data.config.triggers.actions.TriggerAction
 
-abstract class Trigger protected constructor() : StoredConfig(), Cloneable {
+@PolymorphicJson
+sealed class Trigger protected constructor() : StoredConfig(), Cloneable {
 
     @field:ConfigDoc("Whether the trigger is active.")
     private var enabled: Boolean = true

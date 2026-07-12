@@ -21,11 +21,22 @@ One shared `ObjectMapper`, configured three ways to handle these JavaBeans:
 
 - **Field-based visibility** (`GETTER`/`IS_GETTER` = `NONE`, `FIELD` = `ANY`): the beans carry *computed*
   getters (`VmIdentifier.getUnqualifiedPath()` is self-referential; `ThresholdTrigger.getDescription()`
-  NPEs on a null sub-field) that must not be persisted. Field access persists actual state and
-  ignores those.
-- **Default typing `NON_FINAL`**: the stored graphs are polymorphic (`TransactionDefSet` holds
-  `TransactionDef` subtypes, etc.); type info is embedded so deserialization resolves the concrete subtype.
-- **A mixin on `AbstractEntity`** ignoring `modified` / `changeListeners` (transient runtime state).
+  NPEs on a null sub-field; `GlobalConfig.authenticationContainers` aggregates concrete sub-configs) that
+  must not be persisted. Field access persists actual state and ignores those.
+- **Targeted polymorphism** (not blanket default typing): only the genuinely polymorphic server-bean
+  hierarchies carry `@JsonTypeInfo(use = NAME, include = PROPERTY, property = "@type")` — currently the
+  **sealed** `Trigger` and `TriggerAction`. Their concrete subtypes are registered in `objectMapper()` by
+  walking the sealed tree (keyed by simple name), so there is no `@JsonSubTypes` list to maintain and a new
+  subtype is picked up automatically (the compiler also guarantees the set is closed). Monomorphic fields and
+  collections get no type info, so the JSON stays compact and carries no embedded class names (a rename is an
+  annotation edit, not a data migration).
+- **Agent beans nested in Jackson-stored server beans** (`TransactionDefSet` → `TransactionDef`,
+  `TelemetrySet` → `MBeanTelemetryConfig`, and `GroupConfig.agentGroupConfig`) must stay Jackson-free, so
+  `CodecEntityJacksonModule` bridges any `CodecEntity` through the codec (`JsonAgentWriter`/`Reader`). Their
+  JSON is therefore identical to the export's `agentConfig` (a compact `@type`), with no second subtype
+  registry duplicating `CodecTypes`.
+- **A mixin on `AbstractEntity`** ignoring `modified` / `changeListeners` (transient runtime state);
+  `@JsonInclude(NON_NULL)` drops null ids and other absent values.
 
 Used in two places: **DB storage** (`config_storage.content` is Jackson JSON) and the **`serverConfig`
 part of the export file**.
@@ -78,16 +89,16 @@ sources — a nanojson envelope, codec-produced subtrees, and Jackson-produced s
       "recordingOptions": {"@type":"RecordingOptions","retransformationType":"STARTUP"},
       "transactionSettings": { … },
       "telemetrySettings": { … } },
-    "serverConfig": ["com.jvmguard…ServerGroupConfig", { … }]   ← JACKSON (type-tagged array)
+    "serverConfig": { … }                                     ← JACKSON (plain object; @type only where polymorphic)
   }],
-  "serverConfig": ["com.jvmguard…ServerConfig", { … }]    ← JACKSON (global/users/sets)
+  "serverConfig": { … }                                   ← JACKSON (global/users/sets)
 }
 ```
 
 - The **envelope** (`version`, `type`, `groups`, `path`, `groupType`) is plain JSON.
 - `groups[].agentConfig` is built by handing the agent bean to `JsonAgentWriter` → a nanojson object.
 - `groups[].serverConfig` (per-group) and the top-level `serverConfig` are built by
-  `ConfigStorage.objectMapper().writeValueAsString(...)` → a Jackson type-tagged array, embedded verbatim.
+  `ConfigStorage.objectMapper().writeValueAsString(...)` → a plain Jackson object, embedded verbatim.
 
 nanojson is the **container**; the codec and Jackson each produce JSON fragments that nanojson holds.
 
@@ -103,6 +114,7 @@ nanojson is the **container**; the codec and Jackson each produce JSON fragments
 | Concern | Location |
 |---|---|
 | Jackson mapper (shared, server) | `com.jvmguard.common.config.ConfigStorage#objectMapper()` |
+| Jackson↔codec bridge (agent beans in server sets) | `com.jvmguard.common.config.CodecEntityJacksonModule` |
 | Storage (server beans → DB JSON) | `com.jvmguard.common.config.ConfigStorage` |
 | Codec interfaces + backends | `com.jvmguard.agent.comm` (`CodecBean`, `AgentReader`/`AgentWriter`, `BinaryAgent*`, `JsonAgent*`) |
 | Codec type registry | `com.jvmguard.agent.comm.CodecRegistry`, `CodecTypes.registerAll()` |

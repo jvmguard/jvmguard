@@ -1,9 +1,11 @@
 package com.jvmguard.common.config
 
+import com.jvmguard.agent.comm.CodecTypes
 import com.jvmguard.agent.config.VmType
 import com.jvmguard.data.vmdata.VmIdentifier
 import org.h2.jdbcx.JdbcDataSource
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
@@ -44,5 +46,9 @@ class ConfigManagerGroupConfigTest {
 
     companion object {
         private val DB_COUNTER = AtomicInteger()
+
+        @BeforeAll
+        @JvmStatic
+        fun registerCodecTypes() = CodecTypes.registerAll()
     }
 }
