@@ -1,6 +1,7 @@
 package com.jvmguard.ui.views.account
 
 import com.jvmguard.data.user.User
+import com.jvmguard.data.user.UserType
 import com.jvmguard.ui.components.TwoFactorEnroller
 import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.shell.MainLayout
@@ -45,12 +46,12 @@ class AccountTwoFactorView : AbstractAccountSectionView() {
 
     private fun render() {
         body.removeAll()
+        if (isOidc()) {
+            addInfoText("Two-factor authentication is handled by the single sign-on provider.")
+            return
+        }
         if (!globalUse2fa()) {
-            body.add(
-                settingsSection(
-                    "Two-factor authentication",
-                    Span("Two-factor authentication is disabled globally.").apply { addClassName("jvmguard-field-hint") })
-            )
+            addInfoText("Two-factor authentication is disabled globally.")
             return
         }
         if (enrolling) {
@@ -58,6 +59,14 @@ class AccountTwoFactorView : AbstractAccountSectionView() {
         } else {
             renderStatus()
         }
+    }
+
+    private fun addInfoText(text: String) {
+        body.add(
+            settingsSection(
+                "Two-factor authentication",
+                Span(text).apply { addClassName("jvmguard-field-hint") })
+        )
     }
 
     private fun renderEnrolling() {
@@ -125,6 +134,9 @@ class AccountTwoFactorView : AbstractAccountSectionView() {
         defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
         isPadding = false
     }
+
+    private fun isOidc(): Boolean =
+        Sessions.current()?.user?.userType == UserType.OIDC
 
     private fun globalUse2fa(): Boolean =
         Sessions.current()?.serverConnection?.getGlobalConfig(false)?.use2fa == true

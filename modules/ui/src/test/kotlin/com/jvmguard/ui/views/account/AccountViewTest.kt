@@ -1,5 +1,6 @@
 package com.jvmguard.ui.views.account
 
+import com.jvmguard.data.user.UserType
 import com.jvmguard.ui.JvmGuardBrowserlessTest
 import com.jvmguard.ui.server.MockConnections
 import com.jvmguard.ui.server.Sessions
@@ -44,6 +45,16 @@ class AccountViewTest : JvmGuardBrowserlessTest() {
         use(cancel()).click()
 
         assertEquals("Administrator", connection.user.fullName, "Cancel must not persist the edit")
+    }
+
+    @Test
+    fun ssoUsersSeeAProviderManagedTwoFactorNotice() {
+        connection.user.userType = UserType.OIDC
+        UI.getCurrent().navigate(AccountTwoFactorView::class.java)
+        assertTrue(
+            find<Span>().all().any { "handled by the single sign-on provider" in it.text },
+            "SSO users see a notice that two-factor is managed by the provider",
+        )
     }
 
     @Test
