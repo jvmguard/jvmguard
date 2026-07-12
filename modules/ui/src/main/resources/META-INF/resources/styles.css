@@ -699,10 +699,20 @@ vaadin-button.jvmguard-filter-active vaadin-icon {
 }
 
 /*
- * Fix vertical scrollbar in unsized dialogs
+ * Fix the phantom scrollbar / clipped last field in auto-sized dialogs.
+ *
+ * Vaadin auto-sizes the dialog overlay to header + content + footer, where [part=content] sizes to its
+ * content's layout box. However, a trailing control can have an invisible sub-element that overflows that box
+ * (e.g. a native <input> of a vaadin-checkbox is 26px tall inside the 18px parent element, which adds 4px below),
+ * and the overlay does not grow accordingly. [part=content] is `overflow: auto`, so that this excess height becomes
+ * a phantom scrollbar and clips the focus ring of the component. Vaadin also sets the bottom padding of the content
+ *  to zero when a footer is present, which leaves the last control with no vertical room.
+ *
+ * This restores a bottom padding on the content for dialogs without an explicit height.
  */
-vaadin-dialog-overlay:not([has-bounds-set])::part(content) {
+vaadin-dialog[theme~="jvmguard-fit-content"]::part(content) {
     flex: 0 1 auto;
+    padding-bottom: var(--vaadin-padding-m);
 }
 
 .jvmguard-step-title {
