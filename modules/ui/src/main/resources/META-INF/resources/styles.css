@@ -5,11 +5,11 @@ html {
     /* Slightly denser typography */
     --aura-base-font-size: 13;
 
-    --jvmguard-header-background: #021527;
-    --jvmguard-header-foreground: #ffffff;
+    --jvmguard-header-background: #fbfcfd;
+    --jvmguard-header-foreground: #021527;
+    --jvmguard-header-shadow: 0 2px 6px rgba(2, 21, 39, 0.08);
     --jvmguard-welcome-color: #1e84dd;
 
-    /* Dark navbar */
     --vaadin-app-layout-navbar-background: var(--jvmguard-header-background);
 
     --jvmguard-status-ok: #98df58;
@@ -25,6 +25,12 @@ html {
     --jvmguard-sparkline-label: #999999;
 }
 
+html[jvmguard-scheme="dark"] {
+    --jvmguard-header-background: #1b2431;
+    --jvmguard-header-foreground: #ffffff;
+    --jvmguard-header-shadow: none;
+}
+
 @media (prefers-color-scheme: dark) {
     html {
         --jvmguard-sparkline-value: #69c1fc;
@@ -36,6 +42,9 @@ html {
 vaadin-app-layout.jvmguard-shell::part(navbar) {
     color: var(--jvmguard-header-foreground);
     min-height: 56px;
+    padding-block: 4px;
+    box-shadow: var(--jvmguard-header-shadow);
+    z-index: 1;
 }
 
 /* Otherwise the content card sits flush under the fixed navbar.
@@ -160,15 +169,6 @@ vaadin-tabsheet.jvmguard-recording-tabsheet::part(tabs-container) {
     white-space: nowrap;
 }
 
-/* The Save button sits on the dark settings navbar; Aura's default disabled style dims the whole
-   button via opacity, leaving the label unreadable there. Drive Aura's own button properties instead
-   and neutralize the opacity, so the disabled state is a legible faded chip on the dark bar. */
-.jvmguard-settings-save[disabled] {
-    --vaadin-button-text-color: rgba(255, 255, 255, 0.6);
-    --vaadin-button-background: rgba(255, 255, 255, 0.12);
-    opacity: 1 !important;
-}
-
 /* Extra separation before a control that starts a new logical group within a section. */
 .jvmguard-settings-gap-before {
     margin-top: 1.25rem;
@@ -210,14 +210,21 @@ vaadin-app-layout.jvmguard-shell:not([overlay]) .jvmguard-header {
     padding: 0;
 }
 
+/* Light is the default (matches the default light header): black-text wordmark. The dark navbar needs
+   the white-text variant. Only the wordmark colour differs between the two files; the brand icon
+   (blue disc) is identical. */
 .jvmguard-logo {
     width: 193px;
     height: 45px;
     flex-shrink: 0;
-    background-image: url('icons/header_logo.svg');
+    background-image: url('icons/header_logo_light.svg');
     background-repeat: no-repeat;
     background-position: left center;
     background-size: contain;
+}
+
+html[jvmguard-scheme="dark"] .jvmguard-logo {
+    background-image: url('icons/header_logo.svg');
 }
 
 /* On a narrow header drop the wordmark and keep just the icon, so the brand never vanishes. */
@@ -232,7 +239,7 @@ vaadin-app-layout.jvmguard-shell:not([overlay]) .jvmguard-header {
     }
 }
 
-/* header controls are light on the dark bar */
+/* header controls take the header foreground (white on the dark bar, dark ink on the light bar) */
 .jvmguard-header vaadin-button,
 .jvmguard-header vaadin-button::part(label),
 .jvmguard-header vaadin-button vaadin-icon {
@@ -241,10 +248,11 @@ vaadin-app-layout.jvmguard-shell:not([overlay]) .jvmguard-header {
 
 .jvmguard-header vaadin-button {
     --aura-surface-opacity: 0;
+    --vaadin-button-background: transparent;
 }
 
 .jvmguard-header vaadin-button:hover {
-    --aura-surface-opacity: 0.18;
+    --vaadin-button-background: color-mix(in srgb, var(--jvmguard-header-foreground) 14%, transparent);
 }
 
 .jvmguard-header vaadin-button[disabled],
@@ -291,7 +299,7 @@ vaadin-menu-bar.jvmguard-dropdown-button::part(container) {
 }
 
 .jvmguard-header vaadin-avatar {
-    --vaadin-avatar-background: rgba(255, 255, 255, 0.2);
+    --vaadin-avatar-background: color-mix(in srgb, var(--jvmguard-header-foreground) 20%, transparent);
     --vaadin-avatar-text-color: var(--jvmguard-header-foreground);
 }
 
