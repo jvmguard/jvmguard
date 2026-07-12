@@ -324,10 +324,9 @@ tasks {
 
     // Vaadin generates frontend/index.html but the plugin does not register it as an input of vaadinBuildFrontend
     named("vaadinBuildFrontend") {
-        inputs.file(layout.projectDirectory.file("frontend/index.html"))
+        inputs.files(layout.projectDirectory.file("frontend/index.html")) // FileCollection tolerates a missing entry
             .withPropertyName("frontendIndexHtml")
             .withPathSensitivity(PathSensitivity.RELATIVE)
-            .optional(true)
     }
 }
 
