@@ -61,6 +61,14 @@ vaadin-app-layout.jvmguard-shell:not([overlay]) vaadin-drawer-toggle {
     display: none;
 }
 
+/* switching areas (e.g. General -> Account settings) changes the width of the nav bar.
+   The nav items are replaced immediately, but the side nav has an animation to expand or
+   contract. When expanding, the new side nav texts are clipped for a while.
+   This disabled the animation except for overlay mode. */
+vaadin-app-layout.jvmguard-shell:not([overlay]) {
+    --vaadin-app-layout-transition-duration: 0s;
+}
+
 vaadin-app-layout.jvmguard-shell:not([overlay]) .jvmguard-nav {
     margin-top: var(--aura-app-layout-inset, 0.75rem);
 }
