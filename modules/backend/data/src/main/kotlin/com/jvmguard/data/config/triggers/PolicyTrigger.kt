@@ -11,19 +11,13 @@ open class PolicyTrigger : DataTrigger() {
     @field:ConfigDoc("Transaction-name filter selecting which transactions' policy events are counted.")
     var filter: String = "*"
         @Synchronized set(value) {
-            val old = field
-            field = value
             pattern = null
-            fireChanged(old, value)
+            field = changed(field, value)
         }
 
     @field:ConfigDoc("Whether filter is wildcard or regex.")
     var comparisonType: ComparisonType = ComparisonType.WILDCARD
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @field:ConfigDoc("Count NORMAL-status policy events.")
     private var normal: Boolean = false
@@ -38,43 +32,23 @@ open class PolicyTrigger : DataTrigger() {
 
     var isNormal: Boolean
         get() = normal
-        set(value) {
-            val old = normal
-            normal = value
-            fireChanged(old, value)
-        }
+        set(value) { normal = changed(normal, value) }
 
     var isSlow: Boolean
         get() = slow
-        set(value) {
-            val old = slow
-            slow = value
-            fireChanged(old, value)
-        }
+        set(value) { slow = changed(slow, value) }
 
     var isVerySlow: Boolean
         get() = verySlow
-        set(value) {
-            val old = verySlow
-            verySlow = value
-            fireChanged(old, value)
-        }
+        set(value) { verySlow = changed(verySlow, value) }
 
     var isOverdue: Boolean
         get() = overdue
-        set(value) {
-            val old = overdue
-            overdue = value
-            fireChanged(old, value)
-        }
+        set(value) { overdue = changed(overdue, value) }
 
     var isError: Boolean
         get() = error
-        set(value) {
-            val old = error
-            error = value
-            fireChanged(old, value)
-        }
+        set(value) { error = changed(error, value) }
 
     @Transient
     private var pattern: Pattern? = null

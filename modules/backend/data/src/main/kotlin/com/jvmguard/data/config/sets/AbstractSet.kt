@@ -5,11 +5,7 @@ import com.jvmguard.data.base.StoredConfig
 abstract class AbstractSet<T> : StoredConfig, Comparable<AbstractSet<T>> {
 
     var name: String = "New set"
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var items: MutableList<T> = ArrayList()
 

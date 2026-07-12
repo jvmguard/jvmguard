@@ -7,9 +7,6 @@ abstract class HierarchicalConfig(private var hierarchyPath: String) : StoredCon
     override fun getHierarchyPath(): String = hierarchyPath
 
     override fun setHierarchyPath(hierarchyPath: String) {
-        val trimmed = hierarchyPath.trim()
-        val oldValue = this.hierarchyPath
-        this.hierarchyPath = trimmed
-        fireChanged(oldValue, trimmed)
+        this.hierarchyPath = changed(this.hierarchyPath, hierarchyPath.trim())
     }
 }

@@ -7,27 +7,15 @@ open class ConnectionTrigger : Trigger() {
 
     @field:ConfigDoc("Whether the trigger may fire immediately or only after the connection count is first reached.")
     var startMode: StartMode = StartMode.IMMEDIATELY
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @field:ConfigDoc("Time unit for minimumTime.")
     var minimumTimeUnit: TimeUnit = TimeUnit.MINUTES
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @field:ConfigDoc("Minimum connection duration before a VM connection counts toward the trigger.")
     var minimumTime: Int = 1
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     override val triggerType: TriggerType
         get() = TriggerType.CONNECTION

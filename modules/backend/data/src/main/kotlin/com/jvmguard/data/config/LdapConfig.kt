@@ -5,42 +5,22 @@ import com.jvmguard.data.base.StoredConfig
 open class LdapConfig : StoredConfig(), AuthenticationContainer {
 
     var url: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var useStartTls: Boolean = false
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     private var authenticate: Boolean = false
 
     override var isAuthenticate: Boolean
         get() = authenticate
-        set(value) {
-            val old = authenticate
-            authenticate = value
-            fireChanged(old, value)
-        }
+        set(value) { authenticate = changed(authenticate, value) }
 
     override var userName: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     override var password: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var userMappings: MutableList<LdapUserMapping> = ArrayList()
 

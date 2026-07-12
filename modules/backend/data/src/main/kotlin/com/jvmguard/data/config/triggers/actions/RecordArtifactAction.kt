@@ -7,19 +7,11 @@ abstract class RecordArtifactAction : ArtifactAction {
 
     @field:ConfigDoc("Recording duration.")
     var time: Int = 1
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @field:ConfigDoc("Unit of the recording duration.")
     var timeUnit: TimeUnit = TimeUnit.MINUTES
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     protected constructor()
 

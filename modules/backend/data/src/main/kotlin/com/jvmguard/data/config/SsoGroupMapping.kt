@@ -6,18 +6,10 @@ import com.jvmguard.data.user.AccessLevel
 open class SsoGroupMapping : StoredConfig() {
 
     var claimValue: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var accessLevel: AccessLevel = AccessLevel.VIEWER
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     val isCatchAll: Boolean
         get() = claimValue == CATCH_ALL

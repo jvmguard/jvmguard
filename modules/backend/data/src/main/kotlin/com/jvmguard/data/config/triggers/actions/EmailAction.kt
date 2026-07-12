@@ -9,19 +9,11 @@ open class EmailAction : TextAction {
 
     @field:ConfigDoc("Recipient email address.")
     var email: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @field:ConfigDoc("Severity label of the email (Info/Warning/Error).")
     var category: String = LogCategory.WARNING.toString()
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @DefaultConstructor
     constructor()

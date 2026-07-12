@@ -6,11 +6,7 @@ abstract class DataTrigger : Trigger() {
 
     @field:ConfigDoc("Counting window over which 'count' events are accumulated.")
     var interval: Interval = Interval.HOUR
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     override fun isIdenticalCounterType(trigger: Trigger): Boolean {
         if (trigger !is DataTrigger || !super.isIdenticalCounterType(trigger)) {

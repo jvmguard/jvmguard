@@ -8,11 +8,7 @@ open class ThresholdTrigger : DataTrigger() {
 
     @field:ConfigDoc("Identifies which threshold's violations this trigger counts.")
     var thresholdIdentifier: ThresholdIdentifier? = null
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     override val triggerType: TriggerType
         get() = TriggerType.THRESHOLD

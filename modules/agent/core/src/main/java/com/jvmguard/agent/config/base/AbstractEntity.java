@@ -46,6 +46,11 @@ public abstract class AbstractEntity implements Identifiable, EntityChangeListen
         }
     }
 
+    protected <T> T changed(@Nullable T oldValue, T newValue) {
+        fireChanged(oldValue, newValue);
+        return newValue;
+    }
+
     protected void fireChanged() {
         for (EntityChangeListener beanChangeListener : changeListeners) {
             beanChangeListener.changed();

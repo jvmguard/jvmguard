@@ -6,11 +6,7 @@ abstract class TextAction : TriggerAction {
 
     @field:ConfigDoc("The message/log text.")
     var text: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     protected constructor()
 

@@ -9,11 +9,7 @@ open class LogAction : TextAction {
 
     @field:ConfigDoc("Log severity (INFO/WARNING/ERROR).")
     var category: LogCategory = LogCategory.INFO
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @DefaultConstructor
     constructor()

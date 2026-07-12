@@ -17,11 +17,7 @@ open class SnapshotFile(
         private set
 
     var name: String = name
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var uncompressedLength: Long = UNKNOWN_LENGTH.toLong()
         private set

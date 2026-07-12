@@ -6,22 +6,14 @@ abstract class ArtifactAction : TriggerAction {
 
     @field:ConfigDoc("Display name given to the produced artifact (snapshot/dump).")
     var artifactName: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @field:ConfigDoc("If true, an inbox item is created linking the artifact.")
     private var createInboxItem: Boolean = false
 
     var isCreateInboxItem: Boolean
         get() = createInboxItem
-        set(value) {
-            val old = createInboxItem
-            createInboxItem = value
-            fireChanged(old, value)
-        }
+        set(value) { createInboxItem = changed(createInboxItem, value) }
 
     protected constructor() {
         artifactName = createDefaultArtifactName()

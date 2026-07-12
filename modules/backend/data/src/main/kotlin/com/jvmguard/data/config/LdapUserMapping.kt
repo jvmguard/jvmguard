@@ -6,25 +6,13 @@ import com.jvmguard.data.user.AccessLevel
 open class LdapUserMapping : StoredConfig() {
 
     var searchBase: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var userFilter: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var accessLevel: AccessLevel = AccessLevel.DEFAULT
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     override fun toString(): String =
         "LdapUserMapping{searchBase='$searchBase', userFilter='$userFilter', accessLevel=$accessLevel}"

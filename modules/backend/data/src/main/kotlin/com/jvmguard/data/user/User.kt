@@ -11,62 +11,30 @@ import java.time.Instant
 open class User @DefaultConstructor constructor() : StoredConfig(), Cloneable, UserSpec {
 
     override var loginName: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var userType: UserType = UserType.LOCAL
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var ldapDn: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var ssoIssuer: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var ssoSubject: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     override var fullName: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var passwordHash: String? = null
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     @get:NotNull
     @setparam:NotNull
     var apiKeyHash: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     private var mustChangePassword: Boolean = false
     private var reset2fa: Boolean = false
@@ -75,70 +43,34 @@ open class User @DefaultConstructor constructor() : StoredConfig(), Cloneable, U
 
     var isMustChangePassword: Boolean
         get() = mustChangePassword
-        set(value) {
-            val old = mustChangePassword
-            mustChangePassword = value
-            fireChanged(old, value)
-        }
+        set(value) { mustChangePassword = changed(mustChangePassword, value) }
 
     var isReset2fa: Boolean
         get() = reset2fa
-        set(value) {
-            val old = reset2fa
-            reset2fa = value
-            fireChanged(old, value)
-        }
+        set(value) { reset2fa = changed(reset2fa, value) }
 
     var isExemptFrom2fa: Boolean
         get() = exemptFrom2fa
-        set(value) {
-            val old = exemptFrom2fa
-            exemptFrom2fa = value
-            fireChanged(old, value)
-        }
+        set(value) { exemptFrom2fa = changed(exemptFrom2fa, value) }
 
     var isUse2fa: Boolean
         get() = use2fa
-        set(value) {
-            val old = use2fa
-            use2fa = value
-            fireChanged(old, value)
-        }
+        set(value) { use2fa = changed(use2fa, value) }
 
     var encryptedTotpSecret: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     override var email: String = ""
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var accessLevel: AccessLevel = AccessLevel.DEFAULT
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var lastLogin: Instant? = null
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var groupNames: MutableList<String> = ArrayList()
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var viewSettings: ViewSettings = ViewSettings()
 

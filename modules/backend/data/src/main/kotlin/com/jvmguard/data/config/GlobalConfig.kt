@@ -9,11 +9,7 @@ import com.jvmguard.data.base.StoredType
 open class GlobalConfig : StoredConfig() {
 
     var use2fa: Boolean = false
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var smtpConfig: SmtpConfig = SmtpConfig()
 
@@ -27,67 +23,34 @@ open class GlobalConfig : StoredConfig() {
         private set
 
     var infiniteTransactionDays: Boolean = false
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var fixedTransactionDays: Int = 60
-        set(value) {
-            val used = getUsedRetentionDays(value)
-            val old = field
-            field = used
-            fireChanged(old, used)
-        }
+        set(value) { field = changed(field, getUsedRetentionDays(value)) }
 
     var violationDays: Int = 31
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var snapshotFileDays: Int = 30
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var payloadCap: Int = 50000
         private set
 
     var transactionCap: Int = 20000
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var windowTitle: CheckedString = CheckedString()
         private set
 
     var defaultTheme: DefaultTheme = DefaultTheme.LIGHT
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var frequencyUnit: FrequencyUnit = FrequencyUnit.PER_MINUTE
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var checkForUpdates: Boolean = true
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     val transactionDays: Int
         get() = if (infiniteTransactionDays) Int.MAX_VALUE else fixedTransactionDays

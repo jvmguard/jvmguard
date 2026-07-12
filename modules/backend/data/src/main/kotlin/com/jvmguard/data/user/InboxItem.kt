@@ -17,33 +17,17 @@ open class InboxItem(
 ) : AbstractEntity(id) {
 
     var date: Instant = Instant.ofEpochMilli(millis)
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var name: String = name
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var message: String = message
-        set(value) {
-            val old = field
-            field = value
-            fireChanged(old, value)
-        }
+        set(value) { field = changed(field, value) }
 
     var isItemRead: Boolean
         get() = itemRead
-        set(value) {
-            val old = itemRead
-            itemRead = value
-            fireChanged(old, value)
-        }
+        set(value) { itemRead = changed(itemRead, value) }
 
     override fun toString(): String =
         "InboxItem{date=$date, snapshotFileId=$snapshotFileId, snapshotFileType=$snapshotFileType, " +
