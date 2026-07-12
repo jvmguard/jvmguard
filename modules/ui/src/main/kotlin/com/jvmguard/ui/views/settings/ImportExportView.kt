@@ -56,8 +56,8 @@ class ImportExportView : AbstractSettingsPage() {
 
     private fun importSection(): VerticalLayout {
         val upload = Upload(UploadHandler.inMemory { _, data -> onUploaded(data) }).apply {
-            setAcceptedMimeTypes("application/xml", "text/xml")
-            setAcceptedFileExtensions(".xml")
+            setAcceptedMimeTypes("application/json")
+            setAcceptedFileExtensions(".json")
             setMaxFiles(1)
             isDropAllowed = true
             testId = ID_UPLOAD
