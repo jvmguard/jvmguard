@@ -2220,6 +2220,7 @@ Changes only come into effect after you restart the jvmguard server.</property>
     <unixArchive name="Unix Archive" id="2005" installDir="jvmguard" require64BitVm="true">
       <jreBundle jreBundleSource="none" />
     </unixArchive>
+    <unixArchive name="Linux Archive" id="5926" mediaFileName="${compiler:sys.shortName}_linux_${compiler:sys.version}" installDir="jvmguard" require64BitVm="true" />
     <macosFolder name="Mac OS X Folder" id="2000" installDir="jvmguard" architecture="universal">
       <variables>
         <variable name="__internal.app.installer.width" value="550" />
