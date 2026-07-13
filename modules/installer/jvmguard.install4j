@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="12.0.3" transformSequenceNumber="12">
+<install4j version="13.0.1" transformSequenceNumber="13">
   <directoryPresets config="../web/web/VAADIN/themes/jvmguard" />
-  <application name="jvmguard" applicationId="9080-1518-6345-9856" mediaDir="../../media" lzmaCompression="true" pack200Compression="false" shortName="jvmguard" publisher="Ingo Kegel" publisherWeb="https://jvmguard.dev" version="1.0" allPathsRelative="true" macVolumeId="999e7cd74d3a46df" javaMinVersion="21" javaMaxVersion="21">
+  <application name="jvmguard" applicationId="9080-1518-6345-9856" mediaDir="../../media" lzmaCompression="true" shortName="jvmguard" publisher="Ingo Kegel" publisherWeb="https://jvmguard.dev" version="1.0" allPathsRelative="true" macVolumeId="999e7cd74d3a46df" javaMinVersion="21" javaMaxVersion="21">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./src/main/resources/messages.utf8" />
     </languages>
@@ -18,10 +18,6 @@
       <variable name="moduleOptions" value="${compiler:moduleOptionsBase}" />
       <variable name="notarizationKey" />
     </variables>
-    <!-- Code signing is disabled for the open-source build. A maintainer with their own
-         certificates can re-enable mac/windows signing here and supply the macApiIssuer/macApiKey
-         credentials and certificate paths through the install4j UI. -->
-    <codeSigning macEnabled="false" windowsEnabled="false" />
     <jreBundles jdkProviderId="Zulu" release="21/latest">
       <modules>
         <defaultModules set="jre" />
@@ -59,8 +55,8 @@
           <entry location="demo" />
         </exclude>
       </dirEntry>
-      <fileEntry mountPoint="5914" file="../../dist/config/application.yaml" overwriteMode="0" uninstallMode="3" overrideOverwriteMode="true" overrideUninstallMode="true" />
-      <fileEntry mountPoint="22" file="../../dist/logback.xml" overwriteMode="0" uninstallMode="3" overrideOverwriteMode="true" overrideUninstallMode="true" />
+      <fileEntry mountPoint="5914" file="../../dist/config/application.yaml" overwriteMode="never" uninstallMode="ifCreatedButNotForUpdate" overrideOverwriteMode="true" overrideUninstallMode="true" />
+      <fileEntry mountPoint="22" file="../../dist/logback.xml" overwriteMode="never" uninstallMode="ifCreatedButNotForUpdate" overrideOverwriteMode="true" overrideUninstallMode="true" />
       <fileEntry mountPoint="22" file="../../LICENSE" />
       <dirEntry mountPoint="1028" file="../../dist/demo" subDirectory="demo" />
     </entries>
@@ -2275,7 +2271,7 @@ Changes only come into effect after you restart the jvmguard server.</property>
       </excludedLaunchers>
       <jreBundle jreBundleSource="none" />
     </unixArchive>
-    <macosFolder name="Mac OS X Folder" id="2000" installDir="jvmguard" architecture="universal" dmgStylingMode="default">
+    <macosFolder name="Mac OS X Folder" id="2000" installDir="jvmguard" architecture="universal">
       <excludedLaunchers>
         <launcher id="2174" />
       </excludedLaunchers>
