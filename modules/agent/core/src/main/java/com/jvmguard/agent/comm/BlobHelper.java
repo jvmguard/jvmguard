@@ -7,6 +7,7 @@ import com.jvmguard.agent.util.PumpingInputStream;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -57,7 +58,7 @@ public class BlobHelper {
             blobResult.uncompressedLength = in.readLong();
             ChecksumOutputStream out;
             try {
-                blobResult.file = File.createTempFile("jf_tr", ".snap", tempDir);
+                blobResult.file = Files.createTempFile(tempDir.toPath(), "jf_tr", ".snap").toFile();
                 out = new ChecksumOutputStream(new BufferedOutputStream(new FileOutputStream(blobResult.file)));
             } catch (IOException e) {
                 Logger.log(Subsystem.COMMUNICATION, 1, true, e);

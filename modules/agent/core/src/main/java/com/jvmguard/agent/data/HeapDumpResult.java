@@ -9,6 +9,7 @@ import com.sun.management.HotSpotDiagnosticMXBean;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
 import java.util.concurrent.Future;
 
 public class HeapDumpResult extends OrderedSnapshotTransferResult {
@@ -20,7 +21,7 @@ public class HeapDumpResult extends OrderedSnapshotTransferResult {
 
     private static File dumpHprof() {
         try {
-            File file = File.createTempFile("jdm", ".hprof", JvmGuardAgent.getAgentUserDir());
+            File file = Files.createTempFile(JvmGuardAgent.getAgentUserDir().toPath(), "jdm", ".hprof").toFile();
             if (!file.delete()) { // dumpHeap requires that the file does not exist yet
                 Logger.log(Subsystem.COMMON, 1, true, "could not prepare heap dump file " + file);
                 return null;

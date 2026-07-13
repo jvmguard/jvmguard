@@ -14,6 +14,7 @@ import com.jvmguard.agent.util.Util;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,7 +52,8 @@ public class JProfilerRecorder {
             // Point-in-time captures at the end of the recording window, folded into the same snapshot.
             // Each is independent so one failure cannot abort the snapshot.
             applyDumps(heapDump, heapDumpFullGc, mbeanSnapshot, monitorDump);
-            File snapshot = File.createTempFile("jvmguard_jprofiler", ".jps");
+            File snapshot = Files.createTempFile(
+                JvmGuardAgent.getAgentUserDir().toPath(), "jvmguard_jprofiler", ".jps").toFile();
             Controller.saveSnapshot(snapshot);
             long size = snapshot.length();
             JvmGuardAgent.log("JProfiler snapshot saved: " + size + " bytes");
