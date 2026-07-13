@@ -91,11 +91,6 @@ public class TransactionSettings extends OptionalConfig implements TransactionDe
     }
 
     @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
-    }
-
-    @Override
     public String toString() {
         return "TransactionSettings{" +
             "transactionDefs=" + transactionDefs +

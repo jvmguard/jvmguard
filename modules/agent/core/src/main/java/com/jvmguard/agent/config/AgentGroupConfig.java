@@ -68,11 +68,6 @@ public class AgentGroupConfig implements AgentSerializable, CodecEntity {
     }
 
     @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
-    }
-
-    @Override
     public String toString() {
         return "AgentGroupConfig{" +
             "transactionSettings=" + transactionSettings +

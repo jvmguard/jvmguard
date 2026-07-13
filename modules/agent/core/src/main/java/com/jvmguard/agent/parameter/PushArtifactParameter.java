@@ -45,7 +45,7 @@ public class PushArtifactParameter extends BaseParameter {
     public void write(CommunicationContext context, DataOutputStream out) throws IOException {
         out.writeUTF(kind.name());
         out.writeUTF(key);
-        BlobHelper.writeBlob(context, out, null, archiveFile, false);
+        BlobHelper.writeBlob(out, null, archiveFile, false);
     }
 
     @Override
@@ -54,6 +54,6 @@ public class PushArtifactParameter extends BaseParameter {
         key = in.readUTF();
         File cacheBaseDir = ArtifactHandlers.get(kind).getCacheBaseDir();
         cacheBaseDir.mkdirs();
-        blobResult = BlobHelper.readBlob(context, in, cacheBaseDir);
+        blobResult = BlobHelper.readBlob(in, cacheBaseDir);
     }
 }

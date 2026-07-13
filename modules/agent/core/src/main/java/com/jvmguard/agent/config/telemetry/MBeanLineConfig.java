@@ -84,9 +84,4 @@ public class MBeanLineConfig extends AbstractEntity implements AgentSerializable
         writer.writeString("lineName", lineName);
     }
 
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V2;
-    }
-
 }

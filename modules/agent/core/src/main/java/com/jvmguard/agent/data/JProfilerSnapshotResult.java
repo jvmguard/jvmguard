@@ -1,7 +1,6 @@
 package com.jvmguard.agent.data;
 
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.helper.SnapshotRecorder;
 import com.jvmguard.agent.jprofiler.JProfilerRecorder;
 import com.jvmguard.agent.parameter.JProfilerRecordParameters;
@@ -30,10 +29,5 @@ public class JProfilerSnapshotResult extends OrderedSnapshotTransferResult {
     @Override
     protected boolean isCompress() {
         return false;
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V8;
     }
 }

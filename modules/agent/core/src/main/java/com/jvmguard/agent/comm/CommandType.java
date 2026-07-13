@@ -21,16 +21,16 @@ public enum CommandType {
     DATA_SET(DataSetParameter.class, DataSetResult.class, V1, true),
     RESET(ResetParameter.class, null, V1),
     METHOD_INFO(MethodInfoParameter.class, MethodInfoResult.class, V1),
-    CHECK_ARTIFACT(CheckArtifactParameter.class, CheckArtifactResult.class, V8),
-    PUSH_ARTIFACT(PushArtifactParameter.class, PushArtifactResult.class, V8),
+    CHECK_ARTIFACT(CheckArtifactParameter.class, CheckArtifactResult.class, V1),
+    PUSH_ARTIFACT(PushArtifactParameter.class, PushArtifactResult.class, V1),
     ROUND_TRIP_PING(null, null, V1),
     REJECT(RejectParameter.class, RejectResult.class, V1),
-    MBEAN_LIST(MBeanListParameter.class, MBeanListResult.class, V2),
-    MBEAN_DATA(MBeanDataParameter.class, MBeanDataResult.class, V2),
-    MBEAN_OPERATION(MBeanOperationParameter.class, MBeanOperationResult.class, V2, true),
-    MBEAN_SET_ATTRIBUTE(MBeanSetAttributeParameter.class, MBeanSetAttributeResult.class, V2, true),
-    JFR_SNAPSHOT(JfrRecordParameters.class, JfrSnapshotResult.class, V7, true),
-    RECORD_JPROFILER(JProfilerRecordParameters.class, JProfilerSnapshotResult.class, V8, true);
+    MBEAN_LIST(MBeanListParameter.class, MBeanListResult.class, V1),
+    MBEAN_DATA(MBeanDataParameter.class, MBeanDataResult.class, V1),
+    MBEAN_OPERATION(MBeanOperationParameter.class, MBeanOperationResult.class, V1, true),
+    MBEAN_SET_ATTRIBUTE(MBeanSetAttributeParameter.class, MBeanSetAttributeResult.class, V1, true),
+    JFR_SNAPSHOT(JfrRecordParameters.class, JfrSnapshotResult.class, V1, true),
+    RECORD_JPROFILER(JProfilerRecordParameters.class, JProfilerSnapshotResult.class, V1, true);
 
     private final Class<? extends BaseParameter> parameterClass;
     private final Class<? extends BaseResult> resultClass;

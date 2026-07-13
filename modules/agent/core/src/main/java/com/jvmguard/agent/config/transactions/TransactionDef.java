@@ -106,11 +106,6 @@ public abstract class TransactionDef extends AbstractEntity implements Hierarchi
     }
 
 
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
-    }
-
     public abstract void initDefault();
     public abstract TransactionType getTransactionType();
     public abstract String getAutomaticName();

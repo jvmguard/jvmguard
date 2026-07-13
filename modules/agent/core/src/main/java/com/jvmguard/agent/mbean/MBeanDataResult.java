@@ -2,7 +2,6 @@ package com.jvmguard.agent.mbean;
 
 import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.data.BaseResult;
 import com.jvmguard.agent.util.Logger;
 import com.jvmguard.mbean.data.MBeanManager;
@@ -69,11 +68,6 @@ public class MBeanDataResult extends BaseResult implements MBeanData {
     @Override
     public List<Object> getValues() {
         return values;
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V2;
     }
 
     @Override

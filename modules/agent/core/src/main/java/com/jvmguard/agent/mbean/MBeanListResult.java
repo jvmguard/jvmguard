@@ -1,7 +1,6 @@
 package com.jvmguard.agent.mbean;
 
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.data.BaseResult;
 import com.jvmguard.mbean.data.MBeanManager;
 import com.jvmguard.mbean.data.MBeanManager.NameResult;
@@ -24,12 +23,8 @@ public class MBeanListResult extends BaseResult {
             MBeanManager.createPlatformServer();
         }
         NameResult nameResult = MBeanManager.getMBeanNames();
-        if (context.satisfies(ProtocolRequirement.V4)) {
-            out.writeBoolean(nameResult.isChanged());
-            if (nameResult.isChanged()) {
-                writeNames(out, nameResult);
-            }
-        } else {
+        out.writeBoolean(nameResult.isChanged());
+        if (nameResult.isChanged()) {
             writeNames(out, nameResult);
         }
     }
@@ -44,11 +39,7 @@ public class MBeanListResult extends BaseResult {
 
     @Override
     public void read(CommunicationContext context, DataInputStream in) throws IOException {
-        if (context.satisfies(ProtocolRequirement.V4)) {
-            changed = in.readBoolean();
-        } else {
-            changed = true;
-        }
+        changed = in.readBoolean();
         if (changed) {
             int count = in.readInt();
             for (int i = 0; i < count; i++) {
@@ -63,10 +54,5 @@ public class MBeanListResult extends BaseResult {
 
     public boolean isChanged() {
         return changed;
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V2;
     }
 }

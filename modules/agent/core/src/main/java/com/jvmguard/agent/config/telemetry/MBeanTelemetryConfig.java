@@ -134,9 +134,4 @@ public class MBeanTelemetryConfig extends AbstractEntity implements AgentSeriali
         writer.writeList("lines", lines);
     }
 
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V2;
-    }
-
 }

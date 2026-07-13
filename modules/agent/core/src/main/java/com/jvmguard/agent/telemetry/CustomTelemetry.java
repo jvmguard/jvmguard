@@ -1,8 +1,6 @@
 package com.jvmguard.agent.telemetry;
 
 import com.jvmguard.agent.base.logging.Subsystem;
-import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.util.Logger;
 
 import java.io.DataOutput;
@@ -25,7 +23,7 @@ abstract class CustomTelemetry {
         return name;
     }
 
-    public void writeValue(CommunicationContext context, DataOutput out) throws IOException {
+    public void writeValue(DataOutput out) throws IOException {
         long currentValue;
         try {
             currentValue = getCurrentValue();
@@ -39,9 +37,7 @@ abstract class CustomTelemetry {
         out.writeInt(getType());
         out.writeUTF(name);
         out.writeLong(currentValue);
-        if (context.satisfies(ProtocolRequirement.V2)) {
-            writeFormat(out);
-        }
+        writeFormat(out);
     }
 
     protected void writeFormat(DataOutput out) throws IOException {

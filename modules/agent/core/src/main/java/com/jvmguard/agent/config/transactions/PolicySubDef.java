@@ -170,11 +170,6 @@ public class PolicySubDef extends AbstractEntity implements PolicyDef, AgentSeri
         policy.removeChangeListener(listener);
     }
 
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
-    }
-
     public void prepareForUsage() {
         patternMatcher = PatternMatcher.create(filter, comparisonType, wildcardCommaSeparated, false, false);
     }

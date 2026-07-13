@@ -5,7 +5,6 @@ import com.jvmguard.mbean.data.BaseValueTransfer;
 import com.jvmguard.agent.util.Util;
 import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.data.BaseResult;
 import com.jvmguard.agent.util.Logger;
 
@@ -78,10 +77,5 @@ public abstract class MBeanModificationResult<T extends MBeanParameter> extends 
         stackTrace = Util.buildMessage(null, e);
     }
 
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V2;
-    }
 
 }

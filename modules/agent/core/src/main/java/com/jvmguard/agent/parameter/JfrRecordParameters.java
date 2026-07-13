@@ -1,7 +1,6 @@
 package com.jvmguard.agent.parameter;
 
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 
 import java.io.DataInputStream;
@@ -55,10 +54,5 @@ public class JfrRecordParameters extends BaseParameter {
         seconds = in.readInt();
         predefined = in.readBoolean();
         profileNameOrSettings = in.readUTF();
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V7;
     }
 }

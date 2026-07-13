@@ -6,8 +6,6 @@ import com.jvmguard.agent.base.logging.Subsystem;
 import com.jvmguard.agent.base.telemetry.AdditionalTelemetryProvider;
 import com.jvmguard.agent.base.telemetry.JMXTelemetryProvider;
 import com.jvmguard.agent.base.telemetry.TelemetryDescription;
-import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.config.telemetry.MBeanLineConfig;
 import com.jvmguard.agent.config.telemetry.MBeanTelemetryConfig;
 import com.jvmguard.agent.config.telemetry.TelemetrySettings;
@@ -88,7 +86,7 @@ public class TelemetryCollector extends Thread {
         }
     }
 
-    public void write(CommunicationContext context, DataOutputStream out) throws IOException {
+    public void write(DataOutputStream out) throws IOException {
         synchronized (this) {
             if (lastJmxData != null) {
                 for (int i = 0; i < lastJmxData.length; i++) {
@@ -99,9 +97,7 @@ public class TelemetryCollector extends Thread {
                         out.writeInt(description.getType());
                         out.writeUTF(description.getName());
                         out.writeLong(lastJmxData[i]);
-                        if (context.satisfies(ProtocolRequirement.V2)) {
-                            out.writeBoolean(false); // format
-                        }
+                        out.writeBoolean(false); // format
                     }
                 }
             }
@@ -109,22 +105,18 @@ public class TelemetryCollector extends Thread {
         if (!annotationTelemetries.isEmpty()) {
             for (Object valueObject : annotationTelemetries.values().toArray()) {
                 AnnotationTelemetry annotationTelemetry = (AnnotationTelemetry)valueObject;
-                annotationTelemetry.writeValue(context, out);
+                annotationTelemetry.writeValue(out);
             }
         }
-        if (context.satisfies(ProtocolRequirement.V2)) {
-            for (MBeanTelemetry mbeanTelemetry : mbeanTelemetries) {
-                mbeanTelemetry.writeValue(context, out);
-            }
+        for (MBeanTelemetry mbeanTelemetry : mbeanTelemetries) {
+            mbeanTelemetry.writeValue(out);
         }
         out.writeBoolean(false);
 
         Runtime runtime = Runtime.getRuntime();
         out.writeLong(runtime.totalMemory());
         out.writeLong(runtime.freeMemory());
-        if (context.satisfies(ProtocolRequirement.V6)) {
-            out.writeLong(runtime.maxMemory());
-        }
+        out.writeLong(runtime.maxMemory());
         long[] cpuDataAverage;
         synchronized (this) {
             cpuDataAverage = cpuData.getAverage();

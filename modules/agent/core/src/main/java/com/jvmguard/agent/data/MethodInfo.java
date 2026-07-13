@@ -2,7 +2,6 @@ package com.jvmguard.agent.data;
 
 import com.jvmguard.agent.comm.AgentSerializable;
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -47,11 +46,6 @@ public class MethodInfo implements AgentSerializable {
         out.writeUTF(className);
         out.writeUTF(methodName);
         out.writeUTF(signature);
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
     }
 
     @Override

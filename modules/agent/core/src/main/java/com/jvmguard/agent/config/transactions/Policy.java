@@ -234,11 +234,6 @@ public class Policy extends AbstractEntity implements AgentSerializable, CodecEn
         writer.writeBoolean("loggedErrorAsError", loggedErrorAsError);
     }
 
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
-    }
-
     protected String getTransactionTypeSpecificUsedError(Object errorObject) {
         return errorObject.toString();
     }

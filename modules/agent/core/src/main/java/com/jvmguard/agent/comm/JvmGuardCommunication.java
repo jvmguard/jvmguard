@@ -36,7 +36,7 @@ public class JvmGuardCommunication implements Runnable {
     public static final int MAGIC_NUMBER = 0xBCC0FAFA;
     public static final int DEFAULT_PORT = 8847;
 
-    public static final int PROTOCOL_VERSION = ProtocolRequirement.V8.getVersion();
+    public static final int PROTOCOL_VERSION = ProtocolRequirement.V1.getVersion();
     public static final int MINIMUM_PROTOCOL_VERSION = ProtocolRequirement.V1.getVersion();
     public static final int SKIP_BUFFER_SIZE = 100;
 

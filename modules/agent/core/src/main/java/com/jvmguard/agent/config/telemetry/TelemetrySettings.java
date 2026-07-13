@@ -42,9 +42,4 @@ public class TelemetrySettings extends OptionalConfig implements AgentSerializab
     public void writeState(AgentWriter writer) throws Exception {
         writer.writeList("mbeanTelemetries", mbeanTelemetries);
     }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V2;
-    }
 }

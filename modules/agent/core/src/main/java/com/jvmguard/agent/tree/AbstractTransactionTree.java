@@ -1,7 +1,6 @@
 package com.jvmguard.agent.tree;
 
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.config.transactions.TransactionType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
@@ -155,11 +154,6 @@ public abstract class AbstractTransactionTree<M, T extends AbstractTransactionTr
     public void clear() {
         time = 0;
         count = 0;
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
     }
 
     @Override

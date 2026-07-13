@@ -1,7 +1,6 @@
 package com.jvmguard.agent.telemetry;
 
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.annotation.TelemetryFormat;
 
 import java.io.DataInput;
@@ -18,10 +17,8 @@ public class AdditionalData {
         type = in.readInt();
         name = in.readUTF();
         value = in.readLong();
-        if (context.satisfies(ProtocolRequirement.V2)) {
-            if (in.readBoolean()) {
-                format = new TelemetryFormatImpl(in, context);
-            }
+        if (in.readBoolean()) {
+            format = new TelemetryFormatImpl(in, context);
         }
     }
 

@@ -2,7 +2,6 @@ package com.jvmguard.agent.data;
 
 import com.jvmguard.agent.comm.AgentSerializable;
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -32,11 +31,6 @@ public class BaseResult implements AgentSerializable {
 
     @Override
     public void write(CommunicationContext context, DataOutputStream out) throws IOException {
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
     }
 
     public void prepareDeferredDirect(CommunicationContext context) {

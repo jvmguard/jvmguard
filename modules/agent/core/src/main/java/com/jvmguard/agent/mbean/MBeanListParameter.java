@@ -1,7 +1,6 @@
 package com.jvmguard.agent.mbean;
 
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.config.base.DefaultConstructor;
 import com.jvmguard.agent.parameter.BaseParameter;
 
@@ -32,10 +31,5 @@ public class MBeanListParameter extends BaseParameter {
 
     public boolean isCreatePlatformServer() {
         return createPlatformServer;
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V2;
     }
 }

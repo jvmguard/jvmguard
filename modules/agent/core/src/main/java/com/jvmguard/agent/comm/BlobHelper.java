@@ -14,7 +14,7 @@ public class BlobHelper {
     private static final int BUFFER_SIZE = 1024 * 24;
     private static final int GZIP_TRANSFER_LENGTH = -1;
 
-    public static TransferAction writeBlob(CommunicationContext context, DataOutputStream out, String errorMessage, File file, boolean compress) throws IOException {
+    public static TransferAction writeBlob(DataOutputStream out, String errorMessage, File file, boolean compress) throws IOException {
         TransferAction action = TransferAction.ERROR;
         if (errorMessage != null) {
             out.writeInt(action.ordinal());
@@ -25,12 +25,10 @@ public class BlobHelper {
             out.writeInt(action.ordinal());
             long inputLength = file.length();
             out.writeLong(compress ? GZIP_TRANSFER_LENGTH : inputLength);
-            if (context.satisfies(ProtocolRequirement.V2)) {
-                out.writeLong(inputLength);
-            }
+            out.writeLong(inputLength);
             try (DataInputStream fileIn = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
                 ChecksumOutputStream checkedOut;
-                if (compress && context.satisfies(ProtocolRequirement.V8)) {
+                if (compress) {
                     ChunkedOutputStream chunkedOutputStream = new ChunkedOutputStream(out);
                     checkedOut = new ChecksumOutputStream(chunkedOutputStream);
                     GZIPOutputStream gzippedOut = new GZIPOutputStream(checkedOut);
@@ -39,13 +37,7 @@ public class BlobHelper {
                     chunkedOutputStream.finish();
                 } else {
                     checkedOut = new ChecksumOutputStream(out);
-                    if (compress) {
-                        GZIPOutputStream gzippedOut = new GZIPOutputStream(checkedOut);
-                        copyBytes(inputLength, fileIn, gzippedOut);
-                        gzippedOut.finish();
-                    } else {
-                        copyBytes(inputLength, fileIn, checkedOut);
-                    }
+                    copyBytes(inputLength, fileIn, checkedOut);
                 }
                 checkedOut.flush();
                 out.writeLong(checkedOut.getChecksum());
@@ -54,7 +46,7 @@ public class BlobHelper {
         return action;
     }
 
-    public static BlobResult readBlob(CommunicationContext context, DataInputStream in, File tempDir) throws IOException {
+    public static BlobResult readBlob(DataInputStream in, File tempDir) throws IOException {
         BlobResult blobResult = new BlobResult();
 
         blobResult.action = TransferAction.values()[in.readInt()];
@@ -62,10 +54,7 @@ public class BlobHelper {
             blobResult.errorMessage = in.readUTF();
         } else if (blobResult.action == TransferAction.CONTENT) {
             long bytesToBeRead = in.readLong();
-            blobResult.uncompressedLength = bytesToBeRead;
-            if (context.satisfies(ProtocolRequirement.V2)) {
-                blobResult.uncompressedLength = in.readLong();
-            }
+            blobResult.uncompressedLength = in.readLong();
             ChecksumOutputStream out;
             try {
                 blobResult.file = File.createTempFile("jf_tr", ".snap", tempDir);
@@ -76,7 +65,7 @@ public class BlobHelper {
                 out = new ChecksumOutputStream(new BufferedOutputStream(new NullOutputStream()));
                 blobResult.errorMessage = "could not create temporary file in " + tempDir + ": " + e;
             }
-            if (bytesToBeRead == GZIP_TRANSFER_LENGTH && context.satisfies(ProtocolRequirement.V8)) {
+            if (bytesToBeRead == GZIP_TRANSFER_LENGTH) {
                 ChunkedInputStream inputStream = new ChunkedInputStream(in);
                 copyBytes(bytesToBeRead, new DataInputStream(inputStream), out);
                 inputStream.finish();

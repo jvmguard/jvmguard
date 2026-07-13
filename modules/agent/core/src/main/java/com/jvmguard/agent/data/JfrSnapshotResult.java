@@ -2,7 +2,6 @@ package com.jvmguard.agent.data;
 
 import com.jvmguard.agent.util.Util;
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.helper.SnapshotRecorder;
 import com.jvmguard.agent.jfr.JfrRecorder;
 import com.jvmguard.agent.parameter.JfrRecordParameters;
@@ -35,10 +34,5 @@ public class JfrSnapshotResult extends OrderedSnapshotTransferResult {
     @Override
     protected boolean isCompress() {
         return false;
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V7;
     }
 }

@@ -2,7 +2,6 @@ package com.jvmguard.agent.data;
 
 import com.jvmguard.agent.comm.AgentSerializable;
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.config.base.LogCategory;
 import com.jvmguard.agent.util.JvmGuardUtil;
 
@@ -79,10 +78,5 @@ public class Message implements AgentSerializable {
                 out.writeUTF("");
             }
         }
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
     }
 }

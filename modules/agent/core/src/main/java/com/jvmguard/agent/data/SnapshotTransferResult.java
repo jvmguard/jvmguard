@@ -25,14 +25,14 @@ public abstract class SnapshotTransferResult extends BaseResult implements FileM
 
     @Override
     public void write(CommunicationContext context, DataOutputStream out) throws IOException {
-        if (BlobHelper.writeBlob(context, out, errorMessage, file, isCompress()) == BlobHelper.TransferAction.CONTENT) {
+        if (BlobHelper.writeBlob(out, errorMessage, file, isCompress()) == BlobHelper.TransferAction.CONTENT) {
             file.delete();
         }
     }
 
     @Override
     public void read(CommunicationContext context, DataInputStream in) throws IOException {
-        BlobResult blobResult = BlobHelper.readBlob(context, in, tempDir);
+        BlobResult blobResult = BlobHelper.readBlob(in, tempDir);
         errorMessage = blobResult.getErrorMessage();
         file = blobResult.getFile();
         if (file == null && (errorMessage == null || errorMessage.isEmpty())) {

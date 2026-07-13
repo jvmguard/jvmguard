@@ -2,7 +2,6 @@ package com.jvmguard.collector.transactions
 
 import com.jvmguard.agent.comm.CommandType
 import com.jvmguard.agent.comm.JvmGuardCommunication
-import com.jvmguard.agent.comm.ProtocolRequirement
 import com.jvmguard.agent.config.VmType
 import com.jvmguard.agent.config.transactions.TransactionType
 import com.jvmguard.agent.data.DataSetResult
@@ -794,16 +793,10 @@ class TransactionManager(
         val transactionName: String?
         val transactionType: TransactionType?
         val nameId: Long
-        if (ProtocolRequirement.V5.satisfies(version)) {
-            transactionType = TransactionType.fromId(input.readShort().toInt())
-            nameId = readId(input, version)
-            transactionName = nameManager.getName(nameId, queryNameStatement)
-        } else {
-            nameId = readId(input, version)
-            transactionName = nameManager.getName(nameId, queryNameStatement)
-            transactionType = TransactionType.fromId(input.readShort().toInt())
-        }
-        val type = readType(input, version, queryNameStatement)
+        transactionType = TransactionType.fromId(input.readShort().toInt())
+        nameId = readId(input)
+        transactionName = nameManager.getName(nameId, queryNameStatement)
+        val type = readType(input, queryNameStatement)
         val currentTree: TransactionTree? = if (root) {
             parent
         } else {
@@ -830,8 +823,8 @@ class TransactionManager(
         return currentTree
     }
 
-    private fun readType(input: DataInputStream, version: Int, queryNameStatement: PreparedStatement): String {
-        val typeId = readId(input, version)
+    private fun readType(input: DataInputStream, queryNameStatement: PreparedStatement): String {
+        val typeId = readId(input)
         val specialPolicyType = PolicyType.getSpecialById(typeId)
         return if (specialPolicyType != null) {
             specialPolicyType.typeString
@@ -968,20 +961,11 @@ class TransactionManager(
             }
         }
 
-        fun readId(input: DataInput, version: Int): Long {
-            if (ProtocolRequirement.V7.satisfies(version)) {
-                return if (input.readBoolean()) {
-                    input.readLong()
-                } else {
-                    input.readInt().toLong()
-                }
+        fun readId(input: DataInput): Long {
+            return if (input.readBoolean()) {
+                input.readLong()
             } else {
-                val id = input.readInt()
-                return if (id == Integer.MAX_VALUE) { // capped
-                    Long.MAX_VALUE
-                } else {
-                    id.toLong()
-                }
+                input.readInt().toLong()
             }
         }
 

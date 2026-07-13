@@ -42,9 +42,4 @@ public class RecordingOptions extends OptionalConfig implements AgentSerializabl
     public void writeState(AgentWriter writer) throws Exception {
         writer.writeEnum("retransformationType", retransformationType);
     }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
-    }
 }

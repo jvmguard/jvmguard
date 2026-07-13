@@ -1,7 +1,7 @@
 package com.jvmguard.agent.tools.importer;
 
 public final class ConfigFileFormat {
-    public static final int FILE_VERSION = 2;
+    public static final int FILE_VERSION = 1;
     public static final String TYPE_SERVER_INIT = "serverInit";
     public static final String TYPE_RECORDING_CONFIG = "recordingConfig";
     public static final String KEY_VERSION = "version";

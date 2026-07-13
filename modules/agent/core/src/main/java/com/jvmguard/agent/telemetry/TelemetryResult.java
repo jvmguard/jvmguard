@@ -1,7 +1,6 @@
 package com.jvmguard.agent.telemetry;
 
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.data.BaseResult;
 import com.jvmguard.agent.data.Message;
 
@@ -32,11 +31,7 @@ public class TelemetryResult extends BaseResult {
 
         totalMemory = in.readLong();
         freeMemory = in.readLong();
-        if (context.satisfies(ProtocolRequirement.V6)) {
-            maxMemory = in.readLong();
-        } else {
-            maxMemory = Long.MAX_VALUE;
-        }
+        maxMemory = in.readLong();
         cpuLoad = in.readLong();
         gcActivity = in.readLong();
         threadCount = in.readLong();
@@ -50,7 +45,7 @@ public class TelemetryResult extends BaseResult {
 
     @Override
     public void write(CommunicationContext context, DataOutputStream out) throws IOException {
-        TelemetryCollector.getInstance().write(context, out);
+        TelemetryCollector.getInstance().write(out);
     }
 
     public List<Message> getMessages() {

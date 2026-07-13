@@ -2,7 +2,6 @@ package com.jvmguard.agent.tree;
 
 import com.jvmguard.agent.comm.AgentSerializable;
 import com.jvmguard.agent.comm.CommunicationContext;
-import com.jvmguard.agent.comm.ProtocolRequirement;
 import com.jvmguard.agent.config.transactions.TransactionType;
 import com.jvmguard.agent.util.JvmGuardUtil;
 import org.jetbrains.annotations.NotNull;
@@ -103,11 +102,6 @@ public class AgentTransactionInfo implements AgentSerializable, Comparable<Agent
             out.writeUTF(name);
         }
         out.writeShort(transactionTypeId);
-    }
-
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
     }
 
     @Override

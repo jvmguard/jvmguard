@@ -98,11 +98,6 @@ public class TransactionNaming extends AbstractEntity implements AgentSerializab
         writer.writeList("namingElements", namingElements);
     }
 
-    @Override
-    public ProtocolRequirement getProtocolRequirement() {
-        return ProtocolRequirement.V1;
-    }
-
     private boolean canBeStatic() {
         for (NamingElement namingElement : namingElements) {
             if (!namingElement.canBeStatic()) {
