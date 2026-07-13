@@ -1,14 +1,21 @@
 package com.jvmguard.ui.views.data.transactions
 
+import com.jvmguard.data.transactions.TransactionTreeInterval
 import tools.jackson.databind.json.JsonMapper
 
 object TransactionExport {
 
     private val mapper = JsonMapper.builder().build()
 
-    fun toJson(mode: TransactionMode, roots: List<TransactionNode>, endTime: Long): ByteArray {
+    fun toJson(
+        mode: TransactionMode,
+        roots: List<TransactionNode>,
+        interval: TransactionTreeInterval,
+        endTime: Long,
+    ): ByteArray {
         val root = linkedMapOf<String, Any?>(
             "view" to mode.label,
+            "interval" to interval.toString(),
             "endTime" to endTime,
             "transactions" to roots.map(::node),
         )
