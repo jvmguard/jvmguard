@@ -80,8 +80,8 @@ tasks {
         from(getDependencyOutputPaths())
     }
 
-    val dist = register<Copy>("dist") {
-        into(file("$distDir/lib/server").apply { mkdirs() })
+    val dist = register<Sync>("dist") {
+        into(file("$distDir/lib/server"))
         from(serverJar.get().archiveFile)
     }
 

@@ -24,9 +24,9 @@ tasks {
         from(getDependencyOutputPaths())
     }
 
-    val dist = register<Copy>("dist") {
+    val dist = register<Sync>("dist") {
         dependsOn(jar)
-        into(file("$distDir/lib/demo").apply { mkdirs() })
+        into(file("$distDir/lib/demo"))
         from(jar)
     }
 
