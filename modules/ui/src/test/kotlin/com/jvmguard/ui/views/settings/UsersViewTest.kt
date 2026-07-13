@@ -1,6 +1,7 @@
 package com.jvmguard.ui.views.settings
 
 import com.jvmguard.data.user.AccessLevel
+import com.jvmguard.data.user.UserType
 import com.jvmguard.ui.JvmGuardBrowserlessTest
 import com.jvmguard.ui.server.MockConnections
 import com.jvmguard.ui.server.Sessions
@@ -9,6 +10,8 @@ import com.jvmguard.connector.server.mock.MockServerConnectionImpl
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.checkbox.Checkbox
+import com.vaadin.flow.component.select.Select
+import com.vaadin.flow.component.textfield.EmailField
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
 import org.junit.jupiter.api.AfterEach
@@ -54,6 +57,20 @@ class UsersViewTest : JvmGuardBrowserlessTest() {
 
         use(shellSave()).click()
         assertTrue(connection.users.any { it.loginName == "newbie" }, "the new user is committed on Save")
+    }
+
+    @Test
+    fun addingAnSsoUserStagesTheEmailAsLoginName() {
+        UI.getCurrent().navigate(UsersView::class.java)
+        use(button("Add user")).click()
+
+        @Suppress("UNCHECKED_CAST")
+        (find<Select<*>>().all().first { it.label == "User type" } as Select<UserType>).value = UserType.OIDC
+        find<EmailField>().all().first { it.label == "SSO email" }.value = "sso@example.com"
+        use(dialogSave()).click()
+
+        use(shellSave()).click()
+        assertTrue(connection.users.any { it.loginName == "sso@example.com" }, "the SSO email is saved as the login name")
     }
 
     @Test

@@ -174,12 +174,17 @@ class UserEditDialog(
             if (ssoEmail.isInvalid || ssoEmail.value.isNullOrBlank()) {
                 return
             }
-            loginName.value = ssoEmail.value
+            if (ssoEmail.value in existingLoginNames) {
+                ssoEmail.errorMessage = "That login name is already taken."
+                ssoEmail.isInvalid = true
+                return
+            }
         }
         if (!binder.writeBeanIfValid(user) || !applyPassword()) {
             return
         }
         if (isOidc()) {
+            user.loginName = ssoEmail.value
             user.email = user.loginName
         }
         onSave(user)
