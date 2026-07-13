@@ -8,7 +8,6 @@ import com.jvmguard.ui.components.Notifications
 import com.jvmguard.ui.server.*
 import com.jvmguard.ui.views.account.AccountApiKeyView
 import com.jvmguard.ui.views.account.AccountProfileView
-import com.jvmguard.ui.views.account.AccountTwoFactorView
 import com.jvmguard.ui.views.account.AccountView
 import com.jvmguard.ui.views.data.mbeans.MBeansView
 import com.jvmguard.ui.views.data.telemetry.VmTelemetryView
@@ -123,7 +122,6 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     )
     private val accountEntries = listOf(
         SettingsNavEntry("User information", AccountProfileView::class.java, VaadinIcon.USER),
-        SettingsNavEntry("Two-factor authentication", AccountTwoFactorView::class.java, VaadinIcon.SHIELD),
         SettingsNavEntry("External access", AccountApiKeyView::class.java, VaadinIcon.KEY),
     )
     private val generalSettingsNav = buildNav(generalSettingsEntries).apply { isVisible = false }

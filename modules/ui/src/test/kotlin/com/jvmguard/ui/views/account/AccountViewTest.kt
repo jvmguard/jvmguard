@@ -47,14 +47,40 @@ class AccountViewTest : JvmGuardBrowserlessTest() {
         assertEquals("Administrator", connection.user.fullName, "Cancel must not persist the edit")
     }
 
+    private fun enableGlobal2fa() {
+        val config = connection.getGlobalConfig(false)
+        config.use2fa = true
+        connection.setGlobalConfig(config)
+    }
+
+    private fun has2faSection(): Boolean =
+        find<Button>().all().any { it.text == "Enable two-factor authentication" || it.text == "Reconfigure authenticator" }
+
     @Test
-    fun ssoUsersSeeAProviderManagedTwoFactorNotice() {
+    fun localUsersManageTwoFactorOnTheProfilePage() {
+        enableGlobal2fa()
+        // Exempt, otherwise the user is force-redirected to mandatory enrollment instead of reaching the profile page.
+        connection.user.isExemptFrom2fa = true
+        UI.getCurrent().navigate(AccountProfileView::class.java)
+        assertTrue(has2faSection(), "exempt local users manage optional two-factor on the profile page")
+    }
+
+    @Test
+    fun twoFactorSectionIsHiddenWhenDisabledGlobally() {
+        UI.getCurrent().navigate(AccountProfileView::class.java)
+        assertFalse(has2faSection(), "no two-factor section when 2FA is disabled globally")
+    }
+
+    @Test
+    fun ssoUsersSeeTheirIdentityAndNoTwoFactorSection() {
+        enableGlobal2fa()
         connection.user.userType = UserType.OIDC
-        UI.getCurrent().navigate(AccountTwoFactorView::class.java)
+        UI.getCurrent().navigate(AccountProfileView::class.java)
         assertTrue(
-            find<Span>().all().any { "handled by the single sign-on provider" in it.text },
-            "SSO users see a notice that two-factor is managed by the provider",
+            find<Span>().all().any { "Signed in via" in it.text },
+            "SSO users see their SSO identity",
         )
+        assertFalse(has2faSection(), "SSO users get no two-factor section (it is handled by the provider)")
     }
 
     @Test

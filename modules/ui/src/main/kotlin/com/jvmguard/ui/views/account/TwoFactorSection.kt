@@ -1,13 +1,8 @@
 package com.jvmguard.ui.views.account
 
-import com.jvmguard.data.user.User
-import com.jvmguard.data.user.UserType
 import com.jvmguard.ui.components.TwoFactorEnroller
 import com.jvmguard.ui.server.Sessions
-import com.jvmguard.ui.shell.MainLayout
-import com.jvmguard.ui.views.settings.AbstractAccountSectionView
 import com.jvmguard.ui.views.settings.settingsSection
-import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -15,58 +10,23 @@ import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
-import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
-import com.vaadin.flow.router.Route
-import jakarta.annotation.security.PermitAll
 
-@PermitAll
-@Route(value = "account/two-factor", layout = MainLayout::class)
-@PageTitle("jvmguard: Account")
-class AccountTwoFactorView : AbstractAccountSectionView() {
+class TwoFactorSection : VerticalLayout() {
 
-    private val body = VerticalLayout().apply {
-        isPadding = false
-        isSpacing = false
-        setWidthFull()
-    }
     private var enroller: TwoFactorEnroller? = null
     private var enrolling = false
 
     init {
-        add(body)
+        isPadding = false
+        isSpacing = false
+        setWidthFull()
     }
 
-    override fun bind(binder: Binder<User>) {}
-
-    override fun onAttach(attachEvent: AttachEvent) {
-        super.onAttach(attachEvent)
-        render()
-    }
+    fun refresh() = render()
 
     private fun render() {
-        body.removeAll()
-        if (isOidc()) {
-            addInfoText("Two-factor authentication is handled by the single sign-on provider.")
-            return
-        }
-        if (!globalUse2fa()) {
-            addInfoText("Two-factor authentication is disabled globally.")
-            return
-        }
-        if (enrolling) {
-            renderEnrolling()
-        } else {
-            renderStatus()
-        }
-    }
-
-    private fun addInfoText(text: String) {
-        body.add(
-            settingsSection(
-                "Two-factor authentication",
-                Span(text).apply { addClassName("jvmguard-field-hint") })
-        )
+        removeAll()
+        if (enrolling) renderEnrolling() else renderStatus()
     }
 
     private fun renderEnrolling() {
@@ -76,7 +36,7 @@ class AccountTwoFactorView : AbstractAccountSectionView() {
             testId = ID_USE
         }
         val cancel = Button("Cancel") { enrolling = false; render() }
-        body.add(settingsSection("Set up authenticator", enrollerComponent, actionRow(use, cancel)))
+        add(settingsSection("Set up authenticator", enrollerComponent, actionRow(use, cancel)))
     }
 
     private fun renderStatus() {
@@ -107,7 +67,7 @@ class AccountTwoFactorView : AbstractAccountSectionView() {
             components += Span("Pending. Click Save to apply.").apply { addClassName("jvmguard-field-hint") }
         }
         components += actionRow(*actions.toTypedArray())
-        body.add(settingsSection("Two-factor authentication", *components.toTypedArray()))
+        add(settingsSection("Two-factor authentication", *components.toTypedArray()))
     }
 
     private fun stageEnrollment() {
@@ -134,12 +94,6 @@ class AccountTwoFactorView : AbstractAccountSectionView() {
         defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
         isPadding = false
     }
-
-    private fun isOidc(): Boolean =
-        Sessions.current()?.user?.userType == UserType.OIDC
-
-    private fun globalUse2fa(): Boolean =
-        Sessions.current()?.serverConnection?.getGlobalConfig(false)?.use2fa == true
 
     companion object {
         const val ID_ENABLE = "twofactor-enable"

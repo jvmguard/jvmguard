@@ -10,6 +10,7 @@ import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.shell.MainLayout
 import com.jvmguard.ui.views.settings.AbstractAccountSectionView
 import com.jvmguard.ui.views.settings.settingsSection
+import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
@@ -42,6 +43,9 @@ class AccountProfileView : AbstractAccountSectionView() {
 
     private val isOidc = Sessions.current()?.user?.userType == UserType.OIDC
 
+    private val use2faEnabled = Sessions.current()?.serverConnection?.getGlobalConfig(false)?.use2fa == true
+    private var twoFactorSection: TwoFactorSection? = null
+
     init {
         if (isOidc) {
             val user = Sessions.current()!!.user
@@ -60,7 +64,15 @@ class AccountProfileView : AbstractAccountSectionView() {
                     isSpacing = true
                 }),
             )
+            if (use2faEnabled) {
+                twoFactorSection = TwoFactorSection().also { add(it) }
+            }
         }
+    }
+
+    override fun onAttach(attachEvent: AttachEvent) {
+        super.onAttach(attachEvent)
+        twoFactorSection?.refresh()
     }
 
     @Suppress("DuplicatedCode")
