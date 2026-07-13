@@ -1,61 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="13.0.1" transformSequenceNumber="13">
   <directoryPresets config="../web/web/VAADIN/themes/jvmguard" />
-  <application name="jvmguard" applicationId="9080-1518-6345-9856" mediaDir="../../media" lzmaCompression="true" shortName="jvmguard" publisher="Ingo Kegel" publisherWeb="https://jvmguard.dev" version="1.0" allPathsRelative="true" macVolumeId="999e7cd74d3a46df" javaMinVersion="21" javaMaxVersion="21">
+  <application name="jvmguard" applicationId="9080-1518-6345-9856" mediaDir="../../media" lzmaCompression="true" shortName="jvmguard" publisher="Ingo Kegel" publisherWeb="https://jvmguard.dev" version="1.0" allPathsRelative="true" macVolumeId="999e7cd74d3a46df" javaMinVersion="25" javaMaxVersion="25">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./src/main/resources/messages.utf8" />
     </languages>
     <variables>
-      <variable name="changelogUrl" value="https://jvmguard.dev/changes" />
+      <variable name="changelogUrl" value="https://github.com/jvmguard/jvmguard/blob/main/CHANGELOG.md" />
       <variable name="majorVersion" value="1" />
-      <variable name="build" value="1000" />
-      <variable name="__internal.app.installer.width" value="520" />
-      <variable name="__internal.app.installer.height" value="410" />
-      <variable name="__internal.app.406.width" value="600" />
-      <variable name="__internal.app.406.height" value="450" />
-      <variable name="sys.ext.install4j.winDigest" value="SHA-2" />
-      <variable name="moduleOptionsBase" value="&quot;@${launcher:sys.launcherDirectory}${compiler:sys.mediaFileSeparator}options${compiler:sys.mediaFileSeparator}base.options&quot;" />
-      <variable name="moduleOptions" value="${compiler:moduleOptionsBase}" />
-      <variable name="notarizationKey" />
     </variables>
-    <jreBundles jdkProviderId="Zulu" release="21/latest">
-      <modules>
-        <defaultModules set="jre" />
-        <module name="jdk.scripting.nashorn" exclude="true" />
-        <module name="jdk.scripting.nashorn.shell" exclude="true" />
-        <module name="jdk.internal.vm.compiler" exclude="true" />
-        <module name="jdk.internal.vm.compiler.management" exclude="true" />
-        <module name="jdk.jsobject" exclude="true" />
-        <module name="jdk.jfr" exclude="true" />
-        <module name="jdk.management.jfr" exclude="true" />
-        <module name="jdk.aot" exclude="true" />
-      </modules>
-    </jreBundles>
+    <jreBundles jdkProviderId="Zulu" release="25/latest" />
   </application>
   <files>
     <filesets>
       <fileset name="Demo" id="1026" customizedId="demo" />
-      <fileset name="Test" id="2950" />
-      <fileset name="Windows" id="5359" />
     </filesets>
     <roots>
       <root id="1027" fileset="1026" />
-      <root id="2951" fileset="2950" />
-      <root id="5360" fileset="5359" />
     </roots>
     <mountPoints>
       <mountPoint id="69" location="bin" />
-      <mountPoint id="22" />
       <mountPoint id="5914" location="config" />
+      <mountPoint id="22" />
       <mountPoint id="1028" root="1027" location="demo" />
     </mountPoints>
     <entries>
+      <fileEntry mountPoint="5914" file="../../dist/config/application.yaml" overwriteMode="never" uninstallMode="ifCreatedButNotForUpdate" overrideOverwriteMode="true" overrideUninstallMode="true" />
       <dirEntry mountPoint="22" file="../../dist" subDirectory="dist">
         <exclude>
           <entry location="demo" />
         </exclude>
       </dirEntry>
-      <fileEntry mountPoint="5914" file="../../dist/config/application.yaml" overwriteMode="never" uninstallMode="ifCreatedButNotForUpdate" overrideOverwriteMode="true" overrideUninstallMode="true" />
       <fileEntry mountPoint="22" file="../../dist/logback.xml" overwriteMode="never" uninstallMode="ifCreatedButNotForUpdate" overrideOverwriteMode="true" overrideUninstallMode="true" />
       <fileEntry mountPoint="22" file="../../LICENSE" />
       <dirEntry mountPoint="1028" file="../../dist/demo" subDirectory="demo" />
@@ -68,9 +43,6 @@
         <classPath>
           <scanDirectory location="lib/server" />
         </classPath>
-        <vmOptions>
-          <options version="9-" line="${compiler:moduleOptions}" />
-        </vmOptions>
       </java>
       <vmOptionsFile mode="content">
         <content># One VM option per line
@@ -79,28 +51,11 @@
       </vmOptionsFile>
     </launcher>
     <launcher name="jvmguard console" id="121">
-      <executable name="jvmguard_console" executableDir="bin" redirectStderr="false" executableMode="console" workingDirectory=".." executionLevel="requireAdministrator" dpiAware="false" />
+      <executable name="jvmguard_console" executableDir="bin" redirectStderr="false" executableMode="console" workingDirectory=".." dpiAware="false" />
       <java mainClass="com.jvmguard.server.ServerMain" vmParameters="-Djava.awt.headless=true -include-options jvmguard_service.vmoptions" preferredVM="server">
         <classPath>
           <scanDirectory location="lib/server" />
         </classPath>
-        <vmOptions>
-          <options version="9-" line="${compiler:moduleOptions}" />
-        </vmOptions>
-      </java>
-      <vmOptionsFile mode="content">
-        <content>-include-options jvmguard_service.vmoptions</content>
-      </vmOptionsFile>
-    </launcher>
-    <launcher name="jvmguard console unelevated" id="2174" fileset="5359">
-      <executable name="jvmguard_console_unelevated" executableDir="bin" redirectStderr="false" executableMode="console" workingDirectory=".." dpiAware="false" />
-      <java mainClass="com.jvmguard.server.ServerMain" vmParameters="-include-options jvmguard_service.vmoptions" preferredVM="server">
-        <classPath>
-          <scanDirectory location="lib/server" />
-        </classPath>
-        <vmOptions>
-          <options version="9-" line="${compiler:moduleOptions}" />
-        </vmOptions>
       </java>
       <vmOptionsFile mode="content">
         <content>-include-options jvmguard_service.vmoptions</content>
@@ -2254,9 +2209,6 @@ Changes only come into effect after you restart the jvmguard server.</property>
     <windows name="Windows" id="23" mediaFileName="${compiler:sys.shortName}_windows_${compiler:sys.version}" installDir="jvmguard" architecture="64" />
     <windowsArchive name="Windows Archive" id="123" installDir="jvmguard" architecture="64" />
     <unixInstaller name="Unix Installer" id="1969" installDir="jvmguard" require64BitVm="true">
-      <excludedLaunchers>
-        <launcher id="2174" />
-      </excludedLaunchers>
       <variables>
         <variable name="__internal.app.installer.width" value="550" />
         <variable name="__internal.app.installer.height" value="430" />
@@ -2266,15 +2218,9 @@ Changes only come into effect after you restart the jvmguard server.</property>
       <jreBundle jreBundleSource="none" />
     </unixInstaller>
     <unixArchive name="Unix Archive" id="2005" installDir="jvmguard" require64BitVm="true">
-      <excludedLaunchers>
-        <launcher id="2174" />
-      </excludedLaunchers>
       <jreBundle jreBundleSource="none" />
     </unixArchive>
     <macosFolder name="Mac OS X Folder" id="2000" installDir="jvmguard" architecture="universal">
-      <excludedLaunchers>
-        <launcher id="2174" />
-      </excludedLaunchers>
       <variables>
         <variable name="__internal.app.installer.width" value="550" />
         <variable name="__internal.app.installer.height" value="430" />
@@ -2282,14 +2228,12 @@ Changes only come into effect after you restart the jvmguard server.</property>
         <variable name="__internal.app.406.height" value="490" />
       </variables>
     </macosFolder>
-    <macosFolderArchive name="Mac OS X Folder Archive" id="2006" installDir="jvmguard" archiveType="tgz" architecture="universal">
-      <excludedLaunchers>
-        <launcher id="2174" />
-      </excludedLaunchers>
-    </macosFolderArchive>
+    <macosFolderArchive name="Mac OS X Folder Archive" id="2006" installDir="jvmguard" archiveType="tgz" architecture="universal" />
+    <linuxRPM name="Linux RPM" id="5923" />
+    <linuxDeb name="Linux Deb Archive" id="5924" />
   </mediaSets>
   <buildIds buildAll="false">
     <mediaSet refId="23" />
   </buildIds>
-  <buildOptions faster="true" disableSigning="true" />
+  <buildOptions faster="true" disableSigning="true" disableNotarization="true" />
 </install4j>

@@ -7,7 +7,7 @@
 # added here as well.
 
 jvmguard:
-  # Parent directory for the jvmguard database and log files. Absolute path or relative to the install dir.
+  # Parent directory for the jvmguard database and log files. Absolute path or relative to the installation directory.
   # To change this value, shut down jvmguard, move the data directory and then change this value accordingly.
   dataDirectory: data
 
@@ -21,7 +21,7 @@ jvmguard:
   # "X-Forwarded-Host" header when building URLs.
   reverseProxy: false
 
-  # Explicit reverse-proxy host (include the port for SSL, e.g. "server.com:443"). Empty = auto-detect.
+  # Explicit reverse-proxy host (include the port for SSL, e.g. "server.com:443"). When empty, it is auto-detected.
   reverseProxyHost: ""
 
   # Context path prepended to all URLs when behind a reverse proxy (no leading/trailing slash), e.g. "jvmguard".
@@ -34,11 +34,11 @@ jvmguard:
   mcpEnabled: true
 
   # Name of the keystore/PKCS12 file in the ssl directory used when useHttps is true.
-  # Empty = ssl/web.pkcs12 or ssl/self_signed.ks.
+  # When empty, ssl/web.pkcs12 or ssl/self_signed.ks are tried.
   keystoreName: ""
 
   # Password for the keystore named above. May be obfuscated (run "jvmguard_obfuscate <password>").
-  # Empty = the console server asks for the password on startup.
+  # When empty, the console server asks for the password on startup.
   keystorePassword: ""
 
   # Port VMs connect to on the dedicated agent channel.
