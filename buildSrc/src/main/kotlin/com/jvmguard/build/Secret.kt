@@ -7,7 +7,6 @@ import org.gradle.api.provider.ValueSourceParameters
 import org.json.JSONObject
 
 enum class Secret {
-    NOTARIZATION_KEY,
     MAVEN_CENTRAL,
     INSTALL4J_LICENSE_KEY,
     GITHUB_TOKEN;

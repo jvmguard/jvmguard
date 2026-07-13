@@ -8,6 +8,7 @@
     <variables>
       <variable name="changelogUrl" value="https://github.com/jvmguard/jvmguard/blob/main/CHANGELOG.md" />
       <variable name="majorVersion" value="1" />
+      <variable name="build" value="1000" />
     </variables>
     <jreBundles jdkProviderId="Zulu" release="25/latest" />
   </application>

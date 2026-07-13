@@ -30,7 +30,6 @@ tasks {
         variables = mapOf(
             "majorVersion" to majorVersion,
             "build" to getBuildNumber("jvmguard"),
-            "notarizationKey" to getNotarizationKeyFile().canonicalPath
         )
 
         doFirstWith(fileSystemOperations, mediaDir) { fsOps, mediaDir ->
@@ -47,7 +46,6 @@ tasks {
             checksumFile.renameTo(checksumTargetFile)
         }
     }
-    provideNotarizationKey(buildMedia)
 
     val media = register("media") {
         dependsOn(buildMedia)
