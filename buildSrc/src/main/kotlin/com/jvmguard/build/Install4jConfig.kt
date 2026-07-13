@@ -5,8 +5,6 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.*
 
 fun Project.configureInstall4j() {
-    val dev = hasProperty("dev")
-
     configure<Install4jExtension> {
         if (project.hasProperty("install4jHome")) {
             installDir.set(file(projectProperty("install4jHome", "")))
@@ -14,28 +12,12 @@ fun Project.configureInstall4j() {
         if (Secret.INSTALL4J_LICENSE_KEY.hasValue) {
             license =  Secret.INSTALL4J_LICENSE_KEY.value
         }
-        faster = booleanProperty("faster", false) || dev
-        disableSigning = booleanProperty("disableSigning", false) || dev
-        disableBundling = booleanProperty("disableBundling", false) || dev
-        if (project.hasProperty("verbose")) {
-            verbose = true
-        }
-        if (project.hasProperty("disableNotarization")) {
-            disableNotarization = true
-        }
-
-        if (dev) {
-            mediaTypes.set(if (project.hasProperty("type")) {
-                listOf(property("type").toString())
-            } else {
-                listOf(
-                    getPlatformDescriptor() + when {
-                        isMacos() -> "Archive"
-                        !isWindows() -> "Installer"
-                        else -> ""
-                    }
-                )
-            })
+        faster = booleanProperty("fasterBuild", false)
+        verbose = booleanProperty("verboseBuild", false)
+        disableSigning = booleanProperty("disableSigning", false)
+        disableBundling = booleanProperty("disableBundling", false)
+        if (project.hasProperty("mediaType")) {
+            mediaTypes = listOf(property("mediaType").toString())
         }
     }
 }
