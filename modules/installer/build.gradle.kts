@@ -51,11 +51,6 @@ tasks {
         dependsOn(buildMedia)
     }
 
-    register<Install4jTask>("mediaStandaloneDemo") {
-        dependsOn(jar, ":dist")
-        projectFile = file("standalone_demo.install4j")
-    }
-
     register("release") {
         mustRunAfter(media)
         dependsOn(
