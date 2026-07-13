@@ -7,14 +7,10 @@ import com.jvmguard.data.vmdata.Telemetry
 import com.jvmguard.data.vmdata.TelemetryData
 import com.jvmguard.data.vmdata.TelemetryInterval
 import com.jvmguard.data.vmdata.VM
-import com.jvmguard.ui.components.NavGroup
 import com.jvmguard.ui.components.echart.EChart
 import com.jvmguard.ui.server.Sessions
 import com.jvmguard.ui.server.serverTime
 import com.jvmguard.ui.views.data.telemetry.TelemetryChartModels
-import com.jvmguard.ui.views.data.telemetry.TelemetryNavigationBar
-import com.vaadin.flow.component.AttachEvent
-import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.html.Span
@@ -22,8 +18,12 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
-import com.vaadin.flow.shared.Registration
 
+/**
+ * The transactions time line is a read-only companion to the transaction grid: its range and
+ * resolution are derived from the transaction grid interval, and its time window follows the grid cursor.
+ * Clicking a point repositions the grid.
+ */
 class TransactionTimeLinePanel(
     private val onPointSelected: (Long) -> Unit,
 ) : VerticalLayout() {
@@ -38,9 +38,13 @@ class TransactionTimeLinePanel(
     private var gridEndTime: Long? = null
     private var mode: Mode = Mode.Associated
 
-    private val navBar = TelemetryNavigationBar(serverTime = ::serverTime, onChange = ::render)
+    // The telemetry window's right edge is only re-centered on navigation and load and is kept stable on
+    // point-click so scrubbing within the view doesn't shift the chart
+    private var telemetryEnd: Long = 0L
 
     private val title = Span().apply { addClassName("jvmguard-timeline-title") }
+
+    private val caption = Span().apply { addClassName("jvmguard-timeline-range") }
 
     private val closeButton = Button(VaadinIcon.CLOSE_SMALL.create()) { showAssociated() }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
@@ -51,16 +55,11 @@ class TransactionTimeLinePanel(
         style.set("margin-inline-start", "auto")
     }
 
-    private var pollRegistration: Registration? = null
-
     private val chart = EChart().apply {
         setSizeFull()
         style.set("min-height", "0")
         testId = ID_CHART
-        addPointClickListener { event -> onPointSelected(event.time) }
-        addBackwardListener { ctrl -> navBar.previous(ctrl) }
-        addForwardListener { ctrl -> navBar.next(ctrl) }
-        addZoomInListener { time -> navBar.zoomIn(time) }
+        addPointClickListener { event -> onPointSelected(snapToGridInterval(event.time)) }
     }
 
     private val message = Span().apply { addClassName("jvmguard-data-message") }
@@ -70,39 +69,37 @@ class TransactionTimeLinePanel(
         setWidthFull()
         isPadding = false
         isSpacing = false
-        val navGroup = NavGroup(*navBar.navigationButtons.toTypedArray())
         val header = HorizontalLayout().apply {
             addClassName("jvmguard-timeline-header")
             defaultVerticalComponentAlignment = FlexComponent.Alignment.END
             setWidthFull()
             isPadding = false
             isWrap = true
-            add(title, navGroup)
-            navBar.rangeControls.forEach { add(it) }
+            add(title, caption)
             add(closeButton)
         }
         add(header)
         showChart()
     }
 
-    override fun onAttach(attachEvent: AttachEvent) {
-        super.onAttach(attachEvent)
-        pollRegistration = attachEvent.ui.addPollListener { navBar.tick() }
-    }
-
-    override fun onDetach(detachEvent: DetachEvent) {
-        pollRegistration?.remove()
-        pollRegistration = null
-        super.onDetach(detachEvent)
-    }
-
-    fun refresh(vm: VM?, gridInterval: TransactionTreeInterval, gridEndTime: Long?, resetToAssociated: Boolean) {
+    fun refresh(
+        vm: VM?,
+        gridInterval: TransactionTreeInterval,
+        gridEndTime: Long?,
+        resetToAssociated: Boolean,
+        recenter: Boolean,
+    ) {
         this.vm = vm
         this.gridInterval = gridInterval
         this.gridEndTime = gridEndTime
         if (resetToAssociated) {
             mode = Mode.Associated
-            gridInterval.minimumTimeLineInterval?.let { navBar.applyRange(it) }
+        }
+        if (recenter || resetToAssociated || telemetryEnd == 0L) {
+            val now = serverTime()
+            val gridEnd = gridEndTime ?: now
+            val window = gridInterval.minimumTimeLineInterval
+            telemetryEnd = if (window != null) telemetryEndTime(window, gridEnd, now) else now
         }
         render()
     }
@@ -123,54 +120,62 @@ class TransactionTimeLinePanel(
             showMessage("Not connected to the jvmguard server.")
             return
         }
+        val window = gridInterval.minimumTimeLineInterval
+        if (window == null) {
+            showMessage(NO_DATA_TEXT)
+            return
+        }
+        caption.text = window.toString()
         val currentMode = mode
         closeButton.isVisible = currentMode is Mode.Item
-        val animate = navBar.consumeAnimatedNav()
-        val window = navBar.selectedInterval
-        val endTime = navBar.currentEndTime()
         val vm = vm ?: return
         val data = when (currentMode) {
             is Mode.Associated -> {
                 title.text = Telemetry.TRANSACTIONS.toString()
-                connection.getTelemetryData(vm, Telemetry.TRANSACTIONS.mainId, window, endTime)
+                connection.getTelemetryData(vm, Telemetry.TRANSACTIONS.mainId, window, telemetryEnd)
             }
 
             is Mode.Item -> {
                 title.text = "${currentMode.valueType} · ${currentMode.node.name}"
                 val treeInterval = window.getTransactionTreeTimeLineInterval() ?: return
                 connection.getTransactionTreeTimeLine(
-                    vm, endTime - window.timeExtent, endTime, currentMode.node.identifier,
+                    vm, telemetryEnd - window.timeExtent, telemetryEnd, currentMode.node.identifier,
                     currentMode.valueType, treeInterval, true,
                 )
             }
         }
-        navBar.setPreviousEnabled(!data.isNoPreviousData)
-        renderChart(data, window, endTime, currentMode is Mode.Associated, animate)
+        renderChart(data, window, telemetryEnd, currentMode is Mode.Associated)
+    }
+
+    private fun snapToGridInterval(time: Long): Long = gridInterval.getFloorStartTime(time)
+
+    private fun telemetryEndTime(window: TelemetryInterval, gridEnd: Long, now: Long): Long {
+        val gridCenter = gridEnd - gridInterval.timeExtent / 2
+        val desiredEnd = gridCenter + window.timeExtent / 2
+        return minOf(desiredEnd, now)
     }
 
     private fun renderChart(
-        data: TelemetryData?, window: TelemetryInterval, endTime: Long, isTransactions: Boolean, animate: Boolean,
+        data: TelemetryData?, window: TelemetryInterval, endTime: Long, isTransactions: Boolean,
     ) {
         val root = data?.rootNode
-        if (data == null || root == null) {
+        if (data == null || root == null || data.isNoPreviousData) {
             showMessage(NO_DATA_TEXT)
             return
         }
         val frequencyUnit = Sessions.current()?.frequencyUnit ?: FrequencyUnit.PER_MINUTE
+        val node = if (isTransactions) root.children.firstOrNull { it.data.isNotEmpty() } ?: root else root
         chart.setModel(
             TelemetryChartModels.build(
                 telemetryData = data,
-                node = root,
+                node = node,
                 frequencyUnit = frequencyUnit,
                 interval = window,
                 endTime = endTime,
                 isTransactions = isTransactions,
                 logarithmic = false,
                 frozen = null,
-                canBackward = !data.isNoPreviousData,
-                canForward = !navBar.isNowSelected(),
-                animate = animate,
-                // The band spans the whole interval, the per-item point marker sits at the interval center
+                // The band spans the whole grid interval, the per-item point marker sits at its center
                 markTime = gridEndTime?.takeUnless { isTransactions }?.let { it - gridInterval.timeExtent / 2 },
                 markBandStart = gridEndTime?.takeIf { isTransactions }?.let { it - gridInterval.timeExtent },
                 markBandEnd = gridEndTime?.takeIf { isTransactions },

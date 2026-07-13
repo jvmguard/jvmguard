@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.WaitUntilState
 import com.jvmguard.ui.views.data.VmDataView
-import com.jvmguard.ui.views.data.telemetry.TelemetryNavigationBar
+import com.jvmguard.ui.views.data.transactions.TransactionNavigationBar
 import com.jvmguard.ui.views.data.transactions.TransactionTimeLinePanel
 import com.jvmguard.ui.views.data.transactions.TransactionsView
 import com.jvmguard.ui.views.login.LoginView
@@ -26,7 +26,7 @@ class TransactionsViewE2ETest : PlaywrightE2ETest() {
         assertThat(getByText("Database").first()).isVisible()
         assertThat(getByText("Request 1").first()).isVisible()
         assertThat(locator("${TransactionTimeLinePanel.ID_CHART.testIdSelector()} canvas").first()).isVisible()
-        assertThat(getByTestId(TelemetryNavigationBar.ID_PREVIOUS)).isVisible()
+        assertThat(getByTestId(TransactionNavigationBar.ID_PREVIOUS)).isVisible()
 
         screenshot(Page.ScreenshotOptions().setPath(screenshotPath("transactions.png")))
     }

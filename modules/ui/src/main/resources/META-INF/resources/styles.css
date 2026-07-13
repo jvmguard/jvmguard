@@ -638,12 +638,13 @@ vaadin-grid.jvmguard-transaction-grid vaadin-grid-cell-content {
     align-items: flex-end;
 }
 
-.jvmguard-timeline-header .jvmguard-telemetry-autoupdate {
+.jvmguard-timeline-title {
+    font-weight: 600;
+    color: var(--vaadin-text-color-secondary);
     margin-bottom: 0.45rem;
 }
 
-.jvmguard-timeline-title {
-    font-weight: 600;
+.jvmguard-timeline-range {
     color: var(--vaadin-text-color-secondary);
     margin-bottom: 0.45rem;
 }

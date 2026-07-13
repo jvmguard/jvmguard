@@ -139,6 +139,7 @@ class TransactionsView : VmDataView() {
     private val split = SplitLayout(gridArea, timeLinePanel).apply {
         orientation = SplitLayout.Orientation.VERTICAL
         setWidthFull()
+        style.set("flex", "1 1 0")
         style.set("min-height", "0")
         setSplitterPosition(62.0)
         addClassName("jvmguard-transaction-split")
@@ -271,7 +272,7 @@ class TransactionsView : VmDataView() {
             cursor = connection.getTransactionTreeCursor(
                 cursorVm(connection), navBar.selectedInterval, mode.dataType, time, TimeRequirement.INCLUDED,
             )
-            fetchAndRender(resetTimeLine = false)
+            fetchAndRender(resetTimeLine = false, recenter = false)
         }
     }
 
@@ -309,7 +310,7 @@ class TransactionsView : VmDataView() {
         }
     }
 
-    private fun fetchAndRender(resetTimeLine: Boolean) {
+    private fun fetchAndRender(resetTimeLine: Boolean, recenter: Boolean = true) {
         withConnection { connection ->
             val current = cursor
             if (current == null || !current.availability.isAvailable) {
@@ -318,7 +319,7 @@ class TransactionsView : VmDataView() {
                 showMessage(if (current != null && navBar.isAutoUpdate()) NO_CURRENT_DATA_TEXT else NO_DATA_TEXT)
                 current?.let(navBar::update)
                 if (mode.hasTimeLines) {
-                    timeLinePanel.refresh(cursorVm(connection), navBar.selectedInterval, null, resetTimeLine)
+                    timeLinePanel.refresh(cursorVm(connection), navBar.selectedInterval, null, resetTimeLine, recenter)
                 }
                 return@withConnection
             }
@@ -328,7 +329,7 @@ class TransactionsView : VmDataView() {
             navBar.update(current)
             applyFilterAndRender()
             if (mode.hasTimeLines) {
-                timeLinePanel.refresh(cursorVm(connection), navBar.selectedInterval, cursorEndTime(current), resetTimeLine)
+                timeLinePanel.refresh(cursorVm(connection), navBar.selectedInterval, cursorEndTime(current), resetTimeLine, recenter)
             }
         }
     }
@@ -465,7 +466,7 @@ class TransactionsView : VmDataView() {
 
     private fun updateExport(displayed: List<TransactionNode>) {
         val end = cursor?.let(::cursorEndTime) ?: 0L
-        val bytes = TransactionExport.toJson(mode, displayed, end)
+        val bytes = TransactionExport.toJson(mode, displayed, navBar.selectedInterval, end)
         val fileName = "transactions-${mode.name.lowercase()}.json"
         exportAnchor.setJsonContent(bytes, fileName)
     }
