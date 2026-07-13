@@ -86,6 +86,26 @@ class SsoViewTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
+    fun addingAProviderWithoutClientIdAndSecretPersistsOnSave() {
+        UI.getCurrent().navigate(SsoView::class.java)
+        use(button("Add provider")).click()
+
+        use(textField("Display name")).setValue("Env Var Okta")
+        use(textField("Issuer URI")).setValue("https://yourco.okta.com")
+        use(dialogSave()).click()
+
+        assertTrue(shellSave().isEnabled, "client ID and secret are optional")
+
+        use(shellSave()).click()
+
+        val providers = connection.getGlobalConfig(false).ssoConfig.providers
+        assertEquals(1, providers.size)
+        assertEquals("Env Var Okta", providers[0].displayName)
+        assertEquals("", providers[0].clientId, "client ID is blank, to be injected via env var")
+        assertEquals("", providers[0].clientSecret, "client secret is blank, to be injected via env var")
+    }
+
+    @Test
     fun nonAdminIsForwardedAwayFromSsoSettings() {
         Sessions.setCurrent(UserSession(MockConnections.create(AccessLevel.VIEWER)))
         UI.getCurrent().navigate(SsoView::class.java)

@@ -218,19 +218,6 @@ class ConfigManager(private val configStorage: ConfigStorage) {
     private fun applyEnvVarOverrides() {
         val config = globalConfig ?: return
 
-        for (provider in config.ssoConfig.providers) {
-            val prefix = "JVMGUARD_SSO_" + provider.displayName.uppercase()
-                .replace(Regex("[^A-Z0-9]+"), "_").trim('_')
-            System.getenv("${prefix}_CLIENT_ID")?.let {
-                logger.info("SSO client ID for '{}' overridden by environment variable", provider.displayName)
-                provider.clientId = it
-            }
-            System.getenv("${prefix}_CLIENT_SECRET")?.let {
-                logger.info("SSO client secret for '{}' overridden by environment variable", provider.displayName)
-                provider.clientSecret = it
-            }
-        }
-
         System.getenv("JVMGUARD_LDAP_PASSWORD")?.let {
             logger.info("LDAP bind password overridden by environment variable")
             config.ldapConfig.password = it

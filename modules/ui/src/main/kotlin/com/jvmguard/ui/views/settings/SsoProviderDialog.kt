@@ -44,8 +44,14 @@ class SsoProviderDialog(
         addValueChangeListener { updatePresetFields() }
     }
     private val issuerUri = TextField("Issuer URI").apply { setWidthFull(); testId = ID_ISSUER_URI }
-    private val clientId = TextField("Client ID").apply { setWidthFull(); testId = ID_CLIENT_ID }
-    private val clientSecret = PasswordField("Client secret").apply { setWidthFull(); testId = ID_CLIENT_SECRET }
+    private val clientId = TextField("Client ID").apply {
+        setWidthFull(); testId = ID_CLIENT_ID
+        helperText = "Optional, can be set via JVMGUARD_SSO_<NAME>_CLIENT_ID env var"
+    }
+    private val clientSecret = PasswordField("Client secret").apply {
+        setWidthFull(); testId = ID_CLIENT_SECRET
+        helperText = "Optional, can be set via JVMGUARD_SSO_<NAME>_CLIENT_SECRET env var"
+    }
     private val domainRestriction = TextField("Domain / tenant").apply {
         setWidthFull()
         placeholder = "e.g. yourco.com"
@@ -146,10 +152,8 @@ class SsoProviderDialog(
             .asRequired("Enter an issuer URI.")
             .bind({ it.issuerUri }, { p, v -> p.issuerUri = v })
         binder.forField(clientId)
-            .asRequired("Enter a client ID.")
             .bind({ it.clientId }, { p, v -> p.clientId = v })
         binder.forField(clientSecret)
-            .asRequired("Enter a client secret.")
             .bind({ it.clientSecret }, { p, v -> p.clientSecret = v })
         binder.forField(domainRestriction)
             .bind({ it.domainRestriction }, { p, v -> p.domainRestriction = v })

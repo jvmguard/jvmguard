@@ -51,6 +51,9 @@ open class SsoProviderConfig : StoredConfig(), AuthenticationContainer {
 
     var accessRules: MutableList<SsoGroupMapping> = ArrayList()
 
+    fun effectiveClientId(): String = clientIdEnvOverride(displayName) ?: clientId
+    fun effectiveClientSecret(): String = clientSecretEnvOverride(displayName) ?: clientSecret
+
     override fun toString(): String =
         "SsoProviderConfig{displayName='$displayName', preset=$preset, enabled=$enabled}"
 
@@ -60,5 +63,14 @@ open class SsoProviderConfig : StoredConfig(), AuthenticationContainer {
                 .replace(Regex("[^a-z0-9]+"), "-")
                 .trim('-')
                 .ifEmpty { "provider" }
+
+        fun clientIdEnvOverride(displayName: String): String? = envOverride(displayName, "CLIENT_ID")
+        fun clientSecretEnvOverride(displayName: String): String? = envOverride(displayName, "CLIENT_SECRET")
+
+        private fun envOverride(displayName: String, suffix: String): String? {
+            if (displayName.isBlank()) return null
+            val prefix = "JVMGUARD_SSO_" + displayName.uppercase().replace(Regex("[^A-Z0-9]+"), "_").trim('_')
+            return System.getenv("${prefix}_$suffix")?.takeIf { it.isNotBlank() }
+        }
     }
 }

@@ -38,7 +38,7 @@ class MutableClientRegistrationRepository(
         val newRegistrations = LinkedHashMap<String, ClientRegistration>()
         for (provider in config.ssoConfig.providers.filter { it.enabled }) {
             val needsIssuer = provider.preset != SsoPreset.GOOGLE_WORKSPACE
-            if (provider.clientId.isBlank() || (needsIssuer && provider.issuerUri.isBlank())) {
+            if (provider.effectiveClientId().isBlank() || (needsIssuer && provider.issuerUri.isBlank())) {
                 continue
             }
             try {
@@ -73,8 +73,8 @@ class MutableClientRegistrationRepository(
 
         val builder = when (provider.preset) {
             SsoPreset.GOOGLE_WORKSPACE -> ClientRegistration.withRegistrationId(registrationId)
-                .clientId(provider.clientId.trim())
-                .clientSecret(provider.clientSecret.trim())
+                .clientId(provider.effectiveClientId().trim())
+                .clientSecret(provider.effectiveClientSecret().trim())
                 .clientName(provider.displayName)
                 .issuerUri("https://accounts.google.com")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -95,8 +95,8 @@ class MutableClientRegistrationRepository(
                 }
                 discoveryBuilder
                     .registrationId(registrationId)
-                    .clientId(provider.clientId.trim())
-                    .clientSecret(provider.clientSecret.trim())
+                    .clientId(provider.effectiveClientId().trim())
+                    .clientSecret(provider.effectiveClientSecret().trim())
                     .clientName(provider.displayName)
                     .userNameAttributeName(provider.userNameAttribute)
             }
