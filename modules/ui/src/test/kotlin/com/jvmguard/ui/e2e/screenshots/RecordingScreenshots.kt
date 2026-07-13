@@ -26,9 +26,8 @@ class RecordingScreenshots : ScreenshotTest() {
     @Test
     fun recordingSettings() = onPage {
         login()
-        open("recording/transactions")
+        openTransactionsAt("Matched")
         assertThat(getByTestId(AbstractRecordingSettingsView.ID_SELECT_BUTTON)).isVisible()
-        getByTestId("transaction-grid-matched").waitFor()
         capture("recording_settings")
     }
 
@@ -60,8 +59,7 @@ class RecordingScreenshots : ScreenshotTest() {
     @Test
     fun transactionsConfig() = onPage {
         login()
-        open("recording/transactions")
-        getByTestId("transaction-grid-matched").waitFor()
+        openTransactionsAt("Matched")
         capture("transactions_config")
     }
 
@@ -162,7 +160,7 @@ class RecordingScreenshots : ScreenshotTest() {
         login()
         open("recording/triggers")
         addTrigger("Connection count trigger")
-        addAction("Record fine-grained CPU data in profiling mode")
+        addAction("Record JProfiler snapshot")
         assertThat(getByTestId(TriggerActionDialog.ID_SAVE)).isVisible()
         capture("trigger_profile")
     }
@@ -290,8 +288,7 @@ class RecordingScreenshots : ScreenshotTest() {
     @Test
     fun transactionsSet() = onPage {
         login()
-        open("recording/transactions")
-        getByTestId("transaction-grid-matched").waitFor()
+        openTransactionsAt("Matched")
         getByTestId("set-add").click()
         assertThat(locator("vaadin-dialog-overlay")).isVisible()
         capture("transactions_set")
@@ -315,29 +312,30 @@ class RecordingScreenshots : ScreenshotTest() {
         getByTestId(TriggerActionDialog.ID_SAVE).waitFor()
     }
 
-    private fun Page.openMatchedDialog() {
+    // Opens the recording/transactions view and activates the given config tab. The tabs default to "Declared"
+    // (see the Declared/Mapped/Matched order), so we wait for that grid to confirm the view loaded and only then
+    // switch tabs — the previous code assumed "Matched" was the default and timed out once the order changed.
+    private fun Page.openTransactionsAt(tab: String) {
         open("recording/transactions")
-        getByTestId("transaction-grid-matched").waitFor()
-        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Matched")).first().click()
-        getByTestId("transaction-grid-matched").waitFor()
+        getByTestId("transaction-grid-declared").waitFor()
+        if (tab != "Declared") openTab(tab)
+        getByTestId("transaction-grid-${tab.lowercase()}").waitFor()
+    }
+
+    private fun Page.openMatchedDialog() {
+        openTransactionsAt("Matched")
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
     }
 
     private fun Page.openDeclaredDialog() {
-        open("recording/transactions")
-        getByTestId("transaction-grid-matched").waitFor()
-        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Declared")).first().click()
-        getByTestId("transaction-grid-declared").waitFor()
+        openTransactionsAt("Declared")
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
     }
 
     private fun Page.openCustomDialog() {
-        open("recording/transactions")
-        getByTestId("transaction-grid-matched").waitFor()
-        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Mapped")).first().click()
-        getByTestId("transaction-grid-mapped").waitFor()
+        openTransactionsAt("Mapped")
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
     }
@@ -362,9 +360,8 @@ class RecordingScreenshots : ScreenshotTest() {
     }
 
     private fun Page.openPolicySubdefDialog() {
-        open("recording/transactions")
-        getByTestId("transaction-grid-matched").waitFor()
-        // The row menu offers "Add policy specialization" only on a saved Matched def.
+        // The row menu offers "Add policy specialization" only on a saved Matched def, so work on the Matched tab.
+        openTransactionsAt("Matched")
         getByTestId("transaction-add").click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
         // A class filter is required to save the definition.
@@ -372,7 +369,11 @@ class RecordingScreenshots : ScreenshotTest() {
             .filter(Locator.FilterOptions().setHasText("Class or interface name"))
             .first().locator("input").fill("com.example.Service")
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).click()
-        locator("[data-testid^='transaction-row-menu-']").first().click()
+        getByTestId(AbstractTransactionDefDialog.ID_SAVE)
+            .waitFor(Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.HIDDEN))
+        val matchedGrid = getByTestId("transaction-grid-matched")
+        matchedGrid.getByText("com.example.Service").waitFor()
+        matchedGrid.locator("[data-testid^='transaction-row-menu-']").first().click()
         getByText("Add policy specialization").click()
         getByTestId(PolicySubDefDialog.ID_SAVE).waitFor()
     }
