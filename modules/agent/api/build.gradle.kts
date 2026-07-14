@@ -7,9 +7,9 @@ plugins {
 
 publishedApi {
     artifactName = "JvmGuard API"
-    artifactId = "jvmguard-api"
+    artifactId = "jvmguard-annotations"
     description = "JvmGuard API for configuring transactions and telemetries in your own code"
-    automaticModuleName = "dev.jvmguard.api"
+    automaticModuleName = "dev.jvmguard.annotation"
 }
 
 tasks {

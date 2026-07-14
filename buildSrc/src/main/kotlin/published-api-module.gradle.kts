@@ -33,7 +33,7 @@ afterEvaluate {
     }
     configure<MavenPublishBaseExtension> {
         coordinates("dev.jvmguard", publishedApi.artifactId.get(), getProductVersion("jvmguard") + getPublishSuffix())
-        publishToMavenCentral(automaticRelease = booleanProperty("automaticRelease", true))
+        publishToMavenCentral()
         signAllPublications()
 
         pom {
@@ -70,6 +70,10 @@ afterEvaluate {
 }
 
 tasks {
+
+    register<RunOnGithub>("publishToMavenCentralGithub")
+    register<RunOnGithub>("publishAndReleaseToMavenCentralGithub")
+
     val jar = named<Jar>("jar") {
         archiveBaseName.set(publishedApi.artifactId)
         manifest {
@@ -132,8 +136,7 @@ tasks {
     }
 }
 
-// "-SNAPSHOT" for beta/snapshot builds, "" otherwise
 fun Project.getPublishSuffix(): String {
     val taskNames = gradle.startParameter.taskNames
-    return if (taskNames.any { it.contains("publishSnapshot") }  || taskNames.contains("beta")) "-SNAPSHOT" else ""
+    return if (taskNames.any { it.contains("publishSnapshot") }) "-SNAPSHOT" else ""
 }
