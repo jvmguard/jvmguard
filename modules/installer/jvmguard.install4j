@@ -2231,8 +2231,8 @@ Changes only come into effect after you restart the jvmguard server.</property>
       </variables>
     </macosFolder>
     <macosFolderArchive name="Mac OS X Folder Archive" id="2006" installDir="jvmguard" archiveType="tgz" architecture="universal" />
-    <linuxRPM name="Linux RPM" id="5923" />
-    <linuxDeb name="Linux Deb Archive" id="5924" />
+    <linuxRPM name="Linux RPM" id="5923" overwriteNeverAsConfigFiles="true" />
+    <linuxDeb name="Linux Deb Archive" id="5924" overwriteNeverAsConfigFiles="true" />
   </mediaSets>
   <buildIds buildAll="false">
     <mediaSet refId="23" />
