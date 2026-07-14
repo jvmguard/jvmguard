@@ -71,8 +71,8 @@ jobs:
 
       - name: Running gradle
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           MAVEN_CENTRAL: "${{ secrets.MAVEN_CENTRAL }}"
+          INSTALL4J_LICENSE_KEY: "${{ secrets.INSTALL4J_LICENSE_KEY }}"
         run: |
           export ORG_GRADLE_PROJECT_mavenCentralUsername=$(echo "$MAVEN_CENTRAL" | jq -er .username)
           echo "::add-mask::$ORG_GRADLE_PROJECT_mavenCentralUsername"

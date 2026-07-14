@@ -181,6 +181,23 @@ abstract class RunOnGithub : DefaultTask() {
         private const val BASE_URL = "https://api.github.com/repos/jvmguard/jvmguard/actions/"
         private val client = HttpClient.newHttpClient()
 
+        private val githubToken: String by lazy { resolveGithubToken() }
+
+        private fun resolveGithubToken(): String {
+            System.getenv("GITHUB_TOKEN")?.takeIf { it.isNotBlank() }?.let { return it }
+            val token = runCatching {
+                val process = ProcessBuilder("gh", "auth", "token").redirectErrorStream(true).start()
+                val output = process.inputStream.bufferedReader().readText().trim()
+                if (process.waitFor() == 0) output else null
+            }.getOrNull()
+            if (!token.isNullOrEmpty()) {
+                return token
+            }
+            throw IllegalStateException(
+                "No GitHub token found. Set the GITHUB_TOKEN environment variable or run 'gh auth login'."
+            )
+        }
+
         fun triggerWorkflow(workflowId: Int, inputs: JSONObject = JSONObject()) {
             doRequest(
                 "workflows/${workflowId}/dispatches",
@@ -192,7 +209,7 @@ abstract class RunOnGithub : DefaultTask() {
             @Suppress("UastIncorrectHttpHeaderInspection")
             val request = HttpRequest.newBuilder(URI.create((if (url.startsWith("https:")) "" else BASE_URL) + url))
                 .header("Accept", "application/vnd.github+json")
-                .header("Authorization", "Bearer ${Secret.GITHUB_TOKEN.value}")
+                .header("Authorization", "Bearer $githubToken")
                 .header("X-GitHub-Api-Version", "2022-11-28")
             if (body != null) {
                 request.POST(BodyPublishers.ofString(body))

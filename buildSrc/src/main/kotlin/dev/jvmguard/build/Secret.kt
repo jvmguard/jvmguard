@@ -8,8 +8,7 @@ import org.json.JSONObject
 
 enum class Secret {
     MAVEN_CENTRAL,
-    INSTALL4J_LICENSE_KEY,
-    GITHUB_TOKEN;
+    INSTALL4J_LICENSE_KEY;
 
     private val cachedValueDelegate = lazy {
         System.getenv(name)?.takeIf { it.isNotBlank() }
