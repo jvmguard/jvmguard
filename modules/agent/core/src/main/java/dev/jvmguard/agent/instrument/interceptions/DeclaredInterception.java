@@ -5,7 +5,7 @@ import dev.jvmguard.agent.callee.Handler;
 import dev.jvmguard.agent.instrument.model.InterceptionMethod;
 import dev.jvmguard.agent.instrument.transaction.TransactionDefinition;
 import dev.jvmguard.agent.util.Logger;
-import dev.jvmguard.annotation.PackageMode;
+import dev.jvmguard.annotation.Part.PackageMode;
 import dev.jvmguard.annotation.Part;
 import dev.jvmguard.annotation.Part.Type;
 import dev.jvmguard.annotation.ReentryInhibition;

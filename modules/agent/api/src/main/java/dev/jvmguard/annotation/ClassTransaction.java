@@ -14,6 +14,12 @@ import java.lang.annotation.Target;
  * that are annotated with {@link NoTransaction @NoTransaction}.
  * Any invocation of an instrumented method will create a transaction with the specified {@link #naming() naming}.
  * <p>
+ * By default, the transaction name is just the class name, so all public methods aggregate into a single transaction
+ * and internal calls between them are collapsed by the default {@code NAME} {@link #reentryInhibition() reentry inhibition}.
+ * This is intended for monitoring a class as a single entry point. To distinguish individual methods, add
+ * {@code @Part(Type.METHOD)} to {@link #naming() naming}.
+ * </p>
+ * <p>
  * Overridden methods in derived classes are not instrumented unless the {@link #inheritance()} parameter is set
  * accordingly. If you specify {@code @ClassTransaction} on an interface, you have to set {@link #inheritance()} to
  * something other than {@code Mode.NONE}, otherwise no method will be instrumented.

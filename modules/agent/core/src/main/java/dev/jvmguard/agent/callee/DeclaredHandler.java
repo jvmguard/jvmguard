@@ -12,7 +12,7 @@ import dev.jvmguard.agent.instrument.NameTransformation;
 import dev.jvmguard.agent.instrument.interceptions.DeclaredInterception;
 import dev.jvmguard.agent.thread.ThreadManager;
 import dev.jvmguard.agent.util.Logger;
-import dev.jvmguard.annotation.PackageMode;
+import dev.jvmguard.annotation.Part.PackageMode;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

@@ -4,7 +4,7 @@ import dev.jvmguard.annotation.MethodTransaction;
 import dev.jvmguard.annotation.Part;
 import dev.jvmguard.annotation.Telemetry;
 import dev.jvmguard.annotation.TelemetryFormat;
-import dev.jvmguard.annotation.Unit;
+import dev.jvmguard.annotation.TelemetryFormat.Unit;
 import dev.jvmguard.demo.server.RateMeter;
 import dev.jvmguard.demo.server.Service;
 import dev.jvmguard.demo.server.TrafficProfile;

@@ -3,6 +3,8 @@ package dev.jvmguard.integration.tests.jvmguard.declared.classes.naming;
 import dev.jvmguard.annotation.*;
 import dev.jvmguard.annotation.Inheritance.Mode;
 import dev.jvmguard.annotation.Part.Type;
+import dev.jvmguard.annotation.Part.PackageMode;
+import dev.jvmguard.annotation.Inheritance.FilterType;
 
 import java.util.ArrayList;
 import java.util.Arrays;

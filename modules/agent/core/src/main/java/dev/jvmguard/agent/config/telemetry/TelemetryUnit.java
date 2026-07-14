@@ -1,7 +1,7 @@
 package dev.jvmguard.agent.config.telemetry;
 
 import dev.jvmguard.agent.config.base.ConfigDoc;
-import dev.jvmguard.annotation.Unit;
+import dev.jvmguard.annotation.TelemetryFormat.Unit;
 
 import java.util.HashMap;
 import java.util.Map;

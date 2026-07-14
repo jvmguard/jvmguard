@@ -1,6 +1,7 @@
 package dev.jvmguard.integration.tests.jvmguard.rest;
 
 import dev.jvmguard.annotation.*;
+import dev.jvmguard.annotation.TelemetryFormat.Unit;
 import dev.jvmguard.integration.AbstractJvmGuardRun;
 import dev.jvmguard.integration.util.SleepHelper;
 

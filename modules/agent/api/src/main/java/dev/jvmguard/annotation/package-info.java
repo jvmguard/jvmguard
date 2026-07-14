@@ -51,9 +51,9 @@
  * </p>
  * <pre>
  *   &#064;MethodTransaction(group = "db", naming = {
- *       &#064;Part(value = Type.CLASS, packageMode = PackageMode.ABBREVIATED),
+ *       &#064;Part(value = Type.CLASS, packageMode = Part.PackageMode.ABBREVIATED),
  *       &#064;Part(text=" query "),
- *       &#064;Part(value = Type.PARAMETER, parameterIndex = 1, getterChain = { "getQuery()", "getName()"}),
+ *       &#064;Part(value = Type.PARAMETER, parameterIndex = 1, getterChain = "getQuery().getName()"),
  *       &#064;Part(text=" count "),
  *       &#064;Part(value = Type.PARAMETER, parameterIndex = 2)},
  *       inheritance = @Inheritance(value = Mode.WITH_SUPERCLASS_NAME, filter = "*Executor")

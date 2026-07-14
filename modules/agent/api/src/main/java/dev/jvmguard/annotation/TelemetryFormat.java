@@ -1,9 +1,15 @@
 package dev.jvmguard.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Display options for a {@link Telemetry} annotation.
  * This annotation is used by the {@link Telemetry#format()} parameter.
  */
+@Target({})
+@Retention(RetentionPolicy.CLASS)
 public @interface TelemetryFormat {
     /**
      * The unit of the recorded values. By default, telemetries are unitless.
@@ -39,4 +45,45 @@ public @interface TelemetryFormat {
      * </p>
      */
     boolean groupAverage() default true;
+
+    /**
+     * Telemetry unit used in the {@link TelemetryFormat} annotation.
+     */
+    enum Unit {
+        /**
+         * The monitored value is a unitless number.
+         */
+        PLAIN,
+        /**
+         * The monitored value has the unit "per second". Conversion into the units "per-minute" and "per-hour" is
+         * done automatically as required. In practice, this conversion would occur if {@link #scale()}
+         * is set to a negative number.
+         */
+        PER_SECOND,
+        /**
+         * The monitored value has the unit "percent". To show two decimal digits, set {@link #scale()}
+         * to {@code 2}.
+         */
+        PERCENT,
+        /**
+         * The monitored value has the unit "milliseconds". Conversion into higher unit prefixes such as seconds or minutes
+         * is done automatically as required.
+         */
+        MILLISECONDS,
+        /**
+         * The monitored value has the unit "microseconds". Conversion into higher unit prefixes such as seconds or minutes
+         * is done automatically as required.
+         */
+        MICROSECONDS,
+        /**
+         * The monitored value has the unit "nanoseconds". Conversion into higher unit prefixes such as microseconds or
+         * milliseconds is done automatically as required.
+         */
+        NANOSECONDS,
+        /**
+         * The monitored value has the unit "bytes". Conversion into higher unit prefixes such as kB, MB or GB
+         * is done automatically as required.
+         */
+        BYTES
+    }
 }

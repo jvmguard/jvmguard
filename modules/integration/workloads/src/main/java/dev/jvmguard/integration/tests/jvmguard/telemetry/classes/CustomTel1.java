@@ -2,7 +2,7 @@ package dev.jvmguard.integration.tests.jvmguard.telemetry.classes;
 
 import dev.jvmguard.annotation.Telemetry;
 import dev.jvmguard.annotation.TelemetryFormat;
-import dev.jvmguard.annotation.Unit;
+import dev.jvmguard.annotation.TelemetryFormat.Unit;
 
 import java.util.Date;
 

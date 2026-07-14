@@ -4,7 +4,7 @@ import dev.jvmguard.agent.AgentConstants
 import dev.jvmguard.agent.telemetry.TelemetryFormatImpl
 import dev.jvmguard.agent.telemetry.TelemetryHelper
 import dev.jvmguard.annotation.TelemetryFormat
-import dev.jvmguard.annotation.Unit
+import dev.jvmguard.annotation.TelemetryFormat.Unit
 import dev.jvmguard.common.Loggers
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization
 import org.springframework.jdbc.core.simple.JdbcClient

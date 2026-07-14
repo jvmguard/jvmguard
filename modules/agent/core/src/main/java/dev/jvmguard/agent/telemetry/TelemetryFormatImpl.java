@@ -2,7 +2,6 @@ package dev.jvmguard.agent.telemetry;
 
 import dev.jvmguard.agent.comm.CommunicationContext;
 import dev.jvmguard.annotation.TelemetryFormat;
-import dev.jvmguard.annotation.Unit;
 
 import java.io.DataInput;
 import java.io.IOException;

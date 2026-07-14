@@ -5,7 +5,7 @@ import dev.jvmguard.agent.config.VmType
 import dev.jvmguard.agent.config.telemetry.TelemetryUnit
 import dev.jvmguard.agent.telemetry.TelemetryFormatImpl
 import dev.jvmguard.annotation.TelemetryFormat
-import dev.jvmguard.annotation.Unit
+import dev.jvmguard.annotation.TelemetryFormat.Unit
 import dev.jvmguard.data.config.FrequencyUnit
 import dev.jvmguard.data.vmdata.*
 import dev.jvmguard.integration.Controller

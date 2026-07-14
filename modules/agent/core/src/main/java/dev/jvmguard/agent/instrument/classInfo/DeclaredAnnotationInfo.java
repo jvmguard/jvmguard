@@ -5,6 +5,7 @@ import dev.jvmguard.agent.helper.matcher.RegexPatternMatcher;
 import dev.jvmguard.agent.instrument.model.InterceptionMethod;
 import dev.jvmguard.agent.instrument.transaction.annotation.DeclaredAnnotationDefinition;
 import dev.jvmguard.annotation.*;
+import dev.jvmguard.annotation.Inheritance.FilterType;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;

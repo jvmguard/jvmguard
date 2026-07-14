@@ -1,7 +1,7 @@
 package dev.jvmguard.integration.tests.jvmguard.declared.classes.naming;
 
 import dev.jvmguard.annotation.ClassTransaction;
-import dev.jvmguard.annotation.FilterType;
+import dev.jvmguard.annotation.Inheritance.FilterType;
 import dev.jvmguard.annotation.Inheritance;
 import dev.jvmguard.annotation.Inheritance.Mode;
 import dev.jvmguard.annotation.Part;
