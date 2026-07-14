@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 import org.gradle.api.JavaVersion
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.compile.JavaCompile

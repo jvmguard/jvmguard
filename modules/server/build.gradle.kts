@@ -1,5 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 
 plugins {
     id("kotlin-module")
@@ -34,7 +34,7 @@ dependencies {
 }
 
 springBoot {
-    mainClass = "com.jvmguard.server.ServerMain"
+    mainClass = "dev.jvmguard.server.ServerMain"
 }
 
 // The cyclonedx plugin attaches the SBOM artifact to its consumable "cyclonedxDirectBom" configuration only

@@ -1,7 +1,13 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="AnonymousHasLambdaAlternative" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Workloads" level="WARNING" enabled="false" editorAttributes="NOT_USED_ELEMENT_ATTRIBUTES" />
+    </inspection_tool>
     <inspection_tool class="AssignmentToCatchBlockParameter" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="AutoCloseableResource" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Workloads" level="WARNING" enabled="false" />
+    </inspection_tool>
     <inspection_tool class="BooleanMethodIsAlwaysInverted" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="BusyWait" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="CanBeFinal" enabled="false" level="WARNING" enabled_by_default="false">
@@ -21,6 +27,9 @@
     </inspection_tool>
     <inspection_tool class="ConstantValue" enabled="true" level="ERROR" enabled_by_default="true">
       <scope name="not annotated" level="ERROR" enabled="false" />
+    </inspection_tool>
+    <inspection_tool class="Convert2Lambda" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Workloads" level="WARNING" enabled="false" editorAttributes="NOT_USED_ELEMENT_ATTRIBUTES" />
     </inspection_tool>
     <inspection_tool class="CssNoGenericFontName" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="DataFlowIssue" enabled="true" level="ERROR" enabled_by_default="true">
@@ -111,10 +120,16 @@
       <option name="m_reportAllNonLibraryCalls" value="false" />
       <option name="callCheckString" value="java.io.InputStream,read,java.io.InputStream,skip,java.lang.StringBuffer,toString,java.lang.StringBuilder,toString,java.lang.String,.*,java.math.BigInteger,.*,java.math.BigDecimal,.*,java.net.InetAddress,.*" />
     </inspection_tool>
+    <inspection_tool class="InfiniteLoopStatement" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Workloads" level="WARNING" enabled="false" />
+    </inspection_tool>
     <inspection_tool class="InnerClassMayBeStatic" enabled="true" level="WARNING" enabled_by_default="true">
       <scope name="Workloads" level="WARNING" enabled="false" />
     </inspection_tool>
     <inspection_tool class="InstanceGuardedByStatic" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="InstantiationOfUtilityClass" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Workloads" level="WARNING" enabled="false" />
+    </inspection_tool>
     <inspection_tool class="JSPotentiallyInvalidUsageOfThis" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="LeakingThis" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="MissingOverrideAnnotation" enabled="true" level="WARNING" enabled_by_default="true">
@@ -142,6 +157,9 @@
       <option name="m_ignoreExpressionsContainingConstants" value="false" />
     </inspection_tool>
     <inspection_tool class="RawUseOfParameterizedType" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RedundantArrayCreation" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Workloads" level="WARNING" enabled="false" editorAttributes="NOT_USED_ELEMENT_ATTRIBUTES" />
+    </inspection_tool>
     <inspection_tool class="RedundantMethodOverride" enabled="true" level="WARNING" enabled_by_default="true">
       <scope name="Workloads" level="WARNING" enabled="false" />
     </inspection_tool>
@@ -173,6 +191,9 @@
     </inspection_tool>
     <inspection_tool class="UnstableApiUsage" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="UnusedReturnValue" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UseHashCodeMethodInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Workloads" level="WARNING" enabled="false" />
+    </inspection_tool>
     <inspection_tool class="groupsTestNG" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="groups">
         <value>

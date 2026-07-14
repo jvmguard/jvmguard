@@ -1,4 +1,4 @@
-import com.jvmguard.build.rootBuildDir
+import dev.jvmguard.build.rootBuildDir
 import java.io.File
 
 // Relocate every module's build directory into one central tree under <root>/build/gradle/<path>.

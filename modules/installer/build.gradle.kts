@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 import com.install4j.gradle.Install4jTask
 
 plugins {
@@ -16,7 +16,7 @@ val fullVersion = getProductVersion("jvmguard")
 
 tasks {
     val jar = named<Jar>("jar") {
-        include("com/jvmguard/installer/**")
+        include("dev/jvmguard/installer/**")
     }
 
     val buildMedia = register<Install4jTask>("buildMedia") {

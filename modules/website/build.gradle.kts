@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 
 val npmBin = if (isWindows()) "npm.cmd" else "npm"
 

@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 
 plugins {
     id("java-module")

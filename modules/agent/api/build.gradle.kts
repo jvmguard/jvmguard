@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
@@ -9,7 +9,7 @@ publishedApi {
     artifactName = "JvmGuard API"
     artifactId = "jvmguard-api"
     description = "JvmGuard API for configuring transactions and telemetries in your own code"
-    automaticModuleName = "com.jvmguard.api"
+    automaticModuleName = "dev.jvmguard.api"
 }
 
 tasks {

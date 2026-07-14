@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
@@ -32,7 +32,7 @@ afterEvaluate {
         dependsOn(tasks.withType<Sign>())
     }
     configure<MavenPublishBaseExtension> {
-        coordinates("com.jvmguard", publishedApi.artifactId.get(), getProductVersion("jvmguard") + getPublishSuffix())
+        coordinates("dev.jvmguard", publishedApi.artifactId.get(), getProductVersion("jvmguard") + getPublishSuffix())
         publishToMavenCentral(automaticRelease = booleanProperty("automaticRelease", true))
         signAllPublications()
 

@@ -1,0 +1,13 @@
+package dev.jvmguard.integration.tests.jvmguard.declared.classes.filter.a;
+
+public class AMethodBase1Sub1 extends MethodBase1SubA1 {
+    @Override
+    public void m1() {
+        throw new RuntimeException();
+    }
+
+    @Override
+    public void m2() {
+        throw new RuntimeException();
+    }
+}

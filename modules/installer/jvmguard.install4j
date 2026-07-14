@@ -40,7 +40,7 @@
   <launchers>
     <launcher name="jvmguard Service" id="70">
       <executable name="jvmguard_service" executableDir="bin" stderrFile="${installer:sys.tempDir}/jvmguard_error.log" executableMode="service" workingDirectory=".." dpiAware="false" />
-      <java mainClass="com.jvmguard.server.ServerMain" vmParameters="-Djava.awt.headless=true" preferredVM="server">
+      <java mainClass="dev.jvmguard.server.ServerMain" vmParameters="-Djava.awt.headless=true" preferredVM="server">
         <classPath>
           <scanDirectory location="lib/server" />
         </classPath>
@@ -53,7 +53,7 @@
     </launcher>
     <launcher name="jvmguard console" id="121">
       <executable name="jvmguard_console" executableDir="bin" redirectStderr="false" executableMode="console" workingDirectory=".." dpiAware="false" />
-      <java mainClass="com.jvmguard.server.ServerMain" vmParameters="-Djava.awt.headless=true -include-options jvmguard_service.vmoptions" preferredVM="server">
+      <java mainClass="dev.jvmguard.server.ServerMain" vmParameters="-Djava.awt.headless=true -include-options jvmguard_service.vmoptions" preferredVM="server">
         <classPath>
           <scanDirectory location="lib/server" />
         </classPath>
@@ -64,7 +64,7 @@
     </launcher>
     <launcher name="Demo service" id="856" fileset="1026">
       <executable name="demo_service" executableDir="demo" stderrFile="${installer:sys.tempDir}/demo_error.log" executableMode="service" workingDirectory=".." dpiAware="false" />
-      <java mainClass="com.jvmguard.demo.server.JvmGuardDemoServerStarter">
+      <java mainClass="dev.jvmguard.demo.server.JvmGuardDemoServerStarter">
         <classPath>
           <scanDirectory location="lib/demo" />
         </classPath>
@@ -72,7 +72,7 @@
     </launcher>
     <launcher name="Demo console" id="858" fileset="1026">
       <executable name="demo_console" executableDir="demo" redirectStderr="false" executableMode="console" workingDirectory=".." dpiAware="false" />
-      <java mainClass="com.jvmguard.demo.server.JvmGuardDemoServerStarter">
+      <java mainClass="dev.jvmguard.demo.server.JvmGuardDemoServerStarter">
         <classPath>
           <scanDirectory location="lib/demo" />
         </classPath>
@@ -80,7 +80,7 @@
     </launcher>
     <launcher name="jvmguard obfuscate" id="2736">
       <executable name="jvmguard_obfuscate" executableDir="bin" redirectStderr="false" executableMode="console" changeWorkingDirectory="false" dpiAware="false" />
-      <java mainClass="com.jvmguard.server.Helper">
+      <java mainClass="dev.jvmguard.server.Helper">
         <classPath>
           <scanDirectory location="lib/server" />
         </classPath>
@@ -247,7 +247,7 @@ return console.askOkCancel(message, true);
                     <serializedBean>
                       <property name="script">
                         <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">import com.jvmguard.installer.*;
+                          <property name="value" type="string">import dev.jvmguard.installer.*;
 
 String[] propertyNames = YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(new File(context.getResourceDirectory(),"application.yaml"), context);
 context.setVariable("jvmguardPropertyNames", propertyNames);
@@ -484,7 +484,7 @@ visually edited with the &lt;b&gt;configure&lt;/b&gt; executable at any time.</p
                     <serializedBean>
                       <property name="script">
                         <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">import com.jvmguard.installer.*;
+                          <property name="value" type="string">import dev.jvmguard.installer.*;
 
 Properties oldProperties = YamlConfigUtil.readJvmGuardSection(context.getDestinationFile("config/application.yaml"));
 
@@ -534,7 +534,7 @@ return true;</property>
                     <serializedBean>
                       <property name="script">
                         <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">import com.jvmguard.installer.*;
+                          <property name="value" type="string">import dev.jvmguard.installer.*;
 
 YamlConfigUtil.mergeJvmGuardSectionYaml(context.getDestinationFile("config/application.yaml"), true, context,
     (String[])context.getVariable("jvmguardPropertyNames")
@@ -1595,7 +1595,7 @@ return !Files.isWritable(context.getDestinationFile("config/application.yaml").t
                 <serializedBean>
                   <property name="script">
                     <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">import com.jvmguard.installer.*;
+                      <property name="value" type="string">import dev.jvmguard.installer.*;
 
 String[] propertyNames = (String[])YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(context.getDestinationFile("config/application.yaml"), context);
 context.setVariable("jvmguardPropertyNames", propertyNames);

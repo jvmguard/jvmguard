@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Demo Servers (template)" type="Application" factoryName="Application" singleton="true">
-    <option name="MAIN_CLASS_NAME" value="com.jvmguard.demo.server.JvmGuardDemoServerStarter" />
+    <option name="MAIN_CLASS_NAME" value="dev.jvmguard.demo.server.JvmGuardDemoServerStarter" />
     <module name="jvmguard.demo.main" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.jvmguard.demo.server.*" />
+        <option name="PATTERN" value="dev.jvmguard.demo.server.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 
 plugins {
     id("java-module")
@@ -19,9 +19,9 @@ tasks {
         archiveBaseName.set("jvmguard")
         manifest {
             attributes(
-                "Premain-Class" to "com.jvmguard.agent.bootstrap.BootstrapAgent",
-                "Agent-Class" to "com.jvmguard.agent.bootstrap.BootstrapAgent",
-                "Main-Class" to "com.jvmguard.agent.bootstrap.BootstrapMain",
+                "Premain-Class" to "dev.jvmguard.agent.bootstrap.BootstrapAgent",
+                "Agent-Class" to "dev.jvmguard.agent.bootstrap.BootstrapAgent",
+                "Main-Class" to "dev.jvmguard.agent.bootstrap.BootstrapMain",
                 "Can-Retransform-Classes" to "true",
                 "Can-Set-Native-Method-Prefix" to "true"
             )

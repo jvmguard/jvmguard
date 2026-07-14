@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="Class1Sub1.m1" count="1" type="mapped">
+        <children>
+          <element name="Class1.m1" count="1" type="mapped"/>
+        </children>
+      </element>
+      <element name="Class2.manno3: tostring: dev.jvmguard.integration.tests.jvmguard.mapped.classes.naming.Class2" count="1" type="mapped"/>
+      <element name="Class2.manno3: tostring: dev.jvmguard.integration.tests.jvmguard.mapped.classes.naming.Class2Sub1" count="1" type="mapped"/>
+    </children>
+  </transactionTree>
+</data>

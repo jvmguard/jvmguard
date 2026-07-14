@@ -1,8 +1,8 @@
 package export
 
-import com.jvmguard.agent.config.telemetry.TelemetryUnit
-import com.jvmguard.common.export.TelemetryExport
-import com.jvmguard.data.vmdata.TelemetryNode
+import dev.jvmguard.agent.config.telemetry.TelemetryUnit
+import dev.jvmguard.common.export.TelemetryExport
+import dev.jvmguard.data.vmdata.TelemetryNode
 import org.junit.jupiter.api.Test
 
 class TelemetryExportTest {

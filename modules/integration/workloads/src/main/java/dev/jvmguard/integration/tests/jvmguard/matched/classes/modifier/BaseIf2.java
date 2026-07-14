@@ -1,0 +1,7 @@
+package dev.jvmguard.integration.tests.jvmguard.matched.classes.modifier;
+
+public interface BaseIf2 {
+    void b1();
+    void b2();
+    void b3();
+}

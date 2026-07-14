@@ -1,4 +1,4 @@
-import com.jvmguard.build.addJunit6
+import dev.jvmguard.build.addJunit6
 
 plugins {
     id("kotlin-module")

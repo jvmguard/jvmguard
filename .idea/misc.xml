@@ -3,15 +3,15 @@
   <component name="EntryPointsManager">
     <list size="7">
       <item index="0" class="java.lang.String" itemvalue="com.google.inject.Inject" />
-      <item index="1" class="java.lang.String" itemvalue="com.jvmguard.agent.config.base.DefaultConstructor" />
-      <item index="2" class="java.lang.String" itemvalue="com.jvmguard.annotation.Telemetry" />
+      <item index="1" class="java.lang.String" itemvalue="dev.jvmguard.agent.config.base.DefaultConstructor" />
+      <item index="2" class="java.lang.String" itemvalue="dev.jvmguard.annotation.Telemetry" />
       <item index="3" class="java.lang.String" itemvalue="com.vaadin.flow.component.ClientCallable" />
       <item index="4" class="java.lang.String" itemvalue="com.vaadin.flow.component.page.Push" />
       <item index="5" class="java.lang.String" itemvalue="com.vaadin.shared.ui.Connect" />
       <item index="6" class="java.lang.String" itemvalue="org.gradle.api.tasks.TaskAction" />
     </list>
-    <pattern value="com.jvmguard.integration.AbstractRun" hierarchically="true" />
-    <pattern value="com.jvmguard.integration.JvmGuardTest" hierarchically="true" />
+    <pattern value="dev.jvmguard.integration.AbstractRun" hierarchically="true" />
+    <pattern value="dev.jvmguard.integration.JvmGuardTest" hierarchically="true" />
     <writeAnnotations>
       <writeAnnotation name="com.google.inject.Inject" />
     </writeAnnotations>

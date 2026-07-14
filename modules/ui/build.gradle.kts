@@ -1,4 +1,4 @@
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -88,7 +88,7 @@ fun serverMainJvmArgs(port: Int, vmPort: Int, productionMode: Boolean, dataDir: 
     "-Dinstall4j.noProxyAutoDetect=true",
     "--add-opens", "java.base/java.lang=ALL-UNNAMED",
     "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED",
-    "com.jvmguard.server.ServerMain",
+    "dev.jvmguard.server.ServerMain",
 )
 
 val e2eServer = gradle.sharedServices.registerIfAbsent("jvmguardWebServer-e2e", ServerProcessService::class.java) {}
@@ -201,7 +201,7 @@ tasks {
                 System.getProperty("java.home") + File.separator + "bin" + File.separator + "java",
                 "-cp", cp.get(),
                 "-DvmPort=$vmPort",
-                "com.jvmguard.demo.server.JvmGuardDemoServerStarter",
+                "dev.jvmguard.demo.server.JvmGuardDemoServerStarter",
             ), root, log)
         }
     }

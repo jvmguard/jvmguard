@@ -72,7 +72,7 @@ it that way. **Standardize; never hand-roll a per-view form or a god-form class.
 
 **Browserless** (the fast per-change check, no browser/servlet container) via Vaadin's built-in browserless
 testing (`com.vaadin:browserless-test-junit6`). Extend **`JvmGuardBrowserlessTest`** (our base in
-`modules/web/src/test/kotlin`: `BrowserlessTest` + `Locators` + `@ViewPackages("com.jvmguard.ui")` + reified
+`modules/web/src/test/kotlin`: `BrowserlessTest` + `Locators` + `@ViewPackages("dev.jvmguard.ui")` + reified
 `find<T>()`). The base creates and tears down the Vaadin env per test, so `@BeforeEach` only does
 `Sessions.setCurrent(...)` (no `MockVaadin.setup`/`tearDown`).
 

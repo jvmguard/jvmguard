@@ -67,7 +67,7 @@
     </encoder>
   </appender>
 
-  <appender name="failOnError" class="com.jvmguard.server.FailOnErrorAppender"/>
+  <appender name="failOnError" class="dev.jvmguard.server.FailOnErrorAppender"/>
 
   <logger name="connection" level="INFO" additivity="false">
     <appender-ref ref="stdout"/>

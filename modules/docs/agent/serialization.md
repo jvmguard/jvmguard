@@ -113,13 +113,13 @@ nanojson is the **container**; the codec and Jackson each produce JSON fragments
 
 | Concern | Location |
 |---|---|
-| Jackson mapper (shared, server) | `com.jvmguard.common.config.ConfigStorage#objectMapper()` |
-| Jackson↔codec bridge (agent beans in server sets) | `com.jvmguard.common.config.CodecEntityJacksonModule` |
-| Storage (server beans → DB JSON) | `com.jvmguard.common.config.ConfigStorage` |
-| Codec interfaces + backends | `com.jvmguard.agent.comm` (`CodecBean`, `AgentReader`/`AgentWriter`, `BinaryAgent*`, `JsonAgent*`) |
-| Codec type registry | `com.jvmguard.agent.comm.CodecRegistry`, `CodecTypes.registerAll()` |
-| Export/import format | `com.jvmguard.data.config.external` (`ServerInitConfig`, `RecordingConfig`, `ServerConfig`) |
-| Format constants | `com.jvmguard.agent.tools.importer.ConfigFileFormat` |
-| Agent offline importer | `com.jvmguard.agent.tools.importer` (`GroupConfigReader`, `ConfigData`, `Importer`) |
-| Bean base classes | `com.jvmguard.agent.config.base` (`AbstractEntity`, `Identifiable`, `OptionalConfig`) |
-| Shadowed JSON lib (agent) | `com.grack:nanojson`, relocated to `com.jvmguard.agent.json` in the agent jar |
+| Jackson mapper (shared, server) | `dev.jvmguard.common.config.ConfigStorage#objectMapper()` |
+| Jackson↔codec bridge (agent beans in server sets) | `dev.jvmguard.common.config.CodecEntityJacksonModule` |
+| Storage (server beans → DB JSON) | `dev.jvmguard.common.config.ConfigStorage` |
+| Codec interfaces + backends | `dev.jvmguard.agent.comm` (`CodecBean`, `AgentReader`/`AgentWriter`, `BinaryAgent*`, `JsonAgent*`) |
+| Codec type registry | `dev.jvmguard.agent.comm.CodecRegistry`, `CodecTypes.registerAll()` |
+| Export/import format | `dev.jvmguard.data.config.external` (`ServerInitConfig`, `RecordingConfig`, `ServerConfig`) |
+| Format constants | `dev.jvmguard.agent.tools.importer.ConfigFileFormat` |
+| Agent offline importer | `dev.jvmguard.agent.tools.importer` (`GroupConfigReader`, `ConfigData`, `Importer`) |
+| Bean base classes | `dev.jvmguard.agent.config.base` (`AbstractEntity`, `Identifiable`, `OptionalConfig`) |
+| Shadowed JSON lib (agent) | `com.grack:nanojson`, relocated to `dev.jvmguard.agent.json` in the agent jar |

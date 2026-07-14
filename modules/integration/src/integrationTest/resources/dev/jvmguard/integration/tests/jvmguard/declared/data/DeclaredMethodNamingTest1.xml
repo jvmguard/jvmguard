@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <transactionTree>
+    <children>
+      <element name="ntest1: DeclaredMethodNaming dev.jvmguard.integration.tests.jvmguard.declared.classes.naming.DeclaredMethodNaming 333 basecall ArrayList d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 55" count="2" type="declared"/>
+      <element name="ntest1: DeclaredMethodNaming dev.jvmguard.integration.tests.jvmguard.declared.classes.naming.DeclaredMethodNamingSub1 333 basecall ArrayList d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 55" count="2" type="declared"/>
+      <element name="ntest1: DeclaredMethodNaming dev.jvmguard.integration.tests.jvmguard.declared.classes.naming.DeclaredMethodNamingSub1_1 333 basecall ArrayList d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 55" count="2" type="declared"/>
+      <element name="ntest1: DeclaredMethodNamingSub2 dev.jvmguard.integration.tests.jvmguard.declared.classes.naming.DeclaredMethodNamingSub2 333 basecall ArrayList d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 55" count="2" type="declared"/>
+      <element name="ntest2: DeclaredMethodNaming d.j.i.t.j.d.c.n.DeclaredMethodNaming 333 5 subcall d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 11" count="2" type="declared">
+        <children>
+          <element name="ntest5" count="2" type="matched"/>
+          <element name="pojo2" count="2" type="matched"/>
+          <element name="ntest9" count="2" type="declared">
+            <children>
+              <element name="ntest5" count="2" type="matched"/>
+              <element name="pojo1" count="2" type="matched"/>
+              <element name="pojo2" count="2" type="matched"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest2: DeclaredMethodNaming d.j.i.t.j.d.c.n.DeclaredMethodNamingSub1 333 5 subcall d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 11" count="2" type="declared">
+        <children>
+          <element name="ntest5" count="2" type="matched"/>
+          <element name="pojo2" count="2" type="matched"/>
+          <element name="ntest9" count="2" type="declared">
+            <children>
+              <element name="ntest5" count="2" type="matched"/>
+              <element name="pojo1" count="2" type="matched"/>
+              <element name="pojo2" count="2" type="matched"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest2: DeclaredMethodNaming d.j.i.t.j.d.c.n.DeclaredMethodNamingSub1_1 333 5 subcall d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 11" count="2" type="declared">
+        <children>
+          <element name="ntest5" count="2" type="matched"/>
+          <element name="pojo2" count="2" type="matched"/>
+          <element name="ntest9" count="2" type="declared">
+            <children>
+              <element name="ntest5" count="2" type="matched"/>
+              <element name="pojo1" count="2" type="matched"/>
+              <element name="pojo2" count="2" type="matched"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest2: DeclaredMethodNaming d.j.i.t.j.d.c.n.DeclaredMethodNamingSub2 333 5 subcall d.j.i.t.j.d.c.n.DeclaredMethodNaming$ParameterClass 11" count="2" type="declared">
+        <children>
+          <element name="ntest5" count="2" type="matched"/>
+          <element name="pojo2" count="2" type="matched"/>
+          <element name="ntest9" count="2" type="declared">
+            <children>
+              <element name="ntest5" count="2" type="matched"/>
+              <element name="pojo1" count="2" type="matched"/>
+              <element name="pojo2" count="2" type="matched"/>
+            </children>
+          </element>
+        </children>
+      </element>
+      <element name="ntest3: DeclaredMethodNaming DeclaredMethodNaming" count="2" type="declared"/>
+      <element name="ntest3: DeclaredMethodNaming DeclaredMethodNamingSub2" count="2" type="declared"/>
+      <element name="ntest3: DeclaredMethodNamingSub1 DeclaredMethodNamingSub1" count="2" type="declared">
+        <children>
+          <element name="ntest3: DeclaredMethodNaming DeclaredMethodNamingSub1" count="2" type="declared"/>
+        </children>
+      </element>
+      <element name="ntest3: DeclaredMethodNamingSub1 DeclaredMethodNamingSub1_1" count="2" type="declared">
+        <children>
+          <element name="ntest3: DeclaredMethodNaming DeclaredMethodNamingSub1_1" count="2" type="declared"/>
+        </children>
+      </element>
+      <element name="ntest4: DeclaredMethodNaming DeclaredMethodNaming" count="2" type="declared"/>
+      <element name="ntest4: DeclaredMethodNaming DeclaredMethodNamingSub2" count="2" type="declared"/>
+      <element name="ntest5" count="8" type="declared">
+        <children>
+          <element name="pojo2" count="8" type="matched"/>
+          <element name="ntest4: DeclaredMethodNaming DeclaredMethodNaming" count="2" type="declared"/>
+          <element name="ntest4: DeclaredMethodNaming DeclaredMethodNamingSub2" count="2" type="declared"/>
+        </children>
+      </element>
+      <element name="ntest6" count="8" type="declared">
+        <children>
+          <element name="ntest5" count="8" type="matched"/>
+          <element name="pojo1" count="8" type="matched"/>
+          <element name="pojo2" count="8" type="matched"/>
+        </children>
+      </element>
+      <element name="ntest7" count="8" type="declared"/>
+    </children>
+  </transactionTree>
+</data>

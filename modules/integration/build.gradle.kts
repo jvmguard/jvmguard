@@ -126,7 +126,7 @@ tasks.register<JavaExec>("perfBenchmark") {
     group = "verification"
     description = "Runs the standalone agent throughput benchmark (BasePerfWorkload) on the current JDK."
     dependsOn(":agent:bootstrap:dist")
-    mainClass.set("com.jvmguard.integration.PerfBenchmarkKt")
+    mainClass.set("dev.jvmguard.integration.PerfBenchmarkKt")
     classpath = sourceSets["benchmark"].runtimeClasspath
 
     val distDir = rootDir.resolve("dist")

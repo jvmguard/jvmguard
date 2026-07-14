@@ -8,18 +8,18 @@ rooted at this directory; modules use the standard **Maven source layout**
 `modules/<m>/build.gradle.kts`. Java baseline is **25** (provisioned by the
 [foojay toolchain resolver](https://github.com/gradle/foojay-toolchains); the system `java`
 may be older). The Gradle build is **fully self-contained**: the build logic lives in the local
-`buildSrc` (under the `com.jvmguard.build.*` packages), versions are declared once in
+`buildSrc` (under the `dev.jvmguard.build.*` packages), versions are declared once in
 `gradle/libs.versions.toml`, and module registration is explicit in `settings.gradle.kts`.
 **Never commit or push** — the user reviews and commits all changes.
 
 ## Backend — `modules/server` (`:server`, the Spring Boot app)
 
-`com.jvmguard.server.ServerMain` (`@Component`, `SmartLifecycle`) is the `main()` entry (no args); it builds a
+`dev.jvmguard.server.ServerMain` (`@Component`, `SmartLifecycle`) is the `main()` entry (no args); it builds a
 `SpringApplication(JvmGuardApplication.class)`, registers a `bootstrap` initializer that applies a pending
 `jvmguard.bak` restore before the auto-configured `DataSource` opens the H2 files (and inits agent-side logging),
 selects the `integrationTest` profile when applicable, and runs it. `JvmGuardApplication` is `@SpringBootConfiguration
-@EnableAutoConfiguration @EnableVaadin("com.jvmguard.ui") @Import(SpringConfiguration.class)`;
-`SpringConfiguration` component-scans the backend packages (`com.jvmguard.common/data/collector/
+@EnableAutoConfiguration @EnableVaadin("dev.jvmguard.ui") @Import(SpringConfiguration.class)`;
+`SpringConfiguration` component-scans the backend packages (`dev.jvmguard.common/data/collector/
 database/rest/connector`) and `@Import`s the server-module beans. Backend collaborators are Spring
 beans with **constructor injection**; the agent `ConnectionServer`, collector, telemetry, REST, and the
 embedded web server are all in the one context. Notes:
@@ -27,7 +27,7 @@ embedded web server are all in the one context. Notes:
   the agent-facing `connector` classes can reach it without the Spring context); inside the context,
   collaborators use Spring constructor injection.
 - **Config** is standard Spring: the `jvmguard:` section of `application.yaml` binds to
-  `com.jvmguard.common.JvmGuardProperties` (`@ConfigurationProperties("jvmguard")`, `-Djvmguard.*` overrides),
+  `dev.jvmguard.common.JvmGuardProperties` (`@ConfigurationProperties("jvmguard")`, `-Djvmguard.*` overrides),
   constructor-injected. Defaults ship in `modules/server/src/main/resources/application.yaml`; installs
   override via `<install>/config/application.yaml`. `JvmGuardEnvironmentPostProcessor` (in
   `META-INF/spring.factories`) runs before refresh: it binds the properties, resolves the install-layout
@@ -42,13 +42,13 @@ embedded web server are all in the one context. Notes:
 - **Security is Spring Security** (`SecurityConfiguration`): an `@Order(0)` stateless HTTP-Basic chain for
   the REST API (`/api/**`, opt-in via `restApiEnabled`, `RestApiKeyAuthenticationProvider`) and an
   `@Order(1)` Vaadin chain (`VaadinSecurityConfigurer` + `loginView`). Web views carry JSR-250
-  `@AnonymousAllowed`/`@PermitAll`/`@RolesAllowed(Roles.*)` (`Roles` in `com.jvmguard.data.user`); the
+  `@AnonymousAllowed`/`@PermitAll`/`@RolesAllowed(Roles.*)` (`Roles` in `dev.jvmguard.data.user`); the
   principal is `JvmGuardUserDetails` (authorities expand the `AccessLevel` hierarchy). Login flows
   `LoginView` → `SecurityBridge` (a `ServerFactory`-style holder, since views aren't beans) →
   `AuthenticationManager` → `JvmGuardAuthenticationProvider` → `Server.authenticate` then `Server.connect`.
 - **Backend authorization is Spring method security** (`@EnableMethodSecurity`): the gated
   `ServerConnectionImpl` / `AbstractServerConnectionImpl` methods carry the meta-annotations
-  **`@RequireAdmin` / `@RequireProfiler` / `@RequireViewer`** (in `com.jvmguard.data.user`, each composing
+  **`@RequireAdmin` / `@RequireProfiler` / `@RequireViewer`** (in `dev.jvmguard.data.user`, each composing
   `@PreAuthorize("hasRole(...)")` over a `Roles` constant, never hand-written), enforced via an AOP proxy of
   the prototype connection. This is the authoritative access-level boundary; route annotations are UX +
   defense-in-depth. The **REST** resources use the same `@Require*` markers (the chain only authenticates),
@@ -66,7 +66,7 @@ embedded web server are all in the one context. Notes:
   pool/Flyway setup. The only pre-refresh work is the `bootstrap` initializer in `ServerMain.main()` (see above).
   SQL is hand-written (`JdbcClient` for fixed-schema CRUD, raw JDBC for blob/time-series writes); there are no Spring
   Data repositories and no `@Transactional` (writes go through a `DatabaseWriter` thread pool).
-- Packaging: install4j launches `com.jvmguard.server.ServerMain` against the exploded `lib/server`
+- Packaging: install4j launches `dev.jvmguard.server.ServerMain` against the exploded `lib/server`
   classpath (no fat jar).
 
 ## Frontend — `modules/ui` (`:ui`)
@@ -94,14 +94,14 @@ Theming, components, forms, and testing conventions live in **[modules/docs/agen
 (read it before touching UI code, and verify APIs against the Vaadin 25.1 MCP server, not memory).
 Orientation:
 
-- **Package layout (extend, don't flatten):** `com.jvmguard.ui.AppShell` (root `AppShellConfigurator`);
+- **Package layout (extend, don't flatten):** `dev.jvmguard.ui.AppShell` (root `AppShellConfigurator`);
   `shell/` (the app frame, `MainLayout`); `server/` (backend access + session-scoped cross-view concerns:
   `UserSession`, `Sessions`, `LoginService`, `NotificationPoller`); `views/<area>/` (one package per view,
   each its own `@Route`); `components/<component>/` (shared Flow/Lit toolkit, e.g. the sparkline). Views may
   call `ServerConnection` directly via `UserSession.getServerConnection()`; cross-view reuse lives in
   `components/`, not copied between views.
 - **Build & run:** `./gradlew :ui:build` produces the Vaadin frontend bundle. To run the dev
-  server, launch `com.jvmguard.server.ServerMain` (IntelliJ run config) — `:server` auto-depends on
+  server, launch `dev.jvmguard.server.ServerMain` (IntelliJ run config) — `:server` auto-depends on
   `:ui:vaadinBuildFrontend` from IntelliJ, so the bundle stays fresh. UI at
   `http://localhost:8020/`. Vaadin auto-detects the IDE and runs dev mode (hot-reload); add
   `-Dvaadin.productionMode=true` to serve the pre-built bundle. Append **`?mock`** to log in against the
@@ -113,10 +113,10 @@ Orientation:
 
 ### Live demo data (the demo cluster) — the real-agent alternative to `?mock`
 
-`com.jvmguard.demo.server.JvmGuardDemoServerStarter` (module **`:demo`**)
+`dev.jvmguard.demo.server.JvmGuardDemoServerStarter` (module **`:demo`**)
 is a multi-JVM workload generator: it spawns 10 child JVMs, each launched with
 `-javaagent:dist/agent/jvmguard.jar` (dev-mode fallback; `agent/jvmguard.jar` in a real install), each running
-one `com.jvmguard.demo.server.DemoService` role simulating an e-commerce "Online Boutique" fleet
+one `dev.jvmguard.demo.server.DemoService` role simulating an e-commerce "Online Boutique" fleet
 (Storefront, Catalog, Recommendation, Currency, Cart, Checkout, Payment, Shipping, Notification).
 Instrumentation is **Declared annotations only** (`@MethodTransaction` operations + nested sub-steps,
 `@Telemetry` getters) — no JEE probes, no config required (annotations are auto-detected at class-load).
@@ -125,7 +125,7 @@ modulates the rate across multiple timescales (weekly/diurnal/hourly/short sines
 jitter) with periodic peaks (flash sales every 3h, a nightly checkout batch, a payment-decline surge),
 exposed as a live-tweakable MXBean. Groups: `Demo/Storefront` (pool of 3), `Demo/Browse`
 {Catalog, Recommendation, Currency}, `Demo/Purchase` {Cart, Checkout, Payment}, `Demo/Fulfillment`
-{Shipping, Notification}. They connect to a jvmguard server (`com.jvmguard.server.ServerMain`). The starter
+{Shipping, Notification}. They connect to a jvmguard server (`dev.jvmguard.server.ServerMain`). The starter
 `inheritIO`s the children and a JVM shutdown hook `destroy()`s them all on exit, so stopping the starter
 tears the whole cluster down. The demo module targets **Java 21** (the installers bundle JRE 21). The
 shipped `dist-template/demo/jvmguard_demo.json` is a valid empty `recordingConfig` for optional manual import
@@ -137,10 +137,10 @@ starter's working directory must resolve that path.
 
 **Why this matters (not just for demos):** the demo cluster is the only easy way to exercise the
 **real agent data path**, which differs from `?mock` in a way that bites the MBean browser. A real
-connection serializes MBean attribute values through `com.jvmguard.mbean.data.MBeanTransfer`
+connection serializes MBean attribute values through `dev.jvmguard.mbean.data.MBeanTransfer`
 (`writeOpenTypeValues` / `readSimpleValues` → `OpenValueTransfer`), so the web side receives composites as
 `CompositeDataWithType` (or a value `Object[]`) and primitive arrays as **boxed `Object[]`** — exactly the
-shapes `com.jvmguard.mbean.common.MBeanHelper` (and `com.jvmguard.ui.views.data.mbeans.AttributeNode.buildTree` / `OpenTypeHelper` / `ObjectArrayHelper`) expand. The `?mock` path (`MockMBeans`) instead serves
+shapes `dev.jvmguard.mbean.common.MBeanHelper` (and `dev.jvmguard.ui.views.data.mbeans.AttributeNode.buildTree` / `OpenTypeHelper` / `ObjectArrayHelper`) expand. The `?mock` path (`MockMBeans`) instead serves
 the platform MBean server's **raw** objects (`long[]`, `CompositeDataSupport`, `TabularDataSupport`),
 bypassing that serialization. So the mock is a *harsher* input that surfaces formatter edge cases
 (primitive-array length, composite/tabular placeholders) which **never occur on a real connection** — handy
@@ -148,7 +148,7 @@ for hardening, but verify anything composite/array-shaped against the demo clust
 
 ## Backend & agent integration tests — `modules/integration` (`:integration`)
 
-End-to-end tests that launch a real jvmguard server (`com.jvmguard.server.ServerMain`, in-process) plus one
+End-to-end tests that launch a real jvmguard server (`dev.jvmguard.server.ServerMain`, in-process) plus one
 or more agent-instrumented workload JVMs and assert on collected data against golden `*.xml`/`*.json`. They
 are **JUnit 6** tests: a test is a `JvmGuardTest` subclass whose `connect()` drives assertions through a
 `TestServerConnection`, and its workload is a matching `*Workload` (`AbstractJvmGuardRun`) subclass (the base
@@ -156,7 +156,7 @@ are **JUnit 6** tests: a test is a `JvmGuardTest` subclass whose `connect()` dri
 fixture (`AgentIntegrationExtension` / `AgentFixture`) that boots the server, launches the workload child
 JVM(s), runs `connect()`, and tears down; discovery/grouping/reporting are stock JUnit.
 
-**Layout** (Maven source layout; everything is under package `com.jvmguard.integration.*`. Golden XML embeds
+**Layout** (Maven source layout; everything is under package `dev.jvmguard.integration.*`. Golden XML embeds
 FQNs/package names, so a code rename must be mirrored in the goldens):
 - Drivers + fixture + comparators run in the JUnit JVM (baseline 25): `src/integrationTest/{java,kotlin}/`.
 - Golden data: `src/integrationTest/resources/.../<test>/data/*.xml`.
@@ -214,8 +214,8 @@ which `:agent:bootstrap`'s `copyDist` renames to `agent.jar` for `dist/agent/lib
   the embedded-server customizer for HTTPS/reverse-proxy, the REST gate filter, the `/test` control
   filter). `modules/ui` — the Vaadin UI (Kotlin/Karibu). `modules/backend/rest` — the Spring MVC REST API.
 - `modules/backend/connector` / `data` / `collector` — the backend (`Server`/`ServerConnection`,
-  POJOs, collector), all Spring beans. `com.jvmguard.database` (incl. `Database`) lives in
-  `:server`; `com.jvmguard.common` lives in `:backend:data`.
+  POJOs, collector), all Spring beans. `dev.jvmguard.database` (incl. `Database`) lives in
+  `:server`; `dev.jvmguard.common` lives in `:backend:data`.
   `modules/agent` — the agent loaded into monitored JVMs (independent of the server's
   Spring context and logging).
 - `gradle/libs.versions.toml` (all versions, single source), `settings.gradle.kts` (modules

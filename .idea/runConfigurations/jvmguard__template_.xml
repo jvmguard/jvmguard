@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="jvmguard (template)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="jvmguard.server.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.jvmguard.server.ServerMain" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="dev.jvmguard.server.ServerMain" />
     <option name="VM_PARAMETERS" value="-Dvaadin.productionMode=true -Djvmguard.dataDirectory=$PROJECT_DIR$/build/data -Dlogging.config=$PROJECT_DIR$/dist-template/logback.xml" />
     <method v="2">
       <option name="Make" enabled="true" />

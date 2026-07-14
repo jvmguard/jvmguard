@@ -1,9 +1,9 @@
 package collector
 
-import com.jvmguard.collector.main.VmManagerImpl
-import com.jvmguard.data.config.triggers.TimeUnit
-import com.jvmguard.data.config.triggers.actions.RecordJpsAction
-import com.jvmguard.server.ServerMain
+import dev.jvmguard.collector.main.VmManagerImpl
+import dev.jvmguard.data.config.triggers.TimeUnit
+import dev.jvmguard.data.config.triggers.actions.RecordJpsAction
+import dev.jvmguard.server.ServerMain
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test

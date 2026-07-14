@@ -1,0 +1,33 @@
+package dev.jvmguard.agent.data;
+
+import dev.jvmguard.agent.comm.CommunicationContext;
+import dev.jvmguard.agent.helper.SnapshotRecorder;
+import dev.jvmguard.agent.jprofiler.JProfilerRecorder;
+import dev.jvmguard.agent.parameter.JProfilerRecordParameters;
+
+import java.io.File;
+import java.util.concurrent.Future;
+
+public class JProfilerSnapshotResult extends OrderedSnapshotTransferResult {
+
+    @Override
+    protected Future<File> getFuture(CommunicationContext context) {
+        final JProfilerRecordParameters parameters =
+            (JProfilerRecordParameters)context.getProperty(CommunicationContext.PROPERTY_PARAMETER);
+        return SnapshotRecorder.execute(() ->
+            JProfilerRecorder.record(
+                parameters.getArtifactKey(), parameters.getSeconds(), parameters.getSubsystems(),
+                parameters.isHeapDump(), parameters.isHeapDumpFullGc(),
+                parameters.isMbeanSnapshot(), parameters.isMonitorDump()));
+    }
+
+    @Override
+    protected String getNullErrorMessage() {
+        return "could not record JProfiler snapshot";
+    }
+
+    @Override
+    protected boolean isCompress() {
+        return false;
+    }
+}

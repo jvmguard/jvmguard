@@ -28,6 +28,6 @@ previous/
    ```
    Copy the regenerated `PreviousAgentTest*.xml` from the test's work dir `output/` (under
    `build/gradle/jvmguard/integration/integration/PreviousAgentTest-jdk8/output/`) back into
-   `../src/integrationTest/resources/com/jvmguard/integration/tests/jvmguard/previous/data/`, then run
+   `../src/integrationTest/resources/dev/jvmguard/integration/tests/jvmguard/previous/data/`, then run
    `:jvmguard:integration:integrationTest --tests "*PreviousAgentTest" -Pjdks=8` (without the record flag)
    to confirm.

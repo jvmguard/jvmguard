@@ -1,5 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.jvmguard.build.*
+import dev.jvmguard.build.*
 import java.io.IOException
 
 plugins {
@@ -48,9 +48,9 @@ tasks {
         // Relocate bundled libraries so they cannot collide with the profiled application's own copies
         // when the agent is attached to the same JVM.
         relocate("it.unimi.dsi.fastutil", "com.${project.rootProject.name}.agent.fastutil")
-        relocate("org.objectweb.asm", "com.jvmguard.agent.asm")
-        relocate("com.grack.nanojson", "com.jvmguard.agent.json")
-        relocate("com.jprofiler.api.controller", "com.jvmguard.agent.jpcontroller")
+        relocate("org.objectweb.asm", "dev.jvmguard.agent.asm")
+        relocate("com.grack.nanojson", "dev.jvmguard.agent.json")
+        relocate("com.jprofiler.api.controller", "dev.jvmguard.agent.jpcontroller")
     }
 
     // Pass -PvmName to set the name of the VM, -PvmGroup to set the group of the VM

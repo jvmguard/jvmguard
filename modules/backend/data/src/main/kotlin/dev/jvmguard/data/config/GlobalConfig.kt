@@ -1,0 +1,79 @@
+package dev.jvmguard.data.config
+
+import dev.jvmguard.agent.config.base.CheckedString
+import dev.jvmguard.common.helper.DeepCopy
+import dev.jvmguard.data.base.StoredConfig
+import dev.jvmguard.data.base.StoredType
+
+@StoredType("global_config")
+open class GlobalConfig : StoredConfig() {
+
+    var use2fa: Boolean = false
+        set(value) { field = changed(field, value) }
+
+    var smtpConfig: SmtpConfig = SmtpConfig()
+
+    var ldapConfig: LdapConfig = LdapConfig()
+        private set
+
+    var ssoConfig: SsoConfig = SsoConfig()
+        private set
+
+    var guardrailConfig: GuardrailConfig = GuardrailConfig()
+        private set
+
+    var infiniteTransactionDays: Boolean = false
+        set(value) { field = changed(field, value) }
+
+    var fixedTransactionDays: Int = 60
+        set(value) { field = changed(field, getUsedRetentionDays(value)) }
+
+    var violationDays: Int = 31
+        set(value) { field = changed(field, value) }
+
+    var snapshotFileDays: Int = 30
+        set(value) { field = changed(field, value) }
+
+    var payloadCap: Int = 50000
+        private set
+
+    var transactionCap: Int = 20000
+        set(value) { field = changed(field, value) }
+
+    var windowTitle: CheckedString = CheckedString()
+        private set
+
+    var defaultTheme: DefaultTheme = DefaultTheme.LIGHT
+        set(value) { field = changed(field, value) }
+
+    var frequencyUnit: FrequencyUnit = FrequencyUnit.PER_MINUTE
+        set(value) { field = changed(field, value) }
+
+    var checkForUpdates: Boolean = true
+        set(value) { field = changed(field, value) }
+
+    val transactionDays: Int
+        get() = if (infiniteTransactionDays) Int.MAX_VALUE else fixedTransactionDays
+
+    fun toObfuscatedConfig(): GlobalConfig =
+        if (authenticationContainers.any { it.password.isNotEmpty() }) {
+            DeepCopy.clone(this).apply { obfuscate() }
+        } else {
+            this
+        }
+
+    private fun obfuscate() {
+        authenticationContainers.forEach { it.obfuscate() }
+    }
+
+    fun deobfuscate() {
+        authenticationContainers.forEach { it.deobfuscate() }
+    }
+
+    private val authenticationContainers: List<AuthenticationContainer>
+        get() = listOf(smtpConfig, ldapConfig) + ssoConfig.providers
+
+    companion object {
+        fun getUsedRetentionDays(retentionDays: Int): Int = maxOf(retentionDays, 2)
+    }
+}

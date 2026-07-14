@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data>
+  <transactionTree>
+    <children>
+      <element name="SimpleMatched" count="30" type="matched"/>
+      <element name="d.j.i.t.j.m.c.a.AbstractSubA.b1" count="120" type="matched"/>
+      <element name="d.j.i.t.j.m.c.a.AbstractSubA.b2" count="120" type="matched"/>
+      <element name="d.j.i.t.j.m.c.a.Class1.b3" count="60" type="matched"/>
+      <element name="d.j.i.t.j.m.c.a.Class2.b3" count="60" type="matched"/>
+      <element name="d.j.i.t.j.m.c.b.AbstractSubB.b1" count="120" type="matched" policy="error" error="java.lang.RuntimeException"/>
+      <element name="d.j.i.t.j.m.c.b.AbstractSubB.b2" count="120" type="matched"/>
+      <element name="d.j.i.t.j.m.c.b.Class1.b3" count="60" type="matched"/>
+      <element name="d.j.i.t.j.m.c.b.Class2.b3" count="60" type="matched"/>
+      <element name="d.j.i.t.j.m.c.c.AbstractSubC.b1" count="120" type="matched" policy="error" error="java.lang.RuntimeException"/>
+      <element name="d.j.i.t.j.m.c.c.AbstractSubC.b2" count="120" type="matched"/>
+      <element name="d.j.i.t.j.m.c.c.Class1.b3" count="60" type="matched"/>
+      <element name="d.j.i.t.j.m.c.c.Class2.b3" count="60" type="matched"/>
+    </children>
+  </transactionTree>
+</data>

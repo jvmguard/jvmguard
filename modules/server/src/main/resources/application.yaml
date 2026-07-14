@@ -6,7 +6,7 @@
 # Any individual key can also be overridden with a "-Djvmguard.<key>=<value>" system property, which
 # always takes the highest precedence.
 #
-# The "jvmguard:" section below is bound to com.jvmguard.common.JvmGuardProperties; top-level Spring Boot
+# The "jvmguard:" section below is bound to dev.jvmguard.common.JvmGuardProperties; top-level Spring Boot
 # keys (server.*, vaadin.*, logging.*, ...) may be added here and are picked up by Spring Boot as usual.
 
 jvmguard:

@@ -3,7 +3,7 @@
 The UI figures in the docs site (`modules/docs/public/images/ui/`) are produced by the Playwright
 screenshot tests, not captured by hand. To regenerate them after a UI change:
 
-- The screenshot tests live in `modules/ui/src/test/kotlin/com/jvmguard/web/e2e/screenshots/`. Each writes a PNG
+- The screenshot tests live in `modules/ui/src/test/kotlin/dev/jvmguard/web/e2e/screenshots/`. Each writes a PNG
   named exactly `<imageName>.png` (the docs image name) into `build/.../web/e2e/screenshotsLight/`.
 - `:jvmguard:web:screenshots` runs them in the light theme. `:jvmguard:web:darkScreenshots` re-runs the
   same tests with the Playwright color scheme set to dark (the app honors `prefers-color-scheme` via
