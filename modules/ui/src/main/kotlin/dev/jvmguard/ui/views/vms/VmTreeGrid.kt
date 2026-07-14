@@ -50,6 +50,10 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
     private var currentTime = 0L
     private var currentRange = SparkLineRange.LAST_HOUR
 
+    private var contextMenuOpen = false
+
+    val isContextMenuOpen: Boolean get() = contextMenuOpen
+
     init {
         setWidthFull()
         minHeight = "0"
@@ -249,6 +253,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
 
     private fun showMenu(item: VmTreeItem): Component =
         menuButton(VaadinIcon.ANGLE_RIGHT, "Show", ID_SHOW) {
+            addOpenedChangeListener { e -> contextMenuOpen = e.isOpened }
             item("Transactions", { showTransactions(item) }) { testId = ID_SHOW_TRANSACTIONS }
             item("Telemetries", { showTelemetries(item) }) { testId = ID_SHOW_TELEMETRIES }
             if (canBrowseMBeans(item)) {
@@ -276,6 +281,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
 
     private fun actionsMenu(vm: VM): Component =
         menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", ID_ACTIONS) {
+            addOpenedChangeListener { e -> contextMenuOpen = e.isOpened }
             item("Run GC", { runGc(vm) }) { testId = ID_ACTION_GC }
             item("Heap dump…", { confirmHeapDump(vm) }) { testId = ID_ACTION_HEAP_DUMP }
             item("Thread dump…", { confirmThreadDump(vm) }) { testId = ID_ACTION_THREAD_DUMP }

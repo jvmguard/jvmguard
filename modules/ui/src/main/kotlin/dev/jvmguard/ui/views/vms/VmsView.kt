@@ -21,6 +21,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.shared.Registration
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
@@ -55,6 +56,7 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
 
     private var visibleTelemetryTypes: List<TelemetryType> = emptyList()
     private var initialized = false
+    private var pollRegistration: Registration? = null
 
     init {
         setSizeFull()
@@ -76,6 +78,8 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
         val session = Sessions.current() ?: return
         registerModificationListener(session)
         addDetachListener { it.unregisterListener() }
+        pollRegistration = attachEvent.ui.addPollListener { onPollTick() }
+        addDetachListener { pollRegistration?.remove(); pollRegistration = null }
         if (initialized) {
             reloadGrid()
         } else {
@@ -86,6 +90,12 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
 
     override fun modifyNotified(modificationTypes: Set<ModificationType>) {
         reloadGrid()
+    }
+
+    private fun onPollTick() {
+        if (!grid.isContextMenuOpen) {
+            reloadGrid()
+        }
     }
 
     private fun initialize(session: UserSession) {
