@@ -28,7 +28,7 @@ on:
       runner:
         description: 'runner name'
         required: false
-        default: 'ubuntu-24.04-l'
+        default: 'ubuntu-latest'
         type: string
 
 concurrency:
