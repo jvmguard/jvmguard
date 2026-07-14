@@ -15,10 +15,6 @@ on:
         description: 'java major version'
         required: true
         type: string
-      workingdir:
-        description: 'working directory'
-        required: true
-        type: string
       additional:
         description: 'additional script'
         required: false
@@ -28,11 +24,6 @@ on:
         description: 'custom run-name display'
         required: false
         default: ''
-        type: string
-      rootprojectprefix:
-        description: 'prefix to the root project'
-        required: false
-        default: './'
         type: string
       runner:
         description: 'runner name'
@@ -80,8 +71,7 @@ jobs:
           echo "::add-mask::$ORG_GRADLE_PROJECT_mavenCentralPassword"
 
           ${{ inputs.additional }}
-          ${{ inputs.rootprojectprefix }}gradlew ${{ inputs.tasks }} -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
-        working-directory: ./${{ inputs.workingdir }}
+          ./gradlew ${{ inputs.tasks }} -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
         shell: bash
 
       - name: Upload notarization logs
@@ -90,7 +80,7 @@ jobs:
         with:
           name: notarization-logs
           path: |
-            ${{ inputs.workingdir }}/media/**/*.notarization.log
+            media/**/*.notarization.log
           if-no-files-found: ignore
 
       - name: Upload test results
@@ -99,4 +89,4 @@ jobs:
         with:
           name: test-results
           path: |
-            ${{ inputs.workingdir }}/build/gradle/**/reports
+            build/gradle/**/reports

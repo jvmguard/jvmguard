@@ -95,12 +95,4 @@ tasks {
         group = "release"
         description = "Triggers the beta build on GitHub Actions"
     }
-
-    register("supportBot") {
-        group = "help"
-        description = "Triggers the support-bot GitHub workflow"
-        doLast {
-            RunOnGithub.triggerWorkflow(259381811)
-        }
-    }
 }

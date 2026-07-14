@@ -10,11 +10,9 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.process.ExecOperations
 import org.json.JSONArray
 import org.json.JSONObject
-import java.awt.Desktop
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URI
-import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpRequest.BodyPublishers
@@ -22,7 +20,6 @@ import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
@@ -36,7 +33,7 @@ abstract class RunOnGithub : DefaultTask() {
     @Internal
     val displayName: Property<String> = project.objects.property(String::class.java).convention("")
     @Internal
-    val workflowId: Property<Int> = project.objects.property(Int::class.java).convention(122242953)
+    val workflowFile: Property<String> = project.objects.property(String::class.java).convention("build.yml")
     @Internal
     val additionalScript: Property<String> = project.objects.property(String::class.java).convention("")
     @Internal
@@ -61,9 +58,7 @@ abstract class RunOnGithub : DefaultTask() {
         checkCurrentCommit()
 
         val branch = retrieveBranch()
-        val workingDir = runCommand(listOf("git", "rev-parse", "--show-prefix")).lines().first().trim().replace('\\', '/').removeSuffix("/")
         val javaMajorVersion = System.getProperty("java.version").substringBefore(".")
-        val rootProjectPrefix = (0 until workingDir.replace('\\', '/').count { it == '/' }).joinToString(separator = "") { "../" } + "./"
         var tasks = tasks.get()
         if (tasks.isEmpty()) {
             if (!path.endsWith("Github")) {
@@ -99,8 +94,6 @@ abstract class RunOnGithub : DefaultTask() {
         val inputs = JSONObject()
             .put("branch", branch)
             .put("java", javaMajorVersion)
-            .put("workingdir", workingDir)
-            .put("rootprojectprefix", rootProjectPrefix)
             .put("tasks", tasks)
             .put("displayname", displayName)
         if (additionalScript.get().isNotEmpty()) {
@@ -111,9 +104,10 @@ abstract class RunOnGithub : DefaultTask() {
         if (runner.isPresent) {
             inputs.put("runner", runner.get())
         }
-        triggerWorkflow(workflowId.get(), inputs)
+        val workflowId = resolveWorkflowId(workflowFile.get())
+        triggerWorkflow(workflowId, inputs)
         val fullTitle = displayName.ifEmpty { tasks } + " [" + branch + "]"
-        openHtmlUrl(startTime, fullTitle)
+        openHtmlUrl(workflowFile.get(), startTime, fullTitle)
     }
 
     private fun checkCurrentCommit() {
@@ -147,34 +141,26 @@ abstract class RunOnGithub : DefaultTask() {
         output.toString(StandardCharsets.UTF_8.name())
     }
 
-    private fun openHtmlUrl(startTime: Instant, title: String) {
+    private fun openHtmlUrl(workflowFile: String, startTime: Instant, title: String) {
         while (true) {
             Thread.sleep(2000)
-            println("checking for job url")
-            val jobsUrl = getJobsUrl(startTime, title)
-            if (jobsUrl != null) {
-                val htmlUrl = getHtmlUrl(jobsUrl)
-                if (htmlUrl != null) {
-                    Desktop.getDesktop().browse(URI.create(htmlUrl))
-                    return
-                }
+            println("checking for run id")
+            val runs = JSONArray(runCommand(listOf(
+                "gh", "run", "list",
+                "--workflow=$workflowFile",
+                "--event=workflow_dispatch",
+                "--json", "databaseId,displayTitle,createdAt"
+            )))
+            val runId = runs.filterIsInstance<JSONObject>()
+                .firstOrNull {
+                    Instant.parse(it.getString("createdAt")).isAfter(startTime) &&
+                        it.getString("displayTitle") == title
+                }?.getLong("databaseId")
+            if (runId != null) {
+                runCommand(listOf("gh", "run", "view", runId.toString(), "--web"))
+                return
             }
         }
-    }
-
-    private fun getJobsUrl(startTime: Instant, title: String): String? {
-        val runUrl = "runs?event=workflow_dispatch&created=${URLEncoder.encode(">${DateTimeFormatter.ISO_INSTANT.format(startTime)}", StandardCharsets.UTF_8)}"
-        val lastJobUrl = (JSONObject(doRequest(runUrl)).optJSONArray("workflow_runs") ?: JSONArray())
-            .filterIsInstance<JSONObject>()
-            .firstOrNull { it.getInt("workflow_id") == workflowId.get() && it.getString("display_title") == title }?.getString("jobs_url")
-        return lastJobUrl
-    }
-
-    private fun getHtmlUrl(jobsUrl: String): String? {
-        val lastJobUrl = (JSONObject(doRequest(jobsUrl)).optJSONArray("jobs") ?: JSONArray())
-            .filterIsInstance<JSONObject>()
-            .firstOrNull()?.getString("html_url")
-        return lastJobUrl
     }
 
     companion object {
@@ -198,10 +184,16 @@ abstract class RunOnGithub : DefaultTask() {
             )
         }
 
+        private fun resolveWorkflowId(workflowFile: String): Int =
+            JSONObject(doRequest("workflows/$workflowFile")).getInt("id")
+
+        private fun resolveDefaultBranch(): String =
+            JSONObject(doRequest(BASE_URL.removeSuffix("/actions/"))).getString("default_branch")
+
         fun triggerWorkflow(workflowId: Int, inputs: JSONObject = JSONObject()) {
             doRequest(
                 "workflows/${workflowId}/dispatches",
-                JSONObject().put("ref", "master").put("inputs", inputs).toString()
+                JSONObject().put("ref", resolveDefaultBranch()).put("inputs", inputs).toString()
             )
         }
 
