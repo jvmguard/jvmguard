@@ -7,7 +7,7 @@ plugins {
 val distTemplateDir = file("dist-template")
 
 tasks {
-    val clean = named<Delete>("clean") {
+    named<Delete>("clean") {
         doLastWith(fileSystemOperations, rootBuildDir, distDir, mediaDir) { fsOps, rootBuildDir, distDir, mediaDir ->
             fsOps.delete { delete(rootBuildDir, distDir, mediaDir) }
         }
@@ -64,26 +64,26 @@ tasks {
 
     val media = register("media") {
         group = "distribution"
-        description = "Cleans, builds the distribution and generates the installer media"
-        dependsOn(clean, dist, ":installer:media")
+        description = "Builds the distribution and generates the installer media"
+        dependsOn(dist, ":installer:media")
     }
 
     register("release") {
         group = "release"
         description = "Builds the media and publishes a release"
-        dependsOn(clean, media, ":installer:release")
+        dependsOn(media, ":installer:release")
     }
 
     register("overwriteRelease") {
         group = "release"
         description = "Builds the media and overwrites the existing release"
-        dependsOn(clean, media, ":installer:overwriteRelease")
+        dependsOn(media, ":installer:overwriteRelease")
     }
 
     register("beta") {
         group = "release"
         description = "Builds the media for a beta"
-        dependsOn(clean, media)
+        dependsOn(media)
     }
 
     val fullVersion = getProductVersion("jvmguard")
