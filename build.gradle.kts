@@ -86,13 +86,55 @@ tasks {
         dependsOn(clean, media)
     }
 
+    val fullVersion = getProductVersion("jvmguard")
+
+    register("printVersion") {
+        group = "release"
+        description = "Prints the current product version"
+        doLast {
+            println(fullVersion)
+        }
+    }
+
+    register("printReleaseTag") {
+        group = "release"
+        description = "Prints the release tag for the current version"
+        val tag = getReleaseTag("jvmguard", fullVersion)
+        doLast {
+            println(tag)
+        }
+    }
+
+    register("extractReleaseNotes") {
+        group = "release"
+        description = "Extracts the changelog section for the current version into build/release-notes.md"
+        val version = fullVersion
+        val changelogFile = rootProject.file("CHANGELOG.md")
+        val outputFile = rootBuildDir.resolve("release-notes.md")
+        doLast {
+            val changelog = changelogFile.readText()
+            val versionSection = extractChangelogSection(changelog, version)
+            outputFile.parentFile.mkdirs()
+            outputFile.writeText(versionSection)
+            println("Release notes written to ${outputFile.absolutePath}")
+        }
+    }
+
     register<RunOnGithub>("releaseGithub") {
         group = "release"
         description = "Triggers the release build on GitHub Actions"
+        releaseType = "release"
+    }
+
+    register<RunOnGithub>("overwriteReleaseGithub") {
+        group = "release"
+        description = "Triggers the overwrite release build on GitHub Actions (skips Maven publish)"
+        releaseType = "release"
     }
 
     register<RunOnGithub>("betaGithub") {
         group = "release"
         description = "Triggers the beta build on GitHub Actions"
+        releaseType = "prerelease"
     }
 }

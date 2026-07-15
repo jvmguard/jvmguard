@@ -88,7 +88,7 @@
       <vmOptionsFile mode="none" />
     </launcher>
   </launchers>
-  <installerGui autoUpdateDescriptorUrl="https://jvmguard.dev/updates${compiler:majorVersion}.xml">
+  <installerGui autoUpdateDescriptorUrl="https://jvmguard.dev/updates.xml">
     <customCode>
       <archive location="../../build/gradle/installer/libs/installer.jar" />
       <resource location="../../dist/config/application.yaml" />
@@ -2209,7 +2209,7 @@ Changes only come into effect after you restart the jvmguard server.</property>
   <mediaSets>
     <windows name="Windows" id="23" mediaFileName="${compiler:sys.shortName}_windows_${compiler:sys.version}" installDir="jvmguard" architecture="64" />
     <windowsArchive name="Windows Archive" id="123" installDir="jvmguard" architecture="64" />
-    <unixInstaller name="Unix Installer" id="1969" installDir="jvmguard" require64BitVm="true">
+    <unixInstaller name="Unix Installer" id="1969" mediaFileName="${compiler:sys.shortName}_unix_installer_${compiler:sys.version}" installDir="jvmguard" require64BitVm="true">
       <variables>
         <variable name="__internal.app.installer.width" value="550" />
         <variable name="__internal.app.installer.height" value="430" />
@@ -2230,7 +2230,7 @@ Changes only come into effect after you restart the jvmguard server.</property>
         <variable name="__internal.app.406.height" value="490" />
       </variables>
     </macosFolder>
-    <macosFolderArchive name="Mac OS X Folder Archive" id="2006" installDir="jvmguard" archiveType="tgz" architecture="universal" />
+    <macosFolderArchive name="Mac OS X Folder Archive" id="2006" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.version}" installDir="jvmguard" archiveType="tgz" architecture="universal" />
     <linuxRPM name="Linux RPM" id="5923" overwriteNeverAsConfigFiles="true" />
     <linuxDeb name="Linux Deb Archive" id="5924" overwriteNeverAsConfigFiles="true" />
   </mediaSets>

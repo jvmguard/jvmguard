@@ -3,13 +3,13 @@ import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://jvmguard.github.io',
+  site: 'https://jvmguard.dev',
   base: '/docs',
   redirects: { '/': '/docs/main/introduction' },
   integrations: [
     sitemap(),
     starlight({
-      title: 'jvmguard 5.0 documentation',
+      title: 'jvmguard documentation',
       logo: { src: './src/assets/logo.svg', replacesTitle: true },
       components: {
         Header: './src/components/overrides/Header.astro',

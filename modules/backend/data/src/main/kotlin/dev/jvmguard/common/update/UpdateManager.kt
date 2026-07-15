@@ -120,7 +120,7 @@ class UpdateManager(
 
     private fun getUpdateDescriptor(): UpdateDescriptorEntry? =
         try {
-            val updatesUrl = UPDATE_URL_BASE + "updates" + SERIES + ".xml" //TODO implement upload, also change in install4j project file
+            val updatesUrl = UPDATE_URL_BASE + "updates.xml"
             UpdateChecker.getUpdateDescriptor(updatesUrl, ApplicationDisplayMode.UNATTENDED).possibleUpdateEntry
         } catch (e: Exception) {
             SERVER_LOGGER.error("Could not check for update", e)

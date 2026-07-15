@@ -1,25 +1,27 @@
 ---
 import PageFrame from '../layouts/PageFrame.astro';
-import {SITE, DOWNLOADS} from '../consts';
+import {SITE} from '../consts';
+import {currentVersion, downloadUrl, hasAsset} from '../data/release';
 
 const platforms = [
   {
     name: 'Windows',
     file: '.exe installer',
-    links: [{label: 'Download', href: DOWNLOADS.windows, primary: true}],
+    links: [{label: 'Download', href: downloadUrl('windows'), primary: true, available: hasAsset('windows')}],
   },
   {
     name: 'macOS',
-    file: '.dmg installer',
-    links: [{label: 'Download', href: DOWNLOADS.macos, primary: true}],
+    file: '.tgz archive',
+    links: [{label: 'Download', href: downloadUrl('macos'), primary: true, available: hasAsset('macos')}],
   },
   {
     name: 'Linux',
-    file: '.rpm  ·  .deb  ·  .sh',
+    file: 'RPM  ·  DEB  ·  .sh  ·  .tar.gz',
     links: [
-      {label: 'Installer (.sh)', href: DOWNLOADS.linuxInstaller, primary: true},
-      {label: 'RPM', href: DOWNLOADS.linuxRpm, primary: false},
-      {label: 'DEB', href: DOWNLOADS.linuxDeb, primary: false},
+      {label: 'Installer (.sh)', href: downloadUrl('unix_installer'), primary: true, available: hasAsset('unix_installer')},
+      {label: 'Linux archive (.tar.gz)', href: downloadUrl('linux'), primary: false, available: hasAsset('linux')},
+      {label: 'RPM', href: downloadUrl('.rpm'), primary: false, available: hasAsset('.rpm')},
+      {label: 'DEB', href: downloadUrl('.deb'), primary: false, available: hasAsset('.deb')},
     ],
   },
 ];
@@ -37,6 +39,12 @@ const platforms = [
       The installer bundles a compatible Java runtime. Run from source if you prefer, or to track the
       current development version.
     </p>
+    <p class="muted version-line">
+      Current version: <strong>{currentVersion}</strong>
+      {currentVersion !== 'dev' && (
+        <> · <a href={SITE.changelog}>Changelog</a></>
+      )}
+    </p>
   </section>
 
   <section class="shell shell--wide">
@@ -51,9 +59,14 @@ const platforms = [
           <p class="muted platform__file">{p.file}</p>
           <div class="platform__links">
             {p.links.map((l) => (
-              <a class:list={['btn', l.primary ? 'btn--primary' : 'btn--ghost', 'platform__link']} href={l.href}>{l.label}</a>
+              <a class:list={['btn', l.primary ? 'btn--primary' : 'btn--ghost', 'platform__link']} href={l.href}>
+                {l.label}
+              </a>
             ))}
           </div>
+          {currentVersion === 'dev' && (
+            <p class="muted platform__pending">No release available yet.</p>
+          )}
         </article>
       ))}
     </div>
@@ -77,7 +90,7 @@ const platforms = [
       </p>
       <pre class="code"><code>git clone https://github.com/jvmguard/jvmguard.git
 cd jvmguard
-./gradlew :jvmguard:server:bootRun</code></pre>
+./gradlew :server:bootRun</code></pre>
       <p class="muted">
         Once you see <code>Server started</code>, open <code>http://localhost:8020/</code>. The default
         web port is <code>8020</code> and the agent port is <code>8847</code>.
@@ -90,6 +103,9 @@ cd jvmguard
   .hero {
     padding-top: var(--space-7);
     padding-bottom: var(--space-5);
+  }
+  .version-line {
+    margin-top: var(--space-3);
   }
   .platform {
     border-top: 1px solid var(--rule);
@@ -110,6 +126,10 @@ cd jvmguard
   .platform__link {
     width: 100%;
     text-align: center;
+  }
+  .platform__pending {
+    margin-top: var(--space-2);
+    font-size: var(--step--1);
   }
   .platform__note {
     margin-top: var(--space-5);

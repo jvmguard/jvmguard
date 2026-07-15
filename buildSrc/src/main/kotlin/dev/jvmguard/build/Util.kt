@@ -42,8 +42,8 @@ fun Project.getProductVersionOrNull(product: String): String? {
 
 fun Project.getReleaseTag(product: String, productVersion: String? = null): String {
     val fullVersion = productVersion ?: getProductVersion(product)
-    val releaseRevision = getReleaseRevision(product, fullVersion)
-    return "releases/$product/$fullVersion${if (releaseRevision != null) "-$releaseRevision" else ""}"
+    val releaseRevision = getReleaseRevision(fullVersion)
+    return "v$fullVersion${if (releaseRevision != null) "-$releaseRevision" else ""}"
 }
 
 @Synchronized
@@ -148,8 +148,8 @@ fun Project.getBuildNumber(product: String): Int {
 }
 
 @Synchronized
-fun Project.getReleaseRevision(product: String, fullVersion: String): Int? {
-    val tagNamePrefix = "releases/$product/$fullVersion"
+fun Project.getReleaseRevision(fullVersion: String): Int? {
+    val tagNamePrefix = "v$fullVersion"
     val previousValue = listGitTags("$tagNamePrefix*")
         .filter { it.startsWith(tagNamePrefix) }
         .maxOfOrNull { it.substringAfterLast("-", "0").toInt() }
@@ -217,3 +217,21 @@ val emptyFileCollection : FileCollection
         override fun getFiles(): Set<File> = emptySet()
         override fun getDisplayName() = "empty file collection"
     }
+
+fun extractChangelogSection(changelog: String, version: String): String {
+    val headingPattern = Regex("""(?m)^#{2,3}\s*\[?((?:\d[^\]\n]*|Unreleased))\]?""")
+    val matches = headingPattern.findAll(changelog).toList()
+    if (matches.isEmpty()) {
+        return "Release $version"
+    }
+
+    val targetMatch = matches.firstOrNull {
+        val headingVersion = it.groupValues[1].trim()
+        headingVersion == version || headingVersion.equals("Unreleased", ignoreCase = true)
+    } ?: matches.first()
+
+    val startIndex = targetMatch.range.first
+    val nextMatch = matches.firstOrNull { it.range.first > targetMatch.range.first }
+    val endIndex = nextMatch?.range?.first ?: changelog.length
+    return changelog.substring(startIndex, endIndex).trim()
+}

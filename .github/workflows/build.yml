@@ -30,6 +30,11 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
+      releaseType:
+        description: 'create a GH release after build: "release", "prerelease", or empty'
+        required: false
+        default: ''
+        type: string
 
 concurrency:
   group: build-workflow-${{ inputs.branch }}
@@ -73,6 +78,46 @@ jobs:
           ${{ inputs.additional }}
           ./gradlew ${{ inputs.tasks }} -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
         shell: bash
+
+      - name: Extract release notes
+        if: inputs.releaseType != ''
+        run: ./gradlew -q extractReleaseNotes
+
+      - name: Create GitHub release and upload media
+        if: inputs.releaseType != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=$(./gradlew -q printReleaseTag)
+          VERSION=$(./gradlew -q printVersion)
+          
+          FLAGS=""
+          if [ "${{ inputs.releaseType }}" = "prerelease" ]; then
+            FLAGS="--prerelease"
+          fi
+          
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, uploading assets"
+            gh release upload "$TAG" media/* --clobber
+          else
+            gh release create "$TAG" media/* \
+              --title "jvmguard $VERSION" \
+              --notes-file build/gradle/release-notes.md \
+              $FLAGS
+          fi
+        shell: bash
+
+      - name: Trigger docs/Pages rebuild
+        if: inputs.releaseType == 'release'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docs.yml',
+              ref: 'main',
+            });
 
       - name: Upload notarization logs
         if: failure()

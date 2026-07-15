@@ -36,13 +36,10 @@ tasks {
             fsOps.delete { delete(mediaDir) }
         }
 
-        val updatesXmlFile = file("$mediaDir/updates.xml")
-        val updatesXmlTargetFile = file("$mediaDir/updates$majorVersion.xml")
         val checksumFile = File("$mediaDir/sha256sums")
         val checksumTargetFile = file("$mediaDir/sha256sums_$fullVersionForFileName.txt")
-        doLastWith(updatesXmlFile, updatesXmlTargetFile, checksumFile, checksumTargetFile) {
-                updatesXmlFile, updatesXmlTargetFile, checksumFile, checksumTargetFile ->
-            updatesXmlFile.renameTo(updatesXmlTargetFile)
+        doLastWith(checksumFile, checksumTargetFile) {
+                checksumFile, checksumTargetFile ->
             checksumFile.renameTo(checksumTargetFile)
         }
     }

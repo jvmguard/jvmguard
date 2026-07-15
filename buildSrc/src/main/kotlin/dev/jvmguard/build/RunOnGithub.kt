@@ -40,6 +40,8 @@ abstract class RunOnGithub : DefaultTask() {
     val excludedTaskNames: SetProperty<String> = project.objects.setProperty(String::class.java)
     @Internal
     val runner: Property<String> = project.objects.property(String::class.java)
+    @Internal
+    val releaseType: Property<String> = project.objects.property(String::class.java).convention("")
 
     private val startParamExcludedTaskNames = project.gradle.startParameter.excludedTaskNames.toSet()
     private val startParamSystemPropertiesArgs =
@@ -103,6 +105,9 @@ abstract class RunOnGithub : DefaultTask() {
         }
         if (runner.isPresent) {
             inputs.put("runner", runner.get())
+        }
+        if (releaseType.get().isNotEmpty()) {
+            inputs.put("releaseType", releaseType.get())
         }
         val workflowId = resolveWorkflowId(workflowFile.get())
         triggerWorkflow(workflowId, inputs)

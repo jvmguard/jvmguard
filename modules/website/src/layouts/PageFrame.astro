@@ -3,6 +3,7 @@
 // A masthead with the logo wordmark and primary nav, a main column, and a footer.
 // Theme (light/dark) is resolved before paint by the inline script in <head>.
 import {SITE} from '../consts';
+import {currentVersion} from '../data/release';
 import Logo from '../components/Logo.astro';
 
 interface Props {
@@ -98,6 +99,9 @@ import '../styles/global.css';
           <a href={SITE.licenseUrl}>License</a>
         </nav>
         <p class="footer__note">Built by the team behind JProfiler.</p>
+        {currentVersion !== 'dev' && (
+          <p class="footer__version">v{currentVersion}</p>
+        )}
       </div>
     </footer>
 
@@ -224,6 +228,12 @@ import '../styles/global.css';
         margin: 0;
         color: var(--ink-muted);
         font-size: var(--step--1);
+      }
+      .footer__version {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: var(--step--1);
+        font-family: var(--font-mono);
       }
     </style>
     <script is:inline>

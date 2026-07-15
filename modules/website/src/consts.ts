@@ -5,7 +5,7 @@
 export const SITE = {
   name: 'jvmguard',
   title: 'jvmguard',
-  canonical: 'https://jvmguard.github.io',
+  canonical: 'https://jvmguard.dev',
 
   tagline: 'the watchman over your JVMs.',
   description:
@@ -13,6 +13,7 @@ export const SITE = {
 
   repo: 'https://github.com/jvmguard/jvmguard',
   releases: 'https://github.com/jvmguard/jvmguard/releases',
+  changelog: 'https://github.com/jvmguard/jvmguard/blob/main/CHANGELOG.md',
 
   docs: '/docs/main/introduction',
 
@@ -23,20 +24,6 @@ export const SITE = {
 
   license: 'Apache License 2.0',
   licenseUrl: 'https://www.apache.org/licenses/LICENSE-2.0',
-} as const;
-
-/*
- * Download links. PLACEHOLDER: all point to the releases page. At publication
- * time, replace each URL with the actual release asset URL from the latest
- * GitHub release (e.g.
- * https://github.com/<org>/<name>/releases/download/v1.0/jvmguard_windows_1_0.exe).
- */
-export const DOWNLOADS = {
-  windows: 'https://github.com/jvmguard/jvmguard/releases/latest',
-  macos: 'https://github.com/jvmguard/jvmguard/releases/latest',
-  linuxInstaller: 'https://github.com/jvmguard/jvmguard/releases/latest',
-  linuxRpm: 'https://github.com/jvmguard/jvmguard/releases/latest',
-  linuxDeb: 'https://github.com/jvmguard/jvmguard/releases/latest',
 } as const;
 
 // Brand palette
