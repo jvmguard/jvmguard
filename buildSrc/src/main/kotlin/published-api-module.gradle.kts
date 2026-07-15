@@ -63,7 +63,9 @@ afterEvaluate {
             configure<SigningExtension> {
                 val key = Secret.MAVEN_CENTRAL.resolveComponentInConfigurationPhase("signingInMemoryKey", providers, optional = true)
                 val pw = Secret.MAVEN_CENTRAL.resolveComponentInConfigurationPhase("signingInMemoryKeyPassword", providers, optional = true)
-                useInMemoryPgpKeys(key, pw)
+                if (key.isNotBlank()) {
+                    useInMemoryPgpKeys(key, pw)
+                }
             }
         }
     }
