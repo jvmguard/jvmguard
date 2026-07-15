@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="13.0.1" transformSequenceNumber="13">
   <directoryPresets config="../web/web/VAADIN/themes/jvmguard" />
-  <application name="jvmguard" applicationId="9080-1518-6345-9856" mediaDir="../../media" lzmaCompression="true" shortName="jvmguard" publisher="Ingo Kegel" publisherWeb="https://jvmguard.dev" version="1.0" allPathsRelative="true" macVolumeId="999e7cd74d3a46df" javaMinVersion="25" javaMaxVersion="25">
+  <application name="jvmguard" applicationId="3849-1066-7696-2968" mediaDir="../../media" lzmaCompression="true" shortName="jvmguard" publisher="Ingo Kegel" publisherWeb="https://jvmguard.dev" version="1.0" allPathsRelative="true" macVolumeId="999e7cd74d3a46df" javaMinVersion="25" javaMaxVersion="25">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./src/main/resources/messages.utf8" />
     </languages>
@@ -115,9 +115,13 @@
               <action id="13" beanClass="com.install4j.runtime.beans.actions.misc.RequestPrivilegesAction" actionElevationType="none">
                 <serializedBean>
                   <property name="failIfNotObtainedMac" type="boolean" value="false" />
+                  <property name="failIfNotObtainedWin" type="boolean" value="false" />
+                  <property name="linuxPrivilegeRequirement" type="enum" class="com.install4j.runtime.beans.actions.misc.PrivilegeRequirement" value="OBTAIN" />
+                  <property name="obtainIfAdminMac" type="boolean" value="true" />
+                  <property name="obtainIfNormalMac" type="boolean" value="true" />
                   <property name="obtainIfNormalWin" type="boolean" value="true" />
                 </serializedBean>
-                <condition>(!Util.isMacOS() || Util.isMacosInstaller()) &amp;&amp; !context.getBooleanVariable("noPrivileges")
+                <condition>!context.getBooleanVariable("noPrivileges")
  </condition>
               </action>
               <action id="5913" beanClass="com.install4j.runtime.beans.actions.control.SetInstallationDirectoryAction" actionElevationType="none" />
@@ -127,29 +131,6 @@
                     <object class="com.install4j.api.beans.ScriptProperty">
                       <property name="value" type="string">context.registerResponseFileVariable("dataDirectory");
 context.registerResponseFileVariable("jvmguard.noService");
-return true;</property>
-                    </object>
-                  </property>
-                </serializedBean>
-              </action>
-              <action name="Test adjustments" id="2182" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction">
-                <serializedBean>
-                  <property name="script">
-                    <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">context.getFileSetByName("Test").setSelected(context.getBooleanVariable("noPrivileges"));
-if (context.getBooleanVariable("noPrivileges")) {
-    context.setVariable("sys.adminRights", false);
-}
-return true;</property>
-                    </object>
-                  </property>
-                </serializedBean>
-              </action>
-              <action name="Select platform files" id="5365" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction">
-                <serializedBean>
-                  <property name="script">
-                    <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">context.getFileSetByName("Windows").setSelected(Util.isWindows());
 return true;</property>
                     </object>
                   </property>
@@ -253,7 +234,7 @@ return console.askOkCancel(message, true);
                     </serializedBean>
                     <condition>context.getVariable("sys.responseFile") == null</condition>
                   </action>
-                  <action name="Read properties file" id="323" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" multiExec="true">
+                  <action name="Read config file" id="323" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" multiExec="true">
                     <serializedBean>
                       <property name="script">
                         <object class="com.install4j.api.beans.ScriptProperty">
@@ -262,14 +243,14 @@ return console.askOkCancel(message, true);
 String[] propertyNames = YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(new File(context.getResourceDirectory(),"application.yaml"), context);
 context.setVariable("jvmguardPropertyNames", propertyNames);
 
-File previousPropertiesFile = context.getDestinationFile("config/application.yaml");
-if (previousPropertiesFile.exists()) {
-    YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(previousPropertiesFile, context);
+File previousConfigFile = context.getDestinationFile("config/application.yaml");
+if (previousConfigFile.exists()) {
+    YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(previousConfigFile, context);
 }
 
-File mediaPropertiesFile = new File((String)context.getVariable("sys.mediaDir"), "application.yaml");
-if (mediaPropertiesFile.exists()) {
-    YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(mediaPropertiesFile, context);
+File mediaConfigFile = new File((String)context.getVariable("sys.mediaDir"), "application.yaml");
+if (mediaConfigFile.exists()) {
+    YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(mediaConfigFile, context);
 }
 
 return true;</property>
@@ -294,7 +275,6 @@ return new File(dataDirectory).isAbsolute();
                       <property name="script">
                         <object class="com.install4j.api.beans.ScriptProperty">
                           <property name="value" type="string">if (!context.getBooleanVariable("wasConfigured")) {
-
     String dataDirectory;
     if (Util.isWindows()) {
         dataDirectory = new File(WinFileSystem.getProgramDataDirectory(), "jvmguard").getPath();
@@ -303,10 +283,8 @@ return new File(dataDirectory).isAbsolute();
     } else {
         dataDirectory = new File(context.getInstallationDirectory(), "data").getAbsolutePath();
     }
-
     context.setVariable("dataDirectory", dataDirectory);
 }
-
 
 return true;</property>
                         </object>
@@ -459,7 +437,7 @@ visually edited with the &lt;b&gt;configure&lt;/b&gt; executable at any time.</p
                   <property name="itemName" type="string">${compiler:sys.fullName} ${compiler:sys.version}</property>
                 </serializedBean>
               </action>
-              <group name="Update properties from default" id="401" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
+              <group name="Update config file from default" id="401" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <beans>
                   <action name="jvmguardTempFile" id="5148" beanClass="com.install4j.runtime.beans.actions.control.SetVariableAction">
                     <serializedBean>
@@ -538,9 +516,9 @@ return true;</property>
                   </action>
                 </beans>
               </group>
-              <group name="Update properties file from user input" id="4426" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
+              <group name="Update config file from user input" id="4426" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <beans>
-                  <action name="Update properties file from user input" id="397" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" actionElevationType="elevated">
+                  <action name="Update config file from user input" id="397" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" actionElevationType="elevated">
                     <serializedBean>
                       <property name="script">
                         <object class="com.install4j.api.beans.ScriptProperty">
@@ -696,7 +674,7 @@ if (file.exists()) {
                   </action>
                 </beans>
               </group>
-              <action name="other config files" id="4612" beanClass="com.install4j.runtime.beans.actions.text.FixCrLfAction" actionElevationType="elevated">
+              <action name="Other config files" id="4612" beanClass="com.install4j.runtime.beans.actions.text.FixCrLfAction" actionElevationType="elevated">
                 <serializedBean>
                   <property name="files" type="array" class="java.io.File" length="2">
                     <element index="0">
@@ -721,46 +699,17 @@ if (file.exists()) {
                   </property>
                 </serializedBean>
                 <beans>
-                  <group name="Non Mac" id="5349" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
+                  <action id="71" beanClass="com.install4j.runtime.beans.actions.services.InstallServiceAction" actionElevationType="elevated">
                     <serializedBean>
-                      <property name="conditionExpression">
-                        <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">!Util.isMacOS()</property>
-                        </object>
-                      </property>
+                      <property name="description" type="string">Profiling access to production JVMs</property>
+                      <property name="keepCurrentAccount" type="boolean" value="true" />
+                      <property name="launcherId" type="string">70</property>
                     </serializedBean>
-                    <beans>
-                      <action id="71" beanClass="com.install4j.runtime.beans.actions.services.InstallServiceAction" actionElevationType="elevated">
-                        <serializedBean>
-                          <property name="description" type="string">jvmguard server consolidates monitoring and profiling information from Java VMs</property>
-                          <property name="keepCurrentAccount" type="boolean" value="true" />
-                          <property name="launcherId" type="string">70</property>
-                        </serializedBean>
-                      </action>
-                      <action id="72" beanClass="com.install4j.runtime.beans.actions.services.StartServiceAction" actionElevationType="elevated">
-                        <serializedBean>
-                          <property name="launcherId" type="string">70</property>
-                        </serializedBean>
-                      </action>
-                    </beans>
-                  </group>
-                  <action name="Mac" id="5350" beanClass="com.install4j.runtime.beans.actions.misc.RunExecutableAction" actionElevationType="elevated">
+                  </action>
+                  <action id="72" beanClass="com.install4j.runtime.beans.actions.services.StartServiceAction" actionElevationType="elevated">
                     <serializedBean>
-                      <property name="arguments" type="array" elementType="string" length="1">
-                        <element index="0">start</element>
-                      </property>
-                      <property name="executable">
-                        <object class="java.io.File">
-                          <string>bin/jvmguard_service</string>
-                        </object>
-                      </property>
-                      <property name="workingDirectory">
-                        <object class="java.io.File">
-                          <string>bin</string>
-                        </object>
-                      </property>
+                      <property name="launcherId" type="string">70</property>
                     </serializedBean>
-                    <condition>Util.isMacOS()</condition>
                   </action>
                 </beans>
               </group>
@@ -792,8 +741,7 @@ if (file.exists()) {
                     <serializedBean>
                       <property name="script">
                         <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">(Util.isWindows() || Util.isMacOS()) &amp;&amp;
-!context.isUnattended() &amp;&amp; !context.isConsole() &amp;&amp;
+                          <property name="value" type="string">!context.isUnattended() &amp;&amp; !context.isConsole() &amp;&amp;
 !context.getBooleanVariable("jvmguard.noService") &amp;&amp; !context.getBooleanVariable("noPrivileges")</property>
                         </object>
                       </property>
@@ -956,7 +904,7 @@ The installation is now complete. The jvmguard server has been started.
         <startup>
           <screen id="14" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
-              <link id="20" targetId="13" />
+              <action id="5933" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
               <action id="21" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" />
             </actions>
           </screen>
@@ -1590,24 +1538,14 @@ context.goForward(1, true, true);
         <startup>
           <screen id="407" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
-              <action id="416" beanClass="com.install4j.runtime.beans.actions.misc.RequestPrivilegesAction" actionElevationType="none">
-                <serializedBean>
-                  <property name="failIfNotRootUnix" type="boolean" value="true" />
-                  <property name="linuxPrivilegeRequirement" type="enum" class="com.install4j.runtime.beans.actions.misc.PrivilegeRequirement" value="ROOT" />
-                  <property name="obtainIfAdminMac" type="boolean" value="true" />
-                  <property name="obtainIfNormalMac" type="boolean" value="true" />
-                  <property name="obtainIfNormalWin" type="boolean" value="true" />
-                </serializedBean>
-                <condition>import java.nio.file.*;
-return !Files.isWritable(context.getDestinationFile("config/application.yaml").toPath());</condition>
-              </action>
-              <action name="Read properties file" id="460" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction">
+              <action id="5932" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
+              <action name="Read config file" id="460" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction">
                 <serializedBean>
                   <property name="script">
                     <object class="com.install4j.api.beans.ScriptProperty">
                       <property name="value" type="string">import dev.jvmguard.installer.*;
 
-String[] propertyNames = (String[])YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(context.getDestinationFile("config/application.yaml"), context);
+String[] propertyNames = YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(context.getDestinationFile("config/application.yaml"), context);
 context.setVariable("jvmguardPropertyNames", propertyNames);
 
 return true;</property>
@@ -1716,19 +1654,10 @@ You can edit that file directly, or use this wizard to change them. </property>
             <beans>
               <screen name="Web server" id="317" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="webServer">
                 <serializedBean>
-                  <property name="subTitle" type="string">Please configure the bundled web server for the user interface.</property>
+                  <property name="subTitle" type="string">Configure the web server for the user interface</property>
                   <property name="title" type="string">Web Server Configuration</property>
                 </serializedBean>
                 <formComponents>
-                  <formComponent id="320" beanClass="com.install4j.runtime.beans.formcomponents.MultilineHtmlLabelComponent">
-                    <serializedBean>
-                      <property name="labelHtml" type="string">&lt;html&gt;jvmguard collects and consolidates monitoring and profiling data from JVMs and presents them
-in a web interface. By default, the web interface is run in the same process as the data
-collection server.
-&lt;p&gt;
-Please configure the web server properties below:</property>
-                    </serializedBean>
-                  </formComponent>
                   <formComponent id="321" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
                   <formComponent name="Port" id="319" beanClass="com.install4j.runtime.beans.formcomponents.IntegerTextfieldComponent">
                     <serializedBean>
@@ -1805,8 +1734,8 @@ return configLevel == null || configLevel == 1;</property>
                     <serializedBean>
                       <property name="labelHtml" type="string">The jvmguard server can expose external access interfaces on the web server port:
 &lt;ul&gt;
-&lt;li&gt;&lt;b&gt;REST API&lt;/b&gt; at the &lt;tt&gt;/api&lt;/tt&gt; path — programmatic read access to monitoring data&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;MCP server&lt;/b&gt; at the &lt;tt&gt;/mcp&lt;/tt&gt; path — for AI assistants like Claude Code and Cursor&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;REST API&lt;/b&gt; at the &lt;tt&gt;/api&lt;/tt&gt; path: programmatic read access to monitoring data&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;MCP server&lt;/b&gt; at the &lt;tt&gt;/mcp&lt;/tt&gt; path: for AI assistants&lt;/li&gt;
 &lt;/ul&gt;
 Both use the protocol (HTTP or HTTPS) that is configured for the web server and require API-key authentication.</property>
                     </serializedBean>
@@ -1819,7 +1748,6 @@ Both use the protocol (HTTP or HTTPS) that is configured for the web server and 
                       <property name="variableName" type="string">restApiEnabled</property>
                     </serializedBean>
                   </formComponent>
-                  <formComponent id="5915" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
                   <formComponent id="5916" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                     <serializedBean>
                       <property name="checkboxText" type="string">Enable MCP server</property>
@@ -1831,7 +1759,7 @@ Both use the protocol (HTTP or HTTPS) that is configured for the web server and 
               </screen>
               <screen name="SSL" id="1038" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="ssl">
                 <serializedBean>
-                  <property name="subTitle" type="string">Please configure options for authenticating and encrypting connections?</property>
+                  <property name="subTitle" type="string">Configure how to secure connections between JVMs and the jvmguard server</property>
                   <property name="title" type="string">Authentication and Encryption</property>
                 </serializedBean>
                 <formComponents>
@@ -1860,7 +1788,7 @@ jvmguard UI already contain the correct certificate file.
               </screen>
               <screen name="Monitored JVMs" id="548" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="monitoredJVMs">
                 <serializedBean>
-                  <property name="subTitle" type="string">Please configure how monitored JVMs connect to the jvmguard server.</property>
+                  <property name="subTitle" type="string">Configure how monitored JVMs connect to the jvmguard server.</property>
                   <property name="title" type="string">Monitored JVM Options</property>
                 </serializedBean>
                 <formComponents>
