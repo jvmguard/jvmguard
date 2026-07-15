@@ -91,7 +91,7 @@ tasks {
     }
 
     register("publishGithubRelease") {
-        dependsOn("extractReleaseNotes")
+        dependsOn(":extractReleaseNotes")
         mustRunAfter("release", "overwriteRelease")
         val version = fullVersion
         val notesFile = mediaDir.parentFile.resolve("build/gradle/release-notes.md")
