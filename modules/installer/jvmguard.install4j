@@ -332,7 +332,7 @@ return true;</property>
               <link id="1979" targetId="412" />
               <screen name="Data directory" id="1488" beanClass="com.install4j.runtime.beans.screens.FormScreen">
                 <serializedBean>
-                  <property name="subTitle" type="string">Where should jvmguard store its data?</property>
+                  <property name="subTitle" type="string">Choose where jvmguard stores its data</property>
                   <property name="title" type="string">Data Directory</property>
                 </serializedBean>
                 <formComponents>
@@ -761,7 +761,7 @@ if (file.exists()) {
           </screen>
           <screen name="Banner with header at the top" id="5351" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="5883" finishScreen="true">
             <serializedBean>
-              <property name="title" type="string">Installation completed</property>
+              <property name="title" type="string">Installation Completed</property>
             </serializedBean>
             <actions>
               <group id="4975" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
@@ -843,7 +843,7 @@ return true;</property>
                 <serializedBean>
                   <property name="labelHtml" type="string">&lt;html&gt;
 The installation is now complete. The jvmguard server has been started.
-&lt;p&gt;You can start and stop ther server by executing&lt;/p&gt;
+&lt;p&gt;You can start and stop the server by executing&lt;/p&gt;
 &lt;p&gt;&lt;b&gt;${installer:servicePath} start|stop&lt;/b&gt;&lt;/p&gt;
 &lt;p&gt;To continue, please open your browser at&lt;/p&gt;
 &lt;p&gt;&lt;b&gt;${installer:localUrl}&lt;/b&gt;&lt;/p&gt;
@@ -865,7 +865,7 @@ The installation is now complete. The jvmguard server has been started.
                 <serializedBean>
                   <property name="labelHtml" type="string">&lt;html&gt;
 The installation is now complete. The jvmguard server has been started.
-&lt;p&gt;You can start and stop ther server by executing&lt;/p&gt;
+&lt;p&gt;You can start and stop the server by executing&lt;/p&gt;
 &lt;p&gt;&lt;b&gt;${installer:servicePath} start|stop&lt;/b&gt;&lt;/p&gt;
 &lt;p&gt;The jvmguard UI is available at&lt;/p&gt;
 &lt;p&gt;&lt;b&gt;${installer:localUrl}&lt;/b&gt;&lt;/p&gt;
@@ -1700,11 +1700,11 @@ The server will then check the "X-Forwarded-Host" header when creating URLs.</pr
                       <formComponent name="Reverse proxy host" id="3766" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent" insetLeft="30">
                         <serializedBean>
                           <property name="helpText" type="string">&lt;html&gt;If the forwarding headers are missing or incompatible with the web server,&lt;br&gt;
-you can set an explicit proxy host. If the proxy uses SSL, include the port,&lt;br&gt;
+you can set an explicit proxy host. If the proxy uses HTTPS, include the port,&lt;br&gt;
 like in &lt;tt&gt;server.com:443&lt;/tt&gt;. If the value is empty, the web server will try to&lt;br&gt;
 determine the proxy host automatically.
 </property>
-                          <property name="labelText" type="string">Reverse proy host:</property>
+                          <property name="labelText" type="string">Reverse proxy host:</property>
                           <property name="variableName" type="string">reverseProxyHost</property>
                         </serializedBean>
                         <visibilityScript>false</visibilityScript>
@@ -1766,8 +1766,8 @@ Both use the protocol (HTTP or HTTPS) that is configured for the web server and 
                 <formComponents>
                   <formComponent id="1039" beanClass="com.install4j.runtime.beans.formcomponents.MultilineHtmlLabelComponent">
                     <serializedBean>
-                      <property name="labelHtml" type="string">If the communication between VMs and the jvmguard server should be
-authenticated and encrypted, select the check box below.
+                      <property name="labelHtml" type="string">If the communication between the monitored JVMs and the jvmguard server should be
+authenticated and encrypted, select the checkbox below.
 &lt;p&gt;
 A certificate file
 &lt;b&gt;ssl/agent.ks&lt;/b&gt; will be created when jvmguard is started the next time.
@@ -1781,7 +1781,7 @@ jvmguard UI already contain the correct certificate file.
                   <formComponent id="1040" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
                   <formComponent id="1041" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                     <serializedBean>
-                      <property name="checkboxText" type="string">Use SSL for VM connections</property>
+                      <property name="checkboxText" type="string">Use SSL for JVM connections</property>
                       <property name="variableName" type="string">vmUseSsl</property>
                     </serializedBean>
                   </formComponent>
@@ -1912,7 +1912,7 @@ Changes only come into effect after you restart the jvmguard server.</property>
               <formComponent name="Watermark" id="5881" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" insetTop="0" insetLeft="5" insetBottom="0" useExternalParametrization="true" externalParametrizationName="Custom watermark" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="enabledTitleText" type="boolean" value="false" />
-                  <property name="labelText" type="string">install4j</property>
+                  <property name="labelText" type="string">jvmguard</property>
                 </serializedBean>
                 <externalParametrizationPropertyNames>
                   <propertyName>labelText</propertyName>
