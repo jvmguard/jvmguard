@@ -1912,7 +1912,7 @@ Changes only come into effect after you restart the jvmguard server.</property>
               <formComponent name="Watermark" id="5881" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" insetTop="0" insetLeft="5" insetBottom="0" useExternalParametrization="true" externalParametrizationName="Custom watermark" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="enabledTitleText" type="boolean" value="false" />
-                  <property name="labelText" type="string">jvmguard</property>
+                  <property name="labelText" type="string">install4j</property>
                 </serializedBean>
                 <externalParametrizationPropertyNames>
                   <propertyName>labelText</propertyName>
