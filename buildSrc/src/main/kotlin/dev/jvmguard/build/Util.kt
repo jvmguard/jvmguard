@@ -47,12 +47,12 @@ fun Project.getReleaseTag(product: String, productVersion: String? = null): Stri
 }
 
 @Synchronized
-fun writeGitTag(execOps: ExecOperations, tag: String) {
+fun writeGitTag(execOps: ExecOperations, tag: String, force: Boolean = false) {
     execOps.exec {
-        commandLine("git", "tag", tag)
+        commandLine(if (force) listOf("git", "tag", "-f", tag) else listOf("git", "tag", tag))
     }
     execOps.exec {
-        commandLine("git", "push", "origin", tag)
+        commandLine(if (force) listOf("git", "push", "origin", "-f", tag) else listOf("git", "push", "origin", tag))
     }
 }
 
@@ -234,4 +234,42 @@ fun extractChangelogSection(changelog: String, version: String): String {
     val nextMatch = matches.firstOrNull { it.range.first > targetMatch.range.first }
     val endIndex = nextMatch?.range?.first ?: changelog.length
     return changelog.substring(startIndex, endIndex).trim()
+}
+
+fun publishGithubRelease(
+    execOps: ExecOperations,
+    tag: String,
+    version: String,
+    notesFile: File,
+    mediaDir: File,
+    prerelease: Boolean = false
+) {
+    val mediaFiles = (mediaDir.listFiles()?.toList() ?: emptyList())
+        .filter { it.isFile }
+        .map { it.absolutePath }
+
+    val exists = execOps.exec {
+        commandLine("gh", "release", "view", tag)
+        isIgnoreExitValue = true
+        standardOutput = java.io.ByteArrayOutputStream()
+        errorOutput = java.io.ByteArrayOutputStream()
+    }.exitValue == 0
+
+    if (exists) {
+        println("Release $tag already exists, uploading assets")
+        execOps.exec {
+            commandLine("gh", "release", "upload", tag, "--clobber", *mediaFiles.toTypedArray())
+        }
+    } else {
+        val args = mutableListOf("gh", "release", "create", tag)
+        args.addAll(mediaFiles)
+        args.addAll(listOf("--title", "jvmguard $version"))
+        if (notesFile.exists()) {
+            args.addAll(listOf("--notes-file", notesFile.absolutePath))
+        }
+        if (prerelease) {
+            args.add("--prerelease")
+        }
+        execOps.exec { commandLine(args) }
+    }
 }

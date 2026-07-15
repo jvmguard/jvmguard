@@ -1,0 +1,78 @@
+name: docs-deploy
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            modules/docs/package-lock.json
+            modules/website/package-lock.json
+
+      - name: Fetch latest release info for website
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p modules/website/src/data
+          gh api repos/jvmguard/jvmguard/releases/latest --jq '{
+            version: .tag_name | ltrimstr("v"),
+            tag: .tag_name,
+            assets: [.assets[] | {name: .name, url: .browser_download_url}],
+            published_at: .published_at
+          }' > modules/website/src/data/latest-release.json || echo '{"version":"","tag":"","assets":[],"published_at":""}' > modules/website/src/data/latest-release.json
+
+      - name: Fetch auto-update XML from latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p modules/website/public
+          gh release download updates.xml --dir modules/website/public/ || true
+
+      - name: Build marketing site
+        working-directory: modules/website
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build docs site
+        working-directory: modules/docs
+        run: |
+          npm ci
+          npm run build
+
+      - name: Combine sites
+        run: |
+          mkdir -p modules/website/dist/docs
+          cp -r modules/docs/dist/. modules/website/dist/docs/
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: modules/website/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

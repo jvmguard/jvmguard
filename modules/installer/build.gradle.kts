@@ -14,6 +14,13 @@ dependencies {
 
 val fullVersion = getProductVersion("jvmguard")
 
+val winCertPath = providers.gradleProperty("winCertPath").orNull
+val macCertPath = providers.gradleProperty("macCertPath").orNull
+val appleIssuerId = providers.gradleProperty("appleIssuerId").orNull
+val appleKeyId = providers.gradleProperty("appleKeyId").orNull
+val applePrivateApiKey = providers.gradleProperty("applePrivateApiKey").orNull
+val digestSigningCommandLine = providers.gradleProperty("digestSigningCommandLine").orNull
+
 tasks {
     val jar = named<Jar>("jar") {
         include("dev/jvmguard/installer/**")
@@ -27,10 +34,27 @@ tasks {
 
         projectFile = file("jvmguard.install4j")
         release = fullVersion
+        macKeystorePassword = ""
+
+        if (winCertPath == null && macCertPath == null) {
+            disableSigning = true
+        }
+        if (appleIssuerId == null || appleKeyId == null || applePrivateApiKey == null) {
+            disableNotarization = true
+        }
+
         variables = mapOf(
             "majorVersion" to majorVersion,
             "build" to getBuildNumber("jvmguard"),
+            "winCertPath" to (winCertPath ?: ""),
+            "macCertPath" to (macCertPath ?: ""),
+            "digestSigningCommandLine" to (digestSigningCommandLine ?: ""),
+            "appleIssuerId" to (appleIssuerId ?: ""),
+            "appleKeyId" to (appleKeyId ?: ""),
+            "applePrivateApiKey" to (applePrivateApiKey ?: ""),
         )
+
+        vmParameters.add("--enable-native-access=ALL-UNNAMED")
 
         doFirstWith(fileSystemOperations, mediaDir) { fsOps, mediaDir ->
             fsOps.delete { delete(mediaDir) }
@@ -60,8 +84,26 @@ tasks {
 
     register("overwriteRelease") {
         mustRunAfter(media)
-        doLastWith(getReleaseTag("jvmguard"), execOperations) { releaseTag, execOps ->
-            writeGitTag(execOps, releaseTag)
+        val tag = "v$fullVersion"
+        doLastWith(tag, execOperations) { releaseTag, execOps ->
+            writeGitTag(execOps, releaseTag, force = true)
+        }
+    }
+
+    register("publishGithubRelease") {
+        dependsOn("extractReleaseNotes")
+        mustRunAfter("release", "overwriteRelease")
+        val version = fullVersion
+        val notesFile = mediaDir.parentFile.resolve("build/gradle/release-notes.md")
+        val media = mediaDir
+        doLastWith(execOperations, version, notesFile, media) { execOps, ver, notes, mediaDirectory ->
+            val tag = "v$ver"
+            publishGithubRelease(execOps, tag, ver, notes, mediaDirectory)
+            println("Triggering docs/Pages rebuild")
+            execOps.exec {
+                commandLine("gh", "workflow", "run", "docs.yml")
+                isIgnoreExitValue = true
+            }
         }
     }
 }

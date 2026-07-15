@@ -70,20 +70,14 @@ tasks {
 
     register("release") {
         group = "release"
-        description = "Builds the media and publishes a release"
-        dependsOn(media, ":installer:release")
+        description = "Builds the media, publishes to Maven Central and creates a GitHub release"
+        dependsOn(media, ":installer:release", ":installer:publishGithubRelease")
     }
 
     register("overwriteRelease") {
         group = "release"
-        description = "Builds the media and overwrites the existing release"
-        dependsOn(media, ":installer:overwriteRelease")
-    }
-
-    register("beta") {
-        group = "release"
-        description = "Builds the media for a beta"
-        dependsOn(media)
+        description = "Builds the media and creates a GitHub release (skips Maven publish)"
+        dependsOn(media, ":installer:overwriteRelease", ":installer:publishGithubRelease")
     }
 
     val fullVersion = getProductVersion("jvmguard")
@@ -118,23 +112,5 @@ tasks {
             outputFile.writeText(versionSection)
             println("Release notes written to ${outputFile.absolutePath}")
         }
-    }
-
-    register<RunOnGithub>("releaseGithub") {
-        group = "release"
-        description = "Triggers the release build on GitHub Actions"
-        releaseType = "release"
-    }
-
-    register<RunOnGithub>("overwriteReleaseGithub") {
-        group = "release"
-        description = "Triggers the overwrite release build on GitHub Actions (skips Maven publish)"
-        releaseType = "release"
-    }
-
-    register<RunOnGithub>("betaGithub") {
-        group = "release"
-        description = "Triggers the beta build on GitHub Actions"
-        releaseType = "prerelease"
     }
 }

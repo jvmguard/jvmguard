@@ -9,7 +9,17 @@
       <variable name="changelogUrl" value="https://github.com/jvmguard/jvmguard/blob/main/CHANGELOG.md" />
       <variable name="majorVersion" value="1" />
       <variable name="build" value="1000" />
+      <variable name="winCertPath" />
+      <variable name="macCertPath" />
+      <variable name="digestSigningCommandLine" />
+      <variable name="appleIssuerId" />
+      <variable name="appleKeyId" />
+      <variable name="applePrivateApiKey" />
     </variables>
+    <codeSigning macEnabled="true" macKeySource="digestSigningExecutable" windowsEnabled="true" windowsKeySource="digestSigningExecutable" macNotarize="true" macApiIssuer="${compiler:appleIssuerId}" macApiKey="${compiler:appleKeyId}" macApiPrivateKey="${compiler:applePrivateApiKey}">
+      <windowsDigestSigningExecutable certificateFile="${compiler:winCertPath}" commandLine="${compiler:digestSigningCommandLine}" batchMode="true" />
+      <macDigestSigningExecutable certificateFile="${compiler:macCertPath}" commandLine="${compiler:digestSigningCommandLine}" batchMode="true" />
+    </codeSigning>
     <jreBundles jdkProviderId="Zulu" release="25/latest" />
   </application>
   <files>
@@ -38,7 +48,7 @@
     </entries>
   </files>
   <launchers>
-    <launcher name="jvmguard Service" id="70">
+    <launcher name="jvmguard Service" id="70" customMacBundleIdentifier="true" macBundleIdentifier="dev.jvmguard.server">
       <executable name="jvmguard_service" executableDir="bin" stderrFile="${installer:sys.tempDir}/jvmguard_error.log" executableMode="service" workingDirectory=".." dpiAware="false" />
       <java mainClass="dev.jvmguard.server.ServerMain" vmParameters="-Djava.awt.headless=true" preferredVM="server">
         <classPath>
@@ -51,7 +61,7 @@
 -XX:+HeapDumpOnOutOfMemoryError</content>
       </vmOptionsFile>
     </launcher>
-    <launcher name="jvmguard console" id="121">
+    <launcher name="jvmguard console" id="121" customMacBundleIdentifier="true" macBundleIdentifier="dev.jvmguard.server.console">
       <executable name="jvmguard_console" executableDir="bin" redirectStderr="false" executableMode="console" workingDirectory=".." dpiAware="false" />
       <java mainClass="dev.jvmguard.server.ServerMain" vmParameters="-Djava.awt.headless=true -include-options jvmguard_service.vmoptions" preferredVM="server">
         <classPath>
@@ -78,7 +88,7 @@
         </classPath>
       </java>
     </launcher>
-    <launcher name="jvmguard obfuscate" id="2736">
+    <launcher name="jvmguard obfuscate" id="2736" customMacBundleIdentifier="true" macBundleIdentifier="dev.jvmguard.server.obfuscate">
       <executable name="jvmguard_obfuscate" executableDir="bin" redirectStderr="false" executableMode="console" changeWorkingDirectory="false" dpiAware="false" />
       <java mainClass="dev.jvmguard.server.Helper">
         <classPath>
@@ -2237,5 +2247,5 @@ Changes only come into effect after you restart the jvmguard server.</property>
   <buildIds buildAll="false">
     <mediaSet refId="23" />
   </buildIds>
-  <buildOptions faster="true" disableSigning="true" disableNotarization="true" />
+  <buildOptions faster="true" />
 </install4j>
