@@ -36,8 +36,8 @@ position jvmguard, state the category it invents, name what it is not, and expla
   is the single register the docs forbid that the site requires. The mission vocabulary in §2 exists to
   be used here.
 - **The contrast, made explicit.** This is the register the website *does* use:
-  > jvmguard watches your production JVMs with low-overhead telemetries and the transactions you
-  > define. It takes a deep capture only when a trigger you configured fires.
+  > jvmguard captures deep, JVM-level profiles from your production JVMs, only when something
+  > warrants it. The lightweight monitoring that drives its triggers is always on.
 
   This is the register the website shares with the docs (plain, concrete, no inflation):
   > The jvmguard agent instruments selected methods through class loading. It loads no native libraries
