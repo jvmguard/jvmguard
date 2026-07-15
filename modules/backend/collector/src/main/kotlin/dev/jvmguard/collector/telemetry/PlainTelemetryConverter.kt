@@ -79,8 +79,8 @@ class PlainTelemetryConverter(
 
         val heapNode = TelemetryNode("Heap", true)
         heapNode.setTelemetryUnit(TelemetryUnit.BYTES, 0)
-        heapNode.addData("Used", TelemetryType.SUB_ID_USED_HEAP, plainData.subIdToData[TelemetryType.SUB_ID_USED_HEAP])
         heapNode.addData("Free", TelemetryType.SUB_ID_FREE_HEAP, plainData.subIdToData[TelemetryType.SUB_ID_FREE_HEAP])
+        heapNode.addData("Used", TelemetryType.SUB_ID_USED_HEAP, plainData.subIdToData[TelemetryType.SUB_ID_USED_HEAP])
 
         val nonHeapNode = TelemetryNode("Non-Heap", true)
         nonHeapNode.setTelemetryUnit(TelemetryUnit.BYTES, 0)
@@ -115,6 +115,9 @@ class PlainTelemetryConverter(
                 }
             }
         }
+        for (child in heapNode.children + nonHeapNode.children) {
+            child.data.reverse()
+        }
         calcFree(heapNode)
         calcFree(nonHeapNode)
 
@@ -124,8 +127,8 @@ class PlainTelemetryConverter(
             nonHeapUsedData = LongArray(plainData.timeStamps!!.size) { Long.MIN_VALUE }
             nonHeapFreeData = LongArray(plainData.timeStamps!!.size) { Long.MIN_VALUE }
             for (child in nonHeapNode.children) {
-                val usedData = child.data[0].data ?: continue
-                val freeData = child.data[1].data ?: continue
+                val usedData = child.data.first { it.description == "Used" }.data ?: continue
+                val freeData = child.data.first { it.description == "Free" }.data ?: continue
                 for (i in nonHeapUsedData.indices) {
                     val used = usedData[i]
                     if (used > Long.MIN_VALUE) {
@@ -147,8 +150,8 @@ class PlainTelemetryConverter(
             nonHeapUsedData = null
             nonHeapFreeData = null
         }
-        nonHeapNode.addData("Used", "", nonHeapUsedData)
         nonHeapNode.addData("Free", "", nonHeapFreeData)
+        nonHeapNode.addData("Used", "", nonHeapUsedData)
 
         if (plain) {
             rootNode.setTelemetryUnit(TelemetryUnit.BYTES, 0)
@@ -218,8 +221,8 @@ class PlainTelemetryConverter(
             if (child.data.size != 2) {
                 iterator.remove()
             } else {
-                val free = child.data[1].data
-                val used = child.data.first().data
+                val free = child.data.first { it.description == "Free" }.data
+                val used = child.data.first { it.description == "Used" }.data
                 if (free != null && used != null) {
                     for (i in free.indices) {
                         if (free[i] != Long.MIN_VALUE) {
