@@ -8,6 +8,7 @@ import dev.jvmguard.data.vmdata.SparkLineRange
 import dev.jvmguard.data.vmdata.TelemetryType
 import dev.jvmguard.data.vmdata.VmFilter
 import dev.jvmguard.ui.components.EnumSelect
+import dev.jvmguard.ui.components.anyContextMenuOpen
 import dev.jvmguard.ui.server.ModificationListener
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.UserSession
@@ -89,11 +90,13 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
     }
 
     override fun modifyNotified(modificationTypes: Set<ModificationType>) {
-        reloadGrid()
+        if (!anyContextMenuOpen()) {
+            reloadGrid()
+        }
     }
 
     private fun onPollTick() {
-        if (!grid.isContextMenuOpen) {
+        if (!anyContextMenuOpen()) {
             reloadGrid()
         }
     }

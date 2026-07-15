@@ -200,7 +200,11 @@ class TransactionsView : VmDataView() {
         applyDrillDown()
     }
 
-    override fun onPollTick() = navBar.tick()
+    override fun onPollTick() {
+        if (!anyContextMenuOpen()) {
+            navBar.tick()
+        }
+    }
 
     override fun onSelectionChanged(selection: VmIdentifier) {
         if (drillTarget != null) {
@@ -351,6 +355,7 @@ class TransactionsView : VmDataView() {
         val menu = ContextMenu()
         menu.target = statusButton
         menu.isOpenOnClick = true
+        menu.trackSingleOpen()
         menu.addItem("Match case") { event ->
             matchCase = event.source.isChecked
             updateFilterIndicator()

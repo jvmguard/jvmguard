@@ -4,6 +4,7 @@ import dev.jvmguard.common.helper.ListModification
 import dev.jvmguard.common.notification.ModificationType
 import dev.jvmguard.data.user.InboxItem
 import dev.jvmguard.ui.components.Formats
+import dev.jvmguard.ui.components.anyContextMenuOpen
 import dev.jvmguard.ui.components.confirm
 import dev.jvmguard.ui.components.menuButton
 import dev.jvmguard.ui.server.ModificationListener
@@ -126,7 +127,7 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
     }
 
     override fun modifyNotified(modificationTypes: Set<ModificationType>) {
-        if (ModificationType.INBOX in modificationTypes) {
+        if (ModificationType.INBOX in modificationTypes && !anyContextMenuOpen()) {
             reload()
         }
     }

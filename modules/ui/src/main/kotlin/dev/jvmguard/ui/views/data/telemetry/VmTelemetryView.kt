@@ -9,6 +9,7 @@ import dev.jvmguard.ui.components.echart.TelemetryChartModel
 import dev.jvmguard.ui.components.showCentered
 import dev.jvmguard.ui.components.showFilling
 import dev.jvmguard.ui.components.sparkline.Sparkline
+import dev.jvmguard.ui.components.trackSingleOpen
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.findVm
 import dev.jvmguard.ui.server.serverTime
@@ -215,6 +216,7 @@ class VmTelemetryView : VmDataView() {
     private fun setupContextMenu() {
         val menu = ContextMenu()
         menu.target = chart
+        menu.trackSingleOpen()
         menu.addItem("Freeze Y-axis") { event -> onFreezeToggle(event.source.isChecked) }.isCheckable = true
         menu.addItem("Logarithmic Y-axis") { event ->
             logarithmic = event.source.isChecked
