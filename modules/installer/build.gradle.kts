@@ -21,6 +21,7 @@ tasks {
 
     val buildMedia = register<Install4jTask>("buildMedia") {
         dependsOn(jar, ":dist")
+        mustRunAfter(":clean")
 
         val fullVersionForFileName = fullVersion.replace('.', '_')
         val majorVersion = getMajorVersion(fullVersion)

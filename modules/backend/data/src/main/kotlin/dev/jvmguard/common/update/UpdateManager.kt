@@ -128,7 +128,6 @@ class UpdateManager(
         }
 
     companion object {
-        const val SERIES = 4
 
         private val SERVER_LOGGER = Loggers.SERVER
 
