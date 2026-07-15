@@ -123,14 +123,21 @@ import '../styles/global.css';
         z-index: 2;
         border-bottom: 1px solid var(--rule-strong);
       }
+      /* Small screens: logo on its own first row, nav below in two
+         columns, theme toggle pinned top-right. */
       .masthead__bar {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "logo toggle"
+          "nav  nav";
         align-items: center;
-        justify-content: space-between;
-        gap: var(--space-4);
+        column-gap: var(--space-4);
+        row-gap: var(--space-4);
         padding-block: var(--space-4);
       }
       .wordmark {
+        grid-area: logo;
         display: inline-flex;
         align-items: center;
         color: var(--ink);
@@ -139,15 +146,30 @@ import '../styles/global.css';
       .wordmark .logo-svg {
         display: block;
       }
+      /* Dissolve the right group so nav + toggle place directly on the grid. */
       .masthead__right {
-        display: flex;
-        align-items: center;
-        gap: var(--space-5);
+        display: contents;
       }
+      /* Nav sits on its own row and stays a single row, wrapping to a second
+         row only when it no longer fits. */
       .nav {
+        grid-area: nav;
         display: flex;
         flex-wrap: wrap;
-        gap: var(--space-4);
+        gap: var(--space-3) var(--space-4);
+      }
+      @media (min-width: 760px) {
+        .masthead__bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--space-4);
+        }
+        .masthead__right {
+          display: flex;
+          align-items: center;
+          gap: var(--space-5);
+        }
       }
       .nav__link {
         font-family: var(--font-mono);
@@ -168,6 +190,8 @@ import '../styles/global.css';
         border-bottom-color: var(--brand);
       }
       .theme-toggle {
+        grid-area: toggle;
+        justify-self: end;
         display: inline-flex;
         align-items: center;
         justify-content: center;

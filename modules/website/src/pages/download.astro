@@ -6,20 +6,20 @@ import {currentVersion, downloadUrl, hasAsset} from '../data/release';
 const platforms = [
   {
     name: 'Windows',
-    file: '.exe installer',
-    links: [{label: 'Download', href: downloadUrl('windows'), primary: true, available: hasAsset('windows')}],
+    file: '.exe',
+    links: [{label: 'Download', href: downloadUrl('.exe'), primary: true, available: hasAsset('.exe')}],
   },
   {
     name: 'macOS',
-    file: '.tgz archive',
-    links: [{label: 'Download', href: downloadUrl('macos'), primary: true, available: hasAsset('macos')}],
+    file: '.dmg',
+    links: [{label: 'Download', href: downloadUrl('.dmg'), primary: true, available: hasAsset('.dmg')}],
   },
   {
     name: 'Linux',
-    file: 'RPM  ·  DEB  ·  .sh  ·  .tar.gz',
+    file: 'Installer or archives',
     links: [
       {label: 'Installer (.sh)', href: downloadUrl('unix_installer'), primary: true, available: hasAsset('unix_installer')},
-      {label: 'Linux archive (.tar.gz)', href: downloadUrl('linux'), primary: false, available: hasAsset('linux')},
+      {label: 'Tar archive', href: downloadUrl('.tar.gz'), primary: false, available: hasAsset('.tar.gz')},
       {label: 'RPM', href: downloadUrl('.rpm'), primary: false, available: hasAsset('.rpm')},
       {label: 'DEB', href: downloadUrl('.deb'), primary: false, available: hasAsset('.deb')},
     ],
