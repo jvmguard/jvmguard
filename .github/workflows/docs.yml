@@ -2,7 +2,7 @@ name: docs
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
     paths:
       - 'modules/docs/**'
       - 'modules/website/**'
@@ -43,9 +43,6 @@ jobs:
           npm ci
           npm run build
 
-      # Combine: the marketing build serves at the artifact root, the docs build
-      # (whose own base is '/docs') is placed under /docs/ so its internal links
-      # and assets resolve. The upload is the combined tree.
       - name: Combine sites
         run: |
           mkdir -p modules/website/dist/docs
