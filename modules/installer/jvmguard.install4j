@@ -904,8 +904,8 @@ The installation is now complete. The jvmguard server has been started.
         <startup>
           <screen id="14" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
-              <action id="5933" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
               <action id="21" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" />
+              <action id="5933" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
             </actions>
           </screen>
         </startup>
@@ -1538,6 +1538,7 @@ context.goForward(1, true, true);
         <startup>
           <screen id="407" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
+              <action id="5934" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" />
               <action id="5932" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
               <action name="Read config file" id="460" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction">
                 <serializedBean>
@@ -1788,7 +1789,7 @@ jvmguard UI already contain the correct certificate file.
               </screen>
               <screen name="Monitored JVMs" id="548" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="monitoredJVMs">
                 <serializedBean>
-                  <property name="subTitle" type="string">Configure how monitored JVMs connect to the jvmguard server.</property>
+                  <property name="subTitle" type="string">Configure how monitored JVMs connect to the jvmguard server</property>
                   <property name="title" type="string">Monitored JVM Options</property>
                 </serializedBean>
                 <formComponents>
