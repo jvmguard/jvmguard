@@ -131,6 +131,10 @@
                     <object class="com.install4j.api.beans.ScriptProperty">
                       <property name="value" type="string">context.registerResponseFileVariable("dataDirectory");
 context.registerResponseFileVariable("jvmguard.noService");
+context.registerResponseFileVariable("serviceUser");
+context.registerResponseFileVariable("serviceGroup");
+context.registerResponseFileVariable("serviceRestart");
+context.registerResponseFileVariable("serviceRestartSec");
 return true;</property>
                     </object>
                   </property>
@@ -384,6 +388,56 @@ visually edited with the &lt;b&gt;configure&lt;/b&gt; executable at any time.</p
               <link id="1999" targetId="1978" />
             </beans>
           </group>
+          <screen name="Service account" id="5935" beanClass="com.install4j.runtime.beans.screens.FormScreen">
+            <serializedBean>
+              <property name="subTitle" type="string">Under which account should the systemd service run?</property>
+              <property name="title" type="string">Service Account</property>
+            </serializedBean>
+            <condition>!context.getBooleanVariable("sys.streamlinedInstallation") &amp;&amp; Util.isLinux() &amp;&amp; !context.getBooleanVariable("jvmguard.noService") &amp;&amp; !context.getBooleanVariable("noPrivileges")</condition>
+            <formComponents>
+              <formComponent id="5936" beanClass="com.install4j.runtime.beans.formcomponents.MultilineHtmlLabelComponent">
+                <serializedBean>
+                  <property name="labelHtml" type="string">&lt;html&gt;jvmguard runs as a systemd service. You can run it under a dedicated
+service account instead of &lt;tt&gt;root&lt;/tt&gt;.
+&lt;p&gt;This installer does &lt;b&gt;not&lt;/b&gt; create the account, so make sure it already exists.
+Leave the user field empty to run the service as root.</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent id="5937" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
+              <formComponent id="5938" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">Service user:</property>
+                  <property name="variableName" type="string">serviceUser</property>
+                  <property name="requestFocus" type="boolean" value="true" />
+                </serializedBean>
+              </formComponent>
+              <formComponent id="5939" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+                <serializedBean>
+                  <property name="helpText" type="string">Defaults to the service user if left empty.</property>
+                  <property name="labelText" type="string">Service group (optional):</property>
+                  <property name="variableName" type="string">serviceGroup</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent id="5940" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
+              <formComponent id="5941" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                <serializedBean>
+                  <property name="checkboxText" type="string">Restart the service automatically on failure</property>
+                  <property name="coupledComponentIds">
+                    <add type="string">5942</add>
+                  </property>
+                  <property name="initiallySelected" type="boolean" value="true" />
+                  <property name="variableName" type="string">serviceRestart</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent id="5942" beanClass="com.install4j.runtime.beans.formcomponents.IntegerTextfieldComponent">
+                <serializedBean>
+                  <property name="initialText" type="string">10</property>
+                  <property name="labelText" type="string">Restart delay (seconds):</property>
+                  <property name="variableName" type="string">serviceRestartSec</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
           <screen id="8" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true">
             <actions>
               <group name="Stop Services" id="252" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
@@ -699,12 +753,76 @@ if (file.exists()) {
                   </property>
                 </serializedBean>
                 <beans>
+                  <action name="Build systemd entries" id="5943" beanClass="com.install4j.runtime.beans.actions.control.SetVariableAction" actionElevationType="none">
+                    <serializedBean>
+                      <property name="script">
+                        <object class="com.install4j.api.beans.ScriptProperty">
+                          <property name="value" type="string">// Build the [Service] overrides for the generated systemd unit from the
+// values collected on the "Service account" screen (or passed via -V...).
+StringBuilder sb = new StringBuilder();
+String user = (String)context.getVariable("serviceUser");
+if (user != null &amp;&amp; !user.trim().isEmpty()) {
+    user = user.trim();
+    String group = (String)context.getVariable("serviceGroup");
+    group = (group == null || group.trim().isEmpty()) ? user : group.trim();
+    sb.append("User=").append(user).append("\n");
+    sb.append("Group=").append(group).append("\n");
+    context.setVariable("serviceOwner", user + ":" + group);
+}
+// serviceRestart defaults to true when unset (unattended without -VserviceRestart)
+Object restartVar = context.getVariable("serviceRestart");
+boolean restart = restartVar == null || Boolean.TRUE.equals(restartVar) || "true".equalsIgnoreCase(String.valueOf(restartVar));
+if (restart) {
+    long restartSec = 10;
+    Object sec = context.getVariable("serviceRestartSec");
+    if (sec instanceof Number) {
+        restartSec = ((Number)sec).longValue();
+    } else if (sec != null) {
+        try { restartSec = Long.parseLong(sec.toString().trim()); } catch (NumberFormatException e) {}
+    }
+    if (restartSec &lt; 0) restartSec = 0;
+    sb.append("Restart=on-failure\n");
+    sb.append("RestartSec=").append(restartSec).append("\n");
+}
+return sb.toString();</property>
+                        </object>
+                      </property>
+                      <property name="variableName" type="string">systemdEntries</property>
+                    </serializedBean>
+                  </action>
                   <action id="71" beanClass="com.install4j.runtime.beans.actions.services.InstallServiceAction" actionElevationType="elevated">
                     <serializedBean>
+                      <property name="additionalSystemdEntries" type="string">${installer:systemdEntries}</property>
                       <property name="description" type="string">Profiling access to production JVMs</property>
                       <property name="keepCurrentAccount" type="boolean" value="true" />
                       <property name="launcherId" type="string">70</property>
                     </serializedBean>
+                  </action>
+                  <action name="Own data directory" id="5944" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" actionElevationType="elevated">
+                    <serializedBean>
+                      <property name="script">
+                        <object class="com.install4j.api.beans.ScriptProperty">
+                          <property name="value" type="string">// A non-root service needs to own its data directory (H2 db, snapshots, logs).
+String owner = (String)context.getVariable("serviceOwner");
+if (owner == null || owner.isEmpty()) {
+    return true; // running as root, nothing to chown
+}
+File dataDir = new File((String)context.getVariable("dataDirectory"));
+try {
+    Process p = new ProcessBuilder("chown", "-R", owner, dataDir.getAbsolutePath())
+        .redirectErrorStream(true).start();
+    int rc = p.waitFor();
+    if (rc != 0) {
+        Util.logError(null, "chown of " + dataDir + " to " + owner + " failed with exit code " + rc);
+    }
+} catch (Exception e) {
+    Util.logError(null, "Could not chown " + dataDir + " to " + owner + ": " + e.getMessage());
+}
+return true;</property>
+                        </object>
+                      </property>
+                    </serializedBean>
+                    <condition>context.getVariable("serviceOwner") != null</condition>
                   </action>
                   <action id="72" beanClass="com.install4j.runtime.beans.actions.services.StartServiceAction" actionElevationType="elevated">
                     <serializedBean>
