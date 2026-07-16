@@ -29,7 +29,7 @@ const features = [
   },
   {
     title: 'Self-hosted and air-gapped',
-    body: 'Install on Windows, macOS, or Linux. All recorded data stays local with no outbound cloud dependency, so the server runs behind your firewall or in an air-gapped network.',
+    body: 'Install on Windows, macOS, or Linux. All recorded data stays local with no outbound cloud dependency, so the server can run on your own infrastructure, including air-gapped networks.',
   },
 ];
 
@@ -127,7 +127,7 @@ const steps = [
       <span class="rule__no">§ 04</span>
       <span class="rule__label">Drive it from an AI agent</span>
     </div>
-    <div class="panel roadmap">
+    <div class="panel open">
       <p>
         jvmguard includes an MCP server. An AI agent connects to it to discover the JVM fleet, read
         telemetries, transactions, and MBeans, start a JFR recording or a heap or thread dump, and
@@ -135,9 +135,8 @@ const steps = [
       </p>
       <p>
         The direction is a supervised loop: an agent detects a problem, captures the right profile, and
-        recommends a next step, with a person approving each capture. The guardrails that make that
-        production-safe, scope opt-in, rate and overhead limits, and an audit record of every agent
-        operation, are the 1.0 work.
+        recommends a next step, with a person approving each capture. The guardrails that make this
+        production-safe are the rate and overhead limits, and a full audit record of every agent operation.
       </p>
       <div class="btn-row">
         <a class="btn btn--ghost" href="/security">How it stays safe in production</a>
@@ -191,11 +190,5 @@ const steps = [
   }
   .open p {
     max-width: none;
-  }
-  .roadmap p {
-    max-width: none;
-  }
-  .roadmap h3 {
-    margin-top: 0;
   }
 </style>

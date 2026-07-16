@@ -7,7 +7,7 @@ const comparisons = [
     base: 'Datadog, Dynatrace, New Relic, and similar platforms',
     differs: [
       'APMs instrument your frameworks and measure spans continuously. jvmguard records only the transactions you define.',
-      'APMs gather application and end-user data and send it to a cloud backend. jvmguard runs behind your firewall.',
+      'APMs gather application and end-user data and send it to a cloud backend. jvmguard stays inside your network.',
       'jvmguard is a complement, not a replacement. APMs give you breadth and alerting, jvmguard gives you deep, targeted captures.',
     ],
   },
@@ -16,8 +16,7 @@ const comparisons = [
     base: 'Grafana Pyroscope, Parca and Polar Signals, Elastic Universal Profiling',
     differs: [
       'Continuous profilers sample broadly and never stop. jvmguard captures a deep artifact, a heap dump or a JFR recording, from the one JVM that needs it, only when warranted.',
-      'The overhead trade-offs are different. jvmguard stays near-zero in steady state and captures depth only when warranted.',
-      'Captures are standard JFR and HPROF, ready to open in JProfiler, JMC, or Eclipse MAT.',
+      'A continuous profiler pays a small constant overhead on every JVM, always. jvmguard pays that cost only during a capture.',
     ],
   },
   {
@@ -25,7 +24,8 @@ const comparisons = [
     base: 'Built into the JDK. JFR recordings, jcmd operations, and JDK Mission Control for analysis.',
     differs: [
       'Without jvmguard, getting a heap dump means SSH access to the production host, running jcmd by hand, and transferring the file. In most organizations, developers do not have that access.',
-      'jvmguard replaces the SSH workflow with authorized, audited access. A profiler-role user starts a capture from the UI or via a coding agent. Every action is audited.',
+      'jvmguard replaces the SSH workflow with authorized access. A profiler-role user starts a capture from the UI or through a coding agent, and the audit log records who ran it, when, and against which JVM.',
+      'jcmd captures whatever you run at that moment. jvmguard can also fire the capture automatically the instant a threshold is crossed, with no one watching.',
       'One trigger fires across all matching JVMs in the fleet, not one-by-one over individual JVMs.',
     ],
   },
@@ -77,8 +77,8 @@ const comparisons = [
       <p>
         jvmguard is not an APM. There is no continuous tracing, no distributed trace export, and no
         metrics pipeline, and it does not auto-instrument your frameworks. It records only the
-        lightweight telemetries and the transactions you define, so steady-state overhead stays near
-        zero. Deep captures are intentional and scoped, and they stay on your infrastructure. No user
+        lightweight telemetries and the transactions you define, so the always-on overhead stays
+        minimal. Deep captures are intentional and scoped, and they stay on your infrastructure. No user
         data is exported to a remote backend.
       </p>
     </div>
