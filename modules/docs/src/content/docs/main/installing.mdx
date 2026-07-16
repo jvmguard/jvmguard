@@ -19,19 +19,19 @@ the help topic on [unattended installations](/docs/config/unattended-installatio
 The installer asks you about all configuration options that are not configurable through the browser in the jvmguard UI.
 The most common setting that has to be adjusted is the HTTPS/HTTP port for the web server.
 
-<Figure src="external/installer_web_server.png" />
+<Figure src="external/installer_web_server.png" scale={1.75} />
 
 Beside the installation directory, a jvmguard installation needs a **data directory** where all variable data is stored.
 This includes the database, log files and security certificates. By default, this directory is set to the program data
 directory on Windows (typically `C:\ProgramData`) and `/var/opt/jvmguard` on Unix and macOS. In a scenario where you
 install multiple instances of jvmguard on the same machine, each jvmguard installation has to have its own data directory.
 
-<Figure src="external/installer_data_dir.png" />
+<Figure src="external/installer_data_dir.png" scale={1.75} />
 
 For evaluation purposes, this is all the installer needs to know. If you are deploying to a production environment, you
 might want to adjust other options.
 
-<Figure src="external/installer_advanced.png" />
+<Figure src="external/installer_advanced.png" scale={1.75} />
 
 ## Changing the initial configuration later on
 

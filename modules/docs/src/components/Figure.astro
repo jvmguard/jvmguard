@@ -1,28 +1,33 @@
 ---
 // Renders a help figure.
-// - UI screenshots (ui/*.png): a light/dark pair is rendered and toggled with Starlight's [data-theme].
+// - PNG screenshots (ui/*.png, external/*.png): every screenshot ships a light/dark pair, so a
+//   `<name>_dark.png` sibling is always rendered and toggled with Starlight's [data-theme].
 // - Diagram SVGs: authored as light-mode (dark ink on pastel boxes); in dark mode a CSS invert filter
 //   makes them readable without needing per-diagram dark variants.
-// - Other images (external/): rendered once.
+// - `scale`: intrinsic pixel density of the source, e.g. 1.75 for a screenshot captured at 175%
+//   fractional HiDPI. Emitted as an `x` density descriptor
 export interface Props {
   src: string;
   alt?: string;
+  scale?: number;
 }
-const { src, alt = '' } = Astro.props;
+const { src, alt = '', scale } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const isUi = src.startsWith('ui/') && src.endsWith('.png');
+const isPng = src.endsWith('.png');
 const isSvg = src.endsWith('.svg');
+const hasDark = isPng;
 const lightSrc = `${base}/images/${src}`;
-const darkSrc = isUi ? `${base}/images/${src.replace(/\.png$/, '_dark.png')}` : null;
+const darkSrc = hasDark ? `${base}/images/${src.replace(/\.png$/, '_dark.png')}` : null;
+const srcSet = (s: string) => (scale && scale > 0 ? `${s} ${scale}x` : undefined);
 const cls = isSvg ? 'figure figure-svg' : 'figure';
 ---
 {darkSrc ? (
   <Fragment>
-    <img src={lightSrc} alt={alt} class="figure figure-light" loading="lazy" />
-    <img src={darkSrc} alt={alt} class="figure figure-dark" loading="lazy" />
+    <img src={lightSrc} srcset={srcSet(lightSrc)} alt={alt} class="figure figure-light" loading="lazy" />
+    <img src={darkSrc} srcset={srcSet(darkSrc)} alt={alt} class="figure figure-dark" loading="lazy" />
   </Fragment>
 ) : (
-  <img src={lightSrc} alt={alt} class={cls} loading="lazy" />
+  <img src={lightSrc} srcset={srcSet(lightSrc)} alt={alt} class={cls} loading="lazy" />
 )}
 
 <style>
