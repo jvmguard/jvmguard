@@ -2,73 +2,56 @@
 import PageFrame from '../layouts/PageFrame.astro';
 import {SITE} from '../consts';
 
+const features = [
+  {
+    title: 'Pure Java agent by default',
+    body: 'The agent instruments selected methods through class loading. It loads no native libraries unless you explicitly run a profiling action.',
+  },
+  {
+    title: 'Triggers and actions',
+    body: 'Set a threshold on a telemetry or a transaction. When it is crossed, jvmguard runs the actions you configured: record JFR, take a heap or thread dump, write to the inbox, send an email, or call a webhook. You compose the response in the UI.',
+  },
+  {
+    title: 'Capture on demand',
+    body: 'Lightweight telemetries and the transactions you define provide the signals that trigger a deep capture. Steady-state overhead stays close to zero.',
+  },
+  {
+    title: 'No JMX port required',
+    body: 'The agent reads MBeans in process. You can inspect and operate on MBeans without exposing a JMX connector server to the network.',
+  },
+  {
+    title: 'Manage a fleet of JVMs',
+    body: 'Organize hundreds of JVMs into hierarchical groups. Configuration is inherited, so a group applies to every JVM under it and new JVMs need no up-front setup.',
+  },
+  {
+    title: 'Configurable retention',
+    body: 'Recorded data is aggregated to larger intervals as it ages. Transactions can be discarded after a threshold you set.',
+  },
+  {
+    title: 'Self-hosted and air-gapped',
+    body: 'Install on Windows, macOS, or Linux. All recorded data stays local with no outbound cloud dependency, so the server runs behind your firewall or in an air-gapped network.',
+  },
+];
+
 const steps = [
   {
     no: '01',
     title: 'Manually',
-    body: 'Start a capture from the UI for any connected VM, the moment you want a closer look. The capture lands in the inbox.',
+    body: 'Start a capture from the UI for any connected JVM. The capture lands in the inbox.',
   },
   {
     no: '02',
     title: 'Triggered',
-    body: 'Set a threshold on a telemetry or a transaction. When it crosses, jvmguard captures a JFR recording, a heap dump, or a thread dump for the offending VM. No one has to be watching, and a trigger can fire as often as the condition recurs.',
+    body: 'A threshold you set on a telemetry or transaction fires a capture automatically: a JFR recording, a heap dump, or a thread dump for the affected JVM.',
   },
   {
     no: '03',
     title: 'Agent-driven',
-    body: 'An AI agent starts a capture through the MCP server or the REST API. Guardrails and auditing make agent-driven capture safe for production.',
+    body: 'An AI agent starts a capture through the MCP server. Scope limits and an audit record of every operation keep that access accountable.',
   },
 ];
 
-const features = [
-  {
-    title: 'Pure Java agent by default',
-    body: 'The agent instruments selected methods through class loading. It loads no native libraries unless you explicitly enable the profiling cross-over.',
-  },
-  {
-    title: 'Triggers and actions',
-    body: 'Compose the response in the UI. When a trigger fires, jvmguard records JFR, takes a heap or thread dump, writes to the inbox, sends an email, or calls a webhook.',
-  },
-  {
-    title: 'Cross-over to profiling',
-    body: 'For the hardest cases, jvmguard loads the JProfiler agent and produces a snapshot for deep analysis. The capture is delivered to your inbox.',
-  },
-  {
-    title: 'No JMX port required',
-    body: 'The agent reads MBeans in process. You inspect and operate on MBeans without exposing a JMX connector server to the network.',
-  },
-  {
-    title: 'A fleet, not a single VM',
-    body: 'Organize hundreds of JVMs into hierarchical groups. Configuration is inherited and applied to entire groups. New VMs need no up-front configuration.',
-  },
-  {
-    title: 'Indefinite retention',
-    body: 'Recorded data is never discarded, only aggregated to larger intervals as it ages. The database grows at a slow, linear rate.',
-  },
-  {
-    title: 'In-house and air-gapped',
-    body: 'Install on Windows, macOS, or Linux, or install unattended for cloud deployments. No outbound cloud dependency. The server runs behind your firewall.',
-  },
-  {
-    title: 'Three access levels',
-    body: 'Admin, Profiler, and Viewer roles partition a single server for multiple teams. Authentication is local or LDAP, over TLS.',
-  },
-];
 
-const isNot = [
-  {
-    k: 'Not an APM',
-    v: 'No continuous tracing, span shipping, or metrics pipeline. jvmguard does not auto-instrument your frameworks.',
-  },
-  {
-    k: 'Not continuous collection',
-    v: 'The steady state keeps only lightweight telemetries and the transactions you define. Deep data comes only from a capture, so the overhead stays near zero.',
-  },
-  {
-    k: 'Not gathering your app data',
-    v: 'No application or end-user data leaves the JVM. A capture is a profile, not your business data.',
-  },
-];
 ---
 
 <PageFrame active="overview">
@@ -76,16 +59,16 @@ const isNot = [
     <p class="eyebrow">Automatic Production Profiling</p>
     <h1>Production profiling, <br />controlled and audited. <br />For humans and agents.</h1>
     <p class="lede">
-      Deep profiling captures in production are risky, but sometimes necessary. jvmguard brings them under control:
-      every capture is authorized, scoped, and fully audited, whether it's triggered by a human,
-      a monitoring alert, or an AI agent.
+      Deep profiling captures in production are risky, but sometimes necessary. jvmguard brings them
+      under control: every capture is authorized and audited, whether it is triggered by a person, a
+      monitoring alert, or an agent.
     </p>
     <div class="btn-row">
       <a class="btn btn--primary" href="/download">Download</a>
       <a class="btn btn--ghost" href={SITE.docs}>Read the docs</a>
       <a class="btn btn--ghost" href={SITE.repo}>View on GitHub</a>
     </div>
-    <p class="hero__cred">Open source under the Apache License 2.0, built by the team behind JProfiler.</p>
+    <p class="hero__cred">Open source under the Apache License 2.0.</p>
   </section>
 
   <section class="shell shell--wide">
@@ -122,34 +105,18 @@ const isNot = [
   <section class="shell shell--wide">
     <div class="rule">
       <span class="rule__no">§ 03</span>
-      <span class="rule__label">What jvmguard is not</span>
-    </div>
-    <div class="grid grid--3">
-      {isNot.map((item) => (
-        <article class="panel isnot">
-          <h3>{item.k}</h3>
-          <p class="muted">{item.v}</p>
-        </article>
-      ))}
-    </div>
-  </section>
-
-  <section class="shell shell--wide">
-    <div class="rule">
-      <span class="rule__no">§ 04</span>
       <span class="rule__label">Open captures, open analysis</span>
     </div>
     <div class="panel open">
       <p>
-        Captures are standard files. JFR recordings and HPROF heap dumps open in JProfiler for the
-        deepest analysis, in JDK Mission Control, or in Eclipse MAT.
+        Captures are standard files. JFR recordings and HPROF heap dumps open in JProfiler, JDK Mission
+        Control, or Eclipse MAT.
       </p>
-      <p class="muted">
-        jvmguard does not lock you in. The handoff to a dedicated analyzer is a feature, not a
-        constraint. For a privacy-respecting, capture-on-demand workflow, that matters.
+      <p>
+        For the deepest analysis, jvmguard can record a JProfiler snapshot, which breaks down subsystems
+        such as JDBC, JPA, MongoDB, HTTP and gRPC calls, Kafka, and LLM invocations.
       </p>
       <div class="btn-row">
-        <a class="btn btn--ghost" href="/security">How it stays safe in production</a>
         <a class="btn btn--ghost" href="/compare">How it compares</a>
       </div>
     </div>
@@ -157,36 +124,23 @@ const isNot = [
 
   <section class="shell shell--wide">
     <div class="rule">
-      <span class="rule__no">§ 05</span>
+      <span class="rule__no">§ 04</span>
       <span class="rule__label">Drive it from an AI agent</span>
     </div>
     <div class="panel roadmap">
-      <h3>An MCP server for your fleet</h3>
       <p>
-        jvmguard ships an MCP server. An AI agent connects to it to discover the fleet, read
+        jvmguard includes an MCP server. An AI agent connects to it to discover the JVM fleet, read
         telemetries, transactions, and MBeans, start a JFR recording or a heap or thread dump, and
         retrieve the capture. The same operations that the UI exposes are also available to an agent.
       </p>
-      <p class="muted">
-        The intended loop is to detect a problem, capture the right profile, analyze it, recommend the
-        next action, with a human supervising it. The guardrails, rate and overhead limits, and auditing
-        of every agent operation make agent-driven capture safe for production.
-      </p>
-    </div>
-  </section>
-
-  <section class="shell shell--wide cta">
-    <div class="panel cta__panel">
-      <h2>
-        <svg class="cta__icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        Try it on a JVM.
-      </h2>
-      <p class="lede">
-        Run from source in two commands, or download the installer for your platform.
+      <p>
+        The direction is a supervised loop: an agent detects a problem, captures the right profile, and
+        recommends a next step, with a person approving each capture. The guardrails that make that
+        production-safe, scope opt-in, rate and overhead limits, and an audit record of every agent
+        operation, are the 1.0 work.
       </p>
       <div class="btn-row">
-        <a class="btn btn--primary" href="/download">Get jvmguard</a>
-        <a class="btn btn--ghost" href={SITE.repo}>Source on GitHub</a>
+        <a class="btn btn--ghost" href="/security">How it stays safe in production</a>
       </div>
     </div>
   </section>
@@ -235,9 +189,6 @@ const isNot = [
   .feature h3 {
     margin-top: 0;
   }
-  .isnot h3 {
-    color: var(--brand-deep);
-  }
   .open p {
     max-width: none;
   }
@@ -246,27 +197,5 @@ const isNot = [
   }
   .roadmap h3 {
     margin-top: 0;
-  }
-  .cta {
-    padding-top: var(--space-6);
-    padding-bottom: var(--space-8);
-  }
-  .cta__panel {
-    text-align: center;
-  }
-  .cta__panel h2 {
-    margin-top: 0;
-  }
-  .cta__icon {
-    color: var(--brand);
-    vertical-align: middle;
-    margin-right: 0.5rem;
-  }
-  .cta__panel .lede {
-    margin-inline: auto;
-    max-width: none;
-  }
-  .cta__panel .btn-row {
-    justify-content: center;
   }
 </style>

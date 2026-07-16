@@ -3,39 +3,30 @@ import PageFrame from '../layouts/PageFrame.astro';
 
 const comparisons = [
   {
-    name: 'Cryostat',
-    base: 'Red Hat, open source. Container-native JFR management for JVMs on Kubernetes and OpenShift.',
+    name: 'APM suites',
+    base: 'Datadog, Dynatrace, New Relic, and similar platforms',
     differs: [
-      'jvmguard is deployment-agnostic. It watches JVMs wherever they run, not only on Kubernetes.',
-      'Beyond JFR, the same triggers can take a heap dump, a thread dump, or read MBean state.',
-      'Captures fire on thresholds and policies across a fleet, with an inbox and an audit trail.',
-    ],
-  },
-  {
-    name: 'Glowroot',
-    base: 'Open source APM for Java. Self-hosted, with always-on transaction traces, response breakdowns, and JVM metrics.',
-    differs: [
-      'Glowroot auto-instruments common frameworks. jvmguard records only the transactions you define, Matched, Declared, or Mapped, so nothing is captured that you did not configure.',
-      'Beyond transaction timing, a jvmguard trigger takes a JFR recording, a heap dump, a thread dump, or reads MBean state, on a threshold across a fleet.',
-      'Deep analysis happens in a dedicated tool. Captures are standard JFR and HPROF, opened in JProfiler, JMC, or Eclipse MAT.',
-    ],
-  },
-  {
-    name: 'Plain JFR and jcmd',
-    base: 'The built-in baseline. JFR and JDK Mission Control are free, low-overhead, and scriptable.',
-    differs: [
-      'jvmguard adds the operational layer on top of JFR: fleet-wide rules, an inbox of captures, retention, and audit.',
-      'Triggers start a capture the moment a condition crosses, so no one has to catch the problem by hand.',
-      'Heap dumps, thread dumps, and an in-process MBean browser are built in.',
+      'APMs instrument your frameworks and measure spans continuously. jvmguard records only the transactions you define.',
+      'APMs gather application and end-user data and send it to a cloud backend. jvmguard runs behind your firewall.',
+      'jvmguard is a complement, not a replacement. APMs give you breadth and alerting, jvmguard gives you deep, targeted captures.',
     ],
   },
   {
     name: 'Continuous profilers',
-    base: 'Grafana Pyroscope, Parca and Polar Signals, Elastic Universal Profiling, and profilers embedded in APM suites. They collect profiles continuously and aggregate them.',
+    base: 'Grafana Pyroscope, Parca and Polar Signals, Elastic Universal Profiling',
     differs: [
-      'jvmguard takes the opposite shape: near-zero steady-state collection, with a deep capture on demand.',
-      'It is a complement, not a replacement. Many teams run both: breadth from the continuous profiler, depth from jvmguard.',
+      'Continuous profilers sample broadly and never stop. jvmguard captures a deep artifact, a heap dump or a JFR recording, from the one JVM that needs it, only when warranted.',
+      'The overhead trade-offs are different. jvmguard stays near-zero in steady state and captures depth only when warranted.',
       'Captures are standard JFR and HPROF, ready to open in JProfiler, JMC, or Eclipse MAT.',
+    ],
+  },
+  {
+    name: 'Plain JFR and jcmd',
+    base: 'Built into the JDK. JFR recordings, jcmd operations, and JDK Mission Control for analysis.',
+    differs: [
+      'Without jvmguard, getting a heap dump means SSH access to the production host, running jcmd by hand, and transferring the file. In most organizations, developers do not have that access.',
+      'jvmguard replaces the SSH workflow with authorized, audited access. A profiler-role user starts a capture from the UI or via a coding agent. Every action is audited.',
+      'One trigger fires across all matching JVMs in the fleet, not one-by-one over individual JVMs.',
     ],
   },
 ];
@@ -44,14 +35,14 @@ const comparisons = [
 <PageFrame
   active="compare"
   title={`How jvmguard compares`}
-  description="How jvmguard compares to Cryostat, plain JFR and jcmd, and continuous profilers, and what it is built for."
+  description="How jvmguard compares to APMs, continuous profilers and JFR and jcmd."
 >
   <section class="shell hero">
     <p class="eyebrow">Comparison</p>
-    <h1>How jvmguard compares.</h1>
+    <h1>How jvmguard compares</h1>
     <p class="lede">
-      jvmguard takes a distinct approach to production profiling. Here is how it relates to the tools
-      you may already use.
+      jvmguard captures deep JVM profiles only when something warrants it, and only with authorization
+      and an audit trail. Here is how that differs from the tools you may already run.
     </p>
   </section>
 
@@ -80,20 +71,46 @@ const comparisons = [
   <section class="shell">
     <div class="rule">
       <span class="rule__no">§ 02</span>
-      <span class="rule__label">What jvmguard is for</span>
+      <span class="rule__label">What jvmguard is not</span>
     </div>
-    <div class="panel">
+    <div class="panel isnot">
       <p>
-        jvmguard gives you profiling access to your production JVMs. Deep, profiler-grade captures run
-        on demand, when a trigger fires or you start one yourself. The lightweight monitoring that
-        drives those triggers is always on, with near-zero overhead, recording only the telemetries and
-        transactions you configured.
+        jvmguard is not an APM. There is no continuous tracing, no distributed trace export, and no
+        metrics pipeline, and it does not auto-instrument your frameworks. It records only the
+        lightweight telemetries and the transactions you define, so steady-state overhead stays near
+        zero. Deep captures are intentional and scoped, and they stay on your infrastructure. No user
+        data is exported to a remote backend.
       </p>
-      <p>
-        jvmguard stands on its own. If you already use an APM or a continuous profiler, it fits beside
-        them rather than replacing them. And instead of hand-rolling JFR on each JVM, you get fleet-wide
-        rules, triggers, and an audit trail.
-      </p>
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 03</span>
+      <span class="rule__label">Where jvmguard fits</span>
+    </div>
+    <div class="panel fits">
+      <div class="fits__item">
+        <svg class="fits__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        <p>
+          A developer gets a deep capture from a production JVM through authorized, audited access,
+          without an SSH session on the host.
+        </p>
+      </div>
+      <div class="fits__item">
+        <svg class="fits__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M12 8V4"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        <p>
+          An AI agent operates on production JVMs within scope and rate limits, and every operation is
+          written to a SIEM-compatible audit log.
+        </p>
+      </div>
+      <div class="fits__item">
+        <svg class="fits__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+        <p>
+          Lightweight always-on monitoring triggers a capture automatically when a threshold is
+          crossed.
+        </p>
+      </div>
     </div>
   </section>
 </PageFrame>
@@ -136,4 +153,34 @@ const comparisons = [
   .cmp__diff li {
     margin-bottom: var(--space-3);
   }
-</style>
+  .isnot h3 {
+    color: var(--brand-deep);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 820px) {
+    .grid--3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .fits__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  .fits__item + .fits__item {
+    margin-top: var(--space-4);
+  }
+  .fits__icon {
+    flex-shrink: 0;
+    color: var(--brand);
+    margin-top: 0.2rem;
+  }
+  .fits__item p {
+    margin: 0;
+    max-width: none;
+  }
+ </style>

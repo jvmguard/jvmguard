@@ -167,6 +167,20 @@ it (§4).
   should finish a paragraph knowing exactly what the agent will and will not do in their JVM.
 - **Preferred connectors:** `so`, `because`, `since`, `however`, `also`, `in that case`, `for example`,
   `note that`, `unlike`, `while`, `rather than`.
+- **Avoid mechanical shape.** Uniform, evenly weighted structure reads as machine-generated even when
+  every word is clean. Specifically:
+  - **No stacked triads.** The rule of three is fine once. Two triads in one sentence or paragraph is a
+    tell. Vary list lengths: a pair, a four, or a single strong claim.
+  - **Vary block weight.** Do not render every idea as an equal headline-plus-one-sentence card. Let
+    some ideas be a short paragraph, one a single wide statement, and let a couple carry more weight
+    than the rest. Prefer fewer, heavier blocks over a long grid of equal ones.
+  - **At most one negation per section.** "Not an APM" lands once. Three parallel "not X" blocks in a
+    row is the most recognizable machine shape. Rewrite the rest as positive, concrete claims.
+  - **Break anaphora.** Do not start three consecutive items with the same subject ("jvmguard …,
+    jvmguard …, jvmguard …") unless it is deliberate and used once.
+  - **Subject-first, not essay-first.** Open with the product or the reader, not an abstract framing
+    ("The hardest question is trust", "The intended loop is to…"). State the thing, then its
+    significance.
 
 ---
 
@@ -331,5 +345,7 @@ Run this before marking any page done. Every box must hold.
       benefit headlines are followed by a concrete mechanism.
 - [ ] Headings are short noun phrases in sentence case; UI labels are in double quotes; files,
       properties, commands, and code are in inline code.
+- [ ] No mechanical shape: no stacked triads, block weight varies, at most one "not X" per section,
+      no three-in-a-row anaphora, and openers are subject-first rather than abstract framing.
 - [ ] Positioning claims are consistent with `modules/docs/agent/app-mission.md`, but rewritten for a deploying reader
       rather than copied verbatim.

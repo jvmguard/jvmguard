@@ -92,12 +92,6 @@ import '../styles/global.css';
         <div class="footer__brand">
           <Logo width={120} height={29} />
         </div>
-        <nav class="footer__nav" aria-label="Footer">
-          <a href={SITE.repo}>GitHub</a>
-          <a href={SITE.docs}>Documentation</a>
-          <a href="/security">Security</a>
-          <a href={SITE.licenseUrl}>License</a>
-        </nav>
         <p class="footer__note">Built by the team behind JProfiler.</p>
         {currentVersion !== 'dev' && (
           <p class="footer__version">v{currentVersion}</p>
@@ -237,15 +231,6 @@ import '../styles/global.css';
       }
       .footer__brand .logo-svg {
         display: block;
-      }
-      .footer__nav {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-4);
-        font-size: var(--step--1);
-      }
-      .footer__nav a {
-        color: var(--ink-soft);
       }
       .footer__note {
         flex-basis: 100%;

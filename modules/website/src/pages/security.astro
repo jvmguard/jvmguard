@@ -4,12 +4,8 @@ import {SITE} from '../consts';
 
 const facts = [
   {
-    k: 'Pure Java agent',
-    v: 'The agent intercepts class loading to instrument selected methods. It loads no native libraries unless you explicitly enable the profiling cross-over.',
-  },
-  {
     k: 'No phone home',
-    v: 'Agents connect to your jvmguard server. The server makes no outbound calls to a vendor. There is no telemetry, usage, or crash reporting shipped anywhere by default.',
+    v: 'Agents connect to your jvmguard server. The server makes no outbound calls. All data stays inside your network.',
   },
   {
     k: 'No JMX port',
@@ -17,28 +13,33 @@ const facts = [
   },
   {
     k: 'Single H2 file',
-    v: 'All persistent data, recorded data and configuration, lives in one embedded H2 database file on a host you control. There is no external database to operate.',
+    v: 'All persistent data, recorded data and configuration, lives in one embedded H2 database file. There is no external database to operate.',
   },
   {
-    k: 'TLS by default-ready',
-    v: 'Agent-to-server traffic and the web UI can be encrypted and authenticated. Keystores are configured at install time.',
+    k: 'TLS for agents',
+    v: 'Agent-to-server traffic can be encrypted and authenticated via TLS.',
   },
   {
-    k: 'Spring Security, LDAP',
-    v: 'Access is gated by Spring Security. Authenticate locally or against LDAP. Three access levels, Admin, Profiler, and Viewer, partition a single server for separate teams.',
+    k: 'Three access levels',
+    v: 'Admin, Profiler, and Viewer roles partition a single server for separate teams.',
+  },
+  {
+    k: 'Local, LDAP, or SSO',
+    v: 'Authentication uses locally configured accounts, LDAP, or SSO, all configurable in the UI.',
   },
 ];
 
 const collect = [
-  'Timing of transactions you explicitly configured (Matched, Declared, or Mapped types).',
-  'Scalar telemetries you enabled: heap, CPU, threads, GC, and MBean or Declared values.',
-  'Threshold states for the telemetries you chose to watch.',
+  'Built-in scalar telemetries like heap, CPU, threads or GC',
+  'Scalar telemetries from configured sources',
+  'Transactions you explicitly configured',
 ];
 
 const capture = [
-  'A JFR recording, taken on one VM, for a bounded duration.',
-  'A heap dump (HPROF) or a thread dump, for one VM.',
-  'A JProfiler snapshot, via the optional profiling cross-over.',
+  'A JFR recording, for a bounded duration',
+  'A heap dump (HPROF)',
+  'A thread dump',
+  'A JProfiler snapshot',
 ];
 ---
 
@@ -49,10 +50,11 @@ const capture = [
 >
   <section class="shell hero">
     <p class="eyebrow">Security and data flow</p>
-    <h1>What jvmguard does inside your JVM.</h1>
+    <h1>What jvmguard does inside your JVM</h1>
     <p class="lede">
-      The hardest question for a production profiling tool is trust. This page states what jvmguard
-      collects, where it sends it, and what you can verify in the source.
+      This page states what the jvmguard agent collects in your JVM, where it sends that data, and
+      what you can check in the source. For a tool that runs in production, that is the first question
+      to answer.
     </p>
   </section>
 
@@ -76,9 +78,7 @@ const capture = [
       <span class="rule__label">Collected by default</span>
     </div>
     <p>
-      The steady state records only lightweight data, with near-zero overhead: the telemetries you
-      enabled and the transactions you defined. jvmguard collects no application payloads, no end-user
-      data, and no deep profiling artifacts. The list below is the full steady-state footprint.
+      jvmguard records only lightweight data, at low steady-state overhead:
     </p>
     <ul class="ticks">
       {collect.map((c) => (
@@ -93,9 +93,8 @@ const capture = [
       <span class="rule__label">Captured on demand</span>
     </div>
     <p>
-      Deep artifacts are never collected in the steady state. A capture runs only when a trigger fires
-      or when you start one manually, for the VM that needs it. The rest of the time, none of the
-      following is collected.
+      Deep artifacts are not collected by default. A capture runs only when a trigger fires, or when
+      you start one manually on a single JVM.
     </p>
     <ul class="ticks">
       {capture.map((c) => (
@@ -125,11 +124,18 @@ const capture = [
       <span class="rule__label">License and deployment</span>
     </div>
     <div class="panel license">
-      <ul class="stack">
-        <li><strong>{SITE.license}.</strong> Source-available. Read it, build it, and audit it with your own tooling before it touches production.</li>
-        <li><strong>Self-hosted.</strong> Runs behind your firewall. Suitable for air-gapped networks. No outbound cloud dependency.</li>
-        <li><strong>Single server.</strong> The collector, the embedded database, and the web UI run in one process. No separate services to secure.</li>
-      </ul>
+      <div class="license__item">
+        <svg class="license__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <p><strong>{SITE.license}.</strong> Sources are available. Read it, build it, and audit it with your own tooling before it touches production.</p>
+      </div>
+      <div class="license__item">
+        <svg class="license__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p><strong>Self-hosted.</strong> Runs behind your firewall. Suitable for air-gapped networks. No outbound cloud dependency.</p>
+      </div>
+      <div class="license__item">
+        <svg class="license__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
+        <p><strong>Single server.</strong> The collector, the embedded database, and the web UI run in one process. No separate services to secure.</p>
+      </div>
     </div>
   </section>
 </PageFrame>
@@ -196,9 +202,20 @@ const capture = [
   .license {
     max-width: var(--measure);
   }
-  .license ul {
-    list-style: none;
-    padding: 0;
+  .license__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  .license__item + .license__item {
+    margin-top: var(--space-4);
+  }
+  .license__icon {
+    flex-shrink: 0;
+    color: var(--brand);
+    margin-top: 0.2rem;
+  }
+  .license__item p {
     margin: 0;
     max-width: none;
   }

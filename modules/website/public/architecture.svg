@@ -805,16 +805,14 @@
        inkscape:connector-curvature="0" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
-       d="m 247.57976,-27.137822 c 0,0 31.65632,35.861725 63.31264,47.815629 31.65632,11.953904 49.74192,22.362318 55.39857,32.873248 5.65663,10.51093 7.91408,14.94238 7.91408,14.94238"
+       d="m 247.57976,-27.137822 126.75,95.319045"
        id="path4235"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="czsc" />
+       inkscape:connector-curvature="0" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
-       d="m 247.57976,-27.137822 c 0,0 -31.68085,35.844669 -63.36169,47.792895 -31.68085,11.948215 -49.54483,22.479492 -55.44148,32.857612 -5.89665,10.37811 -7.92022,14.93527 -7.92022,14.93527"
+       d="m 247.57976,-27.137822 -127.97,95.319045"
        id="path4617"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="czsc" />
+       inkscape:connector-curvature="0" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
@@ -881,9 +879,37 @@
        id="g1320"
        transform="translate(473,-95) scale(2.6667)">
       <path
-         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
-         fill="#1f2937"
-         id="path-material-public" />
+         d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+         fill="none"
+         stroke="#1f2937"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path-users-body" />
+      <circle
+         cx="9"
+         cy="7"
+         r="4"
+         fill="none"
+         stroke="#1f2937"
+         stroke-width="1.5"
+         id="circle-users-head" />
+      <path
+         d="M22 21v-2a4 4 0 0 0-3-3.87"
+         fill="none"
+         stroke="#1f2937"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path-users-shoulder" />
+      <path
+         d="M16 3.13a4 4 0 0 1 0 7.75"
+         fill="none"
+         stroke="#1f2937"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path-users-head2" />
     </g>
    
   </g>
