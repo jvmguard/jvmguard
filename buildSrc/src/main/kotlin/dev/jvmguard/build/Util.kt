@@ -260,6 +260,11 @@ fun publishGithubRelease(
         execOps.exec {
             commandLine("gh", "release", "upload", tag, "--clobber", *mediaFiles.toTypedArray())
         }
+        if (notesFile.exists()) {
+            execOps.exec {
+                commandLine("gh", "release", "edit", tag, "--notes-file", notesFile.absolutePath)
+            }
+        }
     } else {
         val args = mutableListOf("gh", "release", "create", tag)
         args.addAll(mediaFiles)
