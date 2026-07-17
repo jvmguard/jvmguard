@@ -1,3 +1,5 @@
+import dev.jvmguard.build.*
+
 plugins {
     id("kotlin-module")
     kotlin("plugin.spring")
@@ -16,4 +18,11 @@ dependencies {
     api("tools.jackson.core:jackson-databind")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     compileOnly("jakarta.servlet:jakarta.servlet-api")
+    addJunit6()
+    testImplementation(libs.h2)
+    testImplementation("org.springframework.security:spring-security-core")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
