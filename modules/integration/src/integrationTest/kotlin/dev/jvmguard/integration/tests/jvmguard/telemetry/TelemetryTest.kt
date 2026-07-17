@@ -17,7 +17,9 @@ import dev.jvmguard.integration.util.nonNullRootNode
 import dev.jvmguard.integration.util.nonNullTimestamps
 import dev.jvmguard.integration.util.nonNullUnitScaledData
 import java.math.BigDecimal
+import org.junit.jupiter.api.Tag
 
+@Tag("citest")
 @Suppress("DuplicatedCode")
 class TelemetryTest : JvmGuardTest() {
     override fun getJvmGuardOptions(runNo: Int, vmNo: Int, libraryNo: Int) = super.getJvmGuardOptions(runNo, vmNo, libraryNo) + " -Xmx64m"

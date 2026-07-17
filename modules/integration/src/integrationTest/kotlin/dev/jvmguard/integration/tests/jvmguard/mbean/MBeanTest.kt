@@ -19,7 +19,9 @@ import javax.management.AttributeChangeNotification
 import javax.management.ObjectName
 import javax.management.ReflectionException
 import javax.management.openmbean.*
+import org.junit.jupiter.api.Tag
 
+@Tag("citest")
 @Suppress("UNCHECKED_CAST")
 class MBeanTest : JvmGuardTest() {
 

@@ -24,9 +24,11 @@ import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
 import org.jdom2.Element
+import org.junit.jupiter.api.Tag
 
 val DATE_FORMAT_Z = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").apply { timeZone = TimeZone.getTimeZone("UTC") }
 
+@Tag("citest")
 class RestTest : JvmGuardTest() {
 
     override fun getVmCount(vmConfig: VMConfig, runNo: Int) = 2

@@ -9,7 +9,9 @@ import dev.jvmguard.integration.util.TimeComparator
 import dev.jvmguard.integration.util.TransactionTreeComparator
 import dev.jvmguard.data.transactions.TransactionDataType
 import dev.jvmguard.data.transactions.TransactionTreeInterval
+import org.junit.jupiter.api.Tag
 
+@Tag("citest")
 class DeclaredFilterTest : JvmGuardTest() {
 
     override fun getJvmGuardOptions(runNo: Int, vmNo: Int, libraryNo: Int) = super.getJvmGuardOptions(runNo, vmNo, libraryNo) + " -Xmx64m"
