@@ -37,7 +37,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p modules/website/public
-          gh release download updates.xml --dir modules/website/public/ || true
+          gh release download --pattern 'updates.xml' --dir modules/website/public/ || true
 
       - name: Build marketing site
         working-directory: modules/website
