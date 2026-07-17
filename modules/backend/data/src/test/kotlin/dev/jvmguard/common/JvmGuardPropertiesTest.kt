@@ -14,7 +14,7 @@ class JvmGuardPropertiesTest {
         assertEquals(8020, properties.httpPort)
         assertEquals(8847, properties.vmPort)
         assertFalse(properties.isUseHttps)
-        assertEquals(1000, properties.passwordIterations)
+        assertEquals(100_000, properties.passwordIterations)
         assertEquals("", properties.keystoreName)
     }
 

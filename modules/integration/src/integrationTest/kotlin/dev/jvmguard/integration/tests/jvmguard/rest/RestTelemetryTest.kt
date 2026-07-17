@@ -42,7 +42,7 @@ class RestTelemetryTest : JvmGuardTest() {
     override fun getGroupName(vmNo: Int) = if (vmNo == 3) "group2" else super.getGroupName(vmNo)
 
     override fun getServerOptions(runNo: Int, libraryNo: Int) =
-        super.getServerOptions(runNo, libraryNo) + mapOf("jvmguard.restApiEnabled" to true, "jvmguard.restFailedAuthWait" to 0)
+        super.getServerOptions(runNo, libraryNo) + mapOf("jvmguard.restApiEnabled" to true)
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
         rootConfig.telemetrySettings.mbeanTelemetries.add(MBeanTelemetryConfig(MBEAN_TEL1_NAME, TelemetryUnit.PLAIN, 0, false, true).apply {

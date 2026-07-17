@@ -4,6 +4,7 @@ import dev.jvmguard.common.JvmGuardDirectories
 import dev.jvmguard.common.JvmGuardProperties
 import dev.jvmguard.common.config.ConfigManager
 import dev.jvmguard.common.config.ConfigStorage
+import dev.jvmguard.common.helper.LoginThrottle
 import dev.jvmguard.collector.api.TelemetryProvider
 import dev.jvmguard.connector.server.ServerImpl
 import dev.jvmguard.connector.totp.TotpEncryption
@@ -68,6 +69,7 @@ abstract class BaseSsoTest {
             userManager = userManager,
             properties = properties,
             totpEncryption = totpEncryption,
+            loginThrottle = LoginThrottle(),
         )
     }
 

@@ -44,7 +44,7 @@ class JvmGuardProperties {
     var passwordAlgorithm: String = "PBKDF2WithHmacSHA1"
     var passwordSalt: Int = 48
     var passwordHash: Int = 64
-    var passwordIterations: Int = 1000
+    var passwordIterations: Int = 100_000
     var totpKeyAlgorithm: String = "AES"
     var totpKeySize: Int = 128
 
@@ -52,7 +52,6 @@ class JvmGuardProperties {
     var totpKey: String? = null
     var h2ConsoleAllowOthers: String = "false"
     var h2ConsolePort: Int = 8082
-    var restFailedAuthWait: Int = 5
     var windowTitle: String = "jvmguard"
     var isNoPlatformMBean: Boolean = false
     var isNoCollection: Boolean = false

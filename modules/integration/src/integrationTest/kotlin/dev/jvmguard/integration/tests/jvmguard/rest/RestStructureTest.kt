@@ -26,7 +26,7 @@ class RestStructureTest : JvmGuardTest() {
     override fun getVmCount(vmConfig: VMConfig, runNo: Int) = 5
 
     override fun getServerOptions(runNo: Int, libraryNo: Int) =
-        super.getServerOptions(runNo, libraryNo) + mapOf("jvmguard.restApiEnabled" to true, "jvmguard.restFailedAuthWait" to 1)
+        super.getServerOptions(runNo, libraryNo) + mapOf("jvmguard.restApiEnabled" to true)
 
     override fun isPool(vmNo: Int) = vmNo > 3
 

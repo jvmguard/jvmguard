@@ -8,6 +8,7 @@ import dev.jvmguard.common.JvmGuardProperties
 import dev.jvmguard.common.config.ConfigManager
 import dev.jvmguard.common.helper.GroupHelper
 import dev.jvmguard.common.helper.ListModification
+import dev.jvmguard.common.helper.LoginThrottle
 import dev.jvmguard.common.helper.PasswordHelper
 import dev.jvmguard.common.util.BeanUtil
 import dev.jvmguard.data.config.*
@@ -44,6 +45,7 @@ class ServerImpl(
     private val userManager: UserManager,
     private val properties: JvmGuardProperties,
     private val totpEncryption: TotpEncryption,
+    private val loginThrottle: LoginThrottle,
 ) : Server {
 
     override val isNewInstallation: Boolean
@@ -95,8 +97,27 @@ class ServerImpl(
         if (password.isEmpty()) {
             throw FailedLoginException("The password cannot be empty.")
         }
+        if (loginThrottle.isThrottled(loginName)) {
+            throw FailedLoginException("Too many failed login attempts. Please try again later.")
+        }
+        val user = try {
+            authenticateCredentials(loginName, password, authenticatorCode)
+        } catch (e: FailedLoginException) {
+            loginThrottle.loginFailed(loginName)
+            throw e
+        }
+        loginThrottle.loginSucceeded(loginName)
+        return user
+    }
 
+    private fun authenticateCredentials(loginName: String, password: String, authenticatorCode: String?): User {
         val user = findUser(loginName) ?: throwInvalidUser()
+        if (!validatePassword(password, user)) {
+            throwInvalidUser()
+        }
+        if (user.userType == UserType.LOCAL && PasswordHelper.needsRehash(user.passwordHash)) {
+            user.passwordHash = PasswordHelper.createHash(password)
+        }
         if (getGlobalConfig().use2fa && user.isUse2fa && !user.isReset2fa) {
             if (!validateAuthCode(authenticatorCode, user)) {
                 throwInvalidAuthenticatorCode()
@@ -105,9 +126,6 @@ class ServerImpl(
             if (!authenticatorCode.isNullOrEmpty()) {
                 throwInvalidAuthenticatorCode()
             }
-        }
-        if (!validatePassword(password, user)) {
-            throwInvalidUser()
         }
 
         return stampLogin(user)
@@ -180,12 +198,22 @@ class ServerImpl(
         }
     }
 
-    private fun validateAuthCode(authenticatorCode: String?, user: User): Boolean =
-        if (JvmGuardConfig.isIntegrationTest) {
-            authenticatorCode == Server.TEST_AUTH_CODE
-        } else {
-            TOTP.validate(totpEncryption.decryptSecret(user.encryptedTotpSecret).value, authenticatorCode!!)
+    private fun validateAuthCode(authenticatorCode: String?, user: User): Boolean {
+        if (authenticatorCode.isNullOrEmpty()) {
+            return false
         }
+        if (JvmGuardConfig.isIntegrationTest) {
+            return authenticatorCode == Server.TEST_AUTH_CODE
+        }
+        val secret = totpEncryption.decryptSecret(user.encryptedTotpSecret)
+        if (!TOTP.validate(secret.value, authenticatorCode)) {
+            return false
+        }
+        if (totpEncryption.isLegacySecret(user.encryptedTotpSecret)) {
+            user.encryptedTotpSecret = totpEncryption.encryptSecret(secret.value)
+        }
+        return true
+    }
 
     private fun findUser(loginName: String): User? {
         val directUser = userManager.getByLoginName(loginName)

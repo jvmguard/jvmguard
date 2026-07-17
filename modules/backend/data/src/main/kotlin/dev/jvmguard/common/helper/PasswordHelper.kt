@@ -81,6 +81,17 @@ object PasswordHelper {
             throw RuntimeException(e)
         }
 
+    /**
+     * Returns true if the hash was created with fewer iterations than the current configuration.
+     */
+    fun needsRehash(hash: String?): Boolean {
+        if (hash.isNullOrEmpty()) {
+            return false
+        }
+        val storedIterations = hash.substringBefore(':').toIntOrNull() ?: return false
+        return storedIterations < JvmGuardConfig.properties().passwordIterations
+    }
+
     private fun validatePassword(password: CharArray, correctHash: String): String? {
         try {
             val params = correctHash.split(":").toTypedArray()

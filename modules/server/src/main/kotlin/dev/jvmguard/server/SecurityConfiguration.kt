@@ -4,6 +4,7 @@ import dev.jvmguard.common.AuditLog
 import dev.jvmguard.common.JvmGuardConfig
 import dev.jvmguard.common.JvmGuardProperties
 import dev.jvmguard.common.Loggers
+import dev.jvmguard.common.helper.LoginThrottle
 import dev.jvmguard.connector.api.Server
 import dev.jvmguard.connector.api.SsoLoginError
 import dev.jvmguard.rest.restInterface.RestInterface
@@ -46,7 +47,7 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
 
     @Bean
     @Order(0)
-    fun restApiSecurityFilterChain(http: HttpSecurity, restInterface: RestInterface): SecurityFilterChain {
+    fun restApiSecurityFilterChain(http: HttpSecurity, restInterface: RestInterface, loginThrottle: LoginThrottle): SecurityFilterChain {
         http.securityMatcher("/api/**").csrf { it.disable() }
         if (!properties.isRestApiEnabled) {
             return http
@@ -56,7 +57,7 @@ class SecurityConfiguration(private val properties: JvmGuardProperties) {
                 }
                 .build()
         }
-        val restAuthenticationManager = ProviderManager(RestApiKeyAuthenticationProvider(restInterface, properties))
+        val restAuthenticationManager = ProviderManager(RestApiKeyAuthenticationProvider(restInterface, loginThrottle))
         val basicEntryPoint = BasicAuthenticationEntryPoint().apply { setRealmName("jvmguard api") }
         val entryPoint = AuthenticationEntryPoint { request, response, authException ->
             if (request.getHeader("Authorization") != null) {

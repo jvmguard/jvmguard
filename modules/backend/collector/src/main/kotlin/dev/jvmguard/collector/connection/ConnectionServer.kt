@@ -36,6 +36,11 @@ class ConnectionServer(
 
     init {
         isDaemon = true
+        if (!useSsl) {
+            VmManagerImpl.SERVER_LOGGER.warn(
+                "Agent connections on port ${socketAddress.port} are unencrypted and unauthenticated (jvmguard.vmUseSsl=false)."
+            )
+        }
         if (executorService == null) {
             val threadFactory = JvmGuardThreadFactory("comm", false, NORM_PRIORITY)
             executorService = if (commPoolSize > 0) {
