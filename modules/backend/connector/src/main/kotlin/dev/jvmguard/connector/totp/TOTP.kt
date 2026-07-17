@@ -15,6 +15,8 @@ object TOTP {
 
     fun validate(key: String, otp: String): Boolean = validate(step, key, otp)
 
+    fun generate(key: String): String = getOTP(step, key)
+
     private fun validate(step: Long, key: String, otp: String): Boolean =
         getOTP(step, key) == otp || (step > 0 && getOTP(step - 1, key) == otp)
 

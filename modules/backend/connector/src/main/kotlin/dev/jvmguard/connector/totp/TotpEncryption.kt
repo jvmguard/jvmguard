@@ -14,6 +14,7 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 @Component
@@ -84,6 +85,12 @@ class TotpEncryption(
 
     private fun encrypt(valueToEnc: String): String {
         val key: Key = getSecretKey()
+        if (algorithm() == AES_ALGORITHM) {
+            val iv = ByteArray(GCM_IV_LENGTH).also { SecureRandom().nextBytes(it) }
+            val cipher = Cipher.getInstance(GCM_TRANSFORMATION)
+            cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
+            return GCM_PREFIX + Base64.getEncoder().encodeToString(iv + cipher.doFinal(valueToEnc.toByteArray()))
+        }
         val cipher = Cipher.getInstance(algorithm())
         cipher.init(Cipher.ENCRYPT_MODE, key)
         val encValue = cipher.doFinal(valueToEnc.toByteArray())
@@ -92,12 +99,22 @@ class TotpEncryption(
 
     private fun decrypt(encryptedValue: String): String {
         val key: Key = getSecretKey()
+        if (encryptedValue.startsWith(GCM_PREFIX)) {
+            val decoded = Base64.getDecoder().decode(encryptedValue.substring(GCM_PREFIX.length))
+            val iv = decoded.copyOfRange(0, GCM_IV_LENGTH)
+            val cipher = Cipher.getInstance(GCM_TRANSFORMATION)
+            cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
+            return String(cipher.doFinal(decoded.copyOfRange(GCM_IV_LENGTH, decoded.size)))
+        }
         val cipher = Cipher.getInstance(algorithm())
         cipher.init(Cipher.DECRYPT_MODE, key)
         val decValue = Base64.getDecoder().decode(encryptedValue)
         val decValueBytes = cipher.doFinal(decValue)
         return String(decValueBytes)
     }
+
+    fun isLegacySecret(encryptedValue: String): Boolean =
+        algorithm() == AES_ALGORITHM && !encryptedValue.startsWith(GCM_PREFIX)
 
     data class Secret(val value: String, val hash: String)
 
@@ -106,5 +123,10 @@ class TotpEncryption(
         private const val FILE_PREFIX = "file:"
         private const val ENV_PREFIX = "env:"
         private const val DIRECT_PREFIX = "direct:"
+        private const val AES_ALGORITHM = "AES"
+        private const val GCM_TRANSFORMATION = "AES/GCM/NoPadding"
+        private const val GCM_PREFIX = "v2:"
+        private const val GCM_IV_LENGTH = 12
+        private const val GCM_TAG_LENGTH_BITS = 128
     }
 }
