@@ -577,12 +577,12 @@ vaadin-grid.jvmguard-transaction-grid vaadin-grid-cell-content {
     margin-inline-end: 0.25rem;
 }
 
-.jvmguard-transaction-name.policy-slow,
-.jvmguard-transaction-name.policy-very-slow {
+.jvmguard-transaction-policy-prefix.policy-slow,
+.jvmguard-transaction-policy-prefix.policy-very-slow {
     color: var(--jvmguard-status-warning);
 }
 
-.jvmguard-transaction-name.policy-error {
+.jvmguard-transaction-policy-prefix.policy-error {
     color: var(--jvmguard-status-error);
 }
 

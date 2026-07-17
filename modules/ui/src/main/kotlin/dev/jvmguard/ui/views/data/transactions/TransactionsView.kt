@@ -443,9 +443,13 @@ class TransactionsView : VmDataView() {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
             isPadding = false
             isSpacing = false
-            node.policyPrefix?.let { add(Span(it).apply { addClassName("jvmguard-transaction-policy-prefix") }) }
+            node.policyPrefix?.let {
+                add(Span(it).apply {
+                    addClassName("jvmguard-transaction-policy-prefix")
+                    policyClass(node.policyType)?.let { pc -> addClassName(pc) }
+                })
+            }
             add(Span(node.name).apply { addClassName("jvmguard-transaction-name-text") })
-            policyClass(node.policyType)?.let { addClassName(it) }
         }
         return HorizontalLayout().apply {
             addClassName("jvmguard-transaction-name-cell")
