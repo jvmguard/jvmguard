@@ -2,9 +2,6 @@
 title: Telemetries
 ---
 
-
-
-
 import Figure from '../../../components/Figure.astro';
 
 jvmguard observes scalar values from four different types of sources:
@@ -18,9 +15,8 @@ threads.
 
 ## Telemetry data view
 
-All telemetries are available from the "VM Data Views". Each standard telemetry has its own entry under the
-"Telemetries" node, and MBean and Declared telemetries are added under the "Custom telemetries" node. The latter is only
-visible if at least one custom telemetry exists.
+All telemetries are available in the "Telemetries" view. Each standard telemetry, MBean telemetry and Declared telemetry
+has its own entry under the "Telemetries" node.
 
 Many telemetries are stacked area plots where the single lines add up to a total value. For example, the "Transactions"
 telemetry shows the total number of transactions over time, split into single lines for the various [policy
@@ -48,8 +44,7 @@ The full table with all display intervals where resolutions and retention times 
 | 3 days | 1 hour | 1 year |
 | 30 days | 12 hours | unlimited |
 
-Moving to earlier or later times shifts the starting point of the displayed interval by 1/4 of the total display range.
-To skip full intervals, press the <kbd>CTRL</kbd> key while navigating.
+Moving to earlier or later times shifts the starting point of the displayed interval by the total display range.
 
 In between those display intervals, there are many other intervals that just increase the displayed time extent, but use
 the same resolution. With the zoom buttons at the top or in the context menu of the telemetry, you can change the zoom
@@ -75,9 +70,8 @@ labeled axes and are intended to give a visual impression of the recent developm
 graph is followed by the current numeric value. The superscript indicates the observed maximum value, the subscript the
 minimum value in the displayed time range.
 
-When you select the "Telemetries" or "Custom telemetries" category nodes in the "VM data views", a telemetry overview is
-shown. All contained telemetries are shown as sparklines for the last hour and the last day while the current value
-together with maximum and minimum values is shown in a separate column.
+When you select the "Telemetries" view, the "Overview" tab shows all telemetries as sparklines for the last hour and
+the last day while the current value together with maximum and minimum values is shown in a separate column.
 
 In the "VMs" view, you can configure a set of sparkline columns. This allows you to make a relative assessment of the
 different VMs and VM groups with respect to the monitored value. Sparklines can be scaled separately, with a common
@@ -98,8 +92,6 @@ Many application servers and frameworks publish MBeans with values that are inte
 numeric values that are published by an MBean can be polled by the jvmguard agent and become part of a telemetry. To this
 end, it is not necessary that a JMX server has actually been opened to the outside. It is enough if an MBean was
 registered with any MBean server internally.
-
-<Figure src="ui/telemetry_settings.png" />
 
 In the "Telemetries" step in the recording settings, you can add MBean telemetries and their telemetry lines. The
 telemetry defines the name of the telemetry, the unit, and its overall behavior while the telemetry lines define the
@@ -140,8 +132,8 @@ numeric value, either a primitive or a primitive wrapper. Then, annotate the met
 You have to make sure that the containing class is actually loaded, otherwise jvmguard will not detect the annotated
 method.
 
-You can display the custom telemetry by going to the "VM Data Views" and locating the telemetry under the "Custom
-telemetries" node.
+You can display the custom telemetry by going to the "Telemetries" view and locating the telemetry in the telemetry
+drop-down.
 
 Once an annotation telemetry was detected by jvmguard, it will always be shown in this list, regardless of whether the
 annotated method is currently available in a connected VM. When you retire such a telemetry, go to the general settings,

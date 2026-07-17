@@ -34,7 +34,7 @@ public @interface TelemetryFormat {
 
     /**
      * By default, telemetry values from multiple VMs are averaged, for example, in the columns of the "VMs" view or
-     * when you select a VM group for a telemetry in the "VM Data Views". If you want to show sums instead,
+     * when you select a VM group for a telemetry in the "Telemetries" view. If you want to show sums instead,
      * set this parameter to {@code true}.
      * <p>
      * The desired parameter value depends on the semantics of the monitored value. For shared resources,

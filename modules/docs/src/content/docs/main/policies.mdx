@@ -2,9 +2,6 @@
 title: Policies
 ---
 
-
-
-
 import Figure from '../../../components/Figure.astro';
 
 ## Configuration
@@ -56,9 +53,10 @@ each transaction shows its policy state with a color and a prefix, so you can se
 slow, very slow or erroneous. The **Overdue** tab shows only the transactions that have exceeded the overdue threshold
 of their policy, which are the transactions that are hanging or deadlocked.
 
-To focus on a particular policy state, open the transaction-state filter in the filter bar and choose "Slow", "Very slow"
-or "Error". The tree is then reduced to the matching transactions together with their ancestor nodes, so the context is
-preserved. When you also enter a filter text, only the matching transactions are searched for that text.
+To focus on a particular policy state, open the transaction-state filter in the filter bar (the funnel icon) and
+choose "Slow", "Very slow" or "Error". The tree is then reduced to the matching transactions together with their
+ancestor nodes, so the context is preserved. When you also enter a filter text, only the matching transactions are
+searched for that text.
 
 {/* ui/calltree_policies.png removed: it showed the removed policy-split mode. The tree is now shown merged, with the
 policy state indicated per transaction. */}

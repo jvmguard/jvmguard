@@ -50,7 +50,7 @@ then analyze the proxy headers to create correct URLs. If this should not work d
 set the **reverseProxyHost** to the host name of the proxy. If jvmguard is served under a path prefix, set the
 **contextPath** property to that prefix, for example `jvmguard`, without a leading or trailing slash.
 
-The [REST API service](/docs/main/rest) is enabled by setting the **restApiEnabled** property to `true`. The REST API
+The [REST API service](/docs/main/rest) is disabled by setting the **restApiEnabled** property to `false`. If enabled, the REST API
 is then served at the `/api` path on the same port as the web server and uses the same protocol (HTTP/HTTPS) as
 configured for the web server.
 
@@ -72,7 +72,9 @@ For more information on this topic, see the chapter on [monitoring JVMs](/docs/m
 
 ## Environment variable overrides for secrets
 
-In containerized deployments, it is often preferable to inject secrets through environment variables rather than storing them in the database. At startup, jvmguard checks for the following environment variables and overrides the corresponding values from the [server administration](/docs/config/admin) and [single sign-on](/docs/config/sso) settings:
+In containerized deployments, it is often preferable to inject secrets through environment variables rather than storing
+them in the database. At startup, jvmguard checks for the following environment variables and overrides the corresponding
+values from the [server administration](/docs/config/admin) and [single sign-on](/docs/config/sso) settings:
 
 For LDAP:
 
@@ -80,14 +82,18 @@ For LDAP:
 JVMGUARD_LDAP_PASSWORD
 ```
 
-For each SSO provider, the environment variable name is derived from the provider's display name, converted to uppercase with non-alphanumeric characters replaced by underscores:
+For each SSO provider, the environment variable name is derived from the provider's display name, converted to uppercase
+with non-alphanumeric characters replaced by underscores:
 
 ```
 JVMGUARD_SSO_<NAME>_CLIENT_ID
 JVMGUARD_SSO_<NAME>_CLIENT_SECRET
 ```
 
-For example, a provider named "Google" uses `JVMGUARD_SSO_GOOGLE_CLIENT_ID` and `JVMGUARD_SSO_GOOGLE_CLIENT_SECRET`. A provider named "Company Okta" uses `JVMGUARD_SSO_COMPANY_OKTA_CLIENT_ID` and `JVMGUARD_SSO_COMPANY_OKTA_CLIENT_SECRET`.
+For example, a provider named "Google" uses `JVMGUARD_SSO_GOOGLE_CLIENT_ID` and `JVMGUARD_SSO_GOOGLE_CLIENT_SECRET`.
+A provider named "Company Okta" uses `JVMGUARD_SSO_COMPANY_OKTA_CLIENT_ID` and `JVMGUARD_SSO_COMPANY_OKTA_CLIENT_SECRET`.
 
-These overrides are applied after the configuration is loaded from the database and take precedence over the stored values. If an environment variable is not set, the value from the database is used. When jvmguard logs the application of an override, the secret value itself is never logged.
+These overrides are applied after the configuration is loaded from the database and take precedence over the stored
+values. If an environment variable is not set, the value from the database is used. When jvmguard logs the application
+of an override, the secret value itself is never logged.
 

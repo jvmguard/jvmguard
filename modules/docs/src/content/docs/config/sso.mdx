@@ -21,7 +21,7 @@ SSO client IDs and secrets can be overridden through environment variables, see
 
 ## Redirect URIs
 
-Each SSO provider requires a redirect URI to be registered in the identity provider's application settings.
+Each SSO provider requires a redirect URI to be registered in the identity provider application settings.
 The redirect URI has the form:
 
 ```
@@ -43,7 +43,7 @@ Access rules determine which users can sign in via an SSO provider and what acce
 empty access rules list means that only pre-created users can sign in. This is the default and the most
 restrictive mode.
 
-You can add rules that match group or role claims from the identity provider's token. Each rule maps a claim
+You can add rules that match group or role claims from the identity provider token. Each rule maps a claim
 value to an access level. A special catch-all rule, displayed as `*`, matches any user in the configured
 domain who does not match a more specific rule. Only one catch-all rule is allowed per provider.
 
@@ -68,12 +68,12 @@ SSO users can be created in two ways:
 
 **Pre-created users**: In "Users and Roles", create a user with the type "SSO" and enter the user's email
 address at the identity provider. The access level is assigned by you. When the user signs in for the first
-time, jvmguard matches the email address and pins the identity provider's subject identifier to the user
+time, jvmguard matches the email address and associates the subject identifier of the identity provider to the user
 entry.
 
 **Auto-created users**: When an access rule matches and no pre-created user exists, jvmguard creates a new
 user entry with the access level from the matching rule. The user's full name is populated from the identity
-provider's token if available.
+provider token if available.
 
 Once a user has been created, either manually or automatically, you can change the access level in "Users
 and Roles" at any time. The change takes effect at the next login.

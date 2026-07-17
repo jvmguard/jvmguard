@@ -6,7 +6,7 @@ import Figure from '../../../components/Figure.astro';
 
 ## Introduction
 
-Many application servers and frameworks such as [Apache Camel](https://camel.apache.org/camel-jmx.html) use JMX to
+Many application servers and frameworks such as [Apache Camel](https://camel.apache.org) use JMX to
 expose a number of MBeans for configuration and monitoring purposes. The JVM itself also publishes a number of [platform
 MXBeans](https://docs.oracle.com/en/java/javase/25/docs/api/java.management/module-summary.html) that present interesting
 information around the low-level operations in the JVM.
@@ -20,7 +20,7 @@ complex data types that do not involve custom classes. Also, arrays and tables a
 **MXBeans**, JMX offers an easy way to create Open MBeans automatically from Java classes. For example, the MBeans
 provided by the JVM are MXBeans.
 
-The "MBean browser" view in the "VM Data Views" shows all registered MBeans in one selected JVM. If you have selected a
+The "MBeans" view shows all registered MBeans in one selected JVM. If you have selected a
 VM group, you have to switch to a single VM first. If you have selected a VM pool, the context area will show an 🔍
 image button that will present a list of pool VMs.
 
@@ -46,7 +46,7 @@ is shown "inline", and each key-value pair is shown as a nested row. If the key 
 entry" elements with nested key and value entries is inserted. This is also the case for the general tabular type with
 composite keys and multiple values.
 
-Optionally, MBean attributes can be editable in which case an **edit** link will be displayed next to their value. MBean
+Optionally, MBean attributes can be editable in which case an **edit** icon will be displayed next to their value. MBean
 attributes can only be edited by a user with at least the "profiler" access level. Composite and tabular types cannot be
 edited in the MBean browser, but arrays or simple types are editable.
 

@@ -2,9 +2,6 @@
 title: Basic Concepts
 ---
 
-
-
-
 import Figure from '../../../components/Figure.astro';
 
 ## Transactions
@@ -61,14 +58,14 @@ can use the `@Telemetry` annotation to define custom telemetries on static metho
 
 ## Thresholds
 
-You will have different expectations with respect to different telemetries. For example, the heap usage often oscillates
+There can be different expectations with respect to different telemetries. For example, the heap usage often oscillates
 around a baseline and where a steady increase is a sign of a bug in the application.
 
 Or, the number of live threads should stay below a limit that you derive from the capacity of the machine.
 
 To detect anomalous conditions, you define [thresholds](/docs/main/thresholds) with an optional lower and an optional
 upper bound. Threshold violations are counted on a per-VM basis or for each VM group. They do not have actions
-associated with them. Often, you will not want to take any action for single threshold violations, but only for a
+associated with them. Sometimes, you may not want to take any action for single threshold violations, but only for a
 cascade of such conditions.
 
 <Figure src="threshold.svg" />

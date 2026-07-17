@@ -41,22 +41,6 @@ class RecordingScreenshots : ScreenshotTest() {
     }
 
     @Test
-    fun telemetrySettings() = onPage {
-        login()
-        open("recording/telemetries")
-        getByTestId(TelemetryGrid.ID_GRID).waitFor()
-        capture("telemetry_settings")
-    }
-
-    @Test
-    fun triggers() = onPage {
-        login()
-        open("recording/triggers")
-        getByTestId(TriggerGrid.ID_GRID).waitFor()
-        capture("triggers")
-    }
-
-    @Test
     fun transactionsConfig() = onPage {
         login()
         openTransactionsAt("Matched")
@@ -186,13 +170,6 @@ class RecordingScreenshots : ScreenshotTest() {
     }
 
     @Test
-    fun matchedType() = onPage {
-        login()
-        openMatchedDialog()
-        capture("matched_type")
-    }
-
-    @Test
     fun matchedClass() = onPage {
         login()
         openMatchedDialog()
@@ -205,6 +182,7 @@ class RecordingScreenshots : ScreenshotTest() {
         login()
         openMatchedDialog()
         selectEnum("Intercept", "Single method of a class or interface")
+        assertThat(getByText("Method name", Page.GetByTextOptions().setExact(true))).isVisible()
         capture("matched_method")
     }
 
@@ -265,6 +243,7 @@ class RecordingScreenshots : ScreenshotTest() {
         login()
         openDeclaredDialog()
         openTab("Filter")
+        assertThat(getByText("Class filter", Page.GetByTextOptions().setExact(true))).isVisible()
         capture("declared_filter")
     }
 
@@ -272,7 +251,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun policySubdef() = onPage {
         login()
         openPolicySubdefDialog()
-        assertThat(getByTestId(PolicySubDefDialog.ID_SAVE)).isVisible()
+        openTab("Policies")
+        assertThat(getByText("Slow", Page.GetByTextOptions().setExact(true))).isVisible()
         capture("policy_subdef")
     }
 

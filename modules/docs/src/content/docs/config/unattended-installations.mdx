@@ -2,10 +2,6 @@
 title: Unattended installations
 ---
 
-
-
-
-
 import Figure from '../../../components/Figure.astro';
 
 ## Unattended mode and response files
@@ -15,7 +11,7 @@ makes the installer run in **unattended mode**. To set the installation director
 directory]`:
 
 ```
-./jvmguard_unix.sh -q -dir /opt/jvmguard
+./jvmguard_installer.sh -q -dir /opt/jvmguard
 ```
 
 To apply user input from a previous GUI or console installation, locate the response file `.install4j/response.varfile`

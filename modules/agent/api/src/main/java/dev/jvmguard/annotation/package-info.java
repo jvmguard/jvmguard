@@ -84,7 +84,7 @@
  * You can configure multiple lines to be shown in the same telemetry.
  * </p>
  * <p>
- * In the jvmguard UI, the telemetry is shown in the VM data views under "Custom telemetries". In addition, you can
+ * In the jvmguard UI, the telemetry is shown in the "Telemetries" view. In addition, you can
  * choose custom telemetries as data sources for sparklines in the dashboard or in the VMs view.
  * </p>
  *

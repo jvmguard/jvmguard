@@ -11,12 +11,25 @@ code by using the jvmguard annotations.
 Matched transactions are necessary if you cannot add annotations into your code or if the classes of interest are in an
 external library. Otherwise, Declared transactions are recommended for easier maintainability.
 
+In the list of transaction definitions, the filter expression is shown as the name of each Matched transaction
+definition. If this is not descriptive enough, use the "Custom description" check box in the transaction configuration
+to enter a meaningful name.
+
+jvmguard walks the list of transaction definitions and applies the naming and policies of the first matching entry.
+Keep in mind that the matching takes the first match, so more generic filters should be lower in the list of
+transaction definitions.
+
+<Figure src="transaction_matching.svg" />
+
+This allows you to define a series of transaction definitions that all have different naming schemes while keeping
+common policy definitions for a group of definitions.
+
 ## Classes or methods
 
 Similar to [Mapped transactions](/docs/advanced/mapped), the first question is whether you want to choose a
 single method or all public methods from a particular class.
 
-<Figure src="ui/matched_type.png" />
+<Figure src="ui/matched_class.png" />
 
 Matched transactions have the same configuration options regarding inheritance as Mapped transactions. You can switch
 on transactions from derived classes with the "intercept subclasses" check box.
@@ -44,8 +57,6 @@ in the derived classes. In this case, all public methods in derived classes will
 
 As an additional way to collect transaction methods you can select static methods. If the inheritance option is selected
 and all public methods are used, this will collect public static methods in derived classes as well.
-
-<Figure src="ui/matched_class.png" />
 
 ## Naming
 

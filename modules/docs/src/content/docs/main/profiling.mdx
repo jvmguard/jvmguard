@@ -1,5 +1,5 @@
 ---
-title: Cross-over to profiling
+title: Profiling in production
 ---
 
 import Figure from '../../../components/Figure.astro';
@@ -13,19 +13,20 @@ JVM is not tested as extensively with JVMTI as it is without.
 
 However, the best defense against performance problems is defense in depth. Sometimes there are situations that require
 more information than what can be obtained from the low overhead monitoring and sampling techniques that are available
-in jvmguard.
+in APM tools and continuous profilers.
 
 ## Recording JProfiler snapshots
 
-For these cases, jvmguard can load the **JProfiler profiling agent** into a monitored JVM on demand. JProfiler uses a
-native JVMTI library that is optimized for in-production use and records in sampling mode, so the overhead stays low. The
-result of this operation is a JProfiler snapshot file that can be downloaded from jvmguard and opened in JProfiler -
-similarly to the HPROF memory snapshot files that are saved directly by the JVM.
+For these cases, jvmguard can load the **JProfiler profiling agent** into a monitored JVM on demand. JProfiler's
+native JVMTI library is optimized for in-production use and jvmguard configures it to record in sampling mode,
+so the overhead stays low. Especially for Java 17+, the overhead of JVMTI sampling is [comparable to
+async sampling](https://www.ej-technologies.com/blog/2024/02/why-jvmti-sampling-is-better-than-async-sampling-on-modern-jvms/).
+The result of this operation is a JProfiler snapshot file that can be downloaded from jvmguard and opened in JProfiler.
 
 You do not need to install or copy anything yourself. The first time you record a JProfiler snapshot for a given
 platform, jvmguard downloads the matching JProfiler agent package for the monitored VM's operating system and
-architecture, caches it, and transfers it to the agent; subsequent recordings reuse the cached package. This requires
-the jvmguard server to be able to reach the JProfiler website.
+architecture, caches it, and transfers it to the agent. Subsequent recordings will reuse the cached package. This
+requires the jvmguard server to be able to reach the JProfiler website.
 
 Once the profiling agent has been loaded, its JVMTI cannot be turned off again. As long as the JVM is running, it will
 remain in this state. Typically, the overhead of the loaded agent without any data recording is less than 1%, though.
@@ -37,7 +38,7 @@ select "Record JProfiler snapshot".
 
 You can configure the duration of the recording and select which subsystems are recorded: CPU, allocations and monitor
 blocking, as well as the JProfiler probes for JDBC, JPA, HTTP, MongoDB and many others. jvmguard monitoring is not
-impacted by the recording. In addition, you can capture point-in-time data at the end of the recording window and store
+impacted by the recording. In addition, you can capture additional data at the end of the recording window and store
 it in the same snapshot: a heap dump (optionally preceded by a full garbage collection), an MBean snapshot and a monitor
 dump.
 
@@ -50,9 +51,6 @@ configure a trigger that includes the "Record JProfiler snapshot" trigger action
 
 Note that only the last offending VM will be profiled, not all of them.
 
-If you use a custom library for network I/O, you can [add selected methods to the net I/O thread
-state](/docs/advanced/netio), so that you get useful hot spots for your analysis.
-
 ## Viewing JProfiler snapshots in JProfiler
 
 JProfiler snapshots are delivered to your jvmguard inbox from where you can download them. The file extension is ".jps"
@@ -63,16 +61,16 @@ it, or choose Session ▸ Open Snapshot from JProfiler's main menu.
 
 An alternative mechanism to get more low-level information on a monitored VM is to record a [JDK Flight Recorder
 (JFR)](https://en.wikipedia.org/wiki/JDK_Flight_Recorder) snapshot. The Java version of the monitored VM has to be 11+,
-and the JRE has to include the module `jdk.jfr`. JFR recording can have very low overhead because it does not activate
-the JVMTI. Also, it does not interfere with jvmguard monitoring in any way.
+and the JRE has to include the module `jdk.jfr`. JFR recording can have very low overhead, and it does not load
+the JVMTI.
 
 To record a JFR snapshot, go to the VMs view, click on the "actions" link next to the VM and select "Record JDK Flight
 Recorder snapshot".
 
 <Figure src="ui/jfr_recording_action.png" />
 
-Besides configuring the duration of the JFR recording, you can choose a predefined setting or upload a `.jfc` settings
-file that was exported from the "Flight recording template manager" in [JMC](https://openjdk.java.net/projects/jmc/).
+Besides configuring the duration of the JFR recording, you can choose a predefined setting or upload the contents of
+a `.jfc` settings file that was exported from the "Flight recording template manager" in [JMC](https://openjdk.java.net/projects/jmc/).
 The two predefined settings that are guaranteed to exist are "default" and "profile". jvmguard suggests to use "profile"
 by default, because it records more relevant information. Other settings can be predefined by placing `.jfc` files in
 the `lib/jfr` directory of the JVM that is monitored. If you upload a settings file, make sure that is created for a

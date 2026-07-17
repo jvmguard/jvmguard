@@ -11,14 +11,6 @@ import org.junit.jupiter.api.Test
 class SettingsScreenshots : ScreenshotTest() {
 
     @Test
-    fun configMenu() = onPage {
-        login()
-        getByTestId(MainLayout.ID_SETTINGS).click()
-        assertThat(getByTestId(MainLayout.ID_GENERAL_SETTINGS)).isVisible()
-        capture("config_menu")
-    }
-
-    @Test
     fun generalSettingsMenu() = onPage {
         login()
         getByTestId(MainLayout.ID_SETTINGS).click()
@@ -33,6 +25,22 @@ class SettingsScreenshots : ScreenshotTest() {
         open("settings/data")
         getByTestId(DataSettingsView.ID_TRANSACTION_CAP).waitFor()
         capture("global_settings")
+    }
+
+    @Test
+    fun displaySettings() = onPage {
+        login()
+        open("settings/display")
+        getByTestId(DisplaySettingsView.ID_HIDDEN_TELEMETRIES).waitFor()
+        capture("display_settings")
+    }
+
+    @Test
+    fun updatesSettings() = onPage {
+        login()
+        open("settings/updates")
+        getByTestId(UpdatesSettingsView.ID_CHECK_DAILY).waitFor()
+        capture("updates_settings")
     }
 
     @Test

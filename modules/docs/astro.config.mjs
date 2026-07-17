@@ -30,7 +30,7 @@ export default defineConfig({
     { label: 'MBean browser', slug: 'main/mbean' },
     { label: 'REST export API', slug: 'main/rest' },
     { label: 'MCP server', slug: 'main/mcp' },
-    { label: 'Cross-over to profiling', slug: 'main/profiling' },
+    { label: 'Profiling in production', slug: 'main/profiling' },
     {
       label: 'Configuration',
       collapsed: false,
@@ -47,10 +47,9 @@ export default defineConfig({
       label: 'Advanced topics',
       collapsed: false,
       items: [
+        { label: 'Declared transactions', slug: 'advanced/declared' },
         { label: 'Mapped transactions', slug: 'advanced/mapped' },
         { label: 'Matched transactions', slug: 'advanced/matched' },
-        { label: 'Declared transactions', slug: 'advanced/declared' },
-        { label: 'Customizing net I/O methods', slug: 'advanced/netio' },
       ],
     },
   ],

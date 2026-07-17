@@ -29,6 +29,9 @@ class DataViewsScreenshots : ScreenshotTest() {
         login(demo = true)
         open("mbeans?${vmQuery(DEMO_VM)}")
         getByTestId(MBeansView.ID_TREE).waitFor()
+        getByTestId(MBeansView.ID_FILTER).locator("input").fill("java.lang:type=Memory")
+        getByText("Memory [type]").click()
+        assertThat(getByText("Attributes")).isVisible()
         capture("mbean_browser")
     }
 

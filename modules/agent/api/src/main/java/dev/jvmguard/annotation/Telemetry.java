@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * class from the {@code java.util.concurrent.atomic} package.
  * </p>
  * <p>
- * In the jvmguard UI, the telemetry is shown in the VM data views under "Custom telemetries" together with the MBean
+ * In the jvmguard UI, the telemetry is shown in the "Telemetries" view together with the MBean
  * telemetries that are defined in the recording settings. In addition, you can
  * choose custom telemetries as data sources for sparklines in the dashboard or in the VMs view.
  * </p>

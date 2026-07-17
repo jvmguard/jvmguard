@@ -363,23 +363,13 @@
        inkscape:connector-curvature="0" />
     <g
        id="g4568"
-       transform="matrix(0.09135322,0,0,0.09135322,156.62393,154.31907)"
-       style="stroke-width:10.9465">
+       transform="translate(152,152) scale(1.9)">
       <path
-         id="path4562"
-         d="m 186.35,77.8 14.05,20.4 c 6.15,8.9 15.45,13.8 26.3,13.8 H 488 c 4.4,0 8,3.6 8,8 v 352 c 0,4.4 -3.6,8 -8,8 H 24 c -4.4,0 -8,-3.6 -8,-8 V 72 c 0,-4.4 3.6,-8 8,-8 h 136 c 10.85,0 20.2,4.9 26.35,13.8 z"
-         inkscape:connector-curvature="0"
-         style="fill:#ffb100;stroke-width:10.9465" />
-      <path
-         id="path4564"
-         d="M 165.55,176 H 24 c -4.4,0 -8,3.6 -8,8 v 288 c 0,4.4 3.6,8 8,8 h 464 c 4.4,0 8,-3.6 8,-8 V 152 c 0,-4.4 -3.6,-8 -8,-8 H 222.95 c -9.35,0 -17.4,3.55 -23.7,10.5 l -10,11.05 c -6.3,6.9 -14.35,10.45 -23.7,10.45 z"
-         inkscape:connector-curvature="0"
-         style="fill:#ffd34e;stroke-width:10.9465" />
-      <path
-         id="path4566"
-         d="m 18.7,478 c 1.4,1.25 3.25,2 5.3,2 h 464 c 4.4,0 8,-3.6 8,-8 V 152 c 0,-2.35 -1.05,-4.5 -2.7,-6 z"
-         inkscape:connector-curvature="0"
-         style="fill:#ffc928;stroke-width:10.9465" />
+         d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+         fill="#f5f5f5"
+         stroke="#666666"
+         stroke-width="1.5"
+         stroke-linejoin="round" />
     </g>
   </g>
 </svg>

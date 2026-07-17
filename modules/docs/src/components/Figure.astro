@@ -19,12 +19,12 @@ const hasDark = isPng;
 const lightSrc = `${base}/images/${src}`;
 const darkSrc = hasDark ? `${base}/images/${src.replace(/\.png$/, '_dark.png')}` : null;
 const srcSet = (s: string) => (scale && scale > 0 ? `${s} ${scale}x` : undefined);
-const cls = isSvg ? 'figure figure-svg' : 'figure';
+  const cls = isSvg ? 'figure figure-svg' : isPng ? 'figure figure-zoom' : 'figure';
 ---
 {darkSrc ? (
   <Fragment>
-    <img src={lightSrc} srcset={srcSet(lightSrc)} alt={alt} class="figure figure-light" loading="lazy" />
-    <img src={darkSrc} srcset={srcSet(darkSrc)} alt={alt} class="figure figure-dark" loading="lazy" />
+    <img src={lightSrc} srcset={srcSet(lightSrc)} alt={alt} class="figure figure-light figure-zoom" loading="lazy" />
+    <img src={darkSrc} srcset={srcSet(darkSrc)} alt={alt} class="figure figure-dark figure-zoom" loading="lazy" />
   </Fragment>
 ) : (
   <img src={lightSrc} srcset={srcSet(lightSrc)} alt={alt} class={cls} loading="lazy" />
@@ -38,6 +38,9 @@ const cls = isSvg ? 'figure figure-svg' : 'figure';
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 0.25rem;
   }
+  .figure-zoom {
+    cursor: zoom-in;
+  }
   :global(html[data-theme='light']) .figure-dark { display: none; }
   :global(html[data-theme='dark']) .figure-light { display: none; }
   /* Light-mode diagrams: flip to dark-mode in dark theme (invert luminance, hue-rotate keeps colors natural). */
@@ -46,3 +49,26 @@ const cls = isSvg ? 'figure figure-svg' : 'figure';
     border-color: var(--sl-color-gray-3);
   }
 </style>
+
+<script>
+  const overlay = document.createElement('div');
+  overlay.style.cssText =
+    'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;' +
+    'align-items:center;justify-content:center;z-index:9999;cursor:zoom-out;padding:2rem;';
+  const zoomed = document.createElement('img');
+  zoomed.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;border-radius:0.25rem;';
+  overlay.appendChild(zoomed);
+  document.body.appendChild(overlay);
+
+  function close() { overlay.style.display = 'none'; }
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG' && target.classList.contains('figure-zoom') && target.offsetWidth > 0) {
+      zoomed.src = (target as HTMLImageElement).src;
+      overlay.style.display = 'flex';
+    }
+  });
+</script>

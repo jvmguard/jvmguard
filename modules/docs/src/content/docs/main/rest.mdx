@@ -2,9 +2,6 @@
 title: REST Export API
 ---
 
-
-
-
 import Figure from '../../../components/Figure.astro';
 
 ## Introduction
@@ -17,8 +14,8 @@ machine-readable format for further processing.
 To automate external data analysis, as well as to hook up jvmguard to other monitoring systems, this manual export is
 impractical. In that case, you can use the REST export API instead.
 
-By default, the REST API is not enabled. You can enable it by setting the
-[**restApiEnabled** property](/docs/config/server-config) to `true` in `config/application.yaml`. The API is then served
+The REST API is enabled by default. You can disable it by setting the
+[restApiEnabled property](/docs/config/server-config) to `false` in `config/application.yaml`. If enabled, the API is served
 at the `/api` path on the same port as the web server and uses the same protocol, either HTTP or HTTPS.
 
 Once enabled you can make HTTP(S) calls to the web server port to retrieve recorded data. Just like in the web UI, you
@@ -66,8 +63,8 @@ in one of the following formats:
 
 | Format | Example | Description |
 |---|---|---|
-| `yyyy-MM-dd'T'HH:mm:ss.SSS`<br />`yyyy-MM-dd'T'HH:mm:ss`<br />`yyyy-MM-dd` | 2016-03-02T22:40:00.000<br />2016-03-02T22:40:00<br />2016-03-02 | Date and time in the local time of the server. All shortened versions will be equal to providing zeros. |
-| `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`<br />`yyyy-MM-dd'T'HH:mm:ss'Z'`<br />`yyyy-MM-dd'Z'` | 2016-03-02T22:40:00.000Z<br />2016-03-02T22:40:00Z<br />2016-03-02Z | Date and time in UTC. All shortened versions will be equal to providing zeros. |
+| `yyyy-MM-dd'T'HH:mm:ss.SSS`<br />`yyyy-MM-dd'T'HH:mm:ss`<br />`yyyy-MM-dd` | 2026-07-02T22:40:00.000<br />2026-07-02T22:40:00<br />2026-07-02 | Date and time in the local time of the server. All shortened versions will be equal to providing zeros. |
+| `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`<br />`yyyy-MM-dd'T'HH:mm:ss'Z'`<br />`yyyy-MM-dd'Z'` | 2026-07-02T22:40:00.000Z<br />2026-07-02T22:40:00Z<br />2026-07-02Z | Date and time in UTC. All shortened versions will be equal to providing zeros. |
 
 ## API documentation
 
@@ -115,6 +112,6 @@ of the values that is returned by the /api/telemetries URL above.
 absolute directory path of the backup directory as plain text. The backup files are written to the `backup` directory
 inside the jvmguard data directory. To restore such a backup, stop the jvmguard server, replace the contents of the `db`
 directory with the contents of the `backup` directory and start the jvmguard server again. If the REST API is impractical
-to use, or if you have not enabled it for your jvmguard installation, you can also create a file named `trigger_backup` in
+to use, or if you have disabled it for your jvmguard installation, you can also create a file named `trigger_backup` in
 the jvmguard data directory. After the backup has been completed successfully, the file will be deleted and the backup
 will be performed.

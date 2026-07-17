@@ -15,9 +15,8 @@ protocol, either HTTP or HTTPS. It uses the streamable HTTP transport.
 ## Enabling the MCP server
 
 The MCP server is controlled by the **mcpEnabled** property in `config/application.yaml` and is
-enabled in the default configuration. Set it to `false` to disable the endpoint, in which case a
-request to `/mcp` returns a "404 Not Found". For the full list of server properties, see the
-[server configuration](/docs/config/server-config).
+enabled in the default configuration. You can set it to `false` to disable the endpoint. For the full list of
+server properties, see the [server configuration](/docs/config/server-config).
 
 ## Authentication
 
@@ -40,44 +39,43 @@ recordings, require profiler access.
 The key is sent as a bearer token, so it is only encrypted in transit when you use HTTPS. Use HTTPS
 for any assistant that connects over a network.
 
-Beyond access levels, what an assistant may do can be further restricted in two places. Server-wide settings live on
-the **Network** tab in the [general settings](/docs/main/ui#network): an MCP read-only mode and an IP allowlist.
-Per-VM-group toggles and limits for individual captures and mutating actions live in the recording settings under
-[Agent guardrails](/docs/main/ui#agent-guardrails), so a "profiler" can manage them for their own groups. Everything is
-permissive by default. When a guardrail blocks a call, the assistant receives a message explaining the reason so it can
-comply.
+Beyond access levels, what an assistant may do can be further restricted in two places. Server-wide settings are located
+the Network tab in the [general settings](/docs/main/ui#network): an MCP read-only mode and an IP allowlist.
+Per-VM-group toggles and limits for individual captures and mutating actions are available in the recording settings
+under [Agent guardrails](/docs/main/ui#agent-guardrails), so a "profiler" can manage them for their own groups. When a guardrail violation blocks
+a call, the assistant receives a message explaining the reason so it can adjust accordingly.
 
 ## Connecting an assistant
 
-The "External access" page in the jvmguard UI has an integration helper. Select your assistant and it shows
-the exact command or configuration snippet, with your key filled in while the key is visible. The
-copy button copies the snippet to the clipboard.
+The "External access" page in the jvmguard UI has an integration helper. When you select an assistant, it shows
+the command or configuration snippet, with your key filled in while the key is visible.
 
-For a manual setup, register a remote MCP server with the streamable HTTP transport, the endpoint URL,
+For a manual setup, register a remote MCP server with streamable HTTP transport, the endpoint URL,
 and the authorization header. For example, with the Claude Code command line and a web server port of
 8020:
 
 ```
-claude mcp add --transport http jvmguard http://localhost:8020/mcp --header "Authorization: Bearer <API_KEY>"
+claude mcp add --transport http jvmguard http://localhost:8020/mcp\
+    --header "Authorization: Bearer <API_KEY>"
 ```
 
-Assistants that read a configuration file instead take the endpoint URL and an `Authorization` header
-that carries the same bearer token.
+For assistants that read a configuration file, use the endpoint URL and an `Authorization` header
+with the same bearer token.
 
 ## Tools
 
 The assistant discovers the available tools when it connects. It can list the monitored groups and VMs,
 read telemetries and transaction data such as call  trees, hot spots, and overdue transactions, inspect MBeans
-and log files, and read the trigger inbox. It can also capture diagnostics on a VM, such as heap dumps, thread dumps,
-and JFR or JProfiler recordings. Beyond reading MBeans it can also set a
-writable MBean attribute and invoke an MBean operation. It can read a VM group's recording configuration as a JSON
-string and write it back after editing. The read result includes a generated schema that explains the fields, enums
-and polymorphic types, along with a fully worked example configuration that the agent can copy from. These mutating
-tools require profiler access and the capture tools additionally deposit their result in the list of snapshot files
-once it is ready.
+and log files, and read the trigger inbox.
 
-VMs and groups are referenced by their hierarchy path, for example `Demo/Storefront`. The root group is the
-empty string. The telemetry and transaction intervals are the same as for the [REST export API](/docs/main/rest).
+It can also capture diagnostics on a VM, such as heap dumps, thread dumps,
+and JFR or JProfiler recordings. Beyond reading MBeans it can also set a
+writable MBean attribute and invoke an MBean operation.
+
+In addition, it can read a VM group's recording configuration as a JSON
+string and write it back after editing. The read result includes a generated schema that explains the fields, enums
+and polymorphic types, along with a fully worked example configuration. These mutating
+tools require profiler access and the capture tools additionally save their result in the list of snapshot files.
 
 ## Analyzing captured artifacts
 

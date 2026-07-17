@@ -10,6 +10,10 @@ heap usage or thread count, called **telemetries**. Based on that data, jvmguard
 for example a JFR recording, a heap dump or a thread dump, when a configured condition is met. The captured snapshots
 can be opened in JProfiler and other profilers for detailed analysis.
 
+Captures can also be started manually from the UI or through the REST or MCP API. Every capture operation is
+recorded in an audit log. Access is controlled by three access levels: Admin, Profiler, and Viewer, so you can
+partition a single server for multiple teams.
+
 jvmguard is intended to run with your application at all times. This enables it to keep **historic data** and show you
 how monitored values evolve over time. Data is automatically made less granular as it gets older, so you can look back
 over long periods of time with only a slow rate of storage space consumption.
@@ -18,7 +22,6 @@ jvmguard is designed to **monitor multiple VMs** at the same time. Whether you h
 a cloud deployment with hundreds of VMs, jvmguard can monitor and organize them together.
 
 The jvmguard UI is a **web interface** that can be used by multiple users to analyze the collected data at the same time.
-A system of access levels allows you to partition a single server for multiple groups.
 
 ## How do I continue?
 

@@ -2,23 +2,18 @@
 title: UI
 ---
 
-
-
-
 import Figure from '../../../components/Figure.astro';
-
-<Figure src="ui/config_menu.png" />
 
 ## The data views
 
-The left side-navigation holds the main entry points. The **VMs** view is the home view. It shows you the hierarchy of
+The left side-navigation holds the main views. The **VMs** view is the home view. It shows you the hierarchy of
 all connected VMs, together with selected information in the form of sparklines.
 
 <Figure src="ui/vms.png" />
 
 From the VMs view you reach the per-VM data views for a selected group or VM. They provide access to all recorded data
 that is available for your selection, including the telemetry views, the transaction call tree and hot spots, and the
-MBean browser. You follow the VM name link or use the context actions of a row to open these views. Clicking on a
+MBean browser. You use the arrow-shaped view selector context menu of a row to open these views. Clicking on a
 sparkline takes you to the full telemetry view.
 
 The **inbox** view shows all messages that have been sent to you. For example, if you record a JProfiler snapshot on a
@@ -40,20 +35,21 @@ Each entry is a single-line JSON object with the caller, the client address and 
 call also records what it changed: an MBean attribute write logs the object name, attribute, prior value and new
 value, an operation invocation logs the signature, arguments and return value, and a configuration edit logs the
 group with before and after content hashes. If you see unwanted activity, you can revoke the API key of the
-offending user with the **Revoke API key** row action in Users &amp; Roles.
+offending user with the **Revoke API key** row action in Users &amp; Roles view of the general settings.
 * The **server log** (administrator access) contains the general server diagnostics.
 
-When you run jvmguard from a development build, the server logs to the console instead of to files, so these views can
-be empty even though you have access.
+When you run jvmguard from a development build without a <tt>-Dlogging.config=...</tt> VM option, the server only logs
+to the console and not to files, so these views can be empty even though you have access.
 
 ## Configuration
 
-The configuration drop-down in the header gives you access to two parts: **general settings** and **recording options**.
+The cog drop-down in the header gives you access to two parts: **general settings** and **recording options**.
 If you want to view and edit general settings, you have to be an administrator. Recording options can also be edited by
 the "profiler", but not by the "viewer" access level.
 
-As long as you do not change anything, you can simply leave a settings view again. If you made a change, **Apply** and
-**Discard** buttons appear. No changes to the configuration have any effect before you apply them.
+As long as you do not change anything, you can simply leave a settings view with the "Cancel" button in the header
+again. If you made a change, the **Save** button is enabled. No changes to the configuration have any effect before you
+save them.
 
 <Figure src="ui/apply_discard.png" />
 
@@ -62,6 +58,7 @@ As long as you do not change anything, you can simply leave a settings view agai
 In the general settings you administrate the jvmguard server. This includes
 
 * the users and their access levels
+* single sign-on providers
 * data consolidation options
 * SMTP access
 * network access for AI agents and REST clients
@@ -76,8 +73,8 @@ The **Network** tab holds the server-wide restrictions on what an AI agent over 
 REST client may do. All settings are permissive by default.
 
 * **MCP access** has the **read-only mode** switch, which blocks every mutating and capturing tool over MCP and
-leaves only read access. It is the simple umbrella; fine-grained, per-VM-group restrictions on individual captures
-and mutating actions live in the recording settings (see [Agent guardrails](#agent-guardrails) below). When the MCP
+leaves only read access. Per-VM-group restrictions on individual captures
+and mutating actions are available in the recording settings (see [Agent guardrails](#agent-guardrails) below). When the MCP
 server is disabled in the server configuration (`application.yaml`), read-only mode has no effect and is shown disabled.
 * **Allowed IP addresses** is an allowlist of IPv4/IPv6 addresses or CIDR ranges permitted to talk to the MCP server
 and the REST API. Because it guards both, it stays active as long as either is enabled and is only disabled when both
@@ -88,8 +85,8 @@ denial is written to the audit log.
 
 ## Recording &amp; triggers
 
-Recording options and triggers are configured for each VM group. You can click the edit button or double-click on any
-column to jump directly to the desired step.
+Recording options and triggers are configured for each VM group. By default, "All JVMs" are selected for configuration.
+In the VM selection dialog, you can see directly which VM groups have their own configuration.
 
 <Figure src="ui/recording_settings.png" />
 
@@ -131,9 +128,10 @@ page. If your access level is "profiler", this is where you can see the VM group
 
 <Figure src="ui/account_settings.png" />
 
-## Dark mode
+## Dark or Light mode
 
-If you prefer a dark UI, use the theme switcher in the header. The setting is persistent for the current browser.
+By default, jvmguard performs the theme selection according to your system preferences. If you prefer a different theme,
+use the theme switcher in the header. The setting is persistent for the current browser.
 
 <Figure src="ui/dark_mode.png" />
 

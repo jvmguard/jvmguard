@@ -2,9 +2,6 @@
 title: Installing jvmguard
 ---
 
-
-
-
 import Figure from '../../../components/Figure.astro';
 
 ## Installer
@@ -46,24 +43,15 @@ After the installer has finished, the jvmguard server is running and you can ope
 `http[s]://localhost:[port]` to connect to the jvmguard UI. Note that if you have selected HTTPS for the web server,
 there is no port that serves HTTP requests.
 
-Before you can use jvmguard, you have to complete the installation wizard in the jvmguard UI.
-
-The important step in the wizard is the one where you configure the **initial admin user**. You can configure other
-admin and non-admin users later on. The full name is displayed in the UI, and the email can be entered so that an
-administrator can more easily identify or contact users.
+Before you can use jvmguard, you have to complete the setup step in the jvmguard UI where you configure the
+**initial admin user**. You can configure other admin and non-admin users later on.
 
 By default 2FA is enabled, but you can disable it in this step. If 2FA is enabled, you will have to set up 2FA with your
 authenticator app when the wizard is completed. Single users can be exempted from 2FA later on in the user settings.
 
 <Figure src="ui/installer_user.png" />
 
-In the "Recording Options" step you already get a chance to configure **VM groups**. However, it is not necessary to do
-so at this point.
-
-The server can only send emails if it has a valid **SMTP server configuration**, so in the next step it asks you to
-provide this information. If you do not intend to send emails, you can skip this step.
-
-When you complete the wizard, the server is fully initialized and the installation wizard cannot be shown again.
+When you complete the setup step, the server is fully initialized and the installation wizard cannot be shown again.
 However, all settings in the installation wizard can also be adjusted in the jvmguard UI. You are now taken to the VMs
 view and can continue to set up monitored JVMs as explained in the next chapter.
 
