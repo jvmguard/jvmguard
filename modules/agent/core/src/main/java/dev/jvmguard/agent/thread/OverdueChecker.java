@@ -53,7 +53,7 @@ public class OverdueChecker extends Thread {
                 //noinspection BusyWait
                 Thread.sleep(CHECK_NANOS / 1000 / 1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
             currentTime = System.nanoTime();
         }

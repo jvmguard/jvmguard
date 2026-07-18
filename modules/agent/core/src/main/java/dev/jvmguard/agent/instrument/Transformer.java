@@ -1,6 +1,7 @@
 package dev.jvmguard.agent.instrument;
 
 import dev.jvmguard.agent.util.MutableInt;
+import dev.jvmguard.agent.JvmGuardAgent;
 import dev.jvmguard.agent.base.logging.Subsystem;
 import dev.jvmguard.agent.comm.JvmGuardCommunication;
 import dev.jvmguard.agent.config.recording.RetransformationType;
@@ -131,7 +132,7 @@ public class Transformer implements TransformerTarget {
                 try {
                     instrumentation.retransformClasses(retransformClasses.toArray(new Class[0]));
                 } catch (UnmodifiableClassException e) {
-                    e.printStackTrace();
+                    JvmGuardAgent.log(e);
                 }
             }
         }

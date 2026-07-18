@@ -1,6 +1,7 @@
 package dev.jvmguard.agent.config.transactions;
 
 import dev.jvmguard.agent.comm.*;
+import dev.jvmguard.agent.JvmGuardAgent;
 import dev.jvmguard.agent.config.base.ConfigDoc;
 import dev.jvmguard.agent.config.base.OptionalConfig;
 import dev.jvmguard.agent.config.recording.RetransformationType;
@@ -20,7 +21,7 @@ public class TransactionSettings extends OptionalConfig implements TransactionDe
                 try {
                     lastTransactionId = Math.max(lastTransactionId, id);
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    JvmGuardAgent.log(e);
                 }
             }
         }

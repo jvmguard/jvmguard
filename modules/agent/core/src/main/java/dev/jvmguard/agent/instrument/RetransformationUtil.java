@@ -28,8 +28,8 @@ class RetransformationUtil {
                 try {
                     instrumentation.retransformClasses(clazz);
                 } catch (Throwable e) {
-                    System.err.println(clazz);
-                    e.printStackTrace();
+                    JvmGuardAgent.log("error retransforming " + clazz);
+                    JvmGuardAgent.log(e);
                 }
             });
             if (RETRANSFORM_WAIT >= 0) {

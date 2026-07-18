@@ -158,7 +158,7 @@ public class JvmGuardAgent {
             }
             println("Agent initialized (build version " + getBuildVersion() + ")");
         } catch (Throwable e) {
-            e.printStackTrace();
+            log(e);
         }
     }
 
@@ -235,7 +235,7 @@ public class JvmGuardAgent {
                         try {
                             Thread.sleep(Long.MAX_VALUE);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Thread.currentThread().interrupt();
                         }
                     }
                 }

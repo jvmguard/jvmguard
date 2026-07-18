@@ -158,7 +158,7 @@ public class ConfigurationParameter extends BaseParameter {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -232,7 +232,7 @@ public class ConfigurationParameter extends BaseParameter {
             try {
                 logHandler.println("Storing configuration in " + groupFile.getCanonicalPath());
             } catch (IOException e) {
-                e.printStackTrace();
+                JvmGuardAgent.log(e);
             }
 
             RandomAccessFile raFile = null;
@@ -357,7 +357,7 @@ public class ConfigurationParameter extends BaseParameter {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         }
         return false;

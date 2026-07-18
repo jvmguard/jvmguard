@@ -1,6 +1,7 @@
 package dev.jvmguard.agent.thread;
 
 import dev.jvmguard.agent.RequestSession;
+import dev.jvmguard.agent.JvmGuardAgent;
 import dev.jvmguard.agent.callee.DeclaredHandler.GetterChainEntry;
 import dev.jvmguard.agent.config.transactions.PolicyDef;
 import dev.jvmguard.agent.config.transactions.PolicyEventType;
@@ -74,7 +75,7 @@ public class ThreadManager {
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            JvmGuardAgent.log(t);
         }
         return Long.MAX_VALUE;
     }

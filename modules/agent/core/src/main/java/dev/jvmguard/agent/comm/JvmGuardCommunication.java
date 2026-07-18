@@ -165,7 +165,7 @@ public class JvmGuardCommunication implements Runnable {
                             try {
                                 RequestSession.getInstance().reset(-1);
                             } catch (Throwable t) {
-                                t.printStackTrace();
+                                JvmGuardAgent.log(t);
                             }
                         }
                         Thread.sleep(nextSleep * 1000);

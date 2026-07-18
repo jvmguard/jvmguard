@@ -1,6 +1,7 @@
 package dev.jvmguard.agent.instrument;
 
 import dev.jvmguard.agent.AgentProperties;
+import dev.jvmguard.agent.JvmGuardAgent;
 import dev.jvmguard.agent.base.logging.Subsystem;
 import dev.jvmguard.agent.instrument.bytecodeVisitors.CheckClassVisitor;
 import dev.jvmguard.agent.instrument.bytecodeVisitors.InstrumentationClassVisitor;
@@ -200,7 +201,7 @@ public class Instrumenter {
                         RetransformationUtil.doRetransformation(instrumentation, clazz);
                     }
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    JvmGuardAgent.log(e);
                 }
             }
         }

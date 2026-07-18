@@ -20,7 +20,7 @@ public class AgentProperties {
                     defaultProperties.load(reader);
                     reader.close();
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    JvmGuardAgent.log(e);
                 }
             }
             properties.putAll(defaultProperties);
@@ -40,7 +40,7 @@ public class AgentProperties {
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            JvmGuardAgent.log(t);
         }
 
         if (agentArgs != null && !agentArgs.isEmpty()) {

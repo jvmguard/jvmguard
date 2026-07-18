@@ -29,8 +29,7 @@ public class MBeanManager {
 
         @Override
         public void error(Throwable t) {
-            System.err.println(MESSAGE_PREFIX + t.toString());
-            t.printStackTrace();
+            System.err.println(MESSAGE_PREFIX + t);
         }
 
         @Override
