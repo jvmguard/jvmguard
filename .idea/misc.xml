@@ -106,6 +106,13 @@
       </value>
     </option>
   </component>
+  <component name="PrintToLogpointModuleInspectionState">
+    <option name="disabledModuleNames">
+      <set>
+        <option value="jvmguard.integration.integrationTest" />
+      </set>
+    </option>
+  </component>
   <component name="ProjectResources">
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
   </component>
