@@ -151,7 +151,7 @@ public abstract class WildcardMatcher extends PatternMatcher {
 
         @Override
         public boolean matches(String name) {
-            return name.endsWith(endPattern) && name.startsWith(pattern);
+            return name.length() >= pattern.length() + endPattern.length() && name.startsWith(pattern) && name.endsWith(endPattern);
         }
 
         @Override
