@@ -7,6 +7,7 @@ plugins {
 dependencies {
     implementation(project(":agent:core"))
     implementation(project(":agent:api"))
+    implementation(project(":agent:mbean"))
     implementation(libs.asm.commons)
     addJunit6()
 }
