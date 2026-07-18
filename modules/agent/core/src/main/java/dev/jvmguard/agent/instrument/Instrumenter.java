@@ -414,7 +414,10 @@ public class Instrumenter {
         ClassFileInfo classFileInfo = classFileInfos.get(className);
         if (classFileInfo == null) {
             classFileInfo = new ClassFileInfo(className, isHardFiltered(className) != HARD_FILTERED_UNFILTERED);
-            classFileInfos.put(className, classFileInfo);
+            ClassFileInfo previous = classFileInfos.putIfAbsent(className, classFileInfo);
+            if (previous != null) {
+                return previous;
+            }
         }
         return classFileInfo;
     }

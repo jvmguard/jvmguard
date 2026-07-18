@@ -5,13 +5,13 @@ import java.util.Set;
 
 public class ClassFileInfo {
     private String name;
-    private ClassFileInfo superClass;
-    private ClassFileInfo[] interfaces;
+    private volatile ClassFileInfo superClass;
+    private volatile ClassFileInfo[] interfaces;
 
-    private int state;
+    private volatile int state;
 
-    private Object[] classAnnotations;
-    private Object[] methodAnnotations;
+    private volatile Object[] classAnnotations;
+    private volatile Object[] methodAnnotations;
 
     public static final int STATE_TRANSACTION_INSTRUMENTABLE = 1;
     public static final int STATE_NO_TRANSACTION = 2;
@@ -32,7 +32,7 @@ public class ClassFileInfo {
         this.interfaces = interfaces;
     }
 
-    public void setNoTransaction(boolean val) {
+    public synchronized void setNoTransaction(boolean val) {
         if (val) {
             state |= STATE_NO_TRANSACTION;
         } else {
@@ -44,7 +44,7 @@ public class ClassFileInfo {
         return (state & STATE_NO_TRANSACTION) > 0;
     }
 
-    public void setDefined() {
+    public synchronized void setDefined() {
         state |= STATE_DEFINED;
     }
 
@@ -56,7 +56,7 @@ public class ClassFileInfo {
         return (state & STATE_TRANSACTION_INSTRUMENTABLE) > 0;
     }
 
-    public void setTransactionInstrumentable() {
+    public synchronized void setTransactionInstrumentable() {
         state |= STATE_TRANSACTION_INSTRUMENTABLE;
     }
 
