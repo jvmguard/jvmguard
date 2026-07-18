@@ -15,7 +15,7 @@ abstract class ServerProcessService : BuildService<BuildServiceParameters.None>,
     private var port: Int = 8020
 
     @Synchronized
-    fun start(command: List<String>, port: Int = 8020, readyPath: String = "/", logFile: File? = null) {
+    fun start(command: List<String>, port: Int = 8020, readyPath: String = "/", logFile: File? = null, timeoutSeconds: Int = 30) {
         if (process != null) {
             throw IllegalStateException("Server process already running")
         }
@@ -32,7 +32,7 @@ abstract class ServerProcessService : BuildService<BuildServiceParameters.None>,
         StreamGobbler(p.inputStream, "appserver", out, closeOut = logFile != null).start()
         process = p
 
-        if (!waitForWebServer("http", "localhost", port, readyPath, 30)) {
+        if (!waitForWebServer("http", "localhost", port, readyPath, timeoutSeconds)) {
             p.destroyForcibly()
             process = null
             throw RuntimeException("Server was not started successfully on port $port")
