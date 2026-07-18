@@ -27,6 +27,7 @@
             <option value="$PROJECT_DIR$/modules/agent/core" />
             <option value="$PROJECT_DIR$/modules/agent/java11" />
             <option value="$PROJECT_DIR$/modules/agent/mbean" />
+            <option value="$PROJECT_DIR$/modules/agent/tests" />
             <option value="$PROJECT_DIR$/modules/backend" />
             <option value="$PROJECT_DIR$/modules/backend/collector" />
             <option value="$PROJECT_DIR$/modules/backend/connector" />

@@ -27,6 +27,7 @@ listOf(
     ":agent:bootstrap",
     ":agent:api",
     ":agent:mbean",
+    ":agent:tests",
     // backend
     ":backend",
     ":backend:data",
