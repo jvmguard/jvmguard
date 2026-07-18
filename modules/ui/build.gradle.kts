@@ -82,7 +82,6 @@ fun serverMainJvmArgs(port: Int, vmPort: Int, productionMode: Boolean, dataDir: 
     "-Djvmguard.vmPort=$vmPort",
     "-Djvmguard.startH2Console=false",
     "-Djvmguard.restApiEnabled=true",
-    "-Djvmguard.restFailedAuthWait=0",
     "-Djvmguard.demoSnapshot=${demoSnapshotFile.absolutePath}",
     if (productionMode) "-Dvaadin.productionMode=true" else null,
     "-Dinstall4j.noProxyAutoDetect=true",
@@ -95,6 +94,8 @@ val e2eServer = gradle.sharedServices.registerIfAbsent("jvmguardWebServer-e2e", 
 val e2eServerDataDir: File by lazy { createTempDirectory("jvmguard-web-e2e").toFile() }
 val e2eServerClasspath = e2eServerRuntime.elements.map { set -> set.joinToString(File.pathSeparator) { it.asFile.absolutePath } }
 
+// Dev-mode server startup downloads Node and builds a dev bundle. In CI that exceeds the startup window
+val e2eProductionMode = (findProperty("jvmguard.e2e.productionMode") as String?)?.toBoolean() ?: (System.getenv("CI") != null)
 
 tasks {
 
