@@ -2,6 +2,18 @@ import dev.jvmguard.build.*
 
 plugins {
     java
+    id("org.jetbrains.kotlinx.kover")
+}
+
+dependencies {
+    listOf(
+        ":agent:api", ":agent:bootstrap", ":agent:bundle", ":agent:core", ":agent:java11", ":agent:mbean", ":agent:tests",
+        ":backend:collector", ":backend:connector", ":backend:data", ":backend:mcp", ":backend:rest",
+        ":demo",
+        ":installer",
+        ":server",
+        ":ui",
+    ).forEach { kover(project(it)) }
 }
 
 val distTemplateDir = file("dist-template")

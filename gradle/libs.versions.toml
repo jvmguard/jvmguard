@@ -26,10 +26,12 @@ cyclonedx = "3.2.4"
 # Pins the cyclonedx plugin's transitive Jackson (build tooling only) to a non-vulnerable release.
 jackson = "2.22.1"
 mcpSdk = "2.0.0"
+kover = "0.9.9"
 
 [libraries]
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-allopen-plugin = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+kover-gradle-plugin = { module = "org.jetbrains.kotlinx.kover:org.jetbrains.kotlinx.kover.gradle.plugin", version.ref = "kover" }
 kotlin-noarg-plugin = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
 spring-boot-gradle-plugin = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "springBoot" }
 vaadin-gradle-plugin = { module = "com.vaadin:vaadin-gradle-plugin", version.ref = "vaadin" }

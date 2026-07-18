@@ -13,6 +13,14 @@ plugins {
     id("vaadin-bom")
 }
 
+kover {
+    currentProject {
+        instrumentation {
+            disabledForTestTasks.addAll("e2eTest", "configE2eTest", "dataE2eTest", "screenshots", "darkScreenshots")
+        }
+    }
+}
+
 // Committed artifact created by `?mock=demo`. Inert unless a `?mock=demo` login occurs
 val demoSnapshotFile: File = File(project.projectDir, "src/test/resources/demo-snapshot/demo.json.gz")
 
@@ -129,7 +137,7 @@ tasks {
         val service = e2eServer
         val port = e2ePort
         usesService(service)
-        val command = serverMainJvmArgs(port, e2eVmPort, productionMode = false, dataDir = e2eServerDataDir)
+        val command = serverMainJvmArgs(port, e2eVmPort, productionMode = e2eProductionMode, dataDir = e2eServerDataDir)
         val serverLog = project.layout.buildDirectory.file("e2e/server.log").get().asFile
         doLastWith(e2eServerClasspath, serverLog) { cp, log ->
             val java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java"
@@ -179,7 +187,7 @@ tasks {
             set.joinToString(File.pathSeparator) { it.asFile.absolutePath }
         }
         val serverLog = layout.buildDirectory.file("data-e2e/server.log").get().asFile
-        val command = serverMainJvmArgs(port, dataVmPort, productionMode = false, dataDir = dataServerDataDir)
+        val command = serverMainJvmArgs(port, dataVmPort, productionMode = e2eProductionMode, dataDir = dataServerDataDir)
         doLastWith(classpath, serverLog) { cp, log ->
             val java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java"
             service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 180)

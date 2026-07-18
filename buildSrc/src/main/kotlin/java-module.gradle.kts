@@ -1,3 +1,5 @@
+@file:Suppress("AvoidApplyPluginMethod")
+
 import dev.jvmguard.build.*
 import org.gradle.api.JavaVersion
 import org.gradle.api.tasks.compile.AbstractCompile
@@ -10,6 +12,10 @@ import javax.inject.Inject
 plugins {
     id("base-conventions")
     `java-library`
+}
+
+if (!project.path.startsWith(":integration")) {
+    apply(plugin = "org.jetbrains.kotlinx.kover")
 }
 
 tasks {
