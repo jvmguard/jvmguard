@@ -78,7 +78,6 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
         super.onAttach(attachEvent)
         val session = Sessions.current() ?: return
         registerModificationListener(session)
-        addDetachListener { it.unregisterListener() }
         pollRegistration = attachEvent.ui.addPollListener { onPollTick() }
         addDetachListener { pollRegistration?.remove(); pollRegistration = null }
         if (initialized) {

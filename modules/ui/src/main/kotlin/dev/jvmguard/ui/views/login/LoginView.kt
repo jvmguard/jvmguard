@@ -21,6 +21,8 @@ import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
 import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.server.VaadinService
+import com.vaadin.flow.server.VaadinServletRequest
 import com.vaadin.flow.server.auth.AnonymousAllowed
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
@@ -108,7 +110,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
             }
         }
 
-        val httpRequest = (com.vaadin.flow.server.VaadinService.getCurrentRequest() as? com.vaadin.flow.server.VaadinServletRequest)?.httpServletRequest
+        val httpRequest = (VaadinService.getCurrentRequest() as? VaadinServletRequest)?.httpServletRequest
         val errorCode = event.location.queryParameters.parameters["ssoError"]?.firstOrNull()
             ?: httpRequest?.session?.getAttribute("ssoError") as? String
         errorCode?.let { httpRequest?.session?.removeAttribute("ssoError") }
