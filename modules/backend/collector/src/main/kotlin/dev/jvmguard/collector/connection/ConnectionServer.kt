@@ -5,7 +5,6 @@ import dev.jvmguard.agent.comm.CommunicationContext.Type
 import dev.jvmguard.agent.comm.JvmGuardCommunication
 import dev.jvmguard.agent.comm.JvmGuardKeyManager
 import dev.jvmguard.agent.data.DeferredDataResult
-import dev.jvmguard.agent.util.JvmGuardThreadFactory
 import dev.jvmguard.collector.main.VmManagerImpl
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import java.io.IOException
@@ -23,7 +22,7 @@ class ConnectionServer(
     private val sslManager: SslManager,
     private val enabledProtocols: String?,
     private val enabledCipherSuites: String?,
-    commPoolSize: Int,
+    private val executorService: ExecutorService,
 ) : Thread("connector") {
 
     private var serverSocket: ServerSocket? = null
@@ -40,14 +39,6 @@ class ConnectionServer(
             VmManagerImpl.SERVER_LOGGER.warn(
                 "Agent connections on port ${socketAddress.port} are unencrypted and unauthenticated (jvmguard.vmUseSsl=false)."
             )
-        }
-        if (executorService == null) {
-            val threadFactory = JvmGuardThreadFactory("comm", false, NORM_PRIORITY)
-            executorService = if (commPoolSize > 0) {
-                ThreadPoolExecutor(commPoolSize, commPoolSize, 80, TimeUnit.SECONDS, LinkedBlockingQueue(), threadFactory)
-            } else {
-                ThreadPoolExecutor(0, Int.MAX_VALUE, 80, TimeUnit.SECONDS, SynchronousQueue(), threadFactory)
-            }
         }
     }
 
@@ -102,7 +93,7 @@ class ConnectionServer(
         while (!shutdown) {
             try {
                 val socket = serverSocket!!.accept()
-                executorService!!.submit {
+                executorService.submit {
                     val remoteAddress = socket.remoteSocketAddress as InetSocketAddress
                     var vmDescription: String? = null
                     try {
@@ -110,7 +101,7 @@ class ConnectionServer(
                             socket.startHandshake()
                         }
 
-                        val agentConnection = AgentConnectionImpl(this, socket)
+                        val agentConnection = AgentConnectionImpl(this, socket, executorService)
                         agentConnection.connect()
                         socket.soTimeout = JvmGuardCommunication.SOCKET_TIMEOUT
                         val connectionInfo = agentConnection.connectionInfo!!
@@ -174,11 +165,5 @@ class ConnectionServer(
                 instanceIdToPrimaryConnection.remove(instanceId)
             }
         }
-    }
-
-    companion object {
-        @Volatile
-        var executorService: ExecutorService? = null
-            private set
     }
 }

@@ -3,6 +3,7 @@ package dev.jvmguard.server
 import dev.jvmguard.common.JvmGuardConfig
 import dev.jvmguard.common.JvmGuardDirectories
 import dev.jvmguard.common.JvmGuardProperties
+import dev.jvmguard.agent.util.JvmGuardThreadFactory
 import dev.jvmguard.server.sso.JvmGuardOidcUserService
 import dev.jvmguard.server.sso.MutableClientRegistrationRepository
 import org.springframework.context.annotation.Bean
@@ -13,6 +14,11 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableScheduling
@@ -46,6 +52,16 @@ class SpringConfiguration {
     @Bean
     fun databaseWriterExecutor(properties: JvmGuardProperties): ThreadPoolTaskExecutor =
         fixedExecutor("writer-", properties.writerPoolSize)
+
+    @Bean(destroyMethod = "shutdownNow")
+    fun commExecutorService(properties: JvmGuardProperties): ExecutorService {
+        val threadFactory = JvmGuardThreadFactory("comm", false, Thread.NORM_PRIORITY)
+        return if (properties.commPoolSize > 0) {
+            ThreadPoolExecutor(properties.commPoolSize, properties.commPoolSize, 80L, TimeUnit.SECONDS, LinkedBlockingQueue(), threadFactory)
+        } else {
+            ThreadPoolExecutor(0, Int.MAX_VALUE, 80L, TimeUnit.SECONDS, SynchronousQueue(), threadFactory)
+        }
+    }
 
     @Bean
     fun backupExecutor(): ThreadPoolTaskExecutor = fixedExecutor("backup-", 1)

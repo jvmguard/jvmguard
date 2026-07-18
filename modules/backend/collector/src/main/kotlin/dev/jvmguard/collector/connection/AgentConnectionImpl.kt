@@ -14,10 +14,15 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
-class AgentConnectionImpl(private val connectionServer: ConnectionServer, socket: Socket) : AgentConnection {
+class AgentConnectionImpl(
+    private val connectionServer: ConnectionServer,
+    socket: Socket,
+    private val executorService: ExecutorService,
+) : AgentConnection {
 
     @Volatile
     private var socket: Socket? = socket
@@ -129,7 +134,7 @@ class AgentConnectionImpl(private val connectionServer: ConnectionServer, socket
     }
 
     override fun executeLater(commands: Collection<Command>) {
-        ConnectionServer.executorService!!.submit {
+        executorService.submit {
             for (command in commands) {
                 try {
                     @Suppress("UNCHECKED_CAST")
@@ -142,7 +147,7 @@ class AgentConnectionImpl(private val connectionServer: ConnectionServer, socket
     }
 
     override fun <T : BaseResult> executeLater(commandType: CommandType, parameter: BaseParameter?, handler: Handler<T>?) {
-        ConnectionServer.executorService!!.submit {
+        executorService.submit {
             try {
                 executeCommandInt(commandType, parameter, handler)
             } catch (_: Throwable) {

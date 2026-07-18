@@ -1,7 +1,6 @@
 package dev.jvmguard.collector.main
 
 import dev.jvmguard.annotation.MethodTransaction
-import dev.jvmguard.collector.connection.ConnectionServer
 import dev.jvmguard.collector.telemetry.DataPointManager
 import dev.jvmguard.collector.telemetry.TelemetryManager
 import dev.jvmguard.collector.transactions.TransactionManager
@@ -14,6 +13,7 @@ import dev.jvmguard.data.vmdata.VM
 import org.springframework.stereotype.Component
 import java.time.ZonedDateTime
 import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.locks.LockSupport
 
 @Component
@@ -26,6 +26,7 @@ class Collector(
     private val telemetryManager: TelemetryManager,
     private val backupHandler: BackupHandler,
     private val directories: JvmGuardDirectories,
+    private val executorService: ExecutorService,
 ) {
     final var lastRecordingTime: Long = 0
         private set
@@ -61,7 +62,6 @@ class Collector(
     }
 
     private fun run(initialPreviousTime: ZonedDateTime) {
-        val executorService = ConnectionServer.executorService
         var previousTime = initialPreviousTime
         var transactionIteration: Long = 0
 
@@ -99,7 +99,7 @@ class Collector(
                 }
 
                 for (entry in connectionRegistry.getConnections()) {
-                    executorService!!.submit(RetrieveCallable(transactionIteration, entry.value, entry.key, transactionTimestamp, nanoTransactionTime))
+                    executorService.submit(RetrieveCallable(transactionIteration, entry.value, entry.key, transactionTimestamp, nanoTransactionTime))
                 }
 
                 parkUntilNextInterval(TelemetryManager.DEFAULT_RECORDING_INTERVAL.millis * 1000 * 1000 - (System.nanoTime() - nanoStartTime))

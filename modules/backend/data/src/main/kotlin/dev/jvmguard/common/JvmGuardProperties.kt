@@ -28,13 +28,12 @@ class JvmGuardProperties {
 
     @get:Nullable
     var vmEnabledCipherSuites: String? = null
-    var commPoolSize: Int = 0
+    var commPoolSize: Int = 64
     var certPastValidity: Int = 365
     var certValidity: Int = 365 * 100
     var keyAlgorithm: String = "RSA"
     var keySize: Int = 2048
 
-    @Suppress("SpellCheckingInspection")
     var signatureAlgorithm: String = "SHA256withRSA"
     var smtpConnectionTimeout: String = "60000"
     var smtpTimeout: String = "60000"

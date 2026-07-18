@@ -50,6 +50,7 @@ import java.io.File
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.util.*
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import javax.management.MBeanAttributeInfo
 import javax.management.MBeanInfo
@@ -74,6 +75,7 @@ class VmManagerImpl(
     @param:Qualifier("vmPort") private val vmPort: Int,
     @param:Qualifier("vmUseSsl") private val vmUseSsl: Boolean,
     @param:Qualifier("agentDirectory") private val agentDirectory: File,
+    @param:Qualifier("commExecutorService") private val commExecutorService: ExecutorService,
     private val properties: JvmGuardProperties,
     private val dataSource: DataSource,
     private val eventPublisher: ApplicationEventPublisher,
@@ -96,7 +98,7 @@ class VmManagerImpl(
         vmRegistry.rootVmGroupData = VmGroupData(null, VmIdentifier("", VmType.GROUP), collectorContext)
         connectionServer = ConnectionServer(
             InetSocketAddress(vmPort), vmUseSsl, this, sslManager,
-            properties.vmEnabledProtocols, properties.vmEnabledCipherSuites, properties.commPoolSize,
+            properties.vmEnabledProtocols, properties.vmEnabledCipherSuites, commExecutorService,
         )
 
         singleInstance = this
@@ -163,7 +165,7 @@ class VmManagerImpl(
     }
 
     override fun terminate(vm: VM, closeConnection: Boolean) {
-        val connectionEntry = synchronized(connectionRegistry) { connectionRegistry.get(vm) }
+        val connectionEntry = connectionRegistry.get(vm)
         if (connectionEntry != null) {
             connectionEntry.agentConnection.executeCommand(CommandType.KILL)
             if (closeConnection) {
@@ -180,10 +182,8 @@ class VmManagerImpl(
         connectionServer.shutdownDeferred()
         SERVER_LOGGER.info("closing connections (2)")
         val connections = ArrayList<AgentConnectionImpl>()
-        synchronized(connectionRegistry) {
-            for (currentConnectionEntry in connectionRegistry.values()) {
-                connections.add(currentConnectionEntry.agentConnection)
-            }
+        for (currentConnectionEntry in connectionRegistry.values()) {
+            connections.add(currentConnectionEntry.agentConnection)
         }
         for (connection in connections) {
             connection.close()
@@ -324,7 +324,7 @@ class VmManagerImpl(
     }
 
     fun getConnectionEntry(vm: VM): CurrentConnectionEntry? {
-        return synchronized(connectionRegistry) { connectionRegistry.get(vm) }
+        return connectionRegistry.get(vm)
     }
 
     override fun getConnection(vm: VM): AgentConnectionImpl {
@@ -504,9 +504,8 @@ class VmManagerImpl(
     }
 
     override fun deleteVM(vm: VM): Boolean {
+        val vms = ArrayList<VM>()
         synchronized(connectionRegistry) {
-            val vms = ArrayList<VM>()
-
             if (vm.isGroupNode) {
                 val identifier = vm.qualifiedIdentifier
 
@@ -525,21 +524,21 @@ class VmManagerImpl(
                 }
                 vms.add(vm)
             }
-            vmStorage.delete(vms)
-            databaseWriter.executeInWriter {
-                try {
-                    dataSource.connection.use { connection ->
-                        telemetryStorage.deleteVMs(connection, vms)
-                        transactionManager.deleteVMs(connection, vms)
-                        snapshotFileStorage.deleteVMs(connection, vms)
-                        inboxManager.deleteVMs(connection, vms)
-                    }
-                } catch (e: Exception) {
-                    SERVER_LOGGER.error("error cleaning up deleted vm data", e)
-                }
-            }
-            return true
         }
+        vmStorage.delete(vms)
+        databaseWriter.executeInWriter {
+            try {
+                dataSource.connection.use { connection ->
+                    telemetryStorage.deleteVMs(connection, vms)
+                    transactionManager.deleteVMs(connection, vms)
+                    snapshotFileStorage.deleteVMs(connection, vms)
+                    inboxManager.deleteVMs(connection, vms)
+                }
+            } catch (e: Exception) {
+                SERVER_LOGGER.error("error cleaning up deleted vm data", e)
+            }
+        }
+        return true
     }
 
     private fun checkAgentUpdate(agentConnection: AgentConnectionImpl): Boolean {

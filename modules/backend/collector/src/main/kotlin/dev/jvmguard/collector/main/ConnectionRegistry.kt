@@ -12,42 +12,52 @@ class ConnectionRegistry {
     private val vm2Connection = HashMap<VM, CurrentConnectionEntry>()
     private val instanceId2Vm = Long2ObjectOpenHashMap<VM>()
 
+    @Synchronized
     fun get(vm: VM): CurrentConnectionEntry? {
         return vm2Connection[vm]
     }
 
+    @Synchronized
     fun put(vm: VM, connectionEntry: CurrentConnectionEntry) {
         vm2Connection[vm] = connectionEntry
     }
 
+    @Synchronized
     fun remove(vm: VM) {
         vm2Connection.remove(vm)
     }
 
+    @Synchronized
     fun containsKey(vm: VM): Boolean {
         return vm2Connection.containsKey(vm)
     }
 
+    @Synchronized
     fun size(): Int {
         return vm2Connection.size
     }
 
-    fun values(): Collection<CurrentConnectionEntry> {
-        return vm2Connection.values
+    @Synchronized
+    fun values(): List<CurrentConnectionEntry> {
+        return ArrayList(vm2Connection.values)
     }
 
+    @Synchronized
     fun keySet(): Set<VM> {
-        return vm2Connection.keys
+        return HashSet(vm2Connection.keys)
     }
 
+    @Synchronized
     fun getInstanceVm(instanceId: Long): VM? {
         return instanceId2Vm.get(instanceId)
     }
 
+    @Synchronized
     fun putInstanceVm(instanceId: Long, vm: VM) {
         instanceId2Vm.put(instanceId, vm)
     }
 
+    @Synchronized
     fun removeInstanceVm(instanceId: Long) {
         instanceId2Vm.remove(instanceId)
     }
@@ -57,8 +67,9 @@ class ConnectionRegistry {
         return vm2Connection.entries.toTypedArray()
     }
 
+    @Synchronized
     fun getLiveConnection(vm: VM): AgentConnectionImpl? {
-        val connectionEntry = synchronized(this) { vm2Connection[vm] }
+        val connectionEntry = vm2Connection[vm]
         if (connectionEntry != null) {
             val agentConnection = connectionEntry.agentConnection
             if (agentConnection.isAlive) {
