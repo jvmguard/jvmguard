@@ -2,8 +2,8 @@ package dev.jvmguard.collector.main
 
 import dev.jvmguard.agent.data.FileMover
 import dev.jvmguard.collector.util.Consolidator
+import java.io.File
 import dev.jvmguard.common.config.ConfigManager
-import dev.jvmguard.common.helper.DatabaseHelper
 import dev.jvmguard.data.file.SnapshotFile
 import dev.jvmguard.data.file.SnapshotFileType
 import dev.jvmguard.data.vmdata.VM
@@ -36,20 +36,6 @@ class SnapshotFileStorage(
 
     @PostConstruct
     fun postConstruct() {
-        try {
-            dataSource.connection.use { connection ->
-                connection.createStatement().use { statement ->
-                    DatabaseHelper.createTableIfNotExists(
-                        statement,
-                        "$SNAPSHOT_FILE (id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, vmId BIGINT NOT NULL, type INT NOT NULL, snapshotTime BIGINT NOT NULL, name VARCHAR(20000), uncompressedLength BIGINT)"
-                    )
-                    DatabaseHelper.createIndexIfNotExists(statement, SNAPSHOT_FILE + "_query", SNAPSHOT_FILE, "vmId", "type")
-                    DatabaseHelper.createIndexIfNotExists(statement, SNAPSHOT_FILE + "_type", SNAPSHOT_FILE, "type")
-                }
-            }
-        } catch (e: Exception) {
-            VmManagerImpl.SERVER_LOGGER.error("error creating {} table", SNAPSHOT_FILE, e)
-        }
         consolidator.register(3) { deleteExpired() }
     }
 
@@ -85,6 +71,7 @@ class SnapshotFileStorage(
 
     fun createSnapshotFile(vm: VM, type: SnapshotFileType, millis: Long, name: String, fileMover: FileMover): SnapshotFile? {
         var snapshotFile: SnapshotFile? = null
+        var movedFile: File? = null
         try {
             dataSource.connection.use { connection ->
                 connection.autoCommit = false
@@ -104,17 +91,23 @@ class SnapshotFileStorage(
                                 val id = resultSet.getLong(1)
                                 val created = SnapshotFile(id, vm, type, millis, name)
                                 fileMover.moveToFile(created.file)
+                                movedFile = created.file
                                 created.updateUncompressedLength(fileMover.uncompressedLength)
                                 snapshotFile = created
                             }
                         }
                     }
                     connection.commit()
+                } catch (e: Exception) {
+                    connection.rollback()
+                    throw e
                 } finally {
                     connection.autoCommit = true
                 }
             }
         } catch (e: Exception) {
+            snapshotFile = null
+            movedFile?.delete()
             VmManagerImpl.SERVER_LOGGER.error("could not create snapshot file for {}", vm, e)
         }
         return snapshotFile
@@ -206,8 +199,9 @@ class SnapshotFileStorage(
                     statement.executeQuery().use { resultSet ->
                         while (resultSet.next()) {
                             val snapshotFileType = SnapshotFileType.fromDatabaseId(resultSet.getInt("type"))
-                            if (snapshotFileType != null) {
-                                snapshotFile = createSnapshotFile(resultSet, vmStorage.getVmById(resultSet.getLong("vmId"))!!, snapshotFileType)
+                            val vm = vmStorage.getVmById(resultSet.getLong("vmId"))
+                            if (snapshotFileType != null && vm != null) {
+                                snapshotFile = createSnapshotFile(resultSet, vm, snapshotFileType)
                             }
                         }
                     }

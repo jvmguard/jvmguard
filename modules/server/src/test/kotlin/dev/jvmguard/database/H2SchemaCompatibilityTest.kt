@@ -115,6 +115,30 @@ class H2SchemaCompatibilityTest {
         }
     }
 
+    @Test
+    fun v2IndexesApplyAndAreIdempotent() {
+        memoryDatabase("compat_v2").use { connection ->
+            runScript(connection, "/db/migration/V1__initial_schema.sql")
+            runScript(connection, "/db/migration/V2__snapshot_and_vm_indexes.sql")
+            assertIndexExists(connection, "VM", "VM_QUERY")
+            assertIndexExists(connection, "SNAPSHOT_FILE", "SNAPSHOT_FILE_QUERY")
+            assertIndexExists(connection, "SNAPSHOT_FILE", "SNAPSHOT_FILE_TYPE")
+            runScript(connection, "/db/migration/V2__snapshot_and_vm_indexes.sql")
+        }
+    }
+
+    private fun assertIndexExists(connection: Connection, upperCaseTableName: String, upperCaseIndexName: String) {
+        connection.metaData.getIndexInfo(null, null, upperCaseTableName, false, false).use { indexes ->
+            var found = false
+            while (indexes.next()) {
+                if (indexes.getString("INDEX_NAME") == upperCaseIndexName) {
+                    found = true
+                }
+            }
+            assertTrue(found, "expected index $upperCaseIndexName on $upperCaseTableName after migration")
+        }
+    }
+
     private fun assertTableExists(connection: Connection, upperCaseTableName: String) {
         connection.metaData.getTables(null, null, upperCaseTableName, null).use { tables ->
             assertTrue(tables.next(), "expected table $upperCaseTableName to exist after migration")

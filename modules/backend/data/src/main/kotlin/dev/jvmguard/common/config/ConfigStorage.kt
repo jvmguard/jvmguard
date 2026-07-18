@@ -15,6 +15,7 @@ import tools.jackson.databind.cfg.EnumFeature
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.jsontype.NamedType
+import java.sql.Connection
 import java.sql.Statement
 import kotlin.reflect.KClass
 import javax.sql.DataSource
@@ -65,37 +66,35 @@ class ConfigStorage(private val dataSource: DataSource) {
     }
 
     fun <T : StoredConfig> store(clazz: Class<T>, bean: T) {
+        try {
+            dataSource.connection.use { connection ->
+                store(connection, clazz, bean)
+            }
+        } catch (e: Exception) {
+            SERVER_LOGGER.error("could not store config bean {}", clazz.simpleName, e)
+        }
+    }
+
+    private fun <T : StoredConfig> store(connection: Connection, clazz: Class<T>, bean: T) {
         val json = toJson(bean)
         if (bean.id == null) {
-            try {
-                dataSource.connection.use { connection ->
-                    @Suppress("SqlNoDataSourceInspection")
-                    connection.prepareStatement("insert into $TABLE (bean_type, content) values (?,?)", Statement.RETURN_GENERATED_KEYS).use { statement ->
-                        statement.setString(1, beanType(clazz))
-                        statement.setString(2, json)
-                        statement.execute()
-                        statement.generatedKeys.use { resultSet ->
-                            if (resultSet.next()) {
-                                bean.id = resultSet.getLong(1)
-                            }
-                        }
+            @Suppress("SqlNoDataSourceInspection")
+            connection.prepareStatement("insert into $TABLE (bean_type, content) values (?,?)", Statement.RETURN_GENERATED_KEYS).use { statement ->
+                statement.setString(1, beanType(clazz))
+                statement.setString(2, json)
+                statement.execute()
+                statement.generatedKeys.use { resultSet ->
+                    if (resultSet.next()) {
+                        bean.id = resultSet.getLong(1)
                     }
                 }
-            } catch (e: Exception) {
-                SERVER_LOGGER.error("could not insert config bean {}", clazz.simpleName, e)
             }
         } else {
-            try {
-                dataSource.connection.use { connection ->
-                    @Suppress("SqlNoDataSourceInspection")
-                    connection.prepareStatement("update $TABLE set content=? where id=?").use { statement ->
-                        statement.setString(1, json)
-                        statement.setLong(2, bean.id!!)
-                        statement.execute()
-                    }
-                }
-            } catch (e: Exception) {
-                SERVER_LOGGER.error("could not update config bean {}", clazz.simpleName, e)
+            @Suppress("SqlNoDataSourceInspection")
+            connection.prepareStatement("update $TABLE set content=? where id=?").use { statement ->
+                statement.setString(1, json)
+                statement.setLong(2, bean.id!!)
+                statement.execute()
             }
         }
     }
@@ -118,22 +117,41 @@ class ConfigStorage(private val dataSource: DataSource) {
     fun <T : StoredConfig> removeAll(clazz: Class<T>) {
         try {
             dataSource.connection.use { connection ->
-                @Suppress("SqlNoDataSourceInspection")
-                connection.prepareStatement("delete from $TABLE where bean_type=?").use { statement ->
-                    statement.setString(1, beanType(clazz))
-                    statement.execute()
-                }
+                removeAll(connection, clazz)
             }
         } catch (e: Exception) {
             SERVER_LOGGER.error("could not remove config beans {}", clazz.simpleName, e)
         }
     }
 
+    private fun <T : StoredConfig> removeAll(connection: Connection, clazz: Class<T>) {
+        @Suppress("SqlNoDataSourceInspection")
+        connection.prepareStatement("delete from $TABLE where bean_type=?").use { statement ->
+            statement.setString(1, beanType(clazz))
+            statement.execute()
+        }
+    }
+
     fun <T : StoredConfig> replaceAll(clazz: Class<T>, beans: Collection<T>) {
-        removeAll(clazz)
-        for (bean in beans) {
-            bean.id = null
-            store(clazz, bean)
+        try {
+            dataSource.connection.use { connection ->
+                connection.autoCommit = false
+                try {
+                    removeAll(connection, clazz)
+                    for (bean in beans) {
+                        bean.id = null
+                        store(connection, clazz, bean)
+                    }
+                    connection.commit()
+                } catch (e: Exception) {
+                    connection.rollback()
+                    throw e
+                } finally {
+                    connection.autoCommit = true
+                }
+            }
+        } catch (e: Exception) {
+            SERVER_LOGGER.error("could not replace config beans {}", clazz.simpleName, e)
         }
     }
 

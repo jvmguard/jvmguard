@@ -30,10 +30,11 @@ class DataPointManager(
     private var lastSetNanoTime: Long = 0
 
     fun addData(connectionEntry: CurrentConnectionEntry, mainId: String, subId: String, groupAveraged: Boolean, value: Long) {
+        val lastTimestamp = this.lastTimestamp ?: return
         val telemetryIdentifier = TelemetryIdentifier(mainId, subId)
         connectionEntry.vmData.addTelemetryData(
             lastSetNanoTime,
-            lastTimestamp!!.time,
+            lastTimestamp.time,
             telemetryIdentifier,
             value,
             true,

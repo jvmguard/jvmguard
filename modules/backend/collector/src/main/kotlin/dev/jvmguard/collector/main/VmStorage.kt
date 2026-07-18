@@ -32,23 +32,10 @@ class VmStorage(
         try {
             dataSource.connection.use { connection ->
                 nameManager = UntypedNameManager(connection, "vm", null, properties)
-
-                connection.createStatement().use { statement ->
-                    DatabaseHelper.createTableIfNotExists(
-                        statement,
-                        "vm (id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, vmType TINYINT NOT NULL, nameId INT NOT NULL, groupNameId INT NOT NULL, instanceId BIGINT NOT NULL)"
-                    )
-                    DatabaseHelper.createIndexIfNotExists(statement, "vm_query", "vm", "groupNameId", "vmType", "nameId")
-
-                    DatabaseHelper.createTableIfNotExists(
-                        statement,
-                        "vm_instance (instanceId BIGINT NOT NULL PRIMARY KEY, vmId BIGINT NOT NULL, hostNameId INT NOT NULL, port INT NOT NULL)"
-                    )
-                }
                 initRootGroup(connection)
             }
         } catch (e: Exception) {
-            VmManagerImpl.SERVER_LOGGER.error("error creating vm table", e)
+            VmManagerImpl.SERVER_LOGGER.error("error initializing vm storage", e)
         }
     }
 
