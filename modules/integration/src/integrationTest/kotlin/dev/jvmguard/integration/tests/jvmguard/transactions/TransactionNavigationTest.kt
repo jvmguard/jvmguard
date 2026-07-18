@@ -36,7 +36,6 @@ class TransactionNavigationTest : JvmGuardTest() {
             TransactionTreeInterval.HOUR,
             TransactionDataType.TRANSACTION,
             1,
-            true,
             TransactionTreeComparator(TimeComparator.THIRTY_PERCENT)
         )
 

@@ -30,9 +30,9 @@ class CapTest : JvmGuardTest() {
         val runNo = Integer.getInteger("singleRunNo")
         if (runNo == 1) {
             waitForNextConfigRequest(serverConnection)
-            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
             waitForNextConfigRequest(serverConnection)
-            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, true, comparator)
+            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, comparator)
             assertEqual(serverConnection.caps, EnumSet.of(CapType.TRANSACTION))
             assertEqual(serverConnection.inboxItems.size, 1)
             assertTrue(serverConnection.inboxItems.find { it.name == "Too many transactions recorded" } != null)
@@ -46,15 +46,15 @@ class CapTest : JvmGuardTest() {
             }
 
             waitForNextConfigRequest(serverConnection)
-            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, true, comparator)
+            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, comparator)
             serverConnection.resetCaps()
             waitForNextConfigRequest(serverConnection)
-            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, true, comparator)
+            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, comparator)
         } else {
             waitForNextConfigRequest(serverConnection)
-            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 5, true, comparator)
+            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 5, comparator)
             waitForNextConfigRequest(serverConnection)
-            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 6, true, comparator)
+            checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 6, comparator)
         }
 
     }

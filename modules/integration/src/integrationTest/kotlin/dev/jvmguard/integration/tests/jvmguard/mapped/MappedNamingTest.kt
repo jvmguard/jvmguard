@@ -85,7 +85,7 @@ class MappedNamingTest: JvmGuardTest() {
         waitForConnection(serverConnection, listOf("JVM"))
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             var transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 100L } as MappedTransactionDef
@@ -96,7 +96,7 @@ class MappedNamingTest: JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             var transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 100L } as MappedTransactionDef
@@ -107,7 +107,7 @@ class MappedNamingTest: JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             val transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 100L } as MappedTransactionDef
@@ -120,6 +120,6 @@ class MappedNamingTest: JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, comparator)
     }
 }

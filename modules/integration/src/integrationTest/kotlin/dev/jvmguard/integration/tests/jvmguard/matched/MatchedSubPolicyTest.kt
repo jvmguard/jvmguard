@@ -69,7 +69,7 @@ class MatchedSubPolicyTest : JvmGuardTest() {
         waitForConnection(serverConnection, listOf("JVM"))
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, EnumSet.of(TransactionDataType.TRANSACTION, TransactionDataType.OVERDUE), 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, EnumSet.of(TransactionDataType.TRANSACTION, TransactionDataType.OVERDUE), 1, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             rootConfig.transactionSettings.transactionDefs.first { it.id == 100L }.apply {
@@ -88,6 +88,6 @@ class MatchedSubPolicyTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, EnumSet.of(TransactionDataType.TRANSACTION, TransactionDataType.OVERDUE), 2, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, EnumSet.of(TransactionDataType.TRANSACTION, TransactionDataType.OVERDUE), 2, comparator)
     }
 }

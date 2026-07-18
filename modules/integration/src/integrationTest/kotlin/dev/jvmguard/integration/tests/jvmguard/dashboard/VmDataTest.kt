@@ -39,7 +39,6 @@ class VmDataTest : JvmGuardTest() {
             TransactionTreeInterval.HOUR,
             TransactionDataType.TRANSACTION,
             1,
-            false,
             TransactionTreeComparator(TimeComparator.THIRTY_PERCENT)
         )
         println("time: " + TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime))

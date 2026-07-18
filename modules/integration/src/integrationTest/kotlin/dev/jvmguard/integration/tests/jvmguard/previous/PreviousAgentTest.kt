@@ -77,7 +77,6 @@ class PreviousAgentTest : JvmGuardTest() {
                 TransactionTreeInterval.HOUR,
                 TransactionDataType.TRANSACTION,
                 1,
-                true,
                 TransactionTreeComparator(TimeComparator.FIFTY_PERCENT),
                 vm
             )

@@ -53,7 +53,7 @@ class MappedStaticNamingTest: JvmGuardTest() {
         waitForConnection(serverConnection, listOf("JVM"))
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             val transactionDef = MappedTransactionDef()
@@ -70,7 +70,7 @@ class MappedStaticNamingTest: JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             val transactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 100L } as MappedTransactionDef
@@ -78,6 +78,6 @@ class MappedStaticNamingTest: JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, comparator)
     }
 }

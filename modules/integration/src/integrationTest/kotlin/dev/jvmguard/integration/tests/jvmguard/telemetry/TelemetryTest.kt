@@ -45,7 +45,6 @@ class TelemetryTest : JvmGuardTest() {
             TransactionTreeInterval.HOUR,
             TransactionDataType.TRANSACTION,
             1,
-            false,
             TransactionTreeComparator(TimeComparator.THIRTY_PERCENT)
         )
 

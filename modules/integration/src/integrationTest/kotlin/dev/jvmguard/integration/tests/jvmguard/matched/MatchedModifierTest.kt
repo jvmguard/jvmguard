@@ -71,6 +71,6 @@ class MatchedModifierTest : JvmGuardTest() {
         waitForConnection(serverConnection, listOf("JVM"))
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
     }
 }

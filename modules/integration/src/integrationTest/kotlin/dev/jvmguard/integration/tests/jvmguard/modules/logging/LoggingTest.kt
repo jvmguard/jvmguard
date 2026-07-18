@@ -16,7 +16,7 @@ class LoggingTest : JvmGuardTest() {
         waitForConnection(serverConnection, listOf("JVM"))
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             rootConfig.transactionSettings.transactionDefs.filterIsInstance<DeclaredTransactionDef>().first().apply {
@@ -26,7 +26,7 @@ class LoggingTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, comparator)
     }
 
 }

@@ -22,9 +22,9 @@ class VThreadManyTest : JvmGuardTest() {
         val comparator = TransactionTreeComparator(TimeComparator.NONE)
         waitForConnection(serverConnection, listOf("JVM"))
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
         modifyCurrentRootConfig(serverConnection) { }
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, comparator)
     }
 }

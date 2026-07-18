@@ -50,15 +50,14 @@ class NestedOverdueTest : JvmGuardTest() {
 
         val directGroupIdentifier = VmIdentifier(getGroupName(1), VmType.GROUP)
 
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, transactionTreeComparator)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.OVERDUE, 1, true, transactionTreeComparator)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.OVERDUE, 1, true, transactionTreeComparator, vm)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, transactionTreeComparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.OVERDUE, 1, transactionTreeComparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.OVERDUE, 1, transactionTreeComparator, vm)
         checkTree(
             serverConnection,
             TransactionTreeInterval.HOUR,
             TransactionDataType.OVERDUE,
             1,
-            true,
             transactionTreeComparator,
             vmManager.getGroupVM(directGroupIdentifier)
         )

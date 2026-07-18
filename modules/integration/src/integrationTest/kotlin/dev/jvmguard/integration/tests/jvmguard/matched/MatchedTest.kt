@@ -44,7 +44,7 @@ class MatchedTest : JvmGuardTest() {
         waitForConnection(serverConnection, listOf("JVM"))
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             (rootConfig.transactionSettings.transactionDefs.first { it.id == 100L } as MatchedTransactionDef).apply {
@@ -57,7 +57,7 @@ class MatchedTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             (rootConfig.transactionSettings.transactionDefs.first { it.id == 100L } as MatchedTransactionDef).apply {
@@ -70,7 +70,7 @@ class MatchedTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             rootConfig.transactionSettings.transactionDefs.add(0, MatchedTransactionDef().apply {
@@ -83,7 +83,7 @@ class MatchedTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, comparator)
     }
 
     private fun initBaseIf(matchedDef: MatchedTransactionDef) {

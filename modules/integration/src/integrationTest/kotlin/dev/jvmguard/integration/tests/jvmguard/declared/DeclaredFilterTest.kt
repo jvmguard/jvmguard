@@ -21,7 +21,7 @@ class DeclaredFilterTest : JvmGuardTest() {
         waitForConnection(serverConnection, listOf("JVM"))
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, true, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 1, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             val declaredTransactionDef = DeclaredTransactionDef()
@@ -33,7 +33,7 @@ class DeclaredFilterTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 2, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             val declaredTransactionDef = DeclaredTransactionDef()
@@ -45,7 +45,7 @@ class DeclaredFilterTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 3, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             val declaredTransactionDef = rootConfig.transactionSettings.transactionDefs.find { it.id == 101L }!!
@@ -53,7 +53,7 @@ class DeclaredFilterTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 4, comparator)
 
         modifyCurrentRootConfig(serverConnection) { rootConfig ->
             rootConfig.transactionSettings.transactionDefs.removeAll { it.id == 100L || it.id == 101L }
@@ -72,7 +72,7 @@ class DeclaredFilterTest : JvmGuardTest() {
         }
 
         waitForNextConfigRequest(serverConnection)
-        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 5, false, comparator)
+        checkTree(serverConnection, TransactionTreeInterval.HOUR, TransactionDataType.TRANSACTION, 5, comparator)
 
     }
 }

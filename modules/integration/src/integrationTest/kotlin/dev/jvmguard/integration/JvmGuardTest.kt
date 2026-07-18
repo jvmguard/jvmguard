@@ -136,18 +136,21 @@ abstract class JvmGuardTest {
 
     fun waitForConnections(serverConnection: TestServerConnection): Collection<VM> {
         println("WAITING FOR VMS")
-        while (true) {
+        val deadline = System.currentTimeMillis() + WAIT_FOR_VMS_TIMEOUT_MS
+        while (System.currentTimeMillis() < deadline) {
             if (serverConnection.connectedVms.size == getVmCount(vmConfig, runNo)) {
                 println("VMS CONNECTED")
                 return serverConnection.connectedVms
             }
             sleep(100)
         }
+        throw AssertionError("VMs did not connect within ${WAIT_FOR_VMS_TIMEOUT_MS / 1000}s: ${serverConnection.connectedVms.size}/${getVmCount(vmConfig, runNo)}")
     }
 
     fun waitForConnection(serverConnection: TestServerConnection, vmNames: List<String>): Collection<VM> {
         println("WAITING FOR VMS $vmNames")
-        while (true) {
+        val deadline = System.currentTimeMillis() + WAIT_FOR_VMS_TIMEOUT_MS
+        while (System.currentTimeMillis() < deadline) {
             val connectedVms = serverConnection.connectedVms
             if (connectedVms.size >= vmNames.size) {
                 val waitVms = mutableListOf<VM>()
@@ -162,6 +165,7 @@ abstract class JvmGuardTest {
             }
             sleep(100)
         }
+        throw AssertionError("VMs $vmNames did not connect within ${WAIT_FOR_VMS_TIMEOUT_MS / 1000}s: ${serverConnection.connectedVms.size} connected")
     }
 
     fun waitForNextConfigRequest(serverConnection: TestServerConnection, vms: Collection<VM>? = null) {
@@ -197,11 +201,13 @@ abstract class JvmGuardTest {
         return false
     }
 
-    fun checkTree(serverConnection: TestServerConnection, transactionTreeInterval: TransactionTreeInterval, transactionDataType: TransactionDataType, index: Int, immediate: Boolean, treeComparator: TransactionTreeComparator, vm: VM? = null) {
-        checkTree(serverConnection, transactionTreeInterval, EnumSet.of(transactionDataType), index, immediate, treeComparator, vm)
+    fun checkTree(serverConnection: TestServerConnection, transactionTreeInterval: TransactionTreeInterval, transactionDataType: TransactionDataType, index: Int,
+                  treeComparator: TransactionTreeComparator, vm: VM? = null) {
+        checkTree(serverConnection, transactionTreeInterval, EnumSet.of(transactionDataType), index, treeComparator, vm)
     }
 
-    fun checkTree(serverConnection: TestServerConnection, transactionTreeInterval: TransactionTreeInterval, transactionDataTypes: EnumSet<TransactionDataType>, index: Int, immediate: Boolean, treeComparator: TransactionTreeComparator, vm: VM? = null) {
+    fun checkTree(serverConnection: TestServerConnection, transactionTreeInterval: TransactionTreeInterval, transactionDataTypes: EnumSet<TransactionDataType>, index: Int,
+                  treeComparator: TransactionTreeComparator, vm: VM? = null) {
         if (isRecordMode) {
             println("RECORD MODE")
             if (lastRecordedIndex != index) {
@@ -212,11 +218,8 @@ abstract class JvmGuardTest {
                 exportSingleTree(serverConnection, transactionTreeInterval, transactionDataType, index, treeComparator, vm)
             }
         } else {
-            if (!immediate) {
-                sleep(80 * 1000L)
-            }
             for (transactionDataType in transactionDataTypes) {
-                checkSingleTree(index, immediate, serverConnection, transactionTreeInterval, transactionDataType, treeComparator, vm)
+                checkSingleTree(index, serverConnection, transactionTreeInterval, transactionDataType, treeComparator, vm)
             }
         }
     }
@@ -271,11 +274,11 @@ abstract class JvmGuardTest {
         ExportHelper.exportTree(transactionTree, File(controller.workingDir, namePrefix + index).absolutePath, treeComparator.isIncludeTime, treeComparator.timeUnit)
     }
 
-    private fun checkSingleTree(index: Int, immediate: Boolean, serverConnection: TestServerConnection, transactionTreeInterval: TransactionTreeInterval, transactionDataType: TransactionDataType, treeComparator: TransactionTreeComparator, vm: VM?) {
+    private fun checkSingleTree(index: Int, serverConnection: TestServerConnection, transactionTreeInterval: TransactionTreeInterval, transactionDataType: TransactionDataType, treeComparator: TransactionTreeComparator, vm: VM?) {
         val expectedTree = TransactionTreeReader.read(getXmlStream(getSuffix(transactionDataType, vm) + index))
         println("EXPECTED TREE $expectedTree")
 
-        repeat(if (immediate) 24 else 1) {
+        repeat(TREE_MATCH_ATTEMPTS) {
             val transactionCursor = serverConnection.getCurrentTransactionTreeCursor(vm, transactionTreeInterval, transactionDataType)
             val transactionTree = serverConnection.getCallTree(transactionCursor, false).transactionTree
             if (treeComparator.isDifferential) {
@@ -409,6 +412,8 @@ abstract class JvmGuardTest {
         var similarPercentage = DEFAULT_SIMILAR_PERCENTAGE
 
         private const val FIRST_CONFIG_REQUEST = 2
+        private const val WAIT_FOR_VMS_TIMEOUT_MS = 300_000L
+        private const val TREE_MATCH_ATTEMPTS = 24
 
         private fun subtractTree(baseTree: TransactionTree, index: Int, retrieval: (Int) -> TransactionTree) {
             if (index > 1) {
