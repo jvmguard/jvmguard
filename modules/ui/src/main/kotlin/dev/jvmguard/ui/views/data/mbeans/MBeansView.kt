@@ -12,7 +12,6 @@ import dev.jvmguard.connector.api.ServerConnection
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
-import com.vaadin.flow.component.contextmenu.ContextMenu
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.html.Span
@@ -46,20 +45,12 @@ class MBeansView : VmDataView() {
     private var mbeanNames: List<String> = emptyList()
     private var currentObjectName: String? = null
     private var currentVm: VM? = null
-    private var matchCase = false
-    private var useRegex = false
 
     private var attributeTreeData: TreeData<AttributeNode>? = null
     private var lastAttributeSignature: List<String>? = null
     private var refreshTicks = 0
 
-    private val filterOptionsButton = Button(VaadinIcon.FILTER.create()).apply {
-        addThemeVariants(ButtonVariant.TERTIARY)
-        addClassName("jvmguard-field-icon-button")
-        setAriaLabel("Filter options")
-        setTooltipText("Filter options")
-        testId = ID_FILTER_OPTIONS
-    }
+    private val filterOptions = FilterOptionsMenu(ID_FILTER_OPTIONS) { rebuildIfFiltering() }
 
     private val filterField = TextField().apply {
         addClassName("jvmguard-mbean-filter")
@@ -69,7 +60,7 @@ class MBeansView : VmDataView() {
         isClearButtonVisible = true
         setWidthFull()
         prefixComponent = VaadinIcon.SEARCH.create()
-        suffixComponent = filterOptionsButton
+        suffixComponent = filterOptions.button
         addValueChangeListener { rebuildTree() }
     }
 
@@ -149,7 +140,6 @@ class MBeansView : VmDataView() {
     private val split: SplitLayout
 
     init {
-        buildFilterMenu()
         val filterWrapper = Div(filterField).apply {
             setWidthFull()
             style.set("padding-bottom", "0.5rem")
@@ -217,7 +207,7 @@ class MBeansView : VmDataView() {
     }
 
     private fun rebuildTree() {
-        populateMBeanTree(mbeanTree, mbeanNames, filterField.value.trim(), useRegex, matchCase)
+        populateMBeanTree(mbeanTree, mbeanNames, filterField.value.trim(), filterOptions.useRegex, filterOptions.matchCase)
         clearAttributes()
     }
 
@@ -309,7 +299,7 @@ class MBeansView : VmDataView() {
         val paths = mutableSetOf<List<String>>()
         fun visit(nodes: List<AttributeNode>, prefix: List<String>) {
             nodes.forEachIndexed { index, node ->
-                val path = prefix + "$index ${node.name}"
+                val path = prefix + "$index\u0000${node.name}"
                 if (attributeTree.isExpanded(node)) {
                     paths.add(path)
                 }
@@ -326,7 +316,7 @@ class MBeansView : VmDataView() {
         }
         fun visit(nodes: List<AttributeNode>, prefix: List<String>) {
             nodes.forEachIndexed { index, node ->
-                val path = prefix + "$index ${node.name}"
+                val path = prefix + "$index\u0000${node.name}"
                 if (path in paths) {
                     attributeTree.expand(node)
                 }
@@ -453,26 +443,6 @@ class MBeansView : VmDataView() {
 
     private fun isVoid(operationInfo: MBeanOperationInfo): Boolean =
         operationInfo.returnType == "void" || MBeanOperations.returnOpenType(operationInfo) == SimpleType.VOID
-
-    private fun buildFilterMenu() {
-        val menu = ContextMenu()
-        menu.target = filterOptionsButton
-        menu.isOpenOnClick = true
-        menu.addItem("Match case") { event ->
-            matchCase = event.source.isChecked
-            updateFilterIndicator()
-            rebuildIfFiltering()
-        }.isCheckable = true
-        menu.addItem("Regular expression") { event ->
-            useRegex = event.source.isChecked
-            updateFilterIndicator()
-            rebuildIfFiltering()
-        }.isCheckable = true
-    }
-
-    private fun updateFilterIndicator() {
-        filterOptionsButton.element.classList.set("jvmguard-filter-active", matchCase || useRegex)
-    }
 
     private fun rebuildIfFiltering() {
         if (filterField.value.isNotEmpty()) {

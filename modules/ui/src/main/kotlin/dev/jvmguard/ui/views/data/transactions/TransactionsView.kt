@@ -1,25 +1,10 @@
 package dev.jvmguard.ui.views.data.transactions
 
 import com.github.mvysny.karibudsl.v10.item
-import dev.jvmguard.agent.tree.AbstractTransactionTree.PolicyType
-import dev.jvmguard.common.helper.Direction
-import dev.jvmguard.data.transactions.*
-import dev.jvmguard.data.vmdata.VM
-import dev.jvmguard.data.vmdata.VmIdentifier
-import dev.jvmguard.ui.components.*
-import dev.jvmguard.ui.server.Sessions
-import dev.jvmguard.ui.server.findVm
-import dev.jvmguard.ui.server.serverTime
-import dev.jvmguard.ui.shell.MainLayout
-import dev.jvmguard.ui.views.data.VmDataView
-import dev.jvmguard.connector.api.ServerConnection
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.badge.Badge
 import com.vaadin.flow.component.badge.BadgeVariant
-import com.vaadin.flow.component.button.Button
-import com.vaadin.flow.component.button.ButtonVariant
-import com.vaadin.flow.component.contextmenu.ContextMenu
 import com.vaadin.flow.component.contextmenu.MenuItem
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
@@ -36,6 +21,18 @@ import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.value.ValueChangeMode
 import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import dev.jvmguard.agent.tree.AbstractTransactionTree.PolicyType
+import dev.jvmguard.common.helper.Direction
+import dev.jvmguard.connector.api.ServerConnection
+import dev.jvmguard.data.transactions.*
+import dev.jvmguard.data.vmdata.VM
+import dev.jvmguard.data.vmdata.VmIdentifier
+import dev.jvmguard.ui.components.*
+import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.findVm
+import dev.jvmguard.ui.server.serverTime
+import dev.jvmguard.ui.shell.MainLayout
+import dev.jvmguard.ui.views.data.VmDataView
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
@@ -82,17 +79,9 @@ class TransactionsView : VmDataView() {
     }
 
     private var statusFilter: PolicyType? = null
-    private var matchCase = false
-    private var useRegex = false
     private val statusItems = LinkedHashMap<PolicyType?, MenuItem>()
 
-    private val statusButton = Button(VaadinIcon.FILTER.create()).apply {
-        addThemeVariants(ButtonVariant.TERTIARY)
-        addClassName("jvmguard-field-icon-button")
-        setAriaLabel("Filter options")
-        setTooltipText("Filter options")
-        testId = ID_STATUS_FILTER
-    }
+    private val filterOptions = FilterOptionsMenu(ID_STATUS_FILTER) { applyFilterAndRender() }
 
     private val filterField = TextField().apply {
         placeholder = "Filter by name"
@@ -100,7 +89,7 @@ class TransactionsView : VmDataView() {
         valueChangeMode = ValueChangeMode.LAZY
         isClearButtonVisible = true
         prefixComponent = VaadinIcon.SEARCH.create()
-        suffixComponent = statusButton
+        suffixComponent = filterOptions.button
         // 50% wider than the default field width.
         setWidth("18em")
         addValueChangeListener { applyFilterAndRender() }
@@ -352,20 +341,7 @@ class TransactionsView : VmDataView() {
     }
 
     private fun buildStatusMenu() {
-        val menu = ContextMenu()
-        menu.target = statusButton
-        menu.isOpenOnClick = true
-        menu.trackSingleOpen()
-        menu.addItem("Match case") { event ->
-            matchCase = event.source.isChecked
-            updateFilterIndicator()
-            applyFilterAndRender()
-        }.isCheckable = true
-        menu.addItem("Regular expression") { event ->
-            useRegex = event.source.isChecked
-            updateFilterIndicator()
-            applyFilterAndRender()
-        }.isCheckable = true
+        val menu = filterOptions.menu
         menu.addSeparator()
         // A non-interactive group label
         menu.addItem(Span("Transaction state")).apply {
@@ -390,12 +366,8 @@ class TransactionsView : VmDataView() {
     private fun selectStatus(type: PolicyType?) {
         statusFilter = type
         statusItems.forEach { (candidate, item) -> item.isChecked = candidate == type }
-        updateFilterIndicator()
+        filterOptions.setExtraActive(type != null)
         applyFilterAndRender()
-    }
-
-    private fun updateFilterIndicator() {
-        statusButton.element.classList.set("jvmguard-filter-active", statusFilter != null || matchCase || useRegex)
     }
 
     private fun applyFilterAndRender() {
@@ -408,7 +380,7 @@ class TransactionsView : VmDataView() {
             } else {
                 roots.mapNotNull { root ->
                     root.filtered { node ->
-                        nameMatchesFilter(node.name, query, useRegex, matchCase) && (status == null || node.policyType == status)
+                        nameMatchesFilter(node.name, query, filterOptions.useRegex, filterOptions.matchCase) && (status == null || node.policyType == status)
                     }
                 }
             }
