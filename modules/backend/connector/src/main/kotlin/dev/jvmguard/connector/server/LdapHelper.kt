@@ -37,18 +37,22 @@ object LdapHelper {
         try {
             val useStartTls = ldapConfig.useStartTls
             val context = if (useStartTls) createLdapContext(ldapConfig) else createLdapContext(ldapConfig, ldapDn, password)
-            val tlsResponse = if (useStartTls) createStartTlsResponse(context) else null
+            try {
+                val tlsResponse = if (useStartTls) createStartTlsResponse(context) else null
 
-            if (useStartTls) {
-                context.addToEnvironment(Context.SECURITY_PRINCIPAL, ldapDn)
-                context.addToEnvironment(Context.SECURITY_CREDENTIALS, password)
+                if (useStartTls) {
+                    context.addToEnvironment(Context.SECURITY_PRINCIPAL, ldapDn)
+                    context.addToEnvironment(Context.SECURITY_CREDENTIALS, password)
+                }
+
+                val attributes = context.getAttributes(ldapDn, arrayOf(LDAP_ATTRIBUTE_CN, LDAP_ATTRIBUTE_MAIL))
+                getAttribute(attributes, LDAP_ATTRIBUTE_CN)?.let { user.fullName = it }
+                getAttribute(attributes, LDAP_ATTRIBUTE_MAIL)?.let { user.email = it }
+
+                tlsResponse?.close()
+            } finally {
+                context.close()
             }
-
-            val attributes = context.getAttributes(ldapDn, arrayOf(LDAP_ATTRIBUTE_CN, LDAP_ATTRIBUTE_MAIL))
-            getAttribute(attributes, LDAP_ATTRIBUTE_CN)?.let { user.fullName = it }
-            getAttribute(attributes, LDAP_ATTRIBUTE_MAIL)?.let { user.email = it }
-
-            tlsResponse?.close()
         } catch (e: Exception) {
             logException(e)
             return false
@@ -64,34 +68,38 @@ object LdapHelper {
                 createLdapContext(ldapConfig)
             }
 
-            for (userMapping in ldapConfig.userMappings) {
-                val controls = SearchControls().apply {
-                    returningAttributes = arrayOf("dn")
-                    searchScope = SearchControls.SUBTREE_SCOPE
-                }
-
-                val resolvedSearchExpression = userMapping.userFilter.replace(LdapUserMapping.TOKEN_USER, Filter.encodeValue(loginName))
-                val answers = context.search(userMapping.searchBase, resolvedSearchExpression, controls)
-                if (answers.hasMore()) {
-                    val result = answers.nextElement()
-                    if (!answers.hasMore()) {
-                        val user = User().apply {
-                            this.loginName = loginName
-                            userType = UserType.LDAP
-                            ldapDn = result.nameInNamespace
-                            accessLevel = userMapping.accessLevel
-                            groupNames = arrayListOf(GroupHelper.ROOT_GROUP_ID)
-                        }
-                        if (DEBUG) {
-                            SERVER_LOGGER.info("{} matched {}", userMapping, loginName)
-                        }
-                        return user
-                    } else if (DEBUG) {
-                        SERVER_LOGGER.info("{} has more than one match", userMapping)
+            try {
+                for (userMapping in ldapConfig.userMappings) {
+                    val controls = SearchControls().apply {
+                        returningAttributes = arrayOf("dn")
+                        searchScope = SearchControls.SUBTREE_SCOPE
                     }
-                } else {
-                    SERVER_LOGGER.info("{} has no matches", userMapping)
+
+                    val resolvedSearchExpression = userMapping.userFilter.replace(LdapUserMapping.TOKEN_USER, Filter.encodeValue(loginName))
+                    val answers = context.search(userMapping.searchBase, resolvedSearchExpression, controls)
+                    if (answers.hasMore()) {
+                        val result = answers.nextElement()
+                        if (!answers.hasMore()) {
+                            val user = User().apply {
+                                this.loginName = loginName
+                                userType = UserType.LDAP
+                                ldapDn = result.nameInNamespace
+                                accessLevel = userMapping.accessLevel
+                                groupNames = arrayListOf(GroupHelper.ROOT_GROUP_ID)
+                            }
+                            if (DEBUG) {
+                                SERVER_LOGGER.info("{} matched {}", userMapping, loginName)
+                            }
+                            return user
+                        } else if (DEBUG) {
+                            SERVER_LOGGER.info("{} has more than one match", userMapping)
+                        }
+                    } else {
+                        SERVER_LOGGER.info("{} has no matches", userMapping)
+                    }
                 }
+            } finally {
+                context.close()
             }
         } catch (e: NamingException) {
             logException(e)
