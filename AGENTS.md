@@ -32,8 +32,8 @@ embedded web server are all in the one context. Notes:
   override via `<install>/config/application.yaml`. `JvmGuardEnvironmentPostProcessor` (in
   `META-INF/spring.factories`) runs before refresh: it binds the properties, resolves the install-layout
   directories (`JvmGuardDirectories` + the jar-vs-dev `LoadingDescriptor`, exposed as a bean), and publishes
-  the early bootstrap keys (`server.port` from `httpPort`, `logging.config`). Static-only callers
-  (`PasswordHelper`, `MailHelper`, `TelemetryDataInterval`) read the bound properties via the
+  the early bootstrap keys (`server.port` from `httpPort`, `logging.config`). Static callers
+  (`PasswordHelper`, `NetworkView`) read the bound properties via the
   `JvmGuardConfig` holder. `integrationTest` is the Spring profile, selected in `ServerMain.main()`.
 - **HTTPS / reverse-proxy** are applied to Boot's embedded Tomcat by `WebServerCustomizer` (a
   `WebServerFactoryCustomizer<TomcatServletWebServerFactory>`: `factory.setSsl(...)` from the keystore
@@ -46,6 +46,8 @@ embedded web server are all in the one context. Notes:
   principal is `JvmGuardUserDetails` (authorities expand the `AccessLevel` hierarchy). Login flows
   `LoginView` → `SecurityBridge` (a `ServerFactory`-style holder, since views aren't beans) →
   `AuthenticationManager` → `JvmGuardAuthenticationProvider` → `Server.authenticate` then `Server.connect`.
+  Failed logins are throttled by `LoginThrottle` (`dev.jvmguard.common.helper`, exponential backoff after
+  3 free attempts), shared by the Vaadin login and the REST chain.
 - **Backend authorization is Spring method security** (`@EnableMethodSecurity`): the gated
   `ServerConnectionImpl` / `AbstractServerConnectionImpl` methods carry the meta-annotations
   **`@RequireAdmin` / `@RequireProfiler` / `@RequireViewer`** (in `dev.jvmguard.data.user`, each composing
@@ -54,18 +56,27 @@ embedded web server are all in the one context. Notes:
   defense-in-depth. The **REST** resources use the same `@Require*` markers (the chain only authenticates),
   with a 403 handler in `RestExceptionHandler` and `RestInterface` constructor-injected (no static holder).
   REST endpoints produce `text/plain`, so a client must `Accept` it (default is JSON). **Group-scoping** and
-  the **per-file log level** stay backend data-scoping, reading the connection's real `User`.
+  the **per-file log level** stay backend data-scoping, reading the connection's real `User` — and the
+  REST API applies the same group scoping (`RestInterfaceImpl` filters groups/VMs/telemetry by the
+  caller's group roots, like the UI path). Other auth details: the password is always validated **before**
+  the TOTP code; TOTP secrets are encrypted with **AES/GCM** (`TotpEncryption`, `v2:`-prefixed; legacy
+  ECB values decrypt and self-migrate on next login); PBKDF2 hashes carry their iteration count and are
+  re-hashed on next login when below the configured default. When `vmUseSsl=false` (the default, for easy
+  evaluation) the agent listener logs a startup warning that connections are unauthenticated.
 - **Logging** is Spring-Boot-managed **Logback** (`logging.config` → the `logback.xml` shipped in the install root;
   source is `dist-template/logback.xml`); the agent keeps its own `LoggingHandler`. There is no log4j2 on the server
   classpath.
 - **Persistence** is a single embedded **H2** database (file `jvmguard` under the data directory), behind a
-  **HikariCP** pool, with **Flyway** migrations under `modules/server/src/main/resources/db/migration`. Boot's
+  **HikariCP** pool, with **Flyway** migrations under `modules/server/src/main/resources/db/migration`
+  (V1 schema, V2 indexes; the lazily-created telemetry/transaction tables stay programmatic by design). Boot's
   auto-configuration is **not** excluded: the `DataSource` (`spring.datasource.*`, including the HikariCP pool),
   Flyway, the transaction manager and `JdbcClient` are all Boot-managed. `Database` is a `@Component` that wraps the
   auto-configured `HikariDataSource` (for shutdown and the `DB Connections` telemetry) — it is not a manual
   pool/Flyway setup. The only pre-refresh work is the `bootstrap` initializer in `ServerMain.main()` (see above).
   SQL is hand-written (`JdbcClient` for fixed-schema CRUD, raw JDBC for blob/time-series writes); there are no Spring
-  Data repositories and no `@Transactional` (writes go through a `DatabaseWriter` thread pool).
+  Data repositories and no `@Transactional` (bulk writes go through a `DatabaseWriter` thread pool). Multi-step
+  writes that must be atomic use an explicit `autoCommit=false` block with `rollback()` on failure — note that
+  restoring `autoCommit` mid-transaction **commits**, so the rollback must come first.
 - Packaging: install4j launches `dev.jvmguard.server.ServerMain` against the exploded `lib/server`
   classpath (no fat jar).
 
@@ -106,7 +117,8 @@ Orientation:
   `http://localhost:8020/`. Vaadin auto-detects the IDE and runs dev mode (hot-reload); add
   `-Dvaadin.productionMode=true` to serve the pre-built bundle. Append **`?mock`** to log in against the
   canned `MockServerConnectionImpl` data instead of the live backend (auth still needs a real user/password;
-  the flag only swaps the connection via `Sessions.captureMock` → `server.login(..., mock=true)`).
+  the flag only swaps the connection via `Sessions.captureMock` → `Sessions.mockMode()` →
+  `SecurityBridge.authenticate(..., mockMode)`).
 - **Testing:** browserless (`JvmGuardBrowserlessTest`, the fast per-change check) plus Playwright e2e
   (`./gradlew :ui:e2eTest`, its own `ServerMain` on 8123/8948). Full API and gotchas in
   web-ui-style.md.
@@ -162,7 +174,7 @@ FQNs/package names, so a code rename must be mirrored in the goldens):
 - Golden data: `src/integrationTest/resources/.../<test>/data/*.xml`.
 - Workloads run in the agent-instrumented child JVMs and target older JDKs, so they live in separate
   subprojects nested under `workloads` (mirroring `:agent`): `:integration:workloads`
-  (release 8), `:workloads:logging` (release 8 + log4j1/log4j2/logback), `:workloads:java21`
+  (release 8 bytecode), `:workloads:logging` (release 8 bytecode + log4j1/log4j2/logback), `:workloads:java21`
   (compiled on and targeting JDK 21). All three feed the
   child-JVM classpath via the `workloadRuntimeClasspath` configuration.
 
@@ -173,6 +185,19 @@ out at runtime via `isRunOnVM(VMConfig)` (reported as skipped). Even the default
 order of **2 hours**, and a full `-Pjdks=all` run is several times longer — while iterating, scope to one
 test and the current JDK.
 
+**Harness gotchas:**
+- The fixture boots the server with **`vaadin.productionMode=true`** (`AgentFixture`). This is required:
+  a dev-mode start downloads Node and builds a dev bundle, which hangs a cold CI runner for minutes.
+  Do not remove it; dev mode is for local UI work only.
+- Waits are **bounded**: `waitForConnections`/`waitForConfigRequest` fail with a clear error after 900s
+  instead of hanging to the 25-min fixture watchdog. Do not tighten this: config delivery is
+  interval-driven (agent poll → server push → listener → telemetry commit) and legitimately takes minutes
+  on a slow runner.
+- `checkTree` does not sleep blindly; it **polls the comparison every 5s** and returns on first match.
+- e2e server starts (`ServerProcessService`) take a `timeoutSeconds` parameter (e2e tasks pass 180) and
+  **dump the server log tail on start failure**, so CI startup failures are diagnosable from the log.
+  The e2e servers run in production mode in CI (`jvmguard.e2e.productionMode`, default: `$CI` set).
+
 **Running** (from the jvmguard root):
 - One test, current JDK: `./gradlew :integration:integrationTest --tests "*<TestName>"`
   (pin a JDK with `-Pjdks=25`).
@@ -182,6 +207,12 @@ test and the current JDK.
   to confirm green. Re-record freely but spot-check the diffs.
 - Whole suite, full matrix: `./gradlew :integration:integrationTest -Pjdks=all`.
 - CI subset (the `@Tag("citest")` tests, current JDK): `./gradlew :integration:citest`.
+
+**CI layout** (`.github/workflows`): `ci.yml` runs `./gradlew test :integration:citest :ui:e2eTest` on the
+current JDK (unit + browserless + citest + Playwright e2e in one invocation). `weekly.yml` runs the full
+matrix as per-JDK jobs (8/11/17/21/25) plus one unit+e2e job, scheduled Sundays. Both call the shared
+reusable workflow `gradle-test.yml` (checkout → Gradle setup → Playwright cache → gradlew); the 6h/job
+GitHub limit makes the per-JDK split necessary for the full matrix.
 
 **Output & data** — under **`build/gradle/jvmguard/integration/integration/<TestName>-jdk<N>/`**: `data/` is
 the live server's data directory (`db/` embedded H2, `snapshots/`, `log/` incl. `event.log`, `ssl/`),
@@ -199,9 +230,11 @@ start the server, kill stray `jvmguard.testClass` / `jvmguard.vmPort` java proce
 Modules are grouped by concern under `modules/`: **`agent/`** is the Java-8 instrumentation domain that
 loads into monitored JVMs — `:agent` is a container; its children are **`:agent:core`** (base agent
 implementation), `:agent:java11` (Java 11+ additions), `:agent:mbean`, `:agent:api` (instrumentation
-annotations), `:agent:bootstrap` (premain launcher), and **`:agent:bundle`** (the aggregate: it
-`api`-bundles the others and builds the relocated fat jar). **`backend/`** is the Kotlin/JDK-25 server side
-(`:backend:data`/`collector`/`connector`/`rest`). `:ui`, `:server`, `:integration`, `:demo`,
+annotations), `:agent:bootstrap` (premain launcher), **`:agent:bundle`** (the aggregate: it
+`api`-bundles the others and builds the relocated fat jar), and **`:agent:tests`** (fast unit tests for
+the agent's pure logic — matchers, hierarchy model, tree merge/split, wire codecs — running on the
+baseline JDK; the deep behavioral coverage stays in `:integration`). **`backend/`** is the Kotlin/JDK-25 server side
+(`:backend:data`/`collector`/`connector`/`rest`/`mcp`). `:ui`, `:server`, `:integration`, `:demo`,
 `:installer`, `:docs`, `:website` are top-level. The backend builds *on* the agent (e.g. `:backend:collector`
 and `:backend:data` depend on `:agent:bundle`), so the agent modules are a shared foundation, not leaves.
 `:agent:bundle` is a leaf (not the container) specifically so IntelliJ imports it cleanly — an
@@ -211,8 +244,10 @@ which `:agent:bootstrap`'s `copyDist` renames to `agent.jar` for `dist/agent/lib
 (`AgentInit.AGENT_JAR`) hardcodes that name. Do **not** consume the fat jar as a compile dependency.
 
 - `modules/server` — the Spring Boot app (`JvmGuardApplication` + `SpringConfiguration`, `ServerMain`,
-  the embedded-server customizer for HTTPS/reverse-proxy, the REST gate filter, the `/test` control
-  filter). `modules/ui` — the Vaadin UI (Kotlin/Karibu). `modules/backend/rest` — the Spring MVC REST API.
+  the embedded-server customizer for HTTPS/reverse-proxy, the API IP allowlist
+  (`ApiIpAllowlistFilter`), the `/test` control endpoints (`IntegrationTestControlController`,
+  enabled only under the `integrationTest` profile). `modules/ui` — the Vaadin UI (Kotlin/Karibu).
+  `modules/backend/rest` — the Spring MVC REST API.
 - `modules/backend/connector` / `data` / `collector` — the backend (`Server`/`ServerConnection`,
   POJOs, collector), all Spring beans. `dev.jvmguard.database` (incl. `Database`) lives in
   `:server`; `dev.jvmguard.common` lives in `:backend:data`.
@@ -220,8 +255,18 @@ which `:agent:bootstrap`'s `copyDist` renames to `agent.jar` for `dist/agent/lib
   Spring context and logging).
 - `gradle/libs.versions.toml` (all versions, single source), `settings.gradle.kts` (modules
   registered with explicit `include()`), the `foojay-resolver-convention` plugin provisions the
-  JDK toolchains. The product-orchestration tasks (`dist`, `media`, `release`, `beta`, …) live on
-  the root project (`:dist` aggregates `:*:dist`).
+  JDK toolchains. The product-orchestration tasks (`dist`, `media`, `release`, `overwriteRelease`,
+  `prepareCodescan`, `allTests`) live on the root project (`:dist` aggregates `:*:dist`).
+- **Per-module JDK levels** go through the `jvmguardJava` extension (`javaVersion` = toolchain,
+  `classFileVersion` = bytecode level, both `Property<String>` with lazy wiring in
+  `buildSrc/.../JvmGuardJavaSupport.kt`): `jvmguardJava { javaVersion.set("1.8") }`. Compilation uses
+  `--release`; `classFileVersion` instead appends plain `-source/-target` so code using newer APIs still
+  emits old bytecode (the `:agent:java11` pattern). The convention plugins are provider-based — no
+  `afterEvaluate` outside an IDE-sync-only block.
+- **Coverage** is Kover (IntelliJ engine): `./gradlew test koverHtmlReport koverXmlReport`, aggregate
+  report in `build/reports/kover/`. `:integration` is excluded (test-only code, custom compilations),
+  and the UI e2e/screenshot tasks are excluded from instrumentation. Local-only by design; there is no
+  CI gate.
 
 ## Docs
 

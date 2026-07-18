@@ -1,4 +1,4 @@
-name: Gradle test (reusable)
+name: Gradle test
 
 on:
   workflow_call:

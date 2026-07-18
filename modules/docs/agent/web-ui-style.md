@@ -1,6 +1,6 @@
 # web — UI style guide
 
-Conventions for `modules/web` (Vaadin 25.1 / Aura + Karibu-DSL). **Extends
+Conventions for `modules/ui` (Vaadin 25.1 / Aura + Karibu-DSL). **Extends
 [kotlin-style.md](./kotlin-style.md) — read that first** for the general Kotlin language and
 Kotlin ⇄ Java interop rules. This doc covers only the UI-specific layer.
 
@@ -20,6 +20,13 @@ server** (`https://mcp.vaadin.com/docs`). Prefer 25.1 features (Signals, the cur
 - **Use property syntax for Vaadin getter+setter pairs** (`testId = …`, `minWidth = …`,
   `isPadding = false`). The general interop rules (platform types, `@Throws`, numeric narrowing,
   side-effecting getters) are in [kotlin-style.md](./kotlin-style.md).
+- **Background work goes through `server.runInBackground { }`** — it runs the task on a virtual thread
+  with the Spring Security context propagated (required for `@Require*`-gated `ServerConnection` calls;
+  a bare `Thread.ofVirtual()` runs with an empty context and fails with `AccessDeniedException`). Capture
+  `val ui = UI.getCurrent()` on the request thread and wrap **all** UI mutations in `ui.access { }`.
+- **The filter-options button + checkable menu** ("Match case" / "Regular expression") is
+  `components/FilterOptionsMenu` — use it rather than copying the pattern; extra menu sections append to
+  its `menu`, and external state feeds its indicator via `setExtraActive(...)`.
 
 ## UI with Karibu-DSL
 
@@ -41,7 +48,7 @@ server** (`https://mcp.vaadin.com/docs`). Prefer 25.1 features (Signals, the cur
   `registerModificationListener(session)` in `onAttach` (auto-unregisters on detach); do not pair
   `session.addModificationListener` / `removeModificationListener` by hand.
 - **Static assets** (app stylesheet, logos, favicon) live in
-  `modules/web/src/main/resources/META-INF/resources/` (served from the classpath), loaded via
+  `modules/ui/src/main/resources/META-INF/resources/` (served from the classpath), loaded via
   `settings.addLink("styles.css", …)` / `addFavIcon` in `AppShell` — NOT `frontend/` (that is for
   Vite-bundled Lit/TS via `@CssImport`/`@JsModule`). Global CSS reaches shadow internals via `::part(…)`
   and lives in `styles.css`.
@@ -72,7 +79,7 @@ it that way. **Standardize; never hand-roll a per-view form or a god-form class.
 
 **Browserless** (the fast per-change check, no browser/servlet container) via Vaadin's built-in browserless
 testing (`com.vaadin:browserless-test-junit6`). Extend **`JvmGuardBrowserlessTest`** (our base in
-`modules/web/src/test/kotlin`: `BrowserlessTest` + `Locators` + `@ViewPackages("dev.jvmguard.ui")` + reified
+`modules/ui/src/test/kotlin`: `BrowserlessTest` + `Locators` + `@ViewPackages("dev.jvmguard.ui")` + reified
 `find<T>()`). The base creates and tears down the Vaadin env per test, so `@BeforeEach` only does
 `Sessions.setCurrent(...)` (no `MockVaadin.setup`/`tearDown`).
 
@@ -93,14 +100,16 @@ testing (`com.vaadin:browserless-test-junit6`). Extend **`JvmGuardBrowserlessTes
   `findButton().withTestId("…")`), not the `data-testid` element attribute (not serialized in this mode). A
   component inside a Grid component-column is not reachable via `find<T>()`; use
   `use(grid).getCellComponent(row, key)` (give the column a `setKey`) and search the returned cell.
-- Run `./gradlew :jvmguard:web:test` (the task forces `vaadin.productionMode=true`: browserless has no dev
-  server, and Vaadin's dev-mode detection fails because the build file is `web.gradle.kts`, not
+- Run `./gradlew :ui:test` (the task forces `vaadin.productionMode=true`: browserless has no dev
+  server, and Vaadin's dev-mode detection fails because the build file is `build.gradle.kts`, not
   `build.gradle.kts`). JUnit 6 comes from the shared `addJunit6()` helper.
 
-**E2E** (real browser) via Playwright: `./gradlew :jvmguard:web:e2eTest` starts its **own** `ServerMain`
-(from `:jvmguard:server`, integration mode) on isolated ports (8123/8948), runs Playwright, and stops it
+**E2E** (real browser) via Playwright: `./gradlew :ui:e2eTest` starts its **own** `ServerMain`
+(from `:server`, integration mode) on isolated ports (8123/8948), runs Playwright, and stops it
 (excluded from the normal `test`/`build`). Extend `PlaywrightE2ETest`, run each body in `onPage { … }` (a
-`Page` receiver).
+`Page` receiver). The e2e server runs in **production mode in CI** (a dev-mode start downloads Node and
+exceeds the startup window; `jvmguard.e2e.productionMode` overrides, default is `$CI` detection), and a
+failed start dumps the server log tail into the build output.
 
 - **Locate widgets by test id, never display text**: `Component.setTestId(ID)` ↔ `page.getByTestId(ID)`,
   where the id is a `const val ID_*` on the production class (never a literal duplicated in the test).

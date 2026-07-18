@@ -26,8 +26,8 @@ UI/Vaadin-specific conventions (Karibu-DSL, forms, browserless/E2E testing) live
 
 ## Kotlin ⇄ Java interop
 
-The backend modules consume Java that stays Java permanently (the agent via `:jvmguard:api` /
-`:jvmguard:mbean`). Kotlin-calling-Java is friction-free; keep it that way.
+The backend modules consume Java that stays Java permanently (the agent via `:agent:api` /
+`:agent:mbean`). Kotlin-calling-Java is friction-free; keep it that way.
 
 - **Use property syntax for Java getter+setter pairs** (`x.foo = value`), but **call a side-effecting
   "getter" as a method** for honesty (e.g. `getAndClearModificationTypes()`).
@@ -39,5 +39,5 @@ The backend modules consume Java that stays Java permanently (the agent via `:jv
   CGLIB-proxied `@Configuration`/`@Bean` classes or AOP (`@PreAuthorize` method security) must apply the
   `kotlin("plugin.spring")` (all-open) plugin, or the proxies fail at runtime (not at compile time).
 - Expose a Java-friendly surface (`@JvmStatic`, `@JvmField`, `@JvmOverloads`) **only** where a permanent
-  Java consumer needs it — the agent-facing API, or the `:jvmguard:integration` Java workloads. These
+  Java consumer needs it — the agent-facing API, or the `:integration` Java workloads. These
   are permanent, deliberate annotations, not temporary TODOs.
