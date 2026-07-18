@@ -35,4 +35,4 @@ jobs:
 
       - name: Building and running tests
         run: |
-          ./gradlew test :integration:citest :ui:e2eTest --continue -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
+          ./gradlew test :integration:citest :ui:e2eTest --continue -Pjdks=8,25 -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
