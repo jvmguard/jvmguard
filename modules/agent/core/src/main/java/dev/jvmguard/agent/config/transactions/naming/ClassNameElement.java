@@ -5,6 +5,7 @@ import dev.jvmguard.agent.config.base.ConfigDoc;
 import dev.jvmguard.agent.config.base.DefaultConstructor;
 import dev.jvmguard.agent.config.transactions.EnvironmentException;
 import dev.jvmguard.agent.config.transactions.NamingElement;
+import dev.jvmguard.agent.util.ClassNameFormatter;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -78,35 +79,7 @@ public class ClassNameElement extends NamingElement {
     }
 
     public void appendName(StringBuilder buffer, TransactionEnvironment environment) throws EnvironmentException {
-        String className = getClassName(environment);
-        if (packageMode == PackageMode.FULL) {
-            buffer.append(className);
-        } else {
-            int dotIndex = className.lastIndexOf('.');
-            if (dotIndex < 0) {
-                buffer.append(className);
-            } else {
-                switch (packageMode) {
-                    case NONE:
-                        buffer.append(className, dotIndex + 1, className.length());
-                        break;
-                    case ABBREVIATED:
-                        boolean appendNext = true;
-                        for (int i = 0; i < dotIndex; i++) {
-                            char c = className.charAt(i);
-                            if (c == '.') {
-                                buffer.append('.');
-                                appendNext = true;
-                            } else if (appendNext) {
-                                buffer.append(c);
-                                appendNext = false;
-                            }
-                        }
-                        buffer.append(className, dotIndex, className.length());
-                        break;
-                }
-            }
-        }
+        ClassNameFormatter.append(buffer, getClassName(environment), ClassNameFormatter.PackageMode.valueOf(packageMode.name()));
     }
 
     protected String getClassName(TransactionEnvironment environment) {

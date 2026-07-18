@@ -4,6 +4,7 @@ import dev.jvmguard.agent.base.logging.Subsystem;
 import dev.jvmguard.agent.callee.Handler;
 import dev.jvmguard.agent.instrument.model.InterceptionMethod;
 import dev.jvmguard.agent.instrument.transaction.TransactionDefinition;
+import dev.jvmguard.agent.util.ClassNameFormatter;
 import dev.jvmguard.agent.util.Logger;
 import dev.jvmguard.annotation.Part.PackageMode;
 import dev.jvmguard.annotation.Part;
@@ -57,7 +58,6 @@ public abstract class DeclaredInterception extends AnnotationInterception {
                     if (thisAvailable) {
                         appendGetterChain(-1, nameBuilder, getterChainBuilder, part);
                     } else {
-                        //noinspection GrazieInspection
                         Logger.log(Subsystem.USER, 1, true, "usage of Type.INSTANCE on static method or constructor %s.%s\n", className, methodName);
                     }
                     break;
@@ -99,34 +99,7 @@ public abstract class DeclaredInterception extends AnnotationInterception {
     }
 
     private static void appendClassName(StringBuilder builder, String className, PackageMode packageMode) {
-        if (packageMode == PackageMode.FULL) {
-            builder.append(className);
-        } else {
-            int dotIndex = className.lastIndexOf('.');
-            if (dotIndex < 0) {
-                builder.append(className);
-            } else {
-                switch (packageMode) {
-                    case NONE:
-                        builder.append(className, dotIndex + 1, className.length());
-                        break;
-                    case ABBREVIATED:
-                        boolean appendNext = true;
-                        for (int i = 0; i < dotIndex; i++) {
-                            char c = className.charAt(i);
-                            if (c == '.') {
-                                builder.append('.');
-                                appendNext = true;
-                            } else if (appendNext) {
-                                builder.append(c);
-                                appendNext = false;
-                            }
-                        }
-                        builder.append(className, dotIndex, className.length());
-                        break;
-                }
-            }
-        }
+        ClassNameFormatter.append(builder, className, ClassNameFormatter.PackageMode.valueOf(packageMode.name()));
     }
 
     public static class NamingResult {

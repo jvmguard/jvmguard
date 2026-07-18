@@ -11,6 +11,7 @@ import dev.jvmguard.agent.config.transactions.naming.AbstractGetterElement.Gette
 import dev.jvmguard.agent.instrument.NameTransformation;
 import dev.jvmguard.agent.instrument.interceptions.DeclaredInterception;
 import dev.jvmguard.agent.thread.ThreadManager;
+import dev.jvmguard.agent.util.ClassNameFormatter;
 import dev.jvmguard.agent.util.Logger;
 import dev.jvmguard.annotation.Part.PackageMode;
 
@@ -83,28 +84,10 @@ public class DeclaredHandler extends AnnotationHandler {
         try {
             String insertion;
             if (entry.packageMode != null && obj != null) {
-                insertion = NameTransformation.transformClass(obj.getClass().getName());
-                if (entry.packageMode == PackageMode.NONE) {
-                    insertion = insertion.substring(insertion.lastIndexOf(".") + 1);
-                } else if (entry.packageMode == PackageMode.ABBREVIATED) {
-                    int dotIndex = insertion.lastIndexOf('.');
-                    if (dotIndex > -1) {
-                        StringBuilder buffer = new StringBuilder();
-                        boolean appendNext = true;
-                        for (int i = 0; i < dotIndex; i++) {
-                            char c = insertion.charAt(i);
-                            if (c == '.') {
-                                buffer.append('.');
-                                appendNext = true;
-                            } else if (appendNext) {
-                                buffer.append(c);
-                                appendNext = false;
-                            }
-                        }
-                        buffer.append(insertion, dotIndex, insertion.length());
-                        insertion = buffer.toString();
-                    }
-                }
+                insertion = ClassNameFormatter.apply(
+                    NameTransformation.transformClass(obj.getClass().getName()),
+                    ClassNameFormatter.PackageMode.valueOf(entry.packageMode.name())
+                );
             } else {
                 obj = AbstractGetterElement.invokeGetters(entry.getterChain, obj);
                 insertion = String.valueOf(obj);
