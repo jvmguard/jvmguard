@@ -37,7 +37,7 @@ abstract class ServerProcessService : BuildService<BuildServiceParameters.None>,
             process = null
             if (logFile != null && logFile.isFile) {
                 System.err.println("appserver: server failed to start, last log lines of ${logFile.absolutePath}:")
-                logFile.readLines().takeLast(100).forEach { System.err.println("appserver: $it") }
+                logFile.readLines().takeLast(300).forEach { System.err.println("appserver: $it") }
             }
             throw RuntimeException("Server was not started successfully on port $port")
         }

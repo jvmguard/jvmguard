@@ -45,4 +45,4 @@ jobs:
 
       - name: Run Gradle
         run: |
-          ./gradlew ${{ inputs.tasks }} --continue -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
+          ./gradlew ${{ inputs.tasks }} --continue --max-workers=1 -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace

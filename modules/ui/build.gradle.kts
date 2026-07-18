@@ -141,7 +141,7 @@ tasks {
         val serverLog = project.layout.buildDirectory.file("e2e/server.log").get().asFile
         doLastWith(e2eServerClasspath, serverLog) { cp, log ->
             val java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java"
-            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 180)
+            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 300)
         }
     }
     val e2eStopServer = register("e2eStopServer") {
@@ -190,7 +190,7 @@ tasks {
         val command = serverMainJvmArgs(port, dataVmPort, productionMode = e2eProductionMode, dataDir = dataServerDataDir)
         doLastWith(classpath, serverLog) { cp, log ->
             val java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java"
-            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 180)
+            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 300)
         }
     }
 
