@@ -52,21 +52,6 @@ tasks {
         relocate("com.grack.nanojson", "dev.jvmguard.agent.json")
         relocate("com.jprofiler.api.controller", "dev.jvmguard.agent.jpcontroller")
     }
-
-    // Pass -PvmName to set the name of the VM, -PvmGroup to set the group of the VM
-    val runTest = register<JavaExec>("runTest") {
-        dependsOn("testClasses", distJar)
-        mainClass.set("javaagent.TestMain")
-    }
-
-    projectsEvaluated(runTest) {
-        jvmArgs(
-            "-javaagent:${project(":agent:bootstrap").tasks.named<Jar>("jar").flatMap { it.archiveFile }.get().asFile}=name=" +
-                    project.projectProperty("vmName", "testVM") +
-                    (project.projectPropertyOrNull<String>("vmGroup")?.let { ",group=$it" } ?: "")
-        )
-        classpath = project(":agent:core").the<JavaPluginExtension>().sourceSets["test"].output.classesDirs
-    }
 }
 
 fun getBuildVersion(): Long {
