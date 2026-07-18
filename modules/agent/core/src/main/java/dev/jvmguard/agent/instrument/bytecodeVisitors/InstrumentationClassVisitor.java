@@ -34,18 +34,20 @@ public class InstrumentationClassVisitor extends MethodWrapper {
     private final Set<BaseInterception> usedClassInterceptions = new HashSet<>();
 
 
-    private boolean registerClass;
+    private final boolean registerClass;
     private boolean clinitFound;
-    private boolean canAddClinit;
+    private final boolean canAddClinit;
 
     private boolean instrumented;
 
-    public InstrumentationClassVisitor(ClassWriter classWriter, String className, Instrumenter instrumenter) {
+    public InstrumentationClassVisitor(ClassWriter classWriter, String className, Instrumenter instrumenter, boolean registerClass, boolean canAddClinit) {
         super(null, false);
         this.className = className;
         dottedClassName = className.replace('/', '.');
         this.instrumenter = instrumenter;
         thisClass = Type.getObjectType(className);
+        this.registerClass = registerClass;
+        this.canAddClinit = canAddClinit;
 
         this.classWriter = classWriter;
         if (registerClass && canAddClinit) {
@@ -67,11 +69,6 @@ public class InstrumentationClassVisitor extends MethodWrapper {
 
     public boolean isInstrumented() {
         return instrumented;
-    }
-
-    public InstrumentationClassVisitor registerClass(boolean registerClass) {
-        this.registerClass = registerClass;
-        return this;
     }
 
     public InstrumentationClassVisitor methodInterceptions(Map<InterceptionMethod, Set<BaseInterception>> methodInterceptions) {
@@ -206,16 +203,11 @@ public class InstrumentationClassVisitor extends MethodWrapper {
         mv.visitMethodInsn(INVOKESTATIC, SystemInstrVisitor.CALLEE_CLASS_NAME, "__jvmguard_register", "(ZLjava/lang/Class;)V", false);
     }
 
-    public InstrumentationClassVisitor canAddClinit(boolean canAddClinit) {
-        this.canAddClinit = canAddClinit;
-        return this;
-    }
-
     public static class SerialVersionUIDAdderAdapter extends SerialVersionUIDAdder {
         private boolean enabled = true;
 
         public SerialVersionUIDAdderAdapter(ClassVisitor cv) {
-            super(cv);
+            super(ASM_VERSION, cv);
         }
 
         @Override

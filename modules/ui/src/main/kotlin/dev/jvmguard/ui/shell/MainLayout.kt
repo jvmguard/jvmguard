@@ -81,7 +81,6 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         addThemeVariants(BadgeVariant.FILLED, BadgeVariant.SMALL)
         isVisible = false
     }
-    private var modificationSession: UserSession? = null
 
     private val dataNav = buildDataNav()
 
@@ -392,8 +391,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         super.onAttach(attachEvent)
         Sessions.current()?.let { session ->
             poller = NotificationPoller.start(attachEvent.ui, session)
-            modificationSession = session
-            session.addModificationListener(this)
+            registerModificationListener(session)
             refreshInboxBadge()
         }
     }
@@ -401,8 +399,6 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     override fun onDetach(detachEvent: DetachEvent) {
         poller?.stop()
         poller = null
-        modificationSession?.removeModificationListener(this)
-        modificationSession = null
         super.onDetach(detachEvent)
     }
 

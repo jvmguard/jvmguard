@@ -275,11 +275,10 @@ public class Instrumenter {
             boolean registerClass = (loader == null && partiallyDefinedInfo != null) || clInitAdded != null;
             if (registerClass || !checkClassVisitor.getClassInterceptions().isEmpty() || !checkClassVisitor.getMethodInterceptions().isEmpty()) {
                 ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
-                InstrumentationClassVisitor classVisitor = new InstrumentationClassVisitor(classWriter, className, this).
+                InstrumentationClassVisitor classVisitor = new InstrumentationClassVisitor(classWriter, className, this,
+                        registerClass, classBeingRedefined == null || clInitAdded != null).
                     classInterceptions(checkClassVisitor.getClassInterceptions()).
-                    methodInterceptions(checkClassVisitor.getMethodInterceptions()).
-                    registerClass(registerClass).
-                    canAddClinit(classBeingRedefined == null || clInitAdded != null);
+                    methodInterceptions(checkClassVisitor.getMethodInterceptions());
 
                 classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES);
                 if (classVisitor.isInstrumented()) {
