@@ -4,6 +4,7 @@ import dev.jvmguard.data.config.SmtpConfig
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.components.JvmGuardDialog
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.runInBackground
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.html.Span
@@ -42,7 +43,7 @@ class SendTestMailDialog(private val smtpConfig: SmtpConfig) : JvmGuardDialog() 
         }
         sendButton.isEnabled = false
         val ui = UI.getCurrent()
-        Thread.ofVirtual().start {
+        runInBackground {
             val error = try {
                 Sessions.current()?.serverConnection?.sendTestMail(address, SUBJECT, BODY, smtpConfig)
                 null

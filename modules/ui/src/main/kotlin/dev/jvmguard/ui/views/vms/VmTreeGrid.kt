@@ -4,6 +4,7 @@ import com.github.mvysny.karibudsl.v10.icon
 import com.github.mvysny.karibudsl.v10.item
 import com.github.mvysny.karibudsl.v10.span
 import dev.jvmguard.agent.config.VmType
+import dev.jvmguard.common.Loggers
 import dev.jvmguard.data.config.triggers.actions.RecordJfrAction
 import dev.jvmguard.data.config.triggers.actions.RecordJpsAction
 import dev.jvmguard.data.dashboard.Group
@@ -320,11 +321,11 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
             try {
                 action(connection)
             } catch (e: Exception) {
-                // Surface permission denials as a toast; let real errors propagate (delivered via @Push).
                 if (e is SecurityException || e is AccessDeniedException || e is AuthenticationException) {
                     ui.access { Notifications.show("Not allowed: ${e.message}") }
                 } else {
-                    throw e
+                    Loggers.SERVER.error("Background action failed", e)
+                    ui.access { Notifications.show("The operation failed: ${e.message}") }
                 }
             }
         }
