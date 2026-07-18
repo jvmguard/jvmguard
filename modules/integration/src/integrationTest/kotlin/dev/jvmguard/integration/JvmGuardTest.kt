@@ -175,7 +175,11 @@ abstract class JvmGuardTest {
     fun waitForConfigRequest(serverConnection: TestServerConnection, num: Int, vms: Collection<VM>?) {
         println("WAITING FOR CONFIG REQUEST $num")
         val targetVms = vms ?: serverConnection.connectedVms
+        val deadline = System.currentTimeMillis() + WAIT_FOR_VMS_TIMEOUT_MS
         while (!checkTelemetryValue(serverConnection, num, targetVms)) {
+            if (System.currentTimeMillis() >= deadline) {
+                throw AssertionError("Config request $num did not arrive within ${WAIT_FOR_VMS_TIMEOUT_MS / 1000}s")
+            }
             sleep(1000)
         }
         println("FOUND CONFIG REQUEST $num")
