@@ -12,27 +12,8 @@ permissions:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          # Only the default branch writes the Gradle cache; PRs read it.
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
-
-      - name: Building and running tests
-        run: |
-          ./gradlew test :integration:citest :ui:e2eTest --continue -Pjdks=8,25 -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
+    uses: ./.github/workflows/gradle-test.yml
+    with:
+      tasks: test :integration:citest :ui:e2eTest
+      timeout-minutes: 90
+      playwright: true

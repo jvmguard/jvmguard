@@ -1,0 +1,27 @@
+name: Weekly
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-and-e2e:
+    uses: ./.github/workflows/gradle-test.yml
+    with:
+      tasks: test :ui:e2eTest :ui:configE2eTest :ui:dataE2eTest
+      timeout-minutes: 60
+      playwright: true
+
+  integration-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk: [8, 11, 17, 21, 25]
+    uses: ./.github/workflows/gradle-test.yml
+    with:
+      tasks: :integration:integrationTest -Pjdks=${{ matrix.jdk }}
+      timeout-minutes: 360

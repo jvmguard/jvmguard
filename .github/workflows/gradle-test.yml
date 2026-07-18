@@ -1,0 +1,48 @@
+name: Gradle test (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tasks:
+        description: "Gradle tasks and properties to run"
+        required: true
+        type: string
+      timeout-minutes:
+        required: false
+        type: number
+        default: 60
+      playwright:
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          # Only the default branch writes the Gradle cache; PRs read it.
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Cache Playwright browsers
+        if: ${{ inputs.playwright }}
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+
+      - name: Run Gradle
+        run: |
+          ./gradlew ${{ inputs.tasks }} --continue -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
