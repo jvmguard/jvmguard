@@ -8,6 +8,7 @@ import dev.jvmguard.agent.config.transactions.EnvironmentException;
 import dev.jvmguard.agent.config.transactions.NamingElement;
 import dev.jvmguard.agent.config.transactions.naming.ClassNameElement.PackageMode;
 import dev.jvmguard.agent.instrument.NameTransformation;
+import dev.jvmguard.agent.util.ClassNameFormatter;
 import dev.jvmguard.agent.util.Logger;
 import dev.jvmguard.agent.util.reflection.FieldInfo;
 import dev.jvmguard.agent.util.reflection.MethodInfo;
@@ -172,33 +173,7 @@ public abstract class AbstractGetterElement extends NamingElement {
     }
 
     private static String getClassName(String className, PackageMode packageMode) {
-        if (packageMode == PackageMode.FULL) {
-            return className;
-        } else {
-            int dotIndex = className.lastIndexOf('.');
-            if (dotIndex < 0) {
-                return className;
-            } else {
-                if (packageMode == PackageMode.NONE) {
-                    return className.substring(dotIndex + 1);
-                } else {
-                    StringBuilder buffer = new StringBuilder();
-                    boolean appendNext = true;
-                    for (int i = 0; i < dotIndex; i++) {
-                        char c = className.charAt(i);
-                        if (c == '.') {
-                            buffer.append('.');
-                            appendNext = true;
-                        } else if (appendNext) {
-                            buffer.append(c);
-                            appendNext = false;
-                        }
-                    }
-                    buffer.append(className, dotIndex, className.length());
-                    return buffer.toString();
-                }
-            }
-        }
+        return ClassNameFormatter.apply(className, ClassNameFormatter.PackageMode.valueOf(packageMode.name()));
     }
 
     public static class ClassNameGetter extends Getter {
