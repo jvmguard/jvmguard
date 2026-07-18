@@ -8,6 +8,7 @@ import dev.jvmguard.ui.server.UserSession
 import dev.jvmguard.ui.views.data.VmBreadcrumb
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.html.Span
+import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.QueryParameters
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -54,6 +55,22 @@ class VmTelemetryViewTest : JvmGuardBrowserlessTest() {
         UI.getCurrent().navigate(VmTelemetryView::class.java, QueryParameters.simple(mapOf("vm" to "ERP/Processing")))
 
         assertFalse(find<EChart>().all().isEmpty(), "a single JVM selection must render the chart")
+    }
+
+    @Test
+    fun overviewDeepLinkSelectsOverviewTab() {
+        UI.getCurrent().navigate(VmTelemetryView::class.java, QueryParameters.simple(mapOf(VmTelemetryView.PARAM_MODE to VmTelemetryView.MODE_OVERVIEW)))
+
+        assertEquals(1, find<Tabs>().single().selectedIndex, "the overview deep link must select the overview tab")
+    }
+
+    @Test
+    fun telemetryTypeDeepLinkSwitchesBackFromOverview() {
+        UI.getCurrent().navigate(VmTelemetryView::class.java, QueryParameters.simple(mapOf(VmTelemetryView.PARAM_MODE to VmTelemetryView.MODE_OVERVIEW)))
+        assertEquals(1, find<Tabs>().single().selectedIndex)
+
+        UI.getCurrent().navigate(VmTelemetryView::class.java, QueryParameters.simple(mapOf(VmTelemetryView.PARAM_TYPE to "hp")))
+        assertEquals(0, find<Tabs>().single().selectedIndex, "a telemetry type deep link must switch back to the telemetry tab")
     }
 
     private fun breadcrumbLabels(): List<String> =
