@@ -25,12 +25,13 @@ interface PublishedApiExtension {
 
 val publishedApi = extensions.create<PublishedApiExtension>("publishedApi")
 
-javaVersion = "1.8"
+the<JvmGuardJavaExtension>().javaVersion.set("1.8")
+
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    dependsOn(tasks.withType<Sign>())
+}
 
 afterEvaluate {
-    tasks.withType<AbstractPublishToMaven> {
-        dependsOn(tasks.withType<Sign>())
-    }
     configure<MavenPublishBaseExtension> {
         coordinates("dev.jvmguard", publishedApi.artifactId.get(), getProductVersion("jvmguard") + getPublishSuffix())
         publishToMavenCentral()
@@ -94,34 +95,32 @@ tasks {
     val javadoc = named<Javadoc>("javadoc") {
         val mainSourceSet = project.the<JavaPluginExtension>().sourceSets["main"]
         classpath = mainSourceSet.compileClasspath + mainSourceSet.output
-    }
 
-    projectsEvaluated(javadoc) {
-        val productName = publishedApi.artifactName.get()
-        options {
-            this as StandardJavadocDocletOptions
-            memberLevel = JavadocMemberLevel.PROTECTED
-            header = "$productName API"
-            docTitle = "$productName API documentation"
-            windowTitle = "$productName API"
-            tags = listOf("noinspection")
-            jFlags = listOf("-Duser.language=en", "-Duser.country=US")
-            // single string options do not work in Javadoc option files, for -Xdoclint
-            // add changes to the second argument
-            @Suppress("SpellCheckingInspection")
-            addStringOption("Xdoclint:all", "-Xdoclint:-missing")
+        val artifactNameProp = publishedApi.artifactName
+        val javadocExecutable = project.getJavadocExecutableProvider()
+        doFirst {
+            val productName = artifactNameProp.get()
+            (options as StandardJavadocDocletOptions).apply {
+                memberLevel = JavadocMemberLevel.PROTECTED
+                header = "$productName API"
+                docTitle = "$productName API documentation"
+                windowTitle = "$productName API"
+                tags = listOf("noinspection")
+                jFlags = listOf("-Duser.language=en", "-Duser.country=US")
+                // single string options do not work in Javadoc option files, for -Xdoclint
+                // add changes to the second argument
+                @Suppress("SpellCheckingInspection")
+                addStringOption("Xdoclint:all", "-Xdoclint:-missing")
+            }
+            executable = javadocExecutable.get()
         }
-        executable = project.getJavadocExecutable()
     }
 
     val javadocJar = register<Jar>("javadocJar") {
         dependsOn(javadoc)
+        from(provider { javadoc.get().destinationDir })
         archiveBaseName.set(jar.flatMap { it.archiveBaseName })
         archiveClassifier.set("javadoc")
-    }
-
-    projectsEvaluated(javadocJar) {
-        from(javadoc.get().destinationDir)
     }
 
     val copyDist = register<Copy>("copyDist") {

@@ -4,7 +4,9 @@ plugins {
     id("java-module")
 }
 
-javaVersion = "21"
+jvmguardJava {
+    javaVersion.set("21")
+}
 
 dependencies {
     api(project(":agent:api"))
@@ -19,18 +21,15 @@ tasks {
     }
 
     val jar = named<Jar>("jar")
-    projectsEvaluated(jar) {
-        getDependencyProjects().forEach { dependsOn(it.tasks.classes) }
-        from(getDependencyOutputPaths())
+    jar.configure {
+        dependsOn(provider { getDependencyProjects().map { it.tasks.named("classes") } })
+        from(provider { getDependencyOutputPaths() })
     }
 
     val dist = register<Sync>("dist") {
         dependsOn(jar)
         into(file("$distDir/lib/demo"))
         from(jar)
-    }
-
-    projectsEvaluated(dist) {
         from(getDependencyLibraries())
     }
 }

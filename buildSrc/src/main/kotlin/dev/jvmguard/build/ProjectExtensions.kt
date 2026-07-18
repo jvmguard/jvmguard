@@ -2,17 +2,16 @@
 
 package dev.jvmguard.build
 
-import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import java.io.File
+import java.io.IOException
 
 val Project.buildDirFile: File
     get() = layout.buildDirectory.asFile.get()
@@ -121,8 +120,21 @@ fun Project.getJavadocExecutable(): String =
     File(getJavaHome(JAVA_BASELINE_VERSION), "bin/javadoc${if (isWindows()) ".exe" else ""}").absolutePath
 
 
-fun <T : Task> Project.projectsEvaluated(provider: TaskProvider<T>, action: Action<T>) {
-    gradle.projectsEvaluated {
-        provider.configure(action)
+fun Project.getBuildVersion(): Long {
+    val versionParts = getProductVersion("jvmguard").split(".")
+    val major = versionParts[0].toLong()
+    val minor = versionParts[1].toLong()
+    if (minor >= 10) {
+        throw RuntimeException("minor version must be < 10")
     }
+    val revisionNumber = try {
+        getCommittedRevisionNumber()
+    } catch (e: IOException) {
+        if (isIdeaSyncActive()) 0L else throw e
+    }
+    return major * 10000000 + minor * 1000000 + revisionNumber
 }
+
+fun Project.getBuildVersionProvider() = provider { getBuildVersion() }
+
+fun Project.getJavadocExecutableProvider() = provider { getJavadocExecutable() }

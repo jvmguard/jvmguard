@@ -1,6 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.jvmguard.build.*
-import java.io.IOException
 
 plugins {
     id("java-module")
@@ -26,18 +25,16 @@ tasks {
         "shadow"(libs.jprofiler.controller)
     }
 
-    val distJar = register<ShadowJar>("distJar") {
+    register<ShadowJar>("distJar") {
         archiveBaseName.set("agent-bundle")
-    }
 
-    projectsEvaluated(distJar) {
-        val agentModules = getDependencyProjects().filter { it.path != project.path }
-        agentModules.forEach { dependsOn(it.tasks.named("jar")) }
+        dependsOn(provider { getDependencyProjects().filter { it.path != project.path }.map { it.tasks.named("jar") } })
+        from(provider { getOutputPaths(getDependencyProjects().filter { it.path != project.path }) })
 
-        from(getOutputPaths(agentModules))
-
-        manifest {
-            attributes("Build-Version" to getBuildVersion())
+        val buildVersion = getBuildVersionProvider()
+        inputs.property("buildVersion", buildVersion)
+        doFirst {
+            manifest.attributes("Build-Version" to buildVersion.get())
         }
 
         configurations.add(shadow)
@@ -54,17 +51,3 @@ tasks {
     }
 }
 
-fun getBuildVersion(): Long {
-    val versionParts = getProductVersion("jvmguard").split(".")
-    val major = versionParts[0].toLong()
-    val minor = versionParts[1].toLong()
-    if (minor >= 10) {
-        throw RuntimeException("minor version must be < 10")
-    }
-    val revisionNumber = try {
-        getCommittedRevisionNumber()
-    } catch (e: IOException) {
-        if (isIdeaSyncActive()) 0L else throw e
-    }
-    return major * 10000000 + minor * 1000000 + revisionNumber
-}

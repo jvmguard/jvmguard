@@ -1,11 +1,11 @@
-import dev.jvmguard.build.*
-
 plugins {
     id("java-module")
 }
 
-javaVersion = "11"
-classFileVersion = "1.8"
+jvmguardJava {
+    javaVersion.set("11")
+    classFileVersion.set("1.8")
+}
 
 dependencies {
 }

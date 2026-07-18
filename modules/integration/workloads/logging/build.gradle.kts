@@ -1,5 +1,3 @@
-import dev.jvmguard.build.*
-
 plugins {
     id("kotlin-module")
 }
@@ -8,7 +6,9 @@ java {
     disableAutoTargetJvm()
 }
 
-classFileVersion = "1.8"
+jvmguardJava {
+    classFileVersion.set("1.8")
+}
 
 dependencies {
     api(libs.bundles.annotations)

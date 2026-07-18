@@ -39,9 +39,7 @@ springBoot {
 
 // The cyclonedx plugin attaches the SBOM artifact to its consumable "cyclonedxDirectBom" configuration only
 // when that task is first realized. Realize the task now, so the artifact is attached before any consumer observes the variant.
-afterEvaluate {
-    tasks.named("cyclonedxDirectBom").get()
-}
+tasks.named("cyclonedxDirectBom").get()
 
 tasks {
 
@@ -69,24 +67,19 @@ tasks {
 
     val serverJar = register<ShadowJar>("serverJar") {
         dependsOn(jar)
+        dependsOn(provider { getDependencyProjects().map { it.tasks.named("classes") } })
         from(zipTree(jar.flatMap { it.archiveFile }))
+        from(provider { getDependencyOutputPaths() })
         archiveAppendix.set("server")
         archiveBaseName.set("jvmguard")
         exclude("META-INF/*.kotlin_module")
     }
 
-    projectsEvaluated(serverJar) {
-        getDependencyProjects().forEach { dependsOn(it.tasks.classes) }
-        from(getDependencyOutputPaths())
-    }
-
     val dist = register<Sync>("dist") {
         into(file("$distDir/lib/server"))
-        from(serverJar.get().archiveFile)
-    }
-
-    projectsEvaluated(dist) {
+        from(serverJar.flatMap { it.archiveFile })
         from(getDependencyLibraries())
-        from(project(":ui").tasks.named<Jar>("jar").flatMap { it.archiveFile })
+        from(provider { project(":ui").tasks.named<Jar>("jar").get().archiveFile })
+        dependsOn(provider { project(":ui").tasks.named("jar") })
     }
 }

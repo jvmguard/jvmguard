@@ -196,22 +196,6 @@ fun getOutputPaths(projects: Iterable<Project>): Collection<File> {
         .filterNotNull()
 }
 
-class NamedTaskExtraPropertyDelegate(private val taskName: String) {
-    operator fun getValue(project: Any?, property: KProperty<*>): String? {
-        project as Project
-        return getTask(project).extra.getOrNull(property.name) as String?
-    }
-
-    operator fun setValue(project: Any?, property: KProperty<*>, value: String?) {
-        project as Project
-        getTask(project).extra[property.name] = value
-    }
-
-    private fun getTask(project: Project): Task {
-        return project.tasks[taskName]
-    }
-}
-
 val emptyFileCollection : FileCollection
     get() = object : AbstractFileCollection() {
         override fun getFiles(): Set<File> = emptySet()

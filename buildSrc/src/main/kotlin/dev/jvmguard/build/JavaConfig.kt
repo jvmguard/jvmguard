@@ -1,9 +1,20 @@
 package dev.jvmguard.build
 
-import org.gradle.api.Project
+import org.gradle.jvm.toolchain.JavaToolchainService
+import javax.inject.Inject
 
 const val JAVA_BASELINE_VERSION = 25
 
-var Project.javaVersion: String? by NamedTaskExtraPropertyDelegate("classes")
-val Project.usedJavaVersion: String get() = javaVersion ?: JAVA_BASELINE_VERSION.toString()
-var Project.classFileVersion: String? by NamedTaskExtraPropertyDelegate("classes")
+fun releaseOf(version: String): Int = when (version) {
+    "1.8" -> 8
+    "11" -> 11
+    "17" -> 11
+    "21" -> 21
+    "25" -> 25
+    else -> throw RuntimeException("Java version $version not supported")
+}
+
+interface InjectedJavaToolchainService {
+    @get:Inject
+    val toolchains: JavaToolchainService
+}

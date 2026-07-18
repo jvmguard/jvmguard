@@ -1,4 +1,3 @@
-import dev.jvmguard.build.*
 import org.jetbrains.kotlin.gradle.dsl.jvm.JvmTargetValidationMode
 
 plugins {
@@ -14,7 +13,9 @@ tasks.compileKotlin {
 }
 
 // Minimum workloads class file version
-classFileVersion = "1.8"
+jvmguardJava {
+    classFileVersion.set("1.8")
+}
 
 dependencies {
     api(libs.bundles.annotations)

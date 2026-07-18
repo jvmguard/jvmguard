@@ -4,7 +4,9 @@ plugins {
     id("java-module")
 }
 
-javaVersion = "1.8"
+jvmguardJava {
+    javaVersion.set("1.8")
+}
 
 java {
     disableAutoTargetJvm()
@@ -30,17 +32,15 @@ tasks {
 
     val copyDist = register<Copy>("copyDist") {
         dependsOn("jar")
-        into(file("$distDir/agent").apply { mkdirs() })
+        into("$distDir/agent")
         from(jar)
-    }
-
-    projectsEvaluated(copyDist) {
         into("lib") {
             // distJar is archived as agent-bundle.jar; the runtime loads lib/agent.jar
-            from(project(":agent:bundle").tasks.named<Jar>("distJar").get().archiveFile) {
+            from(provider { project(":agent:bundle").tasks.named<Jar>("distJar").get().archiveFile }) {
                 rename { "agent.jar" }
             }
         }
+        dependsOn(provider { project(":agent:bundle").tasks.named("distJar") })
     }
 
     register("dist") {
