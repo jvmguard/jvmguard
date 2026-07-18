@@ -111,6 +111,7 @@ class AgentFixture {
         System.setProperty("jvmguard.httpPort", test.httpPort.toString())
         System.setProperty("jvmguard.vmPort", TEST_VM_PORT)
         System.setProperty("jvmguard.dataDirectory", dataDir.absolutePath)
+        System.setProperty("vaadin.productionMode", "true")
         // From the test classpath the server cannot resolve the installation-layout logback.xml.
         val logbackFile = File(System.getProperty("jvmguard.integration.logbackFile", ""))
         if (logbackFile.isFile) {
