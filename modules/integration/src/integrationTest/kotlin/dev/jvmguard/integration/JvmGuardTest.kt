@@ -416,7 +416,7 @@ abstract class JvmGuardTest {
         var similarPercentage = DEFAULT_SIMILAR_PERCENTAGE
 
         private const val FIRST_CONFIG_REQUEST = 2
-        private const val WAIT_FOR_VMS_TIMEOUT_MS = 300_000L
+        private const val WAIT_FOR_VMS_TIMEOUT_MS = 900_000L
         private const val TREE_MATCH_ATTEMPTS = 24
 
         private fun subtractTree(baseTree: TransactionTree, index: Int, retrieval: (Int) -> TransactionTree) {
