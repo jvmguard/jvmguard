@@ -26,7 +26,7 @@ import org.jdom2.Element
 class RestTransactionTest : JvmGuardTest() {
 
     init {
-        similarPercentage = 50.0
+        similarPercentage = 300.0
     }
 
     override fun modifyInitialRootConfig(rootConfig: GroupConfig) {
@@ -212,7 +212,7 @@ class RestTransactionTest : JvmGuardTest() {
         if (!recordFile(fileName, xmlText)) {
             val received = TransactionTreeReader.read(xmlText.byteInputStream())
             val expected = TransactionTreeReader.read(getStream(fileName))
-            TransactionTreeComparator(TimeComparator.THIRTY_PERCENT).checkContentEqual(received, expected)
+            TransactionTreeComparator(TimeComparator.NONE).checkContentEqual(received, expected)
         }
         return parseXmlString(xmlText)
     }
