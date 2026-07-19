@@ -46,3 +46,14 @@ jobs:
       - name: Run Gradle
         run: |
           ./gradlew ${{ inputs.tasks }} --continue --max-workers=1 -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-${{ github.job }}
+          path: |
+            build/gradle/*/reports/tests/
+            build/gradle/*/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
