@@ -336,6 +336,8 @@ tasks {
         inputs.files(layout.projectDirectory.file("frontend/index.html")) // FileCollection tolerates a missing entry
             .withPropertyName("frontendIndexHtml")
             .withPathSensitivity(PathSensitivity.RELATIVE)
+        // A from-cache restore can break production mode on CI
+        outputs.cacheIf { false }
     }
 }
 
