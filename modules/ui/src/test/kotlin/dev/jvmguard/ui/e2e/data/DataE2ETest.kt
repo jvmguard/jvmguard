@@ -10,19 +10,17 @@ import dev.jvmguard.ui.views.vms.VmTreeGrid
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Timeout
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.util.concurrent.TimeUnit
+
 
 /**
  * Runs against a demo-mode server that real agent-instrumented worker JVMs (the demo cluster) connect to.
  * The cluster takes a while to connect, so [waitForDemoVm] polls the VMs grid.
  */
 @Tag("data-e2e")
-@Timeout(value = 600, unit = TimeUnit.SECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
 class DataE2ETest : PlaywrightE2ETest() {
 
     @BeforeAll
@@ -70,7 +68,7 @@ class DataE2ETest : PlaywrightE2ETest() {
     }
 
     private companion object {
-        const val POLL_ATTEMPTS = 200
+        const val POLL_ATTEMPTS = 40
         const val POLL_INTERVAL_MS = 3_000.0
     }
 }

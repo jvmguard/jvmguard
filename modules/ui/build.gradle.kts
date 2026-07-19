@@ -141,7 +141,7 @@ tasks {
         val serverLog = project.layout.buildDirectory.file("e2e/server.log").get().asFile
         doLastWith(e2eServerClasspath, serverLog) { cp, log ->
             val java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java"
-            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 300)
+            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 180)
         }
     }
     val e2eStopServer = register("e2eStopServer") {
@@ -158,7 +158,7 @@ tasks {
         classpath = testSourceSet.runtimeClasspath
         useJUnitPlatform { includeTags("e2e") }
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
-        systemProperty("jvmguard.e2e.timeoutMs", 60_000)
+        systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir", project.layout.buildDirectory.dir("e2e").get().asFile.path)
         outputs.upToDateWhen { false }
     }
@@ -176,7 +176,7 @@ tasks {
         }
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
-        systemProperty("jvmguard.e2e.timeoutMs", 60_000)
+        systemProperty("jvmguard.e2e.timeoutMs", "30000")
         outputs.upToDateWhen { false }
     }
 
@@ -192,13 +192,14 @@ tasks {
         val command = serverMainJvmArgs(port, dataVmPort, productionMode = e2eProductionMode, dataDir = dataServerDataDir)
         doLastWith(classpath, serverLog) { cp, log ->
             val java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java"
-            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 300)
+            service.get().start(listOf(java, "-cp", cp.get()) + command, port, "/login", log, timeoutSeconds = 180)
         }
     }
 
     val dataE2eStartDemo = register("dataE2eStartDemo") {
         usesService(demoCluster)
         dependsOn(dataE2eStartServer)
+        dependsOn(":agent:bootstrap:dist")
         inputs.files(demoRuntime)
         val service = demoCluster
         val vmPort = dataVmPort
@@ -240,7 +241,7 @@ tasks {
         }
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$dataPort")
-        systemProperty("jvmguard.e2e.timeoutMs", 60_000)
+        systemProperty("jvmguard.e2e.timeoutMs", "30000")
         outputs.upToDateWhen { false }
     }
 
@@ -259,7 +260,7 @@ tasks {
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
         // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
-        systemProperty("jvmguard.e2e.timeoutMs", "60000")
+        systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir",
             layout.buildDirectory.dir("e2e/screenshotsLight").get().asFile.path)
         outputs.upToDateWhen { false }
@@ -280,7 +281,7 @@ tasks {
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
         // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
-        systemProperty("jvmguard.e2e.timeoutMs", "60000")
+        systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir",
             layout.buildDirectory.dir("e2e/screenshotsDark").get().asFile.path)
         systemProperty("jvmguard.e2e.darkScreenshots", "true")
