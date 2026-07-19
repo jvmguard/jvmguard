@@ -84,7 +84,6 @@ class RecordingConfigE2ETest : ConfigE2ETest() {
         loginRealAndWaitForApp()
 
         openRecording("recording/transactions")
-        getByTestId("transaction-grid-matched").waitFor()
         locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Matched")).first().click()
         getByTestId("transaction-grid-matched").waitFor()
         getByTestId("transaction-add").click()
@@ -97,6 +96,7 @@ class RecordingConfigE2ETest : ConfigE2ETest() {
         applySettings()
 
         openRecording("recording/transactions")
+        locator("vaadin-tab").filter(Locator.FilterOptions().setHasText("Matched")).first().click()
         getByTestId("transaction-grid-matched").waitFor()
         // A class-only Matched def is displayed as "<class>#*".
         assertThat(getByTestId("transaction-grid-matched").getByText("com.example.OrderService#*")).isVisible()

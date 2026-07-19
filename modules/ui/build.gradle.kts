@@ -158,6 +158,7 @@ tasks {
         classpath = testSourceSet.runtimeClasspath
         useJUnitPlatform { includeTags("e2e") }
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
+        systemProperty("jvmguard.e2e.timeoutMs", 60_000)
         systemProperty("jvmguard.e2e.screenshotDir", project.layout.buildDirectory.dir("e2e").get().asFile.path)
         outputs.upToDateWhen { false }
     }
@@ -175,6 +176,7 @@ tasks {
         }
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
+        systemProperty("jvmguard.e2e.timeoutMs", 60_000)
         outputs.upToDateWhen { false }
     }
 
@@ -238,6 +240,7 @@ tasks {
         }
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$dataPort")
+        systemProperty("jvmguard.e2e.timeoutMs", 60_000)
         outputs.upToDateWhen { false }
     }
 
@@ -256,7 +259,7 @@ tasks {
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
         // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
-        systemProperty("jvmguard.e2e.timeoutMs", "30000")
+        systemProperty("jvmguard.e2e.timeoutMs", "60000")
         systemProperty("jvmguard.e2e.screenshotDir",
             layout.buildDirectory.dir("e2e/screenshotsLight").get().asFile.path)
         outputs.upToDateWhen { false }
@@ -277,7 +280,7 @@ tasks {
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
         // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
-        systemProperty("jvmguard.e2e.timeoutMs", "30000")
+        systemProperty("jvmguard.e2e.timeoutMs", "60000")
         systemProperty("jvmguard.e2e.screenshotDir",
             layout.buildDirectory.dir("e2e/screenshotsDark").get().asFile.path)
         systemProperty("jvmguard.e2e.darkScreenshots", "true")

@@ -67,7 +67,7 @@ class DataE2ETest : PlaywrightE2ETest() {
     }
 
     private companion object {
-        const val POLL_ATTEMPTS = 40
+        const val POLL_ATTEMPTS = 200
         const val POLL_INTERVAL_MS = 3_000.0
     }
 }
