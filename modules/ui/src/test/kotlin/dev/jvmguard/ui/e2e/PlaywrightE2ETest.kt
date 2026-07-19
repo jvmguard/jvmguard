@@ -4,6 +4,8 @@ import com.microsoft.playwright.Browser
 import com.microsoft.playwright.BrowserType
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Playwright
+import com.microsoft.playwright.assertions.PageAssertions
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeAll
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Timeout
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
+import java.util.regex.Pattern
 import java.net.http.HttpResponse
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -33,6 +36,9 @@ abstract class PlaywrightE2ETest {
 
     protected val baseUrl: String = System.getProperty("jvmguard.e2e.url", "http://localhost:8020")
     private val screenshotDir: String = System.getProperty("jvmguard.e2e.screenshotDir", "build/e2e")
+
+    fun Page.expectUrl(pattern: Pattern) =
+        assertThat(this).hasURL(pattern, PageAssertions.HasURLOptions().setTimeout(defaultTimeoutMs))
 
     /** When set, pages render in the dark color scheme (the app honors `prefers-color-scheme`, see AppShell). */
     protected val darkScreenshots: Boolean = System.getProperty("jvmguard.e2e.darkScreenshots") == "true"

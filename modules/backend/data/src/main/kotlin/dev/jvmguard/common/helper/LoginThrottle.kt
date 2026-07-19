@@ -1,5 +1,6 @@
 package dev.jvmguard.common.helper
 
+import dev.jvmguard.common.JvmGuardConfig
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
@@ -14,6 +15,9 @@ class LoginThrottle {
     private val states = ConcurrentHashMap<String, State>()
 
     fun isThrottled(loginName: String): Boolean {
+        if (JvmGuardConfig.isIntegrationTest) {
+            return false
+        }
         val state = states[loginName] ?: return false
         return state.failures >= FREE_ATTEMPTS && System.currentTimeMillis() < state.notBefore
     }

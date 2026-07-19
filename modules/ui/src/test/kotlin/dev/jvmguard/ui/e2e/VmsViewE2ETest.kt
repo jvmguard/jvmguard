@@ -75,7 +75,7 @@ class VmsViewE2ETest : PlaywrightE2ETest() {
         getByTestId(VmTreeGrid.ID_SHOW).first().click()
         getByTestId(VmTreeGrid.ID_SHOW_TRANSACTIONS).click()
 
-        assertThat(this).hasURL(Pattern.compile(".*/transactions$"))
+        expectUrl(Pattern.compile(".*/transactions$"))
         assertThat(getByTestId(TransactionsView.ID_GRID)).isVisible()
         assertThat(locator(".jvmguard-breadcrumb-current")).hasText("Database")
     }
@@ -87,7 +87,7 @@ class VmsViewE2ETest : PlaywrightE2ETest() {
         getByTestId(VmTreeGrid.ID_SHOW).first().click()
         getByTestId(VmTreeGrid.ID_SHOW_TELEMETRIES).click()
 
-        assertThat(this).hasURL(Pattern.compile(".*/telemetry.*"))
+        expectUrl(Pattern.compile(".*/telemetry.*"))
         assertThat(getByTestId(VmTelemetryView.ID_MODE)).isVisible()
         assertThat(getByTestId(TelemetryOverviewPanel.ID_GRID)).isVisible()
         assertFalse(url().contains("vm="), "the VM selection must not appear in the URL")
@@ -112,7 +112,7 @@ class VmsViewE2ETest : PlaywrightE2ETest() {
         db01Show.click()
         getByTestId(VmTreeGrid.ID_SHOW_MBEANS).click()
 
-        assertThat(this).hasURL(Pattern.compile(".*/mbeans$"))
+        expectUrl(Pattern.compile(".*/mbeans$"))
         assertThat(locator(".jvmguard-breadcrumb-current")).hasText("DB 01")
     }
 
@@ -122,7 +122,7 @@ class VmsViewE2ETest : PlaywrightE2ETest() {
 
         locator("jvmguard-sparkline").first().click()
 
-        assertThat(this).hasURL(Pattern.compile(".*/telemetry\\?.*t=.*"))
+        expectUrl(Pattern.compile(".*/telemetry\\?.*t=.*"))
         assertFalse(url().contains("vm="), "the VM selection must not appear in the URL")
         assertThat(getByTestId(VmDataView.ID_SELECT_BUTTON)).isVisible()
         assertThat(locator(".jvmguard-breadcrumb-current")).hasText("Database")
@@ -152,7 +152,7 @@ class VmsViewE2ETest : PlaywrightE2ETest() {
         getByTestId(VmSelectorDialog.ID_SELECT).click()
 
         assertThat(locator(".jvmguard-breadcrumb-current")).hasText("ERP")
-        assertThat(this).hasURL(Pattern.compile(".*/telemetry.*"))
+        expectUrl(Pattern.compile(".*/telemetry.*"))
         assertFalse(url().contains("vm="), "selecting a VM must not put it in the URL")
     }
 
@@ -185,11 +185,11 @@ class VmsViewE2ETest : PlaywrightE2ETest() {
         assertThat(locator("vaadin-drawer-toggle")).isHidden()
         val nav = locator("vaadin-side-nav")
         nav.getByText("Transactions").click()
-        assertThat(this).hasURL(Pattern.compile(".*/transactions.*"))
+        expectUrl(Pattern.compile(".*/transactions.*"))
         assertThat(getByTestId(TransactionsView.ID_GRID)).isVisible()
 
         nav.getByText("Telemetries").click()
-        assertThat(this).hasURL(Pattern.compile(".*/telemetry.*"))
+        expectUrl(Pattern.compile(".*/telemetry.*"))
         assertThat(getByTestId(VmTelemetryView.ID_MODE)).isVisible()
         assertThat(getByTestId(VmTelemetryView.ID_CHART)).isVisible()
 
@@ -209,18 +209,18 @@ class VmsViewE2ETest : PlaywrightE2ETest() {
 
         val nav = locator("vaadin-side-nav")
         nav.getByText("Telemetries").click()
-        assertThat(this).hasURL(Pattern.compile(".*/telemetry$"))
+        expectUrl(Pattern.compile(".*/telemetry$"))
         assertThat(locator(".jvmguard-breadcrumb-current")).hasText("DB 01")
 
         nav.getByText("MBeans").click()
-        assertThat(this).hasURL(Pattern.compile(".*/mbeans$"))
+        expectUrl(Pattern.compile(".*/mbeans$"))
         assertThat(locator(".jvmguard-breadcrumb-current")).hasText("DB 01")
 
         // Passing through the selection-less VMs view must not drop the selection.
         nav.getByText("VMs").click()
-        assertThat(this).hasURL(Pattern.compile(".*/?$"))
+        expectUrl(Pattern.compile(".*/?$"))
         nav.getByText("Transactions").click()
-        assertThat(this).hasURL(Pattern.compile(".*/transactions$"))
+        expectUrl(Pattern.compile(".*/transactions$"))
         assertThat(locator(".jvmguard-breadcrumb-current")).hasText("DB 01")
     }
 

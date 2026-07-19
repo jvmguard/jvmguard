@@ -48,7 +48,7 @@ class TelemetryOverviewE2ETest : PlaywrightE2ETest() {
 
         locator("jvmguard-sparkline.jvmguard-sparkline-link").first().click()
 
-        assertThat(this).hasURL(Pattern.compile(".*/telemetry\\?.*t=.*"))
+        expectUrl(Pattern.compile(".*/telemetry\\?.*t=.*"))
         assertFalse(url().contains("vm="), "the VM selection must not appear in the URL")
         assertThat(locator("jvmguard-echart canvas").first()).isVisible()
         assertThat(getByTestId(TelemetryOverviewPanel.ID_GRID)).isHidden()
