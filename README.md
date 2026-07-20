@@ -7,6 +7,11 @@ jvmguard agent, track telemetry and transactions, and capture deep profiles, eit
 on threshold and policy triggers, or with a coding agent via the MCP server.
 Every capture is access-controlled and audited.
 
+<picture>
+  <source srcset="https://jvmguard.dev/images/ui/profiling_options_dark.png" media="(prefers-color-scheme: dark)">
+  <img src="https://jvmguard.dev/images/ui/profiling_options.png" alt="The jvmguard web UI showing a fleet of JVMs with live telemetry and the snapshot recording dialog.">
+</picture>
+
 ## Get started
 
 Download the installer for your platform from **[jvmguard.dev/download](https://jvmguard.dev/download)**,

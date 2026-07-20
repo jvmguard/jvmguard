@@ -4,6 +4,13 @@ val npmBin = if (isWindows()) "npm.cmd" else "npm"
 
 tasks {
 
+    val copyScreenshots = register<Copy>("copyScreenshots") {
+        group = "website"
+        from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsLight")) { include("profiling_options.png") }
+        from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsDark")) { include("profiling_options_dark.png") }
+        into(layout.projectDirectory.dir("public/images/ui"))
+    }
+
     val npmInstall = register<Exec>("npmInstall") {
         group = "website"
         description = "Installs the website npm dependencies (npm ci)."
@@ -17,7 +24,7 @@ tasks {
     val npmBuild = register<Exec>("npmBuild") {
         group = "website"
         description = "Builds the marketing site into dist/."
-        dependsOn(npmInstall)
+        dependsOn(npmInstall, copyScreenshots)
         workingDir = projectDir
         commandLine(npmBin, "run", "build")
     }
@@ -41,7 +48,7 @@ tasks {
     register("buildWebsite") {
         group = "website"
         description = "Builds the marketing site."
-        dependsOn(npmBuild)
+        dependsOn(copyScreenshots, npmBuild)
     }
 
     register<Exec>("devAll") {
