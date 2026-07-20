@@ -8,8 +8,8 @@ on threshold and policy triggers, or with a coding agent via the MCP server.
 Every capture is access-controlled and audited.
 
 <picture>
-  <source srcset="https://jvmguard.dev/images/ui/profiling_options_dark.png" media="(prefers-color-scheme: dark)">
-  <img src="https://jvmguard.dev/images/ui/profiling_options.png" alt="The jvmguard web UI showing a fleet of JVMs with live telemetry and the snapshot recording dialog.">
+  <source srcset="https://raw.githubusercontent.com/jvmguard/jvmguard/main/modules/website/public/images/ui/profiling_options_dark.png" media="(prefers-color-scheme: dark)">
+  <img src="https://raw.githubusercontent.com/jvmguard/jvmguard/main/modules/website/public/images/ui/profiling_options.png" alt="The jvmguard web UI showing a fleet of JVMs with live telemetry and the snapshot recording dialog.">
 </picture>
 
 ## Get started
