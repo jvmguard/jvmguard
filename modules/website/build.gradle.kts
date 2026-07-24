@@ -1,4 +1,5 @@
 import dev.jvmguard.build.*
+import org.gradle.api.tasks.javadoc.Javadoc
 
 val npmBin = if (isWindows()) "npm.cmd" else "npm"
 
@@ -9,6 +10,14 @@ tasks {
         from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsLight")) { include("profiling_options.png") }
         from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsDark")) { include("profiling_options_dark.png") }
         into(layout.projectDirectory.dir("public/images/ui"))
+    }
+
+    val copyJavadoc = register<Copy>("copyJavadoc") {
+        group = "website"
+        val api = project(":agent:api")
+        from(api.tasks.named<Javadoc>("javadoc").map { it.destinationDir!! }) { into("javadoc") }
+        from(api.tasks.named<Jar>("jar").flatMap { it.archiveFile }) { rename { "jvmguard-annotations.jar" } }
+        into(layout.projectDirectory.dir("public"))
     }
 
     val npmInstall = register<Exec>("npmInstall") {
@@ -24,7 +33,7 @@ tasks {
     val npmBuild = register<Exec>("npmBuild") {
         group = "website"
         description = "Builds the marketing site into dist/."
-        dependsOn(npmInstall, copyScreenshots)
+        dependsOn(npmInstall, copyScreenshots, copyJavadoc)
         workingDir = projectDir
         commandLine(npmBin, "run", "build")
     }

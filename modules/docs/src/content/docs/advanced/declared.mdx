@@ -11,16 +11,18 @@ much more maintainable to directly annotate the methods and classes of interest 
 Transactions defined this way are called Declared transactions, because you declare them explicitly in your source code
 with the jvmguard annotations.
 
-The jvmguard annotations are located in the JAR file `api/jvmguard-annotations.jar`, see the javadoc overview for how to download
-this JAR file with Maven or Gradle.
+The jvmguard annotations are located in the JAR file `api/jvmguard-annotations.jar`, see the
+[javadoc overview](/javadoc/overview-summary.html) for how to download this JAR file with Maven or Gradle.
 
 All annotations have a class retention policy. This means that they are present in the class file, but the JVM does not
 load them into memory. Code that queries runtime annotations on a particular method cannot be confused by the additional
 jvmguard annotations because they are only detected by jvmguard at the class loading stage and do not appear in the loaded
 class objects.
 
-The usage of Declared transactions is **described in detail in the Javadoc** that is present in the `api/doc` directory of
-the jvmguard installation.
+The usage of Declared transactions is **described in detail in the Javadoc** of the
+[`@MethodTransaction`](/javadoc/dev/jvmguard/annotation/MethodTransaction.html) and
+[`@ClassTransaction`](/javadoc/dev/jvmguard/annotation/ClassTransaction.html) annotations. The Javadoc is also present
+in the `api/doc` directory of the jvmguard installation.
 
 ## Policies
 

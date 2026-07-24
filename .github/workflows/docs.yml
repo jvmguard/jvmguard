@@ -6,6 +6,7 @@ on:
     paths:
       - 'modules/docs/**'
       - 'modules/website/**'
+      - 'modules/agent/api/**'
       - '.github/workflows/docs.yml'
       - '.github/workflows/docs-deploy.yml'
   workflow_dispatch:

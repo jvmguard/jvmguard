@@ -2,6 +2,8 @@
 buildSrc/build/
 /dist/
 /media/
+modules/website/public/javadoc/
+modules/website/public/jvmguard-annotations.jar
 .gradle/
 .kotlin/
 

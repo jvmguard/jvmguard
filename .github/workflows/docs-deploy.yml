@@ -39,6 +39,12 @@ jobs:
           mkdir -p modules/website/public
           gh release download --pattern 'updates.xml' --dir modules/website/public/ || true
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build Javadoc
+        run: ./gradlew :website:copyJavadoc
+
       - name: Build marketing site
         working-directory: modules/website
         run: |
