@@ -8,6 +8,7 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.external.javadoc.JavadocMemberLevel
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 
@@ -96,8 +97,13 @@ tasks {
         val mainSourceSet = project.the<JavaPluginExtension>().sourceSets["main"]
         classpath = mainSourceSet.compileClasspath + mainSourceSet.output
 
+        // The module bytecode level is 1.8, but javadoc must run on the baseline JDK
+        val toolchains = project.objects.newInstance<InjectedJavaToolchainService>().toolchains
+        javadocTool.set(toolchains.javadocToolFor {
+            languageVersion.set(JavaLanguageVersion.of(JAVA_BASELINE_VERSION))
+        })
+
         val artifactNameProp = publishedApi.artifactName
-        val javadocExecutable = project.getJavadocExecutableProvider()
         doFirst {
             val productName = artifactNameProp.get()
             (options as StandardJavadocDocletOptions).apply {
@@ -112,7 +118,6 @@ tasks {
                 @Suppress("SpellCheckingInspection")
                 addStringOption("Xdoclint:all", "-Xdoclint:-missing")
             }
-            executable = javadocExecutable.get()
         }
     }
 

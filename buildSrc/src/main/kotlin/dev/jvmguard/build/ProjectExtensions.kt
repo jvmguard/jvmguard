@@ -116,10 +116,6 @@ fun Project.getJavaHome(javaVersion: Int): String {
     return launcher.executablePath.asFile.parentFile.parentFile.absolutePath
 }
 
-fun Project.getJavadocExecutable(): String =
-    File(getJavaHome(JAVA_BASELINE_VERSION), "bin/javadoc${if (isWindows()) ".exe" else ""}").absolutePath
-
-
 fun Project.getBuildVersion(): Long {
     val versionParts = getProductVersion("jvmguard").split(".")
     val major = versionParts[0].toLong()
@@ -136,5 +132,3 @@ fun Project.getBuildVersion(): Long {
 }
 
 fun Project.getBuildVersionProvider() = provider { getBuildVersion() }
-
-fun Project.getJavadocExecutableProvider() = provider { getJavadocExecutable() }
