@@ -340,9 +340,6 @@ tasks {
         inputs.files(layout.projectDirectory.file("frontend/index.html")) // FileCollection tolerates a missing entry
             .withPropertyName("frontendIndexHtml")
             .withPathSensitivity(PathSensitivity.RELATIVE)
-        //TODO fixed in Flow 25.2.5, vaadin/flow#24012, remove after upgrade
-        // A from-cache restore can break production mode on CI
-        outputs.cacheIf { false }
     }
 }
 
