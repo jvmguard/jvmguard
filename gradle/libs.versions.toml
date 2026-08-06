@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.4.10"
 springBoot = "4.1.0"
-vaadin = "25.2.4"
+vaadin = "25.2.5"
 asm = "9.10.1"
 nanojson = "1.10"
 jdom = "2.0.6.1"
