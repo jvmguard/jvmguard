@@ -26,50 +26,62 @@ tasks {
         include("dev/jvmguard/installer/**")
     }
 
-    val buildMedia = register<Install4jTask>("buildMedia") {
-        dependsOn(jar, ":dist")
+    fun registerBuildMedia(name: String, mediaTypes: List<String>?): TaskProvider<Install4jTask> =
+        register<Install4jTask>(name) {
+            dependsOn(jar, ":dist")
 
-        val fullVersionForFileName = fullVersion.replace('.', '_')
-        val majorVersion = getMajorVersion(fullVersion)
+            val fullVersionForFileName = fullVersion.replace('.', '_')
+            val majorVersion = getMajorVersion(fullVersion)
 
-        projectFile = file("jvmguard.install4j")
-        release = fullVersion
-        macKeystorePassword = ""
+            projectFile = file("jvmguard.install4j")
+            release = fullVersion
+            macKeystorePassword = ""
 
-        if (winCertPath == null && macCertPath == null) {
-            disableSigning = true
+            if (mediaTypes != null) {
+                this.mediaTypes.set(mediaTypes)
+            }
+
+            if (winCertPath == null && macCertPath == null) {
+                disableSigning = true
+            }
+            if (appleIssuerId == null || appleKeyId == null || applePrivateApiKey == null) {
+                disableNotarization = true
+            }
+
+            variables = mapOf(
+                "majorVersion" to majorVersion,
+                "build" to getBuildNumber("jvmguard"),
+                "winCertPath" to (winCertPath ?: ""),
+                "macCertPath" to (macCertPath ?: ""),
+                "digestSigningCommandLine" to (digestSigningCommandLine ?: ""),
+                "appleIssuerId" to (appleIssuerId ?: ""),
+                "appleKeyId" to (appleKeyId ?: ""),
+                "applePrivateApiKey" to (applePrivateApiKey ?: ""),
+            )
+
+            vmParameters.add("--enable-native-access=ALL-UNNAMED")
+
+            doFirstWith(fileSystemOperations, mediaDir) { fsOps, mediaDir ->
+                fsOps.delete { delete(mediaDir) }
+            }
+
+            val checksumFile = File("$mediaDir/sha256sums")
+            val checksumTargetFile = file("$mediaDir/sha256sums_$fullVersionForFileName.txt")
+            doLastWith(checksumFile, checksumTargetFile) {
+                    checksumFile, checksumTargetFile ->
+                checksumFile.renameTo(checksumTargetFile)
+            }
         }
-        if (appleIssuerId == null || appleKeyId == null || applePrivateApiKey == null) {
-            disableNotarization = true
-        }
 
-        variables = mapOf(
-            "majorVersion" to majorVersion,
-            "build" to getBuildNumber("jvmguard"),
-            "winCertPath" to (winCertPath ?: ""),
-            "macCertPath" to (macCertPath ?: ""),
-            "digestSigningCommandLine" to (digestSigningCommandLine ?: ""),
-            "appleIssuerId" to (appleIssuerId ?: ""),
-            "appleKeyId" to (appleKeyId ?: ""),
-            "applePrivateApiKey" to (applePrivateApiKey ?: ""),
-        )
-
-        vmParameters.add("--enable-native-access=ALL-UNNAMED")
-
-        doFirstWith(fileSystemOperations, mediaDir) { fsOps, mediaDir ->
-            fsOps.delete { delete(mediaDir) }
-        }
-
-        val checksumFile = File("$mediaDir/sha256sums")
-        val checksumTargetFile = file("$mediaDir/sha256sums_$fullVersionForFileName.txt")
-        doLastWith(checksumFile, checksumTargetFile) {
-                checksumFile, checksumTargetFile ->
-            checksumFile.renameTo(checksumTargetFile)
-        }
-    }
+    val buildMedia = registerBuildMedia("buildMedia", null)
+    val buildMediaLinux = registerBuildMedia("buildMediaLinux", listOf("unixInstaller", "unixArchive"))
 
     val media = register("media") {
         dependsOn(buildMedia)
+    }
+
+    register("mediaLinux") {
+        dependsOn(buildMediaLinux)
     }
 
     register("release") {

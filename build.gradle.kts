@@ -80,6 +80,12 @@ tasks {
         dependsOn(dist, ":installer:media")
     }
 
+    register("mediaLinux") {
+        group = "distribution"
+        description = "Builds the distribution and generates only the Linux installer media"
+        dependsOn(dist, ":installer:mediaLinux")
+    }
+
     register("release") {
         group = "release"
         description = "Builds the media, publishes to Maven Central and creates a GitHub release"
