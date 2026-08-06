@@ -155,6 +155,6 @@ class TransactionNavigationBar(
         const val ID_NEXT = "transaction-next"
         const val ID_AUTO_UPDATE = "transaction-auto-update"
 
-        private const val AUTO_UPDATE_TICKS = 10
+        private const val AUTO_UPDATE_TICKS = 5
     }
 }

@@ -21,7 +21,7 @@ class NotificationPoller private constructor(private val ui: UI, private val ses
     }
 
     companion object {
-        private const val POLL_INTERVAL_MS = 500
+        private const val POLL_INTERVAL_MS = 2_000
 
         fun start(ui: UI, session: UserSession): NotificationPoller {
             val poller = NotificationPoller(ui, session)

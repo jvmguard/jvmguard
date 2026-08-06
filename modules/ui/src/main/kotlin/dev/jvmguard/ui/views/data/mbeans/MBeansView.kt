@@ -490,8 +490,7 @@ class MBeansView : VmDataView() {
 
         private const val ATTRIBUTES_TAB = 0
 
-        // every 2s.
-        private const val REFRESH_EVERY_TICKS = 4
+        private const val REFRESH_EVERY_TICKS = 1
 
         private const val NOT_CONNECTED = "Not connected to the jvmguard server."
         private const val NO_VM = "The selected JVM is not available."

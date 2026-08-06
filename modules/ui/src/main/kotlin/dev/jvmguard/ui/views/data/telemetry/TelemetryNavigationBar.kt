@@ -239,6 +239,6 @@ class TelemetryNavigationBar(
         const val ID_AUTO_UPDATE = "telemetry-auto-update"
 
         private const val PAGE_DIVISOR = 4
-        private const val AUTO_UPDATE_TICKS = 10
+        private const val AUTO_UPDATE_TICKS = 5
     }
 }
