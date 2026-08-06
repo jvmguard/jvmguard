@@ -200,6 +200,9 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
     private fun appendDelta() {
         val file = logFile ?: return
         val delta = file.componentDelta()
+        if (!delta.rotated && delta.lines.isEmpty()) {
+            return
+        }
         if (delta.rotated) {
             lines.clear()
         }

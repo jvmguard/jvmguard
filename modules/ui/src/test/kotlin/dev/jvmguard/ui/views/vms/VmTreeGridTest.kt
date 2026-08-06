@@ -26,6 +26,8 @@ class VmTreeGridTest : JvmGuardBrowserlessTest() {
     private class ScriptedConnection(base: ServerConnection, private val trees: List<Group<VmDataHolder>>) :
         ServerConnection by base {
         private var index = 0
+        var timeMillis = 0L
+        override val currentTime: Long get() = timeMillis
         override fun getVmDataHolders(
             vmFilter: VmFilter,
             sparkLineRange: SparkLineRange,
@@ -54,7 +56,7 @@ class VmTreeGridTest : JvmGuardBrowserlessTest() {
     }
 
     private fun VmTreeGrid.reloadDefault() =
-        reload(VmFilter.CONNECTED, SparkLineRange.LAST_HOUR, SparkLineScaleMode.SEPARATE)
+        reload(VmFilter.CONNECTED, SparkLineRange.LAST_HOUR, SparkLineScaleMode.SEPARATE, force = true)
 
     // VmTreeItem equality is key-based, so a fresh item with the same key addresses the real one in the grid.
     private fun group(name: String) = VmGroupItem(name, name, VmType.GROUP, null)
@@ -78,4 +80,22 @@ class VmTreeGridTest : JvmGuardBrowserlessTest() {
         grid.reloadDefault()
         assertFalse(grid.isExpanded(group("B")), "a user-collapsed group must stay collapsed across reloads")
     }
+
+    @Test
+    fun aPollReloadIsSkippedUntilTheNextRecordingInterval() {
+        val connection = ScriptedConnection(MockConnections.create(AccessLevel.ADMIN), listOf(treeOf("B"), treeOf("A", "B")))
+        Sessions.setCurrent(UserSession(connection))
+        val grid = VmTreeGrid().also { UI.getCurrent().add(it) }
+
+        grid.reloadDefault()
+        grid.pollReload()
+        assertFalse(grid.isExpanded(group("A")), "a poll reload within the same recording interval must be skipped")
+
+        connection.timeMillis = 10_000L
+        grid.pollReload()
+        assertTrue(grid.isExpanded(group("A")), "a poll reload must see new data in the next recording interval")
+    }
+
+    private fun VmTreeGrid.pollReload() =
+        reload(VmFilter.CONNECTED, SparkLineRange.LAST_HOUR, SparkLineScaleMode.SEPARATE, force = false)
 }

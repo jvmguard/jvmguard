@@ -50,6 +50,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
     private var canProfile: Boolean? = null
     private var currentTime = 0L
     private var currentRange = SparkLineRange.LAST_HOUR
+    private var lastDataBucket = -1L
 
     init {
         setWidthFull()
@@ -117,10 +118,15 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
         }
     }
 
-    fun reload(filter: VmFilter, range: SparkLineRange, scaleMode: SparkLineScaleMode) {
+    fun reload(filter: VmFilter, range: SparkLineRange, scaleMode: SparkLineScaleMode, force: Boolean = false) {
         val connection = Sessions.current()?.serverConnection ?: return
         currentRange = range
         currentTime = connection.currentTime
+        val dataBucket = currentTime / RECORDING_INTERVAL_MILLIS
+        if (!force && dataBucket == lastDataBucket) {
+            return
+        }
+        lastDataBucket = dataBucket
         val roots = buildRoots(connection.getVmDataHolders(filter, range, visibleTelemetryTypes))
         applyScaleMode(scaleMode, roots)
         treeData.clear()
@@ -352,6 +358,8 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
         const val ID_ACTION_RECORD_JFR = "vm-action-record-jfr"
 
         private const val SPARKLINE_COLUMN_WIDTH = "190px"
+        // Matches the 10 s telemetry recording interval of the collector (TelemetryDataInterval.TEN_SECONDS).
+        private const val RECORDING_INTERVAL_MILLIS = 10_000L
 
         private fun displayName(identifier: VmIdentifier): String {
             val name = identifier.name

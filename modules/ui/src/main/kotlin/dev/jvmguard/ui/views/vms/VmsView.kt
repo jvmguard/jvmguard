@@ -96,7 +96,7 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
 
     private fun onPollTick() {
         if (!anyContextMenuOpen()) {
-            reloadGrid()
+            reloadGrid(force = false)
         }
     }
 
@@ -125,8 +125,8 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
         reloadGrid()
     }
 
-    private fun reloadGrid() {
-        grid.reload(filterSelect.value, rangeSelect.value, scaleModeSelect.value)
+    private fun reloadGrid(force: Boolean = true) {
+        grid.reload(filterSelect.value, rangeSelect.value, scaleModeSelect.value, force)
     }
 
     private fun persistSettings() {
