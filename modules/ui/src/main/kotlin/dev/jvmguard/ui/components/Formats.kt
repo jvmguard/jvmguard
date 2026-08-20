@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.components
 
+import com.vaadin.flow.component.UI
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -26,8 +27,6 @@ object Formats {
 
     private const val SCALE_THRESHOLD = 100
 
-    private val grouping = NumberFormat.getIntegerInstance(Locale.US)
-
     /** Formats a nanosecond duration, scaling to the largest fitting unit (µs / ms / s / m / h). */
     fun time(nanos: Long): String {
         val abs = abs(nanos)
@@ -40,6 +39,7 @@ object Formats {
         }
     }
 
-    /** Formats an invocation count with grouping separators. */
-    fun count(value: Long): String = grouping.format(value)
+    /** Formats an invocation count with grouping separators, in the current UI locale. */
+    fun count(value: Long): String =
+        NumberFormat.getIntegerInstance(UI.getCurrent()?.locale ?: Locale.US).format(value)
 }

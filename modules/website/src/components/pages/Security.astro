@@ -1,0 +1,200 @@
+---
+// Security.astro: the security and data flow page, shared by all locales.
+// Copy comes from the locale's message catalog in src/i18n/ui.ts.
+import PageFrame from '../../layouts/PageFrame.astro';
+import {
+  DEFAULT_LOCALE,
+  getMessages,
+  securityCapture,
+  securityCollect,
+  securityFacts,
+  securityLicense,
+  type Locale,
+} from '../../i18n/ui';
+
+interface Props {
+  locale?: Locale;
+}
+const {locale = DEFAULT_LOCALE} = Astro.props;
+const m = getMessages(locale);
+
+const facts = securityFacts(m);
+const collect = securityCollect(m);
+const capture = securityCapture(m);
+const license = securityLicense(m);
+---
+
+<PageFrame
+  active="security"
+  locale={locale}
+  title={m['security.meta.title']}
+  description={m['security.meta.description']}
+>
+  <section class="shell hero">
+    <p class="eyebrow">{m['security.hero.eyebrow']}</p>
+    <h1>{m['security.hero.title']}</h1>
+    <p class="lede">
+      {m['security.hero.lede']}
+    </p>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 01</span>
+      <span class="rule__label">{m['security.arch.rule']}</span>
+    </div>
+    <figure class="arch">
+      <img src="/architecture.svg" alt={m['security.arch.alt']} width="510" height="350" />
+      <figcaption class="mono">
+        {m['security.arch.caption']}
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
+      <span class="rule__label">{m['security.collect.rule']}</span>
+    </div>
+    <p>
+      {m['security.collect.intro']}
+    </p>
+    <ul class="ticks">
+      {collect.map((c) => (
+        <li>{c}</li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 03</span>
+      <span class="rule__label">{m['security.capture.rule']}</span>
+    </div>
+    <p>
+      {m['security.capture.intro']}
+    </p>
+    <ul class="ticks">
+      {capture.map((c) => (
+        <li>{c}</li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 04</span>
+      <span class="rule__label">{m['security.posture.rule']}</span>
+    </div>
+    <div class="grid grid--2">
+      {facts.map((f) => (
+        <article class="fact">
+          <h3>{f.k}</h3>
+          <p class="muted">{f.v}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 05</span>
+      <span class="rule__label">{m['security.license.rule']}</span>
+    </div>
+    <div class="panel license">
+      <div class="license__item">
+        <svg class="license__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <p><strong>{license[0].strong}</strong> {license[0].body}</p>
+      </div>
+      <div class="license__item">
+        <svg class="license__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p><strong>{license[1].strong}</strong> {license[1].body}</p>
+      </div>
+      <div class="license__item">
+        <svg class="license__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
+        <p><strong>{license[2].strong}</strong> {license[2].body}</p>
+      </div>
+    </div>
+  </section>
+</PageFrame>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-5);
+  }
+  .arch {
+    margin: 0;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    text-align: center;
+  }
+  .arch img {
+    display: block;
+    width: 100%;
+    max-width: 760px;
+    height: auto;
+    margin-inline: auto;
+  }
+  /* The diagram is authored light (dark ink). Invert it in dark mode. */
+  :root[data-theme="dark"] .arch img {
+    filter: invert(0.93) hue-rotate(180deg);
+  }
+  .arch figcaption {
+    margin-top: var(--space-4);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    max-width: 60ch;
+    margin-inline: auto;
+  }
+  .ticks {
+    list-style: none;
+    padding: 0;
+    max-width: var(--measure);
+  }
+  .ticks li {
+    position: relative;
+    padding-left: 1.75rem;
+    margin-bottom: var(--space-3);
+  }
+  .ticks li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 0.7em;
+    height: 0.7em;
+    background: var(--alive);
+    border-radius: 50%;
+  }
+  .fact {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+  .fact h3 {
+    margin-top: 0;
+    color: var(--brand-deep);
+  }
+  .license {
+    max-width: var(--measure);
+  }
+  .license__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  .license__item + .license__item {
+    margin-top: var(--space-4);
+  }
+  .license__icon {
+    flex-shrink: 0;
+    color: var(--brand);
+    margin-top: 0.2rem;
+  }
+  .license__item p {
+    margin: 0;
+    max-width: none;
+  }
+</style>

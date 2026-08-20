@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.e2e.screenshots
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import dev.jvmguard.ui.views.data.mbeans.MBeansView
 import dev.jvmguard.ui.views.data.transactions.TransactionsView
@@ -31,7 +32,8 @@ class DataViewsScreenshots : ScreenshotTest() {
         getByTestId(MBeansView.ID_TREE).waitFor()
         getByTestId(MBeansView.ID_FILTER).locator("input").fill("java.lang:type=Memory")
         getByText("Memory [type]").click()
-        assertThat(getByText("Attributes")).isVisible()
+        // Scoped to the tab: in ko the tab label is identical to the attributes grid header
+        assertThat(locator("vaadin-tab").filter(Locator.FilterOptions().setHasText(l("mbeans.tabs.attributes")))).isVisible()
         capture("mbean_browser")
     }
 

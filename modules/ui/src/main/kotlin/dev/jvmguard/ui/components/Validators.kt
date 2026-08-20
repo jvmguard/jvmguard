@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.components
 
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.data.binder.Validator
 
 object Validators {
@@ -8,6 +9,6 @@ object Validators {
 
     fun isValidEmail(value: String?): Boolean = !value.isNullOrEmpty() && EMAIL_PATTERN.matches(value)
 
-    fun optionalEmail(message: String = "Enter a valid email address."): Validator<String> =
+    fun optionalEmail(message: String = t("validation.email")): Validator<String> =
         Validator.from({ it.isNullOrEmpty() || EMAIL_PATTERN.matches(it) }, message)
 }

@@ -1,0 +1,116 @@
+---
+title: REST 보내기 API
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+## 소개
+
+jvmguard UI에서 데이터 뷰에는 표시된 데이터를 추가 처리를 위해 머신이 읽을 수 있는 형식으로 추출할 수 있는
+보내기 버튼이 있습니다.
+
+<Figure src="ui/export_button.png" />
+
+외부 데이터 분석을 자동화하고 jvmguard를 다른 모니터링 시스템에 연결하려면 이 수동 보내기는 비실용적입니다.
+이 경우 REST 보내기 API를 대신 사용할 수 있습니다.
+
+REST API는 기본적으로 활성화되어 있습니다. `config/application.yaml`에서 [restApiEnabled
+속성](/docs/ko/config/server-config)을 `false`로 설정하여 비활성화할 수 있습니다. 활성화된 경우 API는 웹
+서버와 같은 포트의 `/api` 경로에서 제공되며 HTTP 또는 HTTPS의 동일한 프로토콜을 사용합니다.
+
+활성화되면 웹 서버 포트로 HTTP(S) 호출을 수행하여 기록된 데이터를 검색할 수 있습니다. 웹 UI와 마찬가지로
+단일 VM의 데이터를 요청하거나 특정 VM 그룹의 누적 데이터를 요청할 수 있습니다.
+
+## API 사용
+
+API에 대한 액세스는 기본 HTTP 인증으로 보호됩니다. 즉, 자격 증명은 HTTPS를 프로토콜로 사용할 때만
+암호화됩니다. 사용자 이름은 jvmguard 로그인 이름이고 비밀번호는 jvmguard UI에서 생성하는 API 키입니다.
+데이터 보내기 엔드포인트는 액세스 수준에 관계없이 API 키를 가진 모든 사용자가 사용할 수 있습니다.
+`/api/triggerBackup` 엔드포인트에는 관리자가 필요합니다.
+
+API 키는 jvmguard UI 상단의 사용자 드롭다운에 있는 "계정 설정"에서 이동할 수 있는 "외부 액세스" 페이지에서
+만들 수 있습니다. 생성된 API 키는 한 번만 표시됩니다. 대화 상자를 확인하면 새 API 키가 활성화되고 이전 API
+키는 무효화됩니다.
+
+반환되는 형식은 HTTP 요청의 "Accept" 헤더에 따라 달라집니다. 다음 MIME 타입이 지원됩니다:
+
+* **text/plain**: 출력은 일반 텍스트입니다. 여러 열이 있는 경우 CSV 데이터가 기록됩니다. 계층적 데이터의
+경우 최상위 수준만 보내기됩니다. 구분자는 기본적으로 쉼표이지만 csvSeparator URL 쿼리 매개변수로 변경할 수
+있습니다. winLineBreak URL 쿼리 매개변수는 기본 줄 바꿈을 LF에서 CR+LF로 변경합니다. Accept 헤더가 전송되지
+않은 경우 이것이 기본값입니다.
+* **application/json**: 출력은 JSON 형식입니다. 다른 Accept 헤더에 관계없이 출력이 UTF-8 인코딩이 되도록
+하려면 application/json;charset=UTF-8을 사용하세요.
+* **application/xml**: 출력은 XML 형식입니다.
+
+REST API 호출은 `/api` 접두사와 하나 이상의 URL 세그먼트, 그리고 쿼리 매개변수 목록으로 구성됩니다. 예를
+들어, 웹 서버 포트가 8020인 경우
+
+```
+http://localhost:8020/api/groups
+```
+
+를 호출하면 jvmguard에 구성된 모든 그룹이 나열됩니다. URL
+
+```
+http://localhost:8020/api/transactions/callTree?group=Demo%2FWeb&interval=1h
+```
+
+는 VM 그룹 "Demo/Web"의 지난 1시간 동안의 호출 트리 데이터를 검색합니다. 그룹 이름에서 URL 인코딩된
+슬래시에 유의하세요.
+
+모든 시작 및 종료 시간은 현재 시간과 1970년 1월 1일 자정 UTC 사이의 밀리초로 지정하거나 다음 형식 중
+하나로 지정할 수 있습니다:
+
+| 형식 | 예 | 설명 |
+|---|---|---|
+| `yyyy-MM-dd'T'HH:mm:ss.SSS`<br />`yyyy-MM-dd'T'HH:mm:ss`<br />`yyyy-MM-dd` | 2026-07-02T22:40:00.000<br />2026-07-02T22:40:00<br />2026-07-02 | 서버의 현지 시간으로 된 날짜와 시간입니다. 모든 축약 버전은 0을 제공한 것과 같습니다. |
+| `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`<br />`yyyy-MM-dd'T'HH:mm:ss'Z'`<br />`yyyy-MM-dd'Z'` | 2026-07-02T22:40:00.000Z<br />2026-07-02T22:40:00Z<br />2026-07-02Z | UTC로 된 날짜와 시간입니다. 모든 축약 버전은 0을 제공한 것과 같습니다. |
+
+## API 문서
+
+다음 URL을 사용할 수 있습니다:
+
+* **/api/groups**: 모든 VM 그룹의 목록을 반환합니다. 그룹 계층 구분자는 슬래시입니다. 기록 옵션의 트리
+테이블에 있는 모든 노드가 너비 우선 방식으로 반환됩니다. XML과 JSON에서 "pool" 속성은 그룹이 VM 풀인지
+여부를 보여 줍니다.
+* **/api/vms**: VM 목록을 반환합니다. 이름에는 /api/groups URL이 반환하는 계층적 그룹 경로가 포함됩니다.
+개별 풀 VM은 반환되지 않습니다.
+
+| 쿼리 매개변수 | 설명 |
+|---|---|
+| group | VM을 나열할 특정 그룹입니다. 지정하지 않으면 모든 VM이 반환됩니다. |
+| connected | `true`로 설정하면 현재 연결된 VM만 반환됩니다. |
+
+* **/api/telemetries**: 아래 URL에서 사용할 수 있는 모든 텔레메트리 타입의 목록을 반환합니다.
+* **/api/telemetries/\{telemetryType\}**: 지정된 텔레메트리 데이터를 반환합니다. \{telemetryType\}의 값은
+위의 /api/telemetries URL이 반환하는 값 중 하나여야 합니다.
+
+| 쿼리 매개변수 | 설명 |
+|---|---|
+| interval | 텔레메트리 간격입니다. 가능한 값은 `10min`, `20min`, `40min`, `80min`, `3h`, `6h`, `12h`, `1d`, `3d`, `6d`, `12d`, `30d`, `60d`, `180d`입니다. |
+| startTime<br />endTime | 간격 외에 시작 또는 종료 시간을 지정할 수 있습니다. 시간 형식은 위를 참조하세요. 생략하면 현재 시간이 종료 시간으로 사용됩니다. |
+| vm<br />group | VM 이름 또는 그룹 이름을 지정할 수 있습니다. 생략하면 모든 VM이 사용됩니다. |
+| pretty | `true`로 설정하면 JSON 및 XML 출력이 보기 좋게 인쇄됩니다. |
+| csvSeparator | text/plain이 요청된 경우 사용자 정의 구분 문자를 지정할 수 있습니다. |
+| winLineBreak | `true`로 설정하고 text/plain이 요청된 경우 LF 줄 바꿈 대신 CR+LF 줄 바꿈이 기록됩니다. |
+
+* **/api/transactions/callTree**: 선택한 간격의 호출 트리 데이터를 반환합니다.
+* **/api/transactions/hotSpots**: 선택한 간격의 핫스팟 데이터를 반환합니다.
+* **/api/transactions/overdue**: 선택한 간격의 기한 초과 트랜잭션을 반환합니다.
+
+| 쿼리 매개변수 | 설명 |
+|---|---|
+| interval | 트랜잭션 간격입니다. 가능한 값은 `1min`, `10min`, `1h`, `1d`입니다. |
+| mergePolicies | `true`로 설정하면 서로 다른 정책 위반이 있는 트랜잭션이 단일 노드로 병합됩니다. |
+| startTime<br />endTime | 간격 외에 시작 또는 종료 시간을 지정할 수 있습니다. 시간 형식은 위를 참조하세요. 생략하면 현재 시간이 종료 시간으로 사용됩니다. |
+| vm<br />group | VM 이름 또는 그룹 이름을 지정할 수 있습니다. 생략하면 모든 VM이 사용됩니다. |
+| pretty | `true`로 설정하면 JSON 및 XML 출력이 보기 좋게 인쇄됩니다. |
+| csvSeparator | text/plain이 요청된 경우 사용자 정의 구분 문자를 지정할 수 있습니다. |
+| winLineBreak | `true`로 설정하고 text/plain이 요청된 경우 LF 줄 바꿈 대신 CR+LF 줄 바꿈이 기록됩니다. |
+
+* **/api/triggerBackup**: 데이터베이스 백업을 트리거합니다. 이 엔드포인트에는 관리자가 필요하며 백업
+디렉터리의 절대 디렉터리 경로를 일반 텍스트로 반환합니다. 백업 파일은 jvmguard 데이터 디렉터리 내부의
+`backup` 디렉터리에 기록됩니다. 이러한 백업을 복원하려면 jvmguard 서버를 중지하고 `db` 디렉터리의 내용을
+`backup` 디렉터리의 내용으로 교체한 다음 jvmguard 서버를 다시 시작하세요. REST API를 사용하기 어렵거나
+jvmguard 설치에서 REST API를 비활성화한 경우 jvmguard 데이터 디렉터리에 `trigger_backup`이라는 파일을
+만들 수도 있습니다. 백업이 성공적으로 완료되면 파일이 삭제되고 백업이 수행됩니다.

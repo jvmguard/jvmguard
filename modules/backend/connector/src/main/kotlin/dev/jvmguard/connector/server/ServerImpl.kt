@@ -2,6 +2,7 @@ package dev.jvmguard.connector.server
 
 import dev.jvmguard.agent.config.base.Identifiable
 import dev.jvmguard.collector.api.TelemetryProvider
+import dev.jvmguard.common.LocalizedLoginException
 import dev.jvmguard.common.Loggers
 import dev.jvmguard.common.JvmGuardConfig
 import dev.jvmguard.common.JvmGuardProperties
@@ -95,10 +96,10 @@ class ServerImpl(
 
     override fun authenticate(loginName: String, password: String, authenticatorCode: String?): User {
         if (password.isEmpty()) {
-            throw FailedLoginException("The password cannot be empty.")
+            throw LocalizedLoginException("login.emptyPassword", "The password cannot be empty.")
         }
         if (loginThrottle.isThrottled(loginName)) {
-            throw FailedLoginException("Too many failed login attempts. Please try again later.")
+            throw LocalizedLoginException("login.throttled", "Too many failed login attempts. Please try again later.")
         }
         val user = try {
             authenticateCredentials(loginName, password, authenticatorCode)
@@ -143,7 +144,7 @@ class ServerImpl(
                     providers.size,
                     providers.map { "issuer=${it.issuerUri}, enabled=${it.enabled}" },
                 )
-                throw FailedLoginException("No SSO provider configured for issuer: $issuer")
+                throw LocalizedLoginException("login.sso.noProvider", "No SSO provider configured for issuer: $issuer", issuer)
             }
 
         if (provider.domainRestriction.isNotEmpty()) {
@@ -274,9 +275,9 @@ class ServerImpl(
 
     companion object {
         private fun throwInvalidAuthenticatorCode(): Nothing =
-            throw FailedLoginException("The authenticator code is not correct.")
+            throw LocalizedLoginException("login.badCode", "The authenticator code is not correct.")
 
         private fun throwInvalidUser(): Nothing =
-            throw FailedLoginException("The combination of user and password is incorrect.")
+            throw LocalizedLoginException("login.badCredentials", "The combination of user and password is incorrect.")
     }
 }

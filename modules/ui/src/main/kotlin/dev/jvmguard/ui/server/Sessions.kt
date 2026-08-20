@@ -78,6 +78,9 @@ object Sessions {
 
     fun setCurrent(session: UserSession?) {
         VaadinSession.getCurrent().setAttribute(UserSession::class.java, session)
+        if (session != null) {
+            Locales.storedLocale()?.let { UI.getCurrent()?.locale = it }
+        }
     }
 
     fun isLoggedIn(): Boolean = current() != null

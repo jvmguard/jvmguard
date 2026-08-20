@@ -105,7 +105,7 @@ interface ServerConnection {
 
     fun sendTestMail(recipient: String, subject: String, content: String, smtpConfig: SmtpConfig)
 
-    fun testSsoDiscovery(issuerUri: String): String
+    fun testSsoDiscovery(issuerUri: String): SsoDiscoveryResult
 
     fun modifyGroupConfigs(listModification: ListModification<GroupConfig>)
 

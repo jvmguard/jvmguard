@@ -1,5 +1,6 @@
 package dev.jvmguard.common.config
 
+import dev.jvmguard.common.LocalizedSecurityException
 import dev.jvmguard.agent.config.VmType
 import dev.jvmguard.common.helper.DeepCopy
 import dev.jvmguard.common.helper.GroupHelper
@@ -183,7 +184,7 @@ class ConfigManager(private val configStorage: ConfigStorage) {
 
     private fun checkAgainstGroupRoots(vmIdentifier: VmIdentifier, groupRoots: List<VmIdentifier>) {
         if (!GroupHelper.checkAgainstGroupRoots(vmIdentifier, groupRoots)) {
-            throw SecurityException("Insufficient rights for modifying group config $vmIdentifier")
+            throw LocalizedSecurityException("error.groupRights", "Insufficient rights for modifying group config $vmIdentifier", vmIdentifier)
         }
     }
 

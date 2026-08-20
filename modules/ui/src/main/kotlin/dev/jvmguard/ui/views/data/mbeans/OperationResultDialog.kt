@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.data.mbeans
 
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Key
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -15,14 +16,14 @@ class OperationResultDialog(
 ) : JvmGuardDialog() {
 
     init {
-        headerTitle = "Operation result"
+        headerTitle = t("mbeans.operation.result.title")
         width = "46rem"
         height = "32rem"
 
         val tree = TreeGrid<AttributeNode>().apply {
             addClassName("jvmguard-mbean-attribute-tree")
-            addHierarchyColumn { it.name }.setHeader("Name").setFlexGrow(1).setSortable(false)
-            addComponentColumn(::attributeValueCell).setHeader("Value").setFlexGrow(1).setSortable(false)
+            addHierarchyColumn { it.name }.setHeader(t("vms.tree.name")).setFlexGrow(1).setSortable(false)
+            addComponentColumn(::attributeValueCell).setHeader(t("mbeans.value.header")).setFlexGrow(1).setSortable(false)
             setSizeFull()
         }
 
@@ -33,7 +34,7 @@ class OperationResultDialog(
         tree.expandRecursively(treeData.rootItems, Int.MAX_VALUE)
 
         add(tree)
-        val ok = Button("OK") { close() }.apply { addThemeVariants(ButtonVariant.PRIMARY) }
+        val ok = Button(t("common.ok")) { close() }.apply { addThemeVariants(ButtonVariant.PRIMARY) }
         ok.addClickShortcut(Key.ENTER).listenOn(this)
         footer.add(ok)
     }

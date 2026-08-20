@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.inbox
 
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Key
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -9,12 +10,12 @@ import com.vaadin.flow.component.html.Pre
 class InboxMessageDialog(title: String, message: String) : JvmGuardDialog() {
 
     init {
-        headerTitle = title.ifBlank { "Message" }
+        headerTitle = title.ifBlank { t("inbox.message.title") }
         width = "48rem"
 
         add(Pre(message).apply { addClassName("jvmguard-inbox-message") })
 
-        val close = Button("Close") { close() }.apply {
+        val close = Button(t("common.close")) { close() }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_CLOSE
         }

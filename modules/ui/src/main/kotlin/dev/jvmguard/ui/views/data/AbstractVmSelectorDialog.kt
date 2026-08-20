@@ -4,6 +4,7 @@ import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.components.JvmGuardDialog
 import dev.jvmguard.ui.components.SelectableTreeGrid
 import dev.jvmguard.ui.components.vmTypeIcon
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Key
 import com.vaadin.flow.component.button.Button
@@ -39,7 +40,7 @@ abstract class AbstractVmSelectorDialog(
         tree.setDataProvider(TreeDataProvider(treeData))
         tree.addItemDoubleClickListener { if (selectable(it.item)) confirm(it.item) }
 
-        val select = Button("Select") {
+        val select = Button(t("vms.selector.select")) {
             tree.asSingleSelect().value?.takeIf(selectable)?.let(::confirm)
         }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
@@ -61,7 +62,7 @@ abstract class AbstractVmSelectorDialog(
         tree.select(current)
 
         add(tree)
-        footer.add(Button("Cancel") { close() }, select)
+        footer.add(Button(t("common.cancel")) { close() }, select)
     }
 
     protected abstract fun configureColumns()
@@ -92,7 +93,7 @@ abstract class AbstractVmSelectorDialog(
 
     protected open fun nodeRow(identifier: VmIdentifier): Component {
         val icon = vmTypeIcon(identifier.type).create().apply { setSize("1.2em") }
-        val name = if (identifier.isRoot) "All JVMs" else identifier.toUnqualified().name
+        val name = if (identifier.isRoot) t("vms.allJvms") else identifier.toUnqualified().name
         return HorizontalLayout(icon, Span(name)).apply {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
             isSpacing = false

@@ -1,0 +1,18 @@
+---
+title: jvmguard 架构
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+<Figure src="architecture.svg" />
+
+jvmguard 由两个主要部分组成：**服务器**和 **Java 代理**。Java 代理加载到受监控的 VM 中并记录数据。代理连接到
+jvmguard 服务器。服务器定期查询所有已连接的代理并处理它们的数据。历史信息写入数据库。用户通过 Web 浏览器登录
+jvmguard 服务器来分析记录的数据。
+
+jvmguard 服务器内部由三个组件构成：
+
+* 收集器接受来自受监控 VM 中 jvmguard 代理的 TCP 连接。这些连接可以加密和认证，因此适用于广域网。收集器还负责
+合并数据库中的数据、触发触发器并执行其操作。
+* 嵌入式 H2 数据库将所有持久数据（包括记录的数据和配置）存储在一个名为 "jvmguard" 的单个数据库文件中。
+* UI 服务器接受 HTTP 或 HTTPS 连接，用户可以通过它登录、查看和分析收集到的数据以及配置服务器。

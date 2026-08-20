@@ -2,14 +2,13 @@ package dev.jvmguard.ui.components.recording.sets
 
 import dev.jvmguard.agent.config.base.Identifiable
 import dev.jvmguard.data.config.sets.AbstractSet
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 
 class SetSpec<T : Identifiable, S : AbstractSet<T>>(
     val setClass: Class<S>,
-    val singularName: String,
-    val pluralName: String,
     val addSubtitle: String,
     val saveSubtitle: String,
     val loadSets: () -> Collection<S>,
@@ -19,16 +18,16 @@ class SetSpec<T : Identifiable, S : AbstractSet<T>>(
 )
 
 fun <T : Identifiable, S : AbstractSet<T>> setActionButtons(spec: SetSpec<T, S>): List<Component> {
-    val add = Button("Add set") { AddSetDialog(spec).open() }.apply {
+    val add = Button(t("recording.set.add")) { AddSetDialog(spec).open() }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
         testId = ID_ADD
-        setTooltipText("Add a saved ${spec.singularName} to this group")
+        setTooltipText(t("recording.set.add.tooltip"))
     }
-    val save = Button("Save set") { SaveSetDialog(spec).open() }.apply {
+    val save = Button(t("recording.set.save")) { SaveSetDialog(spec).open() }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
         testId = ID_SAVE
         isEnabled = spec.currentItems().isNotEmpty()
-        setTooltipText("Save the current ${spec.pluralName} as a reusable ${spec.singularName}")
+        setTooltipText(t("recording.set.save.tooltip"))
     }
     return listOf(add, save)
 }

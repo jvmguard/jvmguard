@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.data.mbeans
 
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Key
 
 class AttributeEditDialog(
@@ -11,11 +12,11 @@ class AttributeEditDialog(
     private val form = MBeanValuesForm(listOf(spec))
 
     init {
-        headerTitle = "Edit attribute"
+        headerTitle = t("mbeans.attribute.edit.title")
         width = "32rem"
 
         add(form)
-        val save = confirmFooter("Save", ID_SAVE) { save() }
+        val save = confirmFooter(t("common.save"), ID_SAVE) { save() }
         save.addClickShortcut(Key.ENTER).listenOn(this)
     }
 

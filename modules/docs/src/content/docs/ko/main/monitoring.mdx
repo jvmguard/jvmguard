@@ -1,0 +1,130 @@
+---
+title: JVM 모니터링
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+jvmguard가 설치되면 로컬 머신에서 실행되는 JVM에 에이전트를 추가할 수 있습니다.
+
+## 기본 메커니즘
+
+jvmguard 에이전트는 **Java 에이전트**입니다. `-javaagent` JVM 옵션을 지정하여 VM에 로드됩니다. Java
+에이전트는 클래스가 로드될 때 계측할 수 있고 이미 로드된 클래스를 재변환할 수 있습니다.
+
+모니터링할 VM을 준비하려면 애플리케이션 서버나 애플리케이션의 시작 스크립트에 삽입해야 하는 실제 JVM 옵션을
+알아야 합니다. jvmguard 에이전트는 이미 jvmguard 설치 디렉터리에 있으며, jvmguard UI는 올바른 `-javaagent`
+JVM 옵션을 구성하는 방법을 보여 줍니다.
+
+시작하려면 헤더의 "VM 추가" 버튼을 클릭하세요.
+
+## 로컬 VM 추가
+
+jvmguard 에이전트는 이미 jvmguard 설치 디렉터리에 있으므로 로컬에서 실행 중인 VM을 쉽게 모니터링할 수
+있습니다. "VM 추가" 대화 상자는 추가 구성이 없는 가장 간단한 경우에 대한 완전한 `-javaagent` JVM 옵션을
+표시합니다. 단일 VM을 모니터링하는 데 적합합니다.
+
+<Figure src="ui/add_vms_local.png" />
+
+"server" 옵션이 없으면 에이전트는 jvmguard 서버가 localhost에서 실행 중이라고 가정합니다. 그룹 및 풀 이름에
+대한 추가 지침은 아래에서 설명합니다.
+
+## VM 이름 지정
+
+여러 VM을 모니터링하는 경우 **jvmguard UI에서 식별할 수 있도록** 이름을 지정해야 합니다. VM 이름을
+지정하려면 `-javaagent` JVM 옵션에 `name` 옵션을 전달합니다:
+
+```
+-javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name]
+```
+
+각 이름은 동시에 하나의 VM만 사용할 수 있습니다. 같은 이름으로 모니터링을 요청하는 두 번째 VM이 있으면 해당
+VM이 이름을 가져가고 이전에 연결된 VM은 연결이 끊어집니다. 고유한 이름을 지정할 수 없는 VM 풀이 있는 경우 아래의
+VM 풀 섹션을 참조하세요.
+
+{/* vm_duplicate_names.svg 제거됨: 이전 "두 번째 VM이 거부됨" 동작을 보여 주었습니다. 실제 동작은
+     last-writer-wins로, 새 VM이 이전 VM을 대체하고 이전 VM의 연결이 끊어집니다. */}
+
+VM 이름 외에도 VM을 계층 구조로 그룹화할 수 있습니다. 기본적으로 VM은 최상위 그룹에 삽입됩니다. 다른 그룹에
+지정하려면 JVM 옵션에 `group` 옵션을 설정합니다:
+
+```
+-javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name],group=[group name]
+```
+
+그룹 이름에서 계층 수준은 `Web/Workers/Gen3`처럼 슬래시로 구분합니다. 완전한 `-javaagent` 매개변수는
+다음과 같습니다:
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,name=web,group=Web/Workers/Gen3
+```
+
+VM 이름은 같은 그룹 내에서 고유해야 합니다.
+
+## VM 풀
+
+때로는 VM에 고유한 이름을 구성할 수 없습니다. 예를 들어 **인스턴스가 동적으로 프로비저닝되는** 클라우드
+환경이 그렇습니다. 이 경우 VM을 VM 풀에 지정할 수 있습니다:
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,pool=Web/Workers
+```
+
+`group` 옵션과 마찬가지로 `pool` 옵션은 계층 구분자로 슬래시를 사용하는 계층적 이름을 받습니다. `pool`
+옵션은 `name` 옵션과 결합할 수 없습니다. `group` 옵션과는 결합할 수 있으며, 이 경우 풀이 해당 그룹 아래에
+중첩됩니다.
+
+풀에서 모니터링되는 VM에는 고유 식별자가 포함된 이름이 부여됩니다. VM이 분리되면 이 식별자는 다시 사용되지
+않습니다. 이름이 지정된 VM과 달리 단일 풀 VM의 데이터는 더 짧은 기간 동안만 보관되므로 인스턴스별 장기
+이력은 없습니다. 그러나 전체 풀의 이력을 따라가며 시간에 따른 추세를 분석할 수 있습니다.
+
+<Figure src="vm_pools.svg" />
+
+## 서버 포트
+
+기본적으로 jvmguard 서버는 포트 **8847**에서 VM 연결을 수신합니다. 모니터링되는 VM이 jvmguard 서버에
+도달할 수 있도록 **방화벽에서 열어야 하는** 포트입니다.
+
+`config/application.yaml`에서 [`vmPort` 속성](/docs/ko/config/server-config)을 설정하여 jvmguard 서버가
+다른 포트를 사용하도록 구성할 수 있습니다. 포트가 이미 사용 중이거나 같은 머신에 jvmguard 인스턴스를 여러
+개 설치하는 경우 필요합니다.
+
+에이전트에 이러한 비기본 포트를 알리려면 `-javaagent` JVM 옵션에 `port` 옵션을 추가해야 합니다. 예를 들어:
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,port=8912,name=test
+```
+
+## 로깅
+
+jvmguard 에이전트는 Linux/Unix에서는 `$HOME/.jvmguard/log` 디렉터리에, Windows에서는
+`%USERPROFILE%\.jvmguard\log` 디렉터리에 오류를 기록합니다. 로그 파일은 필요할 때 생성되며, 기록되는
+것이 없으면 파일이 생성되지 않습니다. 로그 파일의 이름은 `<VM name>.log`이며, &lt;VM name&gt;은 `name`
+또는 `pool` 매개변수의 값입니다. `name`과 `pool`이 모두 지정되지 않은 경우 파일 이름은 `jvm.log`입니다.
+
+다른 파일에 기록하려면 `-javaagent` JVM 옵션에 `logFile=<path to log file>` 옵션을 추가할 수 있습니다.
+로깅을 완전히 비활성화하려면 `logEnabled=false` 옵션을 추가할 수 있습니다.
+
+## 암호화 및 인증
+
+상호 인증과 암호화는 `jvmguard.jar` 파일과 같은 디렉터리에 있는 에이전트 키스토어 파일 `agent.ks`로
+활성화됩니다. 에이전트 키스토어는 서버에서 생성되며 jvmguard 데이터 디렉터리 아래의 `ssl` 디렉터리에
+있습니다.
+
+`config/application.yaml`의 `vmUseSsl` 속성이 `true`로 설정되면 에이전트 키스토어 파일이 jvmguard UI에서
+다운로드하는 에이전트 파일에 자동으로 추가됩니다. 이 경우 암호화와 인증이 즉시 작동합니다.
+
+모니터링되는 VM을 설정한 후 암호화와 인증을 켜거나 끄면 다음 변경 사항을 수동으로 적용해야 합니다:
+
+* **암호화 켜기**: [jvmguard 데이터 디렉터리]/ssl/agent.ks를 찾아 VM이 모니터링되는 모든 머신의 에이전트
+설치 위치로 복사합니다. 키스토어 파일은 jvmguard.jar 파일과 같은 디렉터리에 복사해야 합니다. 올바른 에이전트
+키스토어가 없으면 서버가 에이전트의 연결을 거부합니다.
+* **암호화 끄기**: VM이 모니터링되는 모든 머신의 에이전트 설치 위치에서 jvmguard.jar 파일 옆에 있는
+agent.ks 파일을 삭제합니다. 해당 파일이 있고 서버가 암호화를 사용하지 않으면 에이전트가 서버에 연결을
+거부합니다.
+
+에이전트 키스토어 파일을 다른 경로에 보관하려면 `-javaagent` VM 매개변수에 `keyStore` 옵션을 추가합니다.
+예를 들어:
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,keyStore=/sec/agent.ks,name=test
+```

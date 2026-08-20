@@ -4,6 +4,7 @@ import dev.jvmguard.data.vmdata.VM
 import dev.jvmguard.ui.components.SelectableTreeGrid
 import dev.jvmguard.ui.components.cellRow
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.html.Span
@@ -30,7 +31,7 @@ class MBeanBrowserPanel(
         private set
 
     private val filterField = TextField().apply {
-        placeholder = "Filter MBeans"
+        placeholder = t("mbeans.filter.placeholder")
         testId = ID_FILTER
         valueChangeMode = ValueChangeMode.LAZY
         isClearButtonVisible = true
@@ -49,8 +50,8 @@ class MBeanBrowserPanel(
 
     private val attributeTree = TreeGrid<AttributeNode>().apply {
         testId = ID_ATTRIBUTES
-        addHierarchyColumn { it.name }.setHeader("Attribute").setFlexGrow(1).setSortable(false)
-        addComponentColumn(::attributeValueCell).setHeader("Value").setFlexGrow(1).setSortable(false)
+        addHierarchyColumn { it.name }.setHeader(t("mbeans.attribute.header")).setFlexGrow(1).setSortable(false)
+        addComponentColumn(::attributeValueCell).setHeader(t("mbeans.value.header")).setFlexGrow(1).setSortable(false)
         setSizeFull()
         style.set("user-select", "none").set("-webkit-user-select", "none")
         addSelectionListener { onAttributeSelected(it.firstSelectedItem.orElse(null)) }

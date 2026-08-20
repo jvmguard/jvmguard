@@ -8,6 +8,7 @@ import dev.jvmguard.data.vmdata.TelemetryType
 import dev.jvmguard.ui.components.*
 import dev.jvmguard.ui.components.recording.RecordingGrid
 import dev.jvmguard.ui.components.recording.triggerTypeIcon
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.html.Span
@@ -22,9 +23,9 @@ class TriggerGrid(
 
     private val grid = Grid<Trigger>().apply {
         testId = ID_GRID
-        addComponentColumn(::nameCell).setHeader("Trigger").setFlexGrow(1)
+        addComponentColumn(::nameCell).setHeader(t("trigger.grid.header")).setFlexGrow(1)
         addComponentColumn(::rowActions).setKey(ACTIONS_KEY).setAutoWidth(true).setFlexGrow(0)
-        setEmptyStateComponent(emptyState("No triggers yet. Use \"Add trigger\" to create one."))
+        setEmptyStateComponent(emptyState(t("trigger.grid.empty")))
         addItemDoubleClickListener { edit(it.item) }
         editDeleteKeys(::edit, ::delete)
         enableRowReorder(items = triggers, onReordered = ::changed)
@@ -44,7 +45,7 @@ class TriggerGrid(
     fun addTrigger(type: TriggerType) {
         // A threshold-violation trigger references a group threshold; without one there is nothing to pick.
         if (type == TriggerType.THRESHOLD && thresholds().isEmpty()) {
-            Notifications.show("Define a threshold first in the Thresholds step, then add a threshold-violation trigger.")
+            Notifications.show(t("trigger.grid.defineThresholdFirst"))
             return
         }
         openDialog(type.createTrigger(), isNew = true) {
@@ -73,26 +74,26 @@ class TriggerGrid(
 
     private fun nameCell(trigger: Trigger): Component {
         val icon = triggerTypeIcon(trigger.triggerType).create().apply { setSize("1.2em") }
-        val name = Span(trigger.description)
+        val name = Span(describe(trigger, telemetryTypes))
         return if (trigger.isEnabled) {
             cellRow(icon, name)
         } else {
-            cellRow(icon, name, Span("(disabled)").apply { addClassName("jvmguard-row-detail") })
+            cellRow(icon, name, Span(t("trigger.disabled")).apply { addClassName("jvmguard-row-detail") })
         }
     }
 
     private fun rowActions(trigger: Trigger): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", "trigger-row-menu-${triggers().indexOf(trigger)}") {
-            addItem("Edit") { edit(trigger) }
-            addItem(if (trigger.isEnabled) "Disable" else "Enable") {
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "trigger-row-menu-${triggers().indexOf(trigger)}") {
+            addItem(t("common.edit")) { edit(trigger) }
+            addItem(t(if (trigger.isEnabled) "common.disable" else "common.enable")) {
                 trigger.isEnabled = !trigger.isEnabled
                 changed()
             }
-            addItem("Delete") { delete(trigger) }
+            addItem(t("common.delete")) { delete(trigger) }
         }
 
     private fun delete(trigger: Trigger) {
-        confirm("Delete trigger", "Delete this trigger?", "Delete") {
+        confirm(t("recording.delete.trigger"), t("trigger.delete.text"), t("common.delete")) {
             triggers().remove(trigger)
             changed()
         }

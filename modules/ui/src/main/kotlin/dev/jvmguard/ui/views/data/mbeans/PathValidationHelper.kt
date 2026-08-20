@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.data.mbeans
 
 import dev.jvmguard.mbean.common.MBeanHelper
+import dev.jvmguard.ui.server.t
 import javax.management.openmbean.ArrayType
 import javax.management.openmbean.TabularType
 
@@ -8,17 +9,17 @@ object PathValidationHelper {
 
     fun validatePath(item: AttributeNode, parentOf: (AttributeNode) -> AttributeNode?): String? {
         if (!OpenTypeHelper.isNumberType(item.openType)) {
-            return "Only number values can be selected"
+            return t("mbeans.path.onlyNumbers")
         }
         var current: AttributeNode? = item
         while (current != null) {
             val openType = current.openType
             if (openType is TabularType) {
                 if (!MBeanHelper.isSimpleKeyMap(openType)) {
-                    return "Tabular types other than simple maps are not supported for custom telemetries"
+                    return t("mbeans.path.tabularNotSupported")
                 }
             } else if (openType is ArrayType<*>) {
-                return "Arrays are not supported for custom telemetries"
+                return t("mbeans.path.arraysNotSupported")
             }
             current = parentOf(current)
         }

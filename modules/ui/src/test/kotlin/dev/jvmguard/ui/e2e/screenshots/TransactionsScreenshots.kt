@@ -11,7 +11,7 @@ class TransactionsScreenshots : ScreenshotTest() {
         login(demo = true)
         open("transactions?${vmQuery(DEMO_VM)}")
         getByTestId(TransactionsView.ID_GRID).waitFor()
-        getByTestId(TransactionsView.ID_MODE).getByText("Hot spots").click()
+        getByTestId(TransactionsView.ID_MODE).getByText(l("enum.TransactionMode.HOT_SPOTS")).click()
         getByTestId(TransactionsView.ID_GRID).waitFor()
         capture("hotspots")
     }

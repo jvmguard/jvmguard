@@ -1,5 +1,6 @@
 package dev.jvmguard.common.config
 
+import dev.jvmguard.common.LocalizedImportException
 import com.grack.nanojson.JsonObject
 import com.grack.nanojson.JsonParser
 import dev.jvmguard.agent.tools.importer.ConfigFileFormat
@@ -72,7 +73,7 @@ class ImportManager(
             when (val config = readConfig(FileInputStream(configFile))) {
                 is RecordingConfig -> importRecordingConfig(config)
                 is ServerInitConfig -> importServerInitConfig(config, null)
-                else -> throw IOException("Wrong file format")
+                else -> throw LocalizedImportException("impex.wrongFormat", "Wrong file format")
             }
             true
         } catch (e: Exception) {
@@ -86,14 +87,14 @@ class ImportManager(
                 JsonParser.`object`().from(reader)
             }
         } catch (e: Exception) {
-            throw IOException("Could not parse config file as JSON", e)
+            throw LocalizedImportException("impex.notJson", "Could not parse config file as JSON", e)
         }
         val version = root.getInt(ConfigFileFormat.KEY_VERSION, 0)
         if (version == 0) {
-            throw IOException("Missing version in config file")
+            throw LocalizedImportException("impex.missingVersion", "Missing version in config file")
         }
         if (version > ConfigFileFormat.FILE_VERSION) {
-            throw IOException("Config file version $version is too new, supported version: " + ConfigFileFormat.FILE_VERSION)
+            throw LocalizedImportException("impex.versionTooNew", "Config file version $version is too new, supported version: " + ConfigFileFormat.FILE_VERSION, null, version, ConfigFileFormat.FILE_VERSION)
         }
         val type = root.getString(ConfigFileFormat.KEY_TYPE, null)
         try {
@@ -111,7 +112,7 @@ class ImportManager(
         } catch (e: IOException) {
             throw e
         } catch (e: Exception) {
-            throw IOException("Could not read config", e)
+            throw LocalizedImportException("impex.readFailed", "Could not read config", e)
         }
         return null
     }

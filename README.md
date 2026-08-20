@@ -27,6 +27,16 @@ The build auto-provisions a Java 25 toolchain. Once you see `Server started`, op
 **http://localhost:8020/** and complete the setup. Use the "Add VMs" button in the
 header of the web UI to start monitoring.
 
+## Localization
+
+The web UI, documentation and website are localized into **Korean**, **Japanese** and
+**Simplified Chinese**. 
+
+<picture>
+  <source srcset="https://raw.githubusercontent.com/jvmguard/jvmguard/main/modules/website/public/images/ui/method_parameter_config_zh-CN_dark.png" media="(prefers-color-scheme: dark)">
+  <img src="https://raw.githubusercontent.com/jvmguard/jvmguard/main/modules/website/public/images/ui/method_parameter_config_zh-CN.png" alt="The jvmguard web UI in Simplified Chinese, configuring transaction naming from a method parameter.">
+</picture>
+
 ## Documentation
 
 Full documentation, including installation, configuration, triggers, and the REST/MCP APIs,

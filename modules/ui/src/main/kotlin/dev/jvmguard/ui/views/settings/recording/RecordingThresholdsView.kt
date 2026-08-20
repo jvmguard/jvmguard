@@ -10,26 +10,23 @@ import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.components.recording.RecordingGrid
 import dev.jvmguard.ui.components.recording.thresholds.ThresholdGrid
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.PROFILER)
 @Route(value = "recording/thresholds", layout = MainLayout::class)
-@PageTitle("jvmguard: Recording")
 class RecordingThresholdsView : AbstractRecordingListView<Threshold, ThresholdSet>() {
 
     override val overrideCategory: (GroupConfig) -> OptionalConfig get() = { it.thresholdSettings }
-    override val overrideLabel: String get() = "Override threshold settings for this group"
+    override val overrideLabel: String get() = t("recording.settings.thresholds.override")
 
-    override val addButtonText: String get() = "Add threshold"
+    override val addButtonText: String get() = t("recording.settings.thresholds.add")
     override val addButtonTestId: String get() = "threshold-add"
     override val setClass: Class<ThresholdSet> get() = ThresholdSet::class.java
-    override val singularSetName: String get() = "threshold set"
-    override val pluralSetName: String get() = "threshold sets"
-    override val addSetSubtitle: String get() = "The thresholds in the selected set are added to this group."
-    override val saveSetSubtitle: String get() = "Saved threshold sets can be added to the thresholds of other groups."
+    override val addSetSubtitle: String get() = t("recording.settings.set.addSubtitle.threshold")
+    override val saveSetSubtitle: String get() = t("recording.settings.set.saveSubtitle.threshold")
 
     override fun items(selection: VmIdentifier): MutableList<Threshold>? =
         Sessions.recordingDraft().groupConfig(selection)?.thresholdSettings?.thresholds

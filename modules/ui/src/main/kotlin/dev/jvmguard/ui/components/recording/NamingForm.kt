@@ -3,6 +3,7 @@ package dev.jvmguard.ui.components.recording
 import dev.jvmguard.agent.config.transactions.ReentryInhibition
 import dev.jvmguard.agent.config.transactions.TransactionNaming
 import dev.jvmguard.ui.components.EnumSelect
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.html.H5
 import com.vaadin.flow.component.html.Span
@@ -16,12 +17,12 @@ class NamingForm : VerticalLayout() {
 
     private val binder = Binder(TransactionNaming::class.java)
 
-    private val active = Checkbox("Assign a custom transaction name").apply { testId = "naming-active" }
-    private val reentry = EnumSelect("", ReentryInhibition::class.java) { it.toString() }
-    private val group = TextField("Group name").apply { width = "20rem" }
+    private val active = Checkbox(t("recording.naming.active")).apply { testId = "naming-active" }
+    private val reentry = EnumSelect("", ReentryInhibition::class.java)
+    private val group = TextField(t("recording.naming.groupName")).apply { width = "20rem" }
     private val elementsEditor = NamingElementsEditor()
 
-    private val reentryRow = HorizontalLayout(Span("Suppress nested transactions"), reentry).apply {
+    private val reentryRow = HorizontalLayout(Span(t("recording.naming.suppressNested")), reentry).apply {
         defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
         isPadding = false
     }
@@ -36,7 +37,7 @@ class NamingForm : VerticalLayout() {
         binder.forField(active).bind({ it.isActive }, { n, v -> n.isActive = v })
         binder.forField(reentry).bind({ it.reentryInhibition }, { n, v -> n.reentryInhibition = v })
 
-        add(active, reentryRow, group, H5("Naming elements").apply { addClassName("jvmguard-form-subhead") }, elementsEditor)
+        add(active, reentryRow, group, H5(t("recording.naming.elements")).apply { addClassName("jvmguard-form-subhead") }, elementsEditor)
         setFlexGrow(1.0, elementsEditor)
     }
 

@@ -1,0 +1,88 @@
+---
+title: 프로덕션 프로파일링
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+프로덕션에서 프로파일러를 항상 실행해서는 안 되는 데에는 여러 가지 이유가 있습니다. 첫째, 프로파일링 설정에
+따라 허용할 수 없을 정도로 높을 수 있는 오버헤드가 있습니다. 프로파일러는 발생하는 오버헤드에 대한 명시적
+보장 없이 유용한 정보의 추출을 최대화하는 방향으로 설계됩니다. 또한 JVM의 네이티브 프로파일링
+인터페이스(JVMTI)를 사용하는 것은 프로덕션 환경에서 추가적인 위험입니다. 비표준 가비지 컬렉터나 다른 JVM
+튜닝 옵션을 사용하는지에 따라 안정성 문제가 있을 수 있습니다. JVM은 JVMTI가 없는 경우만큼 JVMTI와 함께
+광범위하게 테스트되지 않기 때문입니다.
+
+그러나 성능 문제에 대한 최선의 방어는 심층 방어입니다. 때로는 APM 도구와 연속 프로파일러에서 사용할 수 있는
+저오버헤드 모니터링 및 샘플링 기술로 얻을 수 있는 것보다 더 많은 정보가 필요한 상황이 있습니다.
+
+## JProfiler 스냅샷 기록
+
+이러한 경우를 위해 jvmguard는 필요할 때 **JProfiler 프로파일링 에이전트**를 모니터링되는 JVM에 로드할 수
+있습니다. JProfiler의 네이티브 JVMTI 라이브러리는 프로덕션 사용에 최적화되어 있으며 jvmguard는 이를
+샘플링 모드로 기록하도록 구성하므로 오버헤드가 낮게 유지됩니다. 특히 Java 17 이상에서는 JVMTI 샘플링의
+오버헤드가 [비동기 샘플링과
+비슷합니다](https://www.ej-technologies.com/blog/2024/02/why-jvmti-sampling-is-better-than-async-sampling-on-modern-jvms/).
+이 작업의 결과는 jvmguard에서 다운로드하여 JProfiler에서 열 수 있는 JProfiler 스냅샷 파일입니다.
+
+직접 설치하거나 복사할 필요가 없습니다. 주어진 플랫폼에 대해 JProfiler 스냅샷을 처음 기록할 때 jvmguard는
+모니터링되는 VM의 운영 체제와 아키텍처에 맞는 JProfiler 에이전트 패키지를 다운로드하여 캐시하고 에이전트로
+전송합니다. 이후 기록에서는 캐시된 패키지를 재사용합니다. 이를 위해서는 jvmguard 서버가 JProfiler 웹
+사이트에 연결할 수 있어야 합니다.
+
+프로파일링 에이전트가 로드되면 해당 JVMTI를 다시 끌 수 없습니다. JVM이 실행되는 동안 이 상태가 유지됩니다.
+그러나 일반적으로 데이터 기록 없이 로드된 에이전트의 오버헤드는 1% 미만입니다.
+
+특정 VM의 JProfiler 스냅샷을 캡처하려면 VM 뷰로 이동하여 VM 옆의 "작업" 링크를 클릭하고 "JProfiler
+스냅샷 기록"을 선택하세요.
+
+<Figure src="ui/vms_profiling_action.png" />
+
+기록 시간을 구성하고 기록할 하위 시스템을 선택할 수 있습니다: CPU, 할당 및 모니터 블로킹, 그리고 JDBC,
+JPA, HTTP, MongoDB 등의 JProfiler 프로브입니다. 기록이 jvmguard 모니터링에 영향을 주지 않습니다. 또한 기록
+창이 끝날 때 추가 데이터를 캡처하여 같은 스냅샷에 저장할 수 있습니다: 힙 덤프(선택적으로 전체 가비지
+컬렉션 선행), MBean 스냅샷 및 모니터 덤프입니다.
+
+<Figure src="ui/profiling_options.png" />
+
+CPU 부하가 너무 높을 때 스냅샷을 자동으로 캡처하려면 CPU 텔레메트리에 대한 임계값을 설정하고 "JProfiler
+스냅샷 기록" 트리거 액션이 포함된 트리거를 구성하면 됩니다.
+
+<Figure src="ui/trigger_profile.png" />
+
+마지막으로 문제가 된 VM만 프로파일링되며 모든 VM이 프로파일링되는 것은 아닙니다.
+
+## JProfiler에서 JProfiler 스냅샷 보기
+
+JProfiler 스냅샷은 jvmguard 수신함으로 전달되며 여기에서 다운로드할 수 있습니다. 파일 확장자는 "JProfiler
+snapshot"을 의미하는 ".jps"입니다. JProfiler가 설치되어 있으면 스냅샷 파일을 두 번 클릭하여 열거나
+JProfiler의 기본 메뉴에서 Session ▸ Open Snapshot을 선택할 수 있습니다.
+
+## JFR 스냅샷 기록
+
+모니터링되는 VM에 대한 더 저수준의 정보를 얻는 또 다른 메커니즘은 [JDK Flight Recorder
+(JFR)](https://en.wikipedia.org/wiki/JDK_Flight_Recorder) 스냅샷을 기록하는 것입니다. 모니터링되는 VM의
+Java 버전은 11 이상이어야 하며 JRE에 `jdk.jfr` 모듈이 포함되어 있어야 합니다. JFR 기록은 오버헤드가 매우
+낮을 수 있으며 JVMTI를 로드하지 않습니다.
+
+JFR 스냅샷을 기록하려면 VM 뷰로 이동하여 VM 옆의 "작업" 링크를 클릭하고 "JFR 스냅샷 기록"을 선택하세요.
+
+<Figure src="ui/jfr_recording_action.png" />
+
+JFR 기록 시간을 구성하는 것 외에도 미리 정의된 설정을 선택하거나 [JMC](https://openjdk.java.net/projects/jmc/)의
+"Flight recording template manager"에서 내보낸 `.jfc` 설정 파일의 내용을 업로드할 수 있습니다. 존재가
+보장되는 두 가지 미리 정의된 설정은 "default"와 "profile"입니다. jvmguard는 더 관련성 높은 정보를 기록하므로
+기본적으로 "profile"을 사용하도록 제안합니다. 다른 설정은 모니터링되는 JVM의 `lib/jfr` 디렉터리에 `.jfc`
+파일을 배치하여 미리 정의할 수 있습니다. 설정 파일을 업로드하는 경우 호환되는 Java 버전용으로 생성된
+파일인지 확인하세요.
+
+<Figure src="ui/jfr_recording_options.png" />
+
+위의 다른 기록과 마찬가지로 JFR 스냅샷도 트리거와 해당 JFR 기록 트리거 액션으로 자동으로 기록할 수
+있습니다.
+
+<Figure src="ui/trigger_jfr_recording.png" />
+
+[JMC](https://openjdk.java.net/projects/jmc/)를 사용하여 JFR 스냅샷을 볼 수도 있지만, JProfiler 스냅샷과
+마찬가지로 JProfiler를 사용하는 것이 좋습니다. JProfiler는 CPU, 할당 및 모니터 기록 외에도 JFR 이벤트로
+구성된 여러 프로브를 보여 줍니다.
+
+<Figure src="external/jprofiler_jfr.png" />

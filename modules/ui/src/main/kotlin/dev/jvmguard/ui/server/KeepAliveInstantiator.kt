@@ -7,6 +7,7 @@ import com.vaadin.flow.component.UI
 import com.vaadin.flow.di.DefaultInstantiator
 import com.vaadin.flow.di.Instantiator
 import com.vaadin.flow.di.InstantiatorFactory
+import com.vaadin.flow.i18n.I18NProvider
 import com.vaadin.flow.router.NavigationEvent
 import com.vaadin.flow.server.VaadinService
 
@@ -19,6 +20,11 @@ class KeepAliveInstantiatorFactory : InstantiatorFactory {
 }
 
 class KeepAliveInstantiator(service: VaadinService) : DefaultInstantiator(service) {
+
+    private val i18nProvider = JvmGuardI18NProvider()
+
+    // This instantiator replaces the Spring one, so the I18NProvider cannot come from a Spring bean.
+    override fun getI18NProvider(): I18NProvider = i18nProvider
 
     override fun <T : HasElement> createRouteTarget(routeTargetType: Class<T>, event: NavigationEvent): T {
         if (CachedView::class.java.isAssignableFrom(routeTargetType)) {

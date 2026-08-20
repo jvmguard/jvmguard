@@ -6,6 +6,7 @@ import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.server.ServerUrls
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.settings.AbstractAccountSectionView
 import dev.jvmguard.ui.views.settings.settingsSection
@@ -18,16 +19,14 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
 @Route(value = "account/api-key", layout = MainLayout::class)
-@PageTitle("jvmguard: Account")
 class AccountApiKeyView : AbstractAccountSectionView() {
 
-    private val apiKeyField = TextField("API key").apply {
+    private val apiKeyField = TextField(t("account.apiKey.label")).apply {
         isReadOnly = true
         setWidthFull()
         testId = ID_API_KEY
@@ -40,7 +39,7 @@ class AccountApiKeyView : AbstractAccountSectionView() {
         isVisible = false
     }
 
-    private val harnessSelect = EnumSelect("Coding assistant", McpHarness::class.java) { it.label }.apply {
+    private val harnessSelect = EnumSelect(t("account.mcp.harness"), McpHarness::class.java) { it.label }.apply {
         value = McpHarness.CLAUDE_CODE
         testId = ID_MCP_HARNESS
         addUserValueChangeListener { refreshMcpSnippet() }
@@ -62,26 +61,17 @@ class AccountApiKeyView : AbstractAccountSectionView() {
     }
 
     init {
-        val intro = Span(
-            "When using the jvmguard REST API or MCP server, you authenticate with an API key that you " +
-                    "generate here.",
-        )
-        val generate = Button("Generate new API key", VaadinIcon.KEY.create()) { generate() }.apply {
+        val intro = Span(t("account.apiKey.intro"))
+        val generate = Button(t("account.apiKey.generate"), VaadinIcon.KEY.create()) { generate() }.apply {
             testId = ID_GENERATE
         }
-        val warning = Span("The new key replaces the old one when you save, and is shown only once. Copy it before saving.")
+        val warning = Span(t("account.apiKey.warning"))
             .apply { addClassName("jvmguard-field-hint") }
-        add(settingsSection("API key", intro, generate, keyRow, warning))
+        add(settingsSection(t("account.apiKey.label"), intro, generate, keyRow, warning))
 
-        val mcpIntro = Span(
-            "Connect an AI coding assistant to this server's MCP endpoint. The assistant authenticates with " +
-                    "your API key as a bearer token.",
-        )
-        val mcpKeyHint = Span(
-            "Your API key is only shown right after you generate it. Generate a key above, then copy the " +
-                    "snippet below while the key is still visible. Otherwise it shows a placeholder.",
-        ).apply { addClassName("jvmguard-field-hint") }
-        add(settingsSection("MCP server integration", mcpIntro, harnessSelect, mcpInstruction, mcpSnippetBlock, mcpKeyHint))
+        val mcpIntro = Span(t("account.mcp.intro"))
+        val mcpKeyHint = Span(t("account.mcp.keyHint")).apply { addClassName("jvmguard-field-hint") }
+        add(settingsSection(t("account.mcp.section"), mcpIntro, harnessSelect, mcpInstruction, mcpSnippetBlock, mcpKeyHint))
     }
 
     override fun bind(binder: Binder<User>) {}
@@ -110,7 +100,7 @@ class AccountApiKeyView : AbstractAccountSectionView() {
     private fun refreshMcpSnippet() {
         val harness = harnessSelect.value ?: McpHarness.CLAUDE_CODE
         val key = Sessions.peekAccountDraft()?.pendingApiKey ?: PLACEHOLDER_KEY
-        mcpInstruction.text = harness.instruction
+        mcpInstruction.text = t(harness.instructionKey)
         mcpSnippet.text = harness.snippet("${ServerUrls.baseUrl()}/mcp", key)
     }
 
@@ -118,34 +108,34 @@ class AccountApiKeyView : AbstractAccountSectionView() {
         apiKeyField.element.executeJs("navigator.clipboard && navigator.clipboard.writeText(this.value)")
     }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
-        setAriaLabel("Copy API key")
-        setTooltipText("Copy")
+        setAriaLabel(t("account.apiKey.copy.aria"))
+        setTooltipText(t("common.copy"))
     }
 
     private fun mcpCopyButton(): Button = Button(VaadinIcon.COPY_O.create()) {
         mcpSnippet.element.executeJs($$"if (navigator.clipboard) { navigator.clipboard.writeText($0); }", mcpSnippet.text)
-        Notifications.show("Copied to clipboard.")
+        Notifications.show(t("common.copiedToClipboard"))
     }.apply {
         addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL)
-        setAriaLabel("Copy MCP setup snippet")
-        setTooltipText("Copy")
+        setAriaLabel(t("account.mcp.copy.aria"))
+        setTooltipText(t("common.copy"))
     }
 
     @Suppress("unused")
-    private enum class McpHarness(val label: String, val instruction: String) {
-        CLAUDE_CODE("Claude Code", "Run this command:") {
+    private enum class McpHarness(val label: String, val instructionKey: String) {
+        CLAUDE_CODE("Claude Code", "account.mcp.instruction.claudeCode") {
             override fun snippet(url: String, key: String) =
                 @Suppress("SpellCheckingInspection")
                 "claude mcp add --transport http jvmguard $url --header \"Authorization: Bearer $key\""
         },
-        CODEX("Codex", "Add this to ~/.codex/config.toml:") {
+        CODEX("Codex", "account.mcp.instruction.codex") {
             override fun snippet(url: String, key: String) = """
                 [mcp_servers.jvmguard]
                 url = "$url"
                 http_headers = { "Authorization" = "Bearer $key" }
             """.trimIndent()
         },
-        ANTIGRAVITY("Antigravity", "Add this to ~/.gemini/antigravity/mcp_config.json:") {
+        ANTIGRAVITY("Antigravity", "account.mcp.instruction.antigravity") {
             override fun snippet(url: String, key: String) = """
                 {
                   "mcpServers": {
@@ -157,7 +147,7 @@ class AccountApiKeyView : AbstractAccountSectionView() {
                 }
             """.trimIndent()
         },
-        OPEN_CODE("OpenCode", "Add this to opencode.json (project) or ~/.config/opencode/opencode.json:") {
+        OPEN_CODE("OpenCode", "account.mcp.instruction.openCode") {
             override fun snippet(url: String, key: String) = $$"""
                 {
                   "$schema": "https://opencode.ai/config.json",
@@ -172,7 +162,7 @@ class AccountApiKeyView : AbstractAccountSectionView() {
                 }
             """.trimIndent()
         },
-        CURSOR("Cursor", "Add this to ~/.cursor/mcp.json (global) or .cursor/mcp.json (project):") {
+        CURSOR("Cursor", "account.mcp.instruction.cursor") {
             override fun snippet(url: String, key: String) = """
                 {
                   "mcpServers": {

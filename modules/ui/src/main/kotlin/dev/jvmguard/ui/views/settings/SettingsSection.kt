@@ -4,6 +4,7 @@ import dev.jvmguard.data.config.GlobalConfig
 import dev.jvmguard.data.user.AccessLevel
 import dev.jvmguard.data.user.User
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.CachedView
 import dev.jvmguard.ui.views.login.LoginView
 import dev.jvmguard.ui.views.vms.VmsView
@@ -17,11 +18,15 @@ import com.vaadin.flow.data.value.HasValueChangeMode
 import com.vaadin.flow.data.value.ValueChangeMode
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
+import com.vaadin.flow.router.HasDynamicTitle
 
-enum class SettingsArea(val title: String, val savedMessage: String) {
-    GENERAL("General Settings", "General settings updated."),
-    RECORDING("Recording Settings", "Recording settings updated."),
-    ACCOUNT("Account settings", "Account settings updated."),
+enum class SettingsArea(private val titleKey: String, private val savedMessageKey: String) {
+    GENERAL("nav.settings.general", "settings.saved.general"),
+    RECORDING("nav.settings.recording", "settings.saved.recording"),
+    ACCOUNT("shell.accountSettings", "settings.saved.account");
+
+    val title: String get() = t(titleKey)
+    val savedMessage: String get() = t(savedMessageKey)
 }
 
 interface SettingsModeView {
@@ -32,7 +37,11 @@ interface SettingsModeView {
     fun isValid(): Boolean
 }
 
-abstract class AbstractSettingsPage : VerticalLayout(), BeforeEnterObserver, SettingsModeView, CachedView {
+abstract class AbstractSettingsPage : VerticalLayout(), BeforeEnterObserver, SettingsModeView, CachedView, HasDynamicTitle {
+
+    protected open val pageTitleKey: String get() = "pageTitle.settings"
+
+    override fun getPageTitle(): String = t(pageTitleKey)
 
     protected open val requiredAccessLevel: AccessLevel get() = AccessLevel.ADMIN
 
@@ -94,6 +103,8 @@ abstract class AbstractSettingsSectionView : AbstractSettingsPage() {
 }
 
 abstract class AbstractAccountSectionView : AbstractSettingsPage() {
+
+    override val pageTitleKey: String get() = "pageTitle.account"
 
     override val requiredAccessLevel: AccessLevel get() = AccessLevel.VIEWER
     override val settingsArea: SettingsArea get() = SettingsArea.ACCOUNT

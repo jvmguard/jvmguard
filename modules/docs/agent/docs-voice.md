@@ -18,6 +18,10 @@ docs are operational reference, never product positioning.
 - Read §5 first. It sets the key rule: the help docs are operational reference, never product positioning.
 - Keep prose tight. Match the sentence length (±) and connector style of the surrounding copy.
 - Run the [self-check](#pre-finish-self-check) before considering any section done.
+- This guide defines the **English source voice**. The docs are localized into ko/ja/zh_CN
+  (`src/content/docs/<locale>/`); translations follow [i18n-glossary.md](./i18n-glossary.md)
+  (terminology, tone, CJK punctuation — its hard rules override this guide's English-only rules).
+  Quoted UI labels in translations use the translated UI strings from the UI message bundles.
 
 ---
 

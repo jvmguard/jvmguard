@@ -4,6 +4,7 @@ import dev.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
 import dev.jvmguard.agent.config.telemetry.TelemetryUnit
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.IntegerField
@@ -18,14 +19,14 @@ class TelemetryConfigDialog(
 ) : JvmGuardDialog() {
 
     private val binder = Binder(MBeanTelemetryConfig::class.java)
-    private val name = TextField("Name").apply { setWidthFull(); testId = ID_NAME }
-    private val unit = EnumSelect("Unit", TelemetryUnit::class.java) { it.toString() }
-    private val scale = IntegerField("Scale (10^-n)").apply { width = "10rem" }
-    private val groupAveraged = Checkbox("Average values from all VMs in the group")
-    private val stacked = Checkbox("Stack all lines and show an area graph")
+    private val name = TextField(t("recording.name")).apply { setWidthFull(); testId = ID_NAME }
+    private val unit = EnumSelect(t("telemetry.config.unit"), TelemetryUnit::class.java)
+    private val scale = IntegerField(t("telemetry.config.scale")).apply { width = "10rem" }
+    private val groupAveraged = Checkbox(t("telemetry.config.groupAveraged"))
+    private val stacked = Checkbox(t("telemetry.config.stacked"))
 
     init {
-        headerTitle = if (isNew) "Add telemetry" else "Edit telemetry"
+        headerTitle = t(if (isNew) "telemetry.dialog.add" else "telemetry.dialog.edit")
         width = "40rem"
         // Auto-size to the content
         isResizable = false
@@ -33,8 +34,8 @@ class TelemetryConfigDialog(
         add(VerticalLayout(name, unit, scale, groupAveraged, stacked).apply { isPadding = false; isSpacing = true })
 
         binder.forField(name)
-            .asRequired("Enter a name.")
-            .withValidator({ !nameTaken(it.trim()) }, "A telemetry with this name already exists.")
+            .asRequired(t("recording.validation.nameRequired"))
+            .withValidator({ !nameTaken(it.trim()) }, t("telemetry.config.nameTaken"))
             .bind({ it.name }, { c, v -> c.name = v.trim() })
         binder.forField(unit).bind({ it.unit }, { c, v -> c.unit = v })
         binder.forField(scale).bind({ it.scale }, { c, v -> c.scale = v ?: 0 })
@@ -42,7 +43,7 @@ class TelemetryConfigDialog(
         binder.forField(stacked).bind({ it.isStacked }, { c, v -> c.isStacked = v })
         binder.readBean(config)
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
     private fun save() {

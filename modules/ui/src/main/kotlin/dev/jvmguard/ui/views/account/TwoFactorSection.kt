@@ -2,6 +2,7 @@ package dev.jvmguard.ui.views.account
 
 import dev.jvmguard.ui.components.TwoFactorEnroller
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.views.settings.settingsSection
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
@@ -31,12 +32,12 @@ class TwoFactorSection : VerticalLayout() {
 
     private fun renderEnrolling() {
         val enrollerComponent = TwoFactorEnroller(Sessions.accountDraft().user.loginName).also { enroller = it }
-        val use = Button("Use this authenticator") { stageEnrollment() }.apply {
+        val use = Button(t("account.twofactor.useAuthenticator")) { stageEnrollment() }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_USE
         }
-        val cancel = Button("Cancel") { enrolling = false; render() }
-        add(settingsSection("Set up authenticator", enrollerComponent, actionRow(use, cancel)))
+        val cancel = Button(t("common.cancel")) { enrolling = false; render() }
+        add(settingsSection(t("account.twofactor.setupSection"), enrollerComponent, actionRow(use, cancel)))
     }
 
     private fun renderStatus() {
@@ -45,29 +46,29 @@ class TwoFactorSection : VerticalLayout() {
         val enabled = draft.pendingUse2fa ?: draft.user.isUse2fa
         val status = Span(
             when {
-                enabled && exempt -> "Two-factor authentication is enabled (optional for your account)."
-                enabled -> "Two-factor authentication is enabled."
-                else -> "Two-factor authentication is not enabled (optional for your account)."
+                enabled && exempt -> t("account.twofactor.status.enabledOptional")
+                enabled -> t("account.twofactor.status.enabled")
+                else -> t("account.twofactor.status.disabledOptional")
             },
         )
         val actions = mutableListOf<Button>()
         if (enabled) {
-            actions += Button("Reconfigure authenticator") { enrolling = true; render() }.apply { testId = ID_RECONFIGURE }
+            actions += Button(t("account.twofactor.reconfigure")) { enrolling = true; render() }.apply { testId = ID_RECONFIGURE }
             if (exempt) {
-                actions += Button("Disable") { disable() }.apply { testId = ID_DISABLE }
+                actions += Button(t("account.twofactor.disable")) { disable() }.apply { testId = ID_DISABLE }
             }
         } else {
-            actions += Button("Enable two-factor authentication") { enrolling = true; render() }.apply {
+            actions += Button(t("account.twofactor.enable")) { enrolling = true; render() }.apply {
                 addThemeVariants(ButtonVariant.PRIMARY)
                 testId = ID_ENABLE
             }
         }
         val components = mutableListOf<Component>(status)
         if (draft.pendingTotpSecretHex != null || draft.pendingUse2fa != null) {
-            components += Span("Pending. Click Save to apply.").apply { addClassName("jvmguard-field-hint") }
+            components += Span(t("account.twofactor.pending")).apply { addClassName("jvmguard-field-hint") }
         }
         components += actionRow(*actions.toTypedArray())
-        add(settingsSection("Two-factor authentication", *components.toTypedArray()))
+        add(settingsSection(t("account.twofactor.section"), *components.toTypedArray()))
     }
 
     private fun stageEnrollment() {

@@ -8,6 +8,8 @@ import dev.jvmguard.data.vmdata.ThresholdIdentifier
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.JvmGuardDialog
 import dev.jvmguard.ui.components.recording.thresholds.thresholdDisplayName
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.combobox.MultiSelectComboBox
 import com.vaadin.flow.component.html.Span
@@ -27,20 +29,23 @@ class TriggerDialog(
     private val onSave: (Trigger) -> Unit,
 ) : JvmGuardDialog() {
 
-    private val inhibitionTime = IntegerField("Inhibition time").apply { width = "8rem"; value = trigger.inhibitionTime }
-    private val inhibitionInterval = EnumSelect("", Trigger.Interval::class.java) { it.multipleVerbose }
+    private val inhibitionTime = IntegerField(t("trigger.inhibitionTime")).apply { width = "8rem"; value = trigger.inhibitionTime }
+    private val inhibitionInterval = EnumSelect("", Trigger.Interval::class.java) { t("enum.Interval.plural.${it.name}") }
         .apply { value = trigger.inhibitionInterval }
 
     private val typeWriter: () -> Boolean
 
     init {
-        headerTitle = (if (isNew) "Add " else "Edit ") + trigger.triggerType.toString().replaceFirstChar { it.lowercase() }
+        headerTitle = t(
+            if (isNew) "trigger.dialog.add" else "trigger.dialog.edit",
+            enumLabel(trigger.triggerType).replaceFirstChar { it.lowercase() },
+        )
         width = "58rem"
         height = "46rem"
 
         val fields = VerticalLayout().apply { isPadding = false; isSpacing = true }
         typeWriter = buildType(fields)
-        fields.add(labeled("Inhibition time", inhibitionTime, inhibitionInterval))
+        fields.add(labeled(t("trigger.inhibitionTime"), inhibitionTime, inhibitionInterval))
 
         val actionsEditor = TriggerActionsEditor(trigger.triggerActions)
 
@@ -51,30 +56,30 @@ class TriggerDialog(
             setFlexGrow(1.0, actionsEditor)
         })
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
-    private fun buildType(fields: VerticalLayout): () -> Boolean = when (val t = trigger) {
+    private fun buildType(fields: VerticalLayout): () -> Boolean = when (val tr = trigger) {
         is ThresholdTrigger -> {
             val threshold = Select<Threshold>().apply {
-                label = "Threshold"
+                label = t("trigger.threshold")
                 testId = ID_THRESHOLD
                 setItems(thresholds)
                 setItemLabelGenerator { thresholdDisplayName(it, telemetryTypes) }
-                value = thresholds.firstOrNull { sameThreshold(it, t) }
+                value = thresholds.firstOrNull { sameThreshold(it, tr) }
             }
-            val count = IntegerField("Fire after").apply { width = "8rem"; value = t.count }
-            val interval = dataInterval(t)
+            val count = IntegerField(t("trigger.fireAfter")).apply { width = "8rem"; value = tr.count }
+            val interval = dataInterval(tr)
             fields.add(threshold, fireAfterRow(count, interval))
             val writer: () -> Boolean = {
                 if (threshold.value == null) {
                     threshold.isInvalid = true
-                    threshold.errorMessage = "Select a threshold."
+                    threshold.errorMessage = t("trigger.threshold.required")
                     false
                 } else {
-                    t.thresholdIdentifier = ThresholdIdentifier(threshold.value.telemetryIdentifier, threshold.value.customName.usedValue)
-                    t.count = count.value ?: 1
-                    t.interval = interval.value
+                    tr.thresholdIdentifier = ThresholdIdentifier(threshold.value.telemetryIdentifier, threshold.value.customName.usedValue)
+                    tr.count = count.value ?: 1
+                    tr.interval = interval.value
                     true
                 }
             }
@@ -82,44 +87,44 @@ class TriggerDialog(
         }
 
         is PolicyTrigger -> {
-            val filter = TextField("Filter").apply { setWidthFull(); value = t.filter }
-            val comparison = EnumSelect("Comparison", ComparisonType::class.java) { it.toString() }.apply { value = t.comparisonType }
-            val states = MultiSelectComboBox<PolicyState>("Transaction states").apply {
+            val filter = TextField(t("recording.tab.filter")).apply { setWidthFull(); value = tr.filter }
+            val comparison = EnumSelect(t("recording.comparison"), ComparisonType::class.java).apply { value = tr.comparisonType }
+            val states = MultiSelectComboBox<PolicyState>(t("trigger.policyStates")).apply {
                 setItems(PolicyState.entries)
-                setItemLabelGenerator { it.label }
+                setItemLabelGenerator { t(it.labelKey) }
                 setWidthFull()
-                value = PolicyState.entries.filter { it.isSet(t) }.toSet()
+                value = PolicyState.entries.filter { it.isSet(tr) }.toSet()
             }
-            val count = IntegerField("Fire after").apply { width = "8rem"; value = t.count }
-            val interval = dataInterval(t)
+            val count = IntegerField(t("trigger.fireAfter")).apply { width = "8rem"; value = tr.count }
+            val interval = dataInterval(tr)
             fields.add(filter, comparison, states, fireAfterRow(count, interval))
             val writer: () -> Boolean = {
-                t.filter = filter.value
-                t.comparisonType = comparison.value
-                PolicyState.entries.forEach { it.set(t, it in states.value) }
-                t.count = count.value ?: 1
-                t.interval = interval.value
+                tr.filter = filter.value
+                tr.comparisonType = comparison.value
+                PolicyState.entries.forEach { it.set(tr, it in states.value) }
+                tr.count = count.value ?: 1
+                tr.interval = interval.value
                 true
             }
             writer
         }
 
         is ConnectionTrigger -> {
-            val count = IntegerField("Minimum number of VMs").apply { width = "12rem"; value = t.count }
+            val count = IntegerField(t("trigger.minVms")).apply { width = "12rem"; value = tr.count }
             val startMode = RadioButtonGroup<ConnectionTrigger.StartMode>().apply {
-                label = "Trigger is armed"
+                label = t("trigger.armed")
                 setItems(*ConnectionTrigger.StartMode.entries.toTypedArray())
-                setItemLabelGenerator { it.toString() }
-                value = t.startMode
+                setItemLabelGenerator { enumLabel(it) }
+                value = tr.startMode
             }
-            val minTime = IntegerField("Minimum time").apply { width = "8rem"; value = t.minimumTime }
-            val minUnit = EnumSelect("", TimeUnit::class.java) { it.toString() }.apply { value = t.minimumTimeUnit }
-            fields.add(count, startMode, labeled("Minimum time", minTime, minUnit))
+            val minTime = IntegerField(t("recording.minimumTime")).apply { width = "8rem"; value = tr.minimumTime }
+            val minUnit = EnumSelect("", TimeUnit::class.java) { t("enum.TimeUnit.plural.${it.name}") }.apply { value = tr.minimumTimeUnit }
+            fields.add(count, startMode, labeled(t("recording.minimumTime"), minTime, minUnit))
             val writer: () -> Boolean = {
-                t.count = count.value ?: 1
-                t.startMode = startMode.value
-                t.minimumTime = minTime.value ?: 1
-                t.minimumTimeUnit = minUnit.value
+                tr.count = count.value ?: 1
+                tr.startMode = startMode.value
+                tr.minimumTime = minTime.value ?: 1
+                tr.minimumTimeUnit = minUnit.value
                 true
             }
             writer
@@ -137,7 +142,7 @@ class TriggerDialog(
     }
 
     private fun dataInterval(t: DataTrigger): EnumSelect<Trigger.Interval> =
-        EnumSelect("", Trigger.Interval::class.java) { it.toString() }.apply { value = t.interval }
+        EnumSelect("", Trigger.Interval::class.java).apply { value = t.interval }
 
     private fun labeled(label: String, value: IntegerField, unit: Component): HorizontalLayout {
         value.label = label
@@ -148,23 +153,23 @@ class TriggerDialog(
     }
 
     private fun fireAfterRow(count: IntegerField, interval: EnumSelect<Trigger.Interval>): HorizontalLayout {
-        count.label = "Fire after"
-        return HorizontalLayout(count, Span("events in one"), interval).apply {
+        count.label = t("trigger.fireAfter")
+        return HorizontalLayout(count, Span(t("trigger.fireAfter.eventsInOne")), interval).apply {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.BASELINE
             isPadding = false
         }
     }
 
     private enum class PolicyState(
-        val label: String,
+        val labelKey: String,
         val isSet: (PolicyTrigger) -> Boolean,
         val set: (PolicyTrigger, Boolean) -> Unit,
     ) {
-        NORMAL("Normal", { it.isNormal }, { t, v -> t.isNormal = v }),
-        SLOW("Slow", { it.isSlow }, { t, v -> t.isSlow = v }),
-        VERY_SLOW("Very slow", { it.isVerySlow }, { t, v -> t.isVerySlow = v }),
-        OVERDUE("Overdue", { it.isOverdue }, { t, v -> t.isOverdue = v }),
-        ERROR("Error", { it.isError }, { t, v -> t.isError = v }),
+        NORMAL("trigger.policyState.normal", { it.isNormal }, { t, v -> t.isNormal = v }),
+        SLOW("recording.policy.slow", { it.isSlow }, { t, v -> t.isSlow = v }),
+        VERY_SLOW("recording.policy.verySlow", { it.isVerySlow }, { t, v -> t.isVerySlow = v }),
+        OVERDUE("recording.policy.overdue", { it.isOverdue }, { t, v -> t.isOverdue = v }),
+        ERROR("trigger.policyState.error", { it.isError }, { t, v -> t.isError = v }),
     }
 
     companion object {

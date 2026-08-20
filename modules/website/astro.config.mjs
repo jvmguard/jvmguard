@@ -25,6 +25,11 @@ function docsRedirect() {
 
 export default defineConfig({
   site: SITE.canonical,
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'ko', 'ja', 'zh-cn'],
+    routing: {prefixDefaultLocale: false},
+  },
   vite: {
     plugins: [docsRedirect()],
   },

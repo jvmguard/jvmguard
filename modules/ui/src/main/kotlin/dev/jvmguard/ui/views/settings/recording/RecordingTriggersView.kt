@@ -12,28 +12,26 @@ import dev.jvmguard.ui.components.recording.RecordingGrid
 import dev.jvmguard.ui.components.recording.triggerTypeIcon
 import dev.jvmguard.ui.components.recording.triggers.TriggerGrid
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.Component
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.PROFILER)
 @Route(value = "recording/triggers", layout = MainLayout::class)
-@PageTitle("jvmguard: Recording")
 class RecordingTriggersView : AbstractRecordingListView<Trigger, TriggerSet>() {
 
     override fun intro(selection: VmIdentifier): String? =
         if (selection.isRoot) null
-        else "Triggers are additive: the triggers defined for this group apply in addition to those of its parent groups."
+        else t("recording.settings.triggers.intro")
 
-    override val addButtonText: String get() = "Add trigger"
+    override val addButtonText: String get() = t("recording.settings.triggers.add")
     override val addButtonTestId: String get() = "trigger-add"
     override val setClass: Class<TriggerSet> get() = TriggerSet::class.java
-    override val singularSetName: String get() = "trigger set"
-    override val pluralSetName: String get() = "trigger sets"
-    override val addSetSubtitle: String get() = "The triggers in the selected set are added to this group."
-    override val saveSetSubtitle: String get() = "Saved trigger sets can be added to the triggers of other groups."
+    override val addSetSubtitle: String get() = t("recording.settings.set.addSubtitle.trigger")
+    override val saveSetSubtitle: String get() = t("recording.settings.set.saveSubtitle.trigger")
 
     override fun items(selection: VmIdentifier): MutableList<Trigger>? =
         Sessions.recordingDraft().groupConfig(selection)?.triggerSettings?.triggers
@@ -50,7 +48,7 @@ class RecordingTriggersView : AbstractRecordingListView<Trigger, TriggerSet>() {
     override fun createAddControl(grid: RecordingGrid): Component =
         dropdownButton(addButtonText, addButtonTestId) {
             TriggerType.entries.forEach { type ->
-                item(triggerTypeIcon(type), type.toString()) { (grid as TriggerGrid).addTrigger(type) }
+                item(triggerTypeIcon(type), enumLabel(type)) { (grid as TriggerGrid).addTrigger(type) }
             }
         }
 

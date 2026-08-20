@@ -1,0 +1,88 @@
+---
+title: 服务器配置
+---
+
+无法在 jvmguard UI 中更改的 jvmguard 配置选项位于 jvmguard 安装目录中的文本文件
+`config/application.yaml` 中。要更改某个值，用文本编辑器编辑该文件并重启 jvmguard 服务器。任何单个键也
+都可以用 `-Djvmguard.<key>=<value>` 系统属性覆盖。
+
+这些属性本身在 `config/application.yaml` 中带有注释文档。这里讨论几个需要调整默认参数的场景。
+
+## 数据目录
+
+**dataDirectory** 属性指向存放所有可变数据的目录。jvmguard 会创建以下子目录：
+
+* **db**：包含嵌入式 H2 数据库。
+* **log**：包含所有日志文件。默认情况下日志文件会轮转。轮转设置可以在 jvmguard 安装目录中的
+`logback.xml` 文件中更改。可以对 "server"、"connection" 和 "event" 三个不同的日志文件应用不同的设置。
+所有日志文件都可以在 jvmguard UI 中查看。
+* **snapshots**：内存快照和分析快照保存在此目录中。这些快照可以在 jvmguard 的“快照”视图中下载或删除。
+* **ssl**：此目录包含用于认证和加密的文件对 agent.ks / server.ks，以及 Web 服务器的 SSL 证书。
+
+如果在同一台机器上运行两个 jvmguard 服务器，它们必须有不同的数据目录。默认情况下，安装程序总是为数据目录
+建议相同的位置，因此在安装多个实例时，必须在安装程序中调整，或在安装后在 `config/application.yaml` 中
+调整。
+
+## Web 服务器
+
+jvmguard 自带一个内置 Web 服务器，默认监听 8020 端口。可以用 **httpPort** 属性调整该端口，并通过将
+**useHttps** 设置为 `true` 切换到 HTTPS。
+
+使用 HTTPS 时，jvmguard 会在 jvmguard 数据目录中生成自签名证书 `ssl/self_signed.ks`。浏览器会对此证书显示
+警告消息。如果有由受认可的证书颁发机构签署的证书，可以以 PKCS12 格式将其复制到 `ssl/web.pkcs12`。如果
+证书文件名不同，可以指定 **keystoreName** 属性。
+
+如果证书受密码保护，可以在 **keystorePassword** 属性中指定密码。虽然密码无法加密，但至少可以用命令行
+工具 `jvmguard_obfuscate` 进行混淆：
+
+```
+jvmguard_obfuscate [password]
+```
+
+如果将 jvmguard 放在反向代理之后，必须将 **reverseProxy** 属性设置为 `true`。Web 服务器随后会分析代理头
+以生成正确的 URL。如果由于反向代理的问题而无法正常工作，将 **reverseProxyHost** 设置为代理的主机名。如果
+jvmguard 在某个路径前缀下提供服务，将 **contextPath** 属性设置为该前缀，例如 `jvmguard`，不带前导或尾随
+斜杠。
+
+将 **restApiEnabled** 属性设置为 `false` 可禁用 [REST API 服务](/docs/zh-cn/main/rest)。启用后，REST API
+在与 Web 服务器相同的端口上以 `/api` 路径提供服务，并使用为 Web 服务器配置的相同协议（HTTP/HTTPS）。
+
+## 与受监控 VM 的通信
+
+受监控的 VM 在 **vmPort** 属性配置的端口上创建 TCP 连接。
+
+默认情况下，受监控 VM 与 jvmguard 收集器之间的通信不加密也不认证。这意味着任何 VM 都可以连接到 jvmguard
+服务器，而 jvmguard 代理无法知道另一端的 jvmguard 服务器是否可信。在某些局域网中这是可以接受的，但不适合
+跨广域网甚至互联网的连接。
+
+要启用认证和加密，将 **vmUseSsl** 属性设置为 `true`。此时会创建文件对 `ssl/agent.ks` 和 `ssl/server.ks`。
+此后，服务器只允许拥有 `agent.ks` 文件的代理连接，代理也只连接拥有 `server.ks` 文件的服务器。此外，通信
+协议会被加密。
+
+关于此主题的更多信息，请参阅[监控 JVM](/docs/zh-cn/main/monitoring) 一章。
+
+## 密钥的环境变量覆盖
+
+在容器化部署中，通常更适合通过环境变量注入密钥，而不是将其存储在数据库中。启动时，jvmguard 会检查以下
+环境变量，并覆盖来自[服务器管理](/docs/zh-cn/config/admin)和[单点登录](/docs/zh-cn/config/sso)设置的
+相应值：
+
+对于 LDAP：
+
+```
+JVMGUARD_LDAP_PASSWORD
+```
+
+对于每个 SSO 提供方，环境变量名由提供方的显示名称派生：转换为大写，并将非字母数字字符替换为下划线：
+
+```
+JVMGUARD_SSO_<NAME>_CLIENT_ID
+JVMGUARD_SSO_<NAME>_CLIENT_SECRET
+```
+
+例如，名为 "Google" 的提供方使用 `JVMGUARD_SSO_GOOGLE_CLIENT_ID` 和 `JVMGUARD_SSO_GOOGLE_CLIENT_SECRET`。
+名为 "Company Okta" 的提供方使用 `JVMGUARD_SSO_COMPANY_OKTA_CLIENT_ID` 和
+`JVMGUARD_SSO_COMPANY_OKTA_CLIENT_SECRET`。
+
+这些覆盖在从数据库加载配置之后应用，并优先于存储的值。如果某个环境变量未设置，则使用数据库中的值。当
+jvmguard 记录某个覆盖的应用时，密钥值本身永远不会被记录。

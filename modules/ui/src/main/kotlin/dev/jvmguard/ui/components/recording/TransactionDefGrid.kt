@@ -3,6 +3,7 @@ package dev.jvmguard.ui.components.recording
 import dev.jvmguard.agent.config.transactions.*
 import dev.jvmguard.common.helper.DeepCopy
 import dev.jvmguard.ui.components.*
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.dnd.GridDropLocation
 import com.vaadin.flow.component.html.Span
@@ -21,15 +22,15 @@ class TransactionDefGrid(
 
     private val tree = TreeGrid<TxNode>().apply {
         testId = "transaction-grid-${type.name.lowercase()}"
-        addHierarchyColumn(::nodeName).setHeader("Business transaction").setFlexGrow(1)
+        addHierarchyColumn(::nodeName).setHeader(t("recording.transaction.grid.header")).setFlexGrow(1)
         if (showNaming) {
-            addComponentColumn(::namingCell).setHeader("Naming").setAutoWidth(true).setFlexGrow(0)
+            addComponentColumn(::namingCell).setHeader(t("recording.transaction.column.naming")).setAutoWidth(true).setFlexGrow(0)
         }
-        addComponentColumn(::policiesCell).setHeader("Policies").setAutoWidth(true).setFlexGrow(0)
+        addComponentColumn(::policiesCell).setHeader(t("recording.transaction.column.policies")).setAutoWidth(true).setFlexGrow(0)
         addComponentColumn(::rowActions).setAutoWidth(true).setFlexGrow(0)
         addItemDoubleClickListener { editNode(it.item) }
         editDeleteKeys(::editNode, ::deleteNode)
-        setEmptyStateComponent(Span("No transactions yet. Use \"Add transaction\" to create one.").apply {
+        setEmptyStateComponent(Span(t("recording.transaction.empty")).apply {
             addClassName("jvmguard-field-hint")
         })
         isAllRowsVisible = true
@@ -71,8 +72,8 @@ class TransactionDefGrid(
     private fun nodeName(node: TxNode): String = when (node) {
         is TxNode.DefNode -> node.def.displayName
         is TxNode.SubNode -> {
-            val prefix = if (node.subDef.isDiscard) "[Discard] " else ""
-            prefix + node.subDef.filter.ifBlank { "(all transactions)" }
+            val filter = node.subDef.filter.ifBlank { t("recording.transaction.subNode.all") }
+            if (node.subDef.isDiscard) t("recording.transaction.subNode.discard", filter) else filter
         }
     }
 
@@ -89,12 +90,12 @@ class TransactionDefGrid(
     private fun check(on: Boolean): Component = if (on) VaadinIcon.CHECK.create().apply { setSize("1em") } else Span()
 
     private fun rowActions(node: TxNode): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", "transaction-row-menu-${nodeName(node)}") {
-            addItem("Edit") { editNode(node) }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "transaction-row-menu-${nodeName(node)}") {
+            addItem(t("common.edit")) { editNode(node) }
             if (node is TxNode.DefNode) {
-                addItem("Add policy specialization") { addSpec(node.def) }
+                addItem(t("recording.subdef.dialog.add")) { addSpec(node.def) }
             }
-            addItem("Delete") { deleteNode(node) }
+            addItem(t("common.delete")) { deleteNode(node) }
         }
 
     private fun editNode(node: TxNode) = when (node) {
@@ -103,12 +104,12 @@ class TransactionDefGrid(
     }
 
     private fun deleteNode(node: TxNode) = when (node) {
-        is TxNode.DefNode -> confirm("Delete transaction", "Delete \"${node.def.displayName}\"?", "Delete") {
+        is TxNode.DefNode -> confirm(t("recording.delete.transaction"), t("recording.delete.text", node.def.displayName), t("common.delete")) {
             defs().remove(node.def)
             changed()
         }
 
-        is TxNode.SubNode -> confirm("Delete specialization", "Delete this policy specialization?", "Delete") {
+        is TxNode.SubNode -> confirm(t("recording.delete.spec"), t("recording.delete.spec.text"), t("common.delete")) {
             node.parent.policySubDefs.remove(node.subDef)
             changed()
         }
@@ -179,9 +180,9 @@ class TransactionDefGrid(
     }
 
     private fun helpText(type: TransactionType): String = when (type) {
-        TransactionType.MATCHED -> "Match individual methods or entire classes by name, configured directly in the UI without touching your code."
-        TransactionType.DECLARED -> "Declare transactions in your source code with the @MethodTransaction and @ClassTransaction annotations."
-        TransactionType.MAPPED -> "Map any existing annotation such as @Service or @Transactional to a transaction without modifying your code."
+        TransactionType.MATCHED -> t("recording.transaction.help.matched")
+        TransactionType.DECLARED -> t("recording.transaction.help.declared")
+        TransactionType.MAPPED -> t("recording.transaction.help.mapped")
         else -> ""
     }
 

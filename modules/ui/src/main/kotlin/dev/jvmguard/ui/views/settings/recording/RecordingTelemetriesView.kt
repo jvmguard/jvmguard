@@ -9,26 +9,23 @@ import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.components.recording.RecordingGrid
 import dev.jvmguard.ui.components.recording.telemetries.TelemetryGrid
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.PROFILER)
 @Route(value = "recording/telemetries", layout = MainLayout::class)
-@PageTitle("jvmguard: Recording")
 class RecordingTelemetriesView : AbstractRecordingListView<MBeanTelemetryConfig, TelemetrySet>() {
 
     override val overrideCategory: (GroupConfig) -> OptionalConfig get() = { it.telemetrySettings }
-    override val overrideLabel: String get() = "Override telemetry settings for this group"
+    override val overrideLabel: String get() = t("recording.settings.telemetries.override")
 
-    override val addButtonText: String get() = "Add telemetry"
+    override val addButtonText: String get() = t("recording.settings.telemetries.add")
     override val addButtonTestId: String get() = "telemetry-add"
     override val setClass: Class<TelemetrySet> get() = TelemetrySet::class.java
-    override val singularSetName: String get() = "telemetry set"
-    override val pluralSetName: String get() = "telemetry sets"
-    override val addSetSubtitle: String get() = "The telemetries in the selected set are added to this group."
-    override val saveSetSubtitle: String get() = "Saved telemetry sets can be added to the telemetries of other groups."
+    override val addSetSubtitle: String get() = t("recording.settings.set.addSubtitle.telemetry")
+    override val saveSetSubtitle: String get() = t("recording.settings.set.saveSubtitle.telemetry")
 
     override fun items(selection: VmIdentifier): MutableList<MBeanTelemetryConfig>? =
         Sessions.recordingDraft().groupConfig(selection)?.telemetrySettings?.mbeanTelemetries

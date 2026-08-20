@@ -8,6 +8,7 @@ import com.vaadin.flow.component.details.Details
 import com.vaadin.flow.component.html.Pre
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
+import dev.jvmguard.ui.server.t
 
 class ErrorDialog(
     title: String,
@@ -17,7 +18,7 @@ class ErrorDialog(
 ) : JvmGuardDialog() {
 
     constructor(throwable: Throwable, reloadOnClose: Boolean = false) :
-            this("Internal error", throwable.message ?: throwable.javaClass.name, throwable.stackTraceToString(), reloadOnClose)
+            this(t("error.internal.title"), throwable.message ?: throwable.javaClass.name, throwable.stackTraceToString(), reloadOnClose)
 
     init {
         headerTitle = title
@@ -29,11 +30,11 @@ class ErrorDialog(
             style.set("gap", "0.5rem")
         }
         if (!stackTrace.isNullOrEmpty()) {
-            content.add(Details("Details", Pre(stackTrace).apply { addClassName("jvmguard-stacktrace") }))
+            content.add(Details(t("error.details"), Pre(stackTrace).apply { addClassName("jvmguard-stacktrace") }))
         }
         add(content)
 
-        val ok = Button("OK") { close() }.apply { addThemeVariants(ButtonVariant.PRIMARY) }
+        val ok = Button(t("common.ok")) { close() }.apply { addThemeVariants(ButtonVariant.PRIMARY) }
         ok.addClickShortcut(Key.ENTER).listenOn(this)
         footer.add(ok)
 

@@ -3,6 +3,7 @@ package dev.jvmguard.ui.views.settings.recording
 import dev.jvmguard.data.config.GroupConfig
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.views.data.AbstractVmSelectorDialog
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.ColumnTextAlign
@@ -14,30 +15,30 @@ class RecordingGroupSelectorDialog(
     current: VmIdentifier,
     onSelect: (VmIdentifier) -> Unit,
 ) : AbstractVmSelectorDialog(
-    current, onSelect, { true }, "Select group",
+    current, onSelect, { true }, t("recording.settings.selectGroup"),
     dialogWidth = "46rem", dialogHeight = "28rem", expandAll = true,
 ) {
 
     init {
         tree.addClassName("jvmguard-group-selector")
-        add(Span("✓ overrides the defaults     ●  defines the defaults").apply {
+        add(Span(t("recording.settings.selector.legend")).apply {
             addClassName("jvmguard-field-hint")
             addClassName("jvmguard-selector-legend")
         })
     }
 
     override fun configureColumns() {
-        addNameColumn().setHeader("Group").setFlexGrow(1)
+        addNameColumn().setHeader(t("recording.settings.selector.group")).setFlexGrow(1)
         OVERRIDE_CATEGORIES.forEach { category ->
             tree.addComponentColumn { overrideCell(it, category) }.apply {
-                setHeader(category.header)
+                setHeader(t(category.headerKey))
                 setAutoWidth(true)
                 flexGrow = 0
                 textAlign = ColumnTextAlign.CENTER
             }
         }
         tree.addComponentColumn(::triggersCell).apply {
-            setHeader("Triggers")
+            setHeader(t("nav.recording.triggers"))
             setAutoWidth(true)
             flexGrow = 0
             textAlign = ColumnTextAlign.CENTER
@@ -62,17 +63,17 @@ class RecordingGroupSelectorDialog(
 
     private fun defaultMarker(): Component = Span("●").apply {
         addClassName("jvmguard-default-marker")
-        element.setAttribute("title", "Defines the defaults")
+        element.setAttribute("title", t("recording.settings.selector.defaultMarker"))
     }
 
-    private class OverrideCategory(val header: String, val isUsed: (GroupConfig) -> Boolean)
+    private class OverrideCategory(val headerKey: String, val isUsed: (GroupConfig) -> Boolean)
 
     companion object {
         private val OVERRIDE_CATEGORIES = listOf(
-            OverrideCategory("Transactions") { it.transactionSettings.isUsed },
-            OverrideCategory("Telemetries") { it.telemetrySettings.isUsed },
-            OverrideCategory("Thresholds") { it.thresholdSettings.isUsed },
-            OverrideCategory("Agent guardrails") { it.guardrailSettings.isUsed },
+            OverrideCategory("nav.transactions") { it.transactionSettings.isUsed },
+            OverrideCategory("nav.telemetries") { it.telemetrySettings.isUsed },
+            OverrideCategory("nav.recording.thresholds") { it.thresholdSettings.isUsed },
+            OverrideCategory("nav.recording.guardrails") { it.guardrailSettings.isUsed },
         )
     }
 }

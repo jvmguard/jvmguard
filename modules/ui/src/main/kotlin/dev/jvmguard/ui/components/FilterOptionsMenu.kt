@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.components
 
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.contextmenu.ContextMenu
@@ -16,8 +17,8 @@ class FilterOptionsMenu(testId: String, private val onChanged: () -> Unit) {
     val button = Button(VaadinIcon.FILTER.create()).apply {
         addThemeVariants(ButtonVariant.TERTIARY)
         addClassName("jvmguard-field-icon-button")
-        setAriaLabel("Filter options")
-        setTooltipText("Filter options")
+        setAriaLabel(t("filter.options"))
+        setTooltipText(t("filter.options"))
         this.testId = testId
     }
 
@@ -28,12 +29,12 @@ class FilterOptionsMenu(testId: String, private val onChanged: () -> Unit) {
     }
 
     init {
-        menu.addItem("Match case") { event ->
+        menu.addItem(t("filter.matchCase")) { event ->
             matchCase = event.source.isChecked
             updateFilterIndicator()
             onChanged()
         }.isCheckable = true
-        menu.addItem("Regular expression") { event ->
+        menu.addItem(t("filter.regex")) { event ->
             useRegex = event.source.isChecked
             updateFilterIndicator()
             onChanged()

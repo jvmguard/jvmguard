@@ -1,6 +1,8 @@
 package dev.jvmguard.ui.views.data.telemetry
 
 import dev.jvmguard.data.vmdata.TelemetryInterval
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.ClickEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
@@ -23,7 +25,7 @@ class TelemetryNavigationBar(
     private val onChange: () -> Unit,
 ) {
 
-    enum class EndMode(val label: String) { NOW("Now"), DATE("Selected date") }
+    enum class EndMode { NOW, DATE }
 
     var selectedInterval: TelemetryInterval = TelemetryInterval.TEN_MINUTES
         private set
@@ -34,8 +36,9 @@ class TelemetryNavigationBar(
     private var animatedNav = false
 
     private val intervalSelect = Select<TelemetryInterval>().apply {
-        label = "Show"
+        label = t("telemetry.show")
         setItems(*TelemetryInterval.entries.toTypedArray())
+        setItemLabelGenerator { enumLabel(it) }
         value = selectedInterval
         testId = ID_INTERVAL
         addValueChangeListener { event ->
@@ -47,9 +50,9 @@ class TelemetryNavigationBar(
     }
 
     private val endModeSelect = Select<EndMode>().apply {
-        label = "Up to"
+        label = t("telemetry.upTo")
         setItems(*EndMode.entries.toTypedArray())
-        setItemLabelGenerator { it.label }
+        setItemLabelGenerator { enumLabel(it) }
         value = endMode
         testId = ID_END_MODE
         addValueChangeListener { event ->
@@ -65,7 +68,7 @@ class TelemetryNavigationBar(
     }
 
     private val dateField = DateTimePicker().apply {
-        label = "End"
+        label = t("telemetry.end")
         step = Duration.ofMinutes(1)
         isVisible = false
         testId = ID_DATE
@@ -77,12 +80,12 @@ class TelemetryNavigationBar(
     }
 
     // Ctrl-click pages by a full interval instead of a quarter (mirrors V1).
-    private val previousButton = iconButton(VaadinIcon.ANGLE_LEFT, "Previous (Ctrl: full interval)", ID_PREVIOUS) { previous(it.isCtrlKey) }
-    private val nextButton = iconButton(VaadinIcon.ANGLE_RIGHT, "Next (Ctrl: full interval)", ID_NEXT) { next(it.isCtrlKey) }
-    private val zoomInButton = iconButton(VaadinIcon.SEARCH_PLUS, "Zoom in", ID_ZOOM_IN) { zoomIn(null) }
-    private val zoomOutButton = iconButton(VaadinIcon.SEARCH_MINUS, "Zoom out", ID_ZOOM_OUT) { zoomOut(null) }
+    private val previousButton = iconButton(VaadinIcon.ANGLE_LEFT, t("telemetry.previous"), ID_PREVIOUS) { previous(it.isCtrlKey) }
+    private val nextButton = iconButton(VaadinIcon.ANGLE_RIGHT, t("telemetry.next"), ID_NEXT) { next(it.isCtrlKey) }
+    private val zoomInButton = iconButton(VaadinIcon.SEARCH_PLUS, t("telemetry.zoomIn"), ID_ZOOM_IN) { zoomIn(null) }
+    private val zoomOutButton = iconButton(VaadinIcon.SEARCH_MINUS, t("telemetry.zoomOut"), ID_ZOOM_OUT) { zoomOut(null) }
 
-    private val autoUpdate = Checkbox("Auto-update").apply {
+    private val autoUpdate = Checkbox(t("telemetry.autoUpdate")).apply {
         testId = ID_AUTO_UPDATE
         addClassName("jvmguard-telemetry-autoupdate")
     }

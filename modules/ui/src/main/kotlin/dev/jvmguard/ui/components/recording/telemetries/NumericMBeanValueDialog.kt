@@ -8,6 +8,7 @@ import dev.jvmguard.ui.components.showCentered
 import dev.jvmguard.ui.components.showFilling
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.findVm
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.views.data.VmBreadcrumb
 import dev.jvmguard.ui.views.data.VmSelectorDialog
 import dev.jvmguard.ui.views.data.mbeans.AttributeNode
@@ -33,8 +34,8 @@ class NumericMBeanValueDialog(
     private val breadcrumb = VmBreadcrumb(::select)
     private val message = Span().apply { addClassName("jvmguard-field-hint") }
     private val placeholder = VerticalLayout(
-        Span("Please select a single named VM or a VM pool first."),
-        Button("Select a VM", VaadinIcon.SEARCH.create()) { openSelector() }.apply {
+        Span(t("telemetry.mbean.selectVmFirst")),
+        Button(t("telemetry.mbean.selectVm"), VaadinIcon.SEARCH.create()) { openSelector() }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
         },
     ).apply {
@@ -49,21 +50,21 @@ class NumericMBeanValueDialog(
         style.set("min-height", "0")
     }
 
-    private val okButton = Button("Select") { confirm() }.apply {
+    private val okButton = Button(t("common.select")) { confirm() }.apply {
         addThemeVariants(ButtonVariant.PRIMARY)
         isEnabled = false
         testId = ID_CONFIRM
     }
 
     init {
-        headerTitle = "Select an MBean value"
+        headerTitle = t("telemetry.mbean.dialog.title")
         width = "70rem"
         height = "44rem"
 
         val selectButton = Button(VaadinIcon.SEARCH.create()) { openSelector() }.apply {
             addThemeVariants(ButtonVariant.TERTIARY)
-            setAriaLabel("Select VM pool or VM")
-            setTooltipText("Select VM pool or VM")
+            setAriaLabel(t("telemetry.mbean.selectPoolOrVm"))
+            setTooltipText(t("telemetry.mbean.selectPoolOrVm"))
             testId = ID_SELECT_VM
         }
         val toolbar = HorizontalLayout(selectButton, breadcrumb).apply {
@@ -79,7 +80,7 @@ class NumericMBeanValueDialog(
             isSpacing = true
             setFlexGrow(1.0, contentHost)
         })
-        footer.add(Button("Cancel") { close() }, okButton)
+        footer.add(Button(t("common.cancel")) { close() }, okButton)
         contentHost.showCentered(placeholder)
     }
 
@@ -87,7 +88,7 @@ class NumericMBeanValueDialog(
         selectedIdentifier ?: VmIdentifier.ROOT_GROUP_IDENTIFIER,
         ::select,
         { it.type != VmType.GROUP },
-        "Select VM pool or VM",
+        t("telemetry.mbean.selectPoolOrVm"),
     ).open()
 
     private fun select(identifier: VmIdentifier) {

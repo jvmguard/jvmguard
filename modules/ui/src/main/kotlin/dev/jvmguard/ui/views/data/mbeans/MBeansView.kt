@@ -6,6 +6,8 @@ import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.components.*
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.findVm
+import dev.jvmguard.ui.server.t
+import dev.jvmguard.ui.server.mbeanErrorText
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.data.VmDataView
 import dev.jvmguard.connector.api.ServerConnection
@@ -28,8 +30,8 @@ import com.vaadin.flow.component.treegrid.TreeGrid
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 import com.vaadin.flow.data.value.ValueChangeMode
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import jakarta.annotation.security.PermitAll
 import java.rmi.RemoteException
 import javax.management.MBeanAttributeInfo
@@ -39,8 +41,9 @@ import javax.management.openmbean.SimpleType
 
 @PermitAll
 @Route(value = "mbeans", layout = MainLayout::class)
-@PageTitle("jvmguard: MBeans")
-class MBeansView : VmDataView() {
+class MBeansView : VmDataView(), HasDynamicTitle {
+
+    override fun getPageTitle(): String = t("pageTitle.mbeans")
 
     private var mbeanNames: List<String> = emptyList()
     private var currentObjectName: String? = null
@@ -54,7 +57,7 @@ class MBeansView : VmDataView() {
 
     private val filterField = TextField().apply {
         addClassName("jvmguard-mbean-filter")
-        placeholder = "Filter MBeans"
+        placeholder = t("mbeans.filter.placeholder")
         testId = ID_FILTER
         valueChangeMode = ValueChangeMode.LAZY
         isClearButtonVisible = true
@@ -78,15 +81,15 @@ class MBeansView : VmDataView() {
     private val attributeTree = TreeGrid<AttributeNode>().apply {
         testId = ID_ATTRIBUTES
         addClassName("jvmguard-mbean-attribute-tree")
-        addHierarchyColumn { it.name }.setHeader("Attribute").setFlexGrow(1).setSortable(false)
-        addComponentColumn(::valueCell).setHeader("Value").setFlexGrow(1).setSortable(false)
+        addHierarchyColumn { it.name }.setHeader(t("mbeans.attribute.header")).setFlexGrow(1).setSortable(false)
+        addComponentColumn(::valueCell).setHeader(t("mbeans.value.header")).setFlexGrow(1).setSortable(false)
         setSizeFull()
     }
 
     private val operationsGrid = Grid<MBeanOperationInfo>().apply {
         testId = ID_OPERATIONS
         addClassName("jvmguard-mbean-operations")
-        addComponentColumn(::operationCell).setHeader("Operation").setFlexGrow(1).setSortable(false)
+        addComponentColumn(::operationCell).setHeader(t("mbeans.operation.header")).setFlexGrow(1).setSortable(false)
         addComponentColumn(::invokeCell).setHeader("").setFlexGrow(0).setAutoWidth(true)
         setSizeFull()
     }
@@ -102,8 +105,8 @@ class MBeansView : VmDataView() {
     private val detailTabs = TabSheet().apply {
         addClassName("jvmguard-mbean-tabs")
         setSizeFull()
-        add("Attributes", attributeTree)
-        add("Operations", operationsGrid)
+        add(t("mbeans.tabs.attributes"), attributeTree)
+        add(t("mbeans.tabs.operations"), operationsGrid)
     }
 
     private val attributeContent = VerticalLayout(
@@ -123,7 +126,7 @@ class MBeansView : VmDataView() {
         style.set("min-width", "0")
     }
 
-    private val attributeNotice = Span("Please select an MBean.").apply { addClassName("jvmguard-data-message") }
+    private val attributeNotice = Span(t("mbeans.selectMBean")).apply { addClassName("jvmguard-data-message") }
 
     private val detailPanel = VerticalLayout().apply {
         setSizeFull()
@@ -178,19 +181,19 @@ class MBeansView : VmDataView() {
 
     override fun isSelectable(selection: VmIdentifier): Boolean = selection.type != VmType.GROUP
 
-    override fun selectorTitle(): String = "Select VM pool or VM"
+    override fun selectorTitle(): String = t("mbeans.selector.title")
 
     private fun loadMBeans() {
-        val connection = Sessions.current()?.serverConnection ?: return showMessage(NOT_CONNECTED)
+        val connection = Sessions.current()?.serverConnection ?: return showMessage(t("mbeans.notConnected"))
         val vm = resolveVm(connection)
-            ?: return showMessage(if (currentSelection.type == VmType.POOL) NO_POOLED_VM else NO_VM)
+            ?: return showMessage(if (currentSelection.type == VmType.POOL) t("mbeans.noPooledVm") else t("mbeans.vmNotAvailable"))
         currentVm = vm
         try {
             mbeanNames = connection.getMBeanNames(vm, true).toList()
             rebuildTree()
             content.showFilling(split)
         } catch (e: RemoteException) {
-            showMessage("Could not load MBeans: ${e.message}")
+            showMessage(t("mbeans.loadFailed", e.message))
         }
     }
 
@@ -242,7 +245,7 @@ class MBeansView : VmDataView() {
             operationsGrid.setItems(beanInfo.operations.sortedBy { it.name })
             detailPanel.showFilling(attributeContent)
         } catch (e: RemoteException) {
-            showMessage("Could not load MBean: ${e.message}")
+            showMessage(t("mbeans.loadFailed.single", e.message))
         }
     }
 
@@ -361,8 +364,8 @@ class MBeansView : VmDataView() {
         Button(VaadinIcon.EDIT.create()) { openAttributeEditor(node, attributeInfo) }.apply {
             addThemeVariants(ButtonVariant.TERTIARY)
             addClassName("jvmguard-field-icon-button")
-            setAriaLabel("Edit value")
-            setTooltipText("Edit value")
+            setAriaLabel(t("mbeans.value.edit.aria"))
+            setTooltipText(t("mbeans.value.edit.aria"))
             testId = "$ID_EDIT_PREFIX${attributeInfo.name}"
         }
 
@@ -377,13 +380,13 @@ class MBeansView : VmDataView() {
         val objectName = currentObjectName ?: return
         try {
             val result = connection.setMBeanAttribute(vm, objectName, attributeInfo, value)
-            val error = result.errorMessage
+            val error = mbeanErrorText(result.errorKey, result.errorParams, result.errorMessage)
             if (error != null) {
-                showError("Could not set attribute", error, result.stackTrace)
+                showError(t("mbeans.attribute.setFailed"), error, result.stackTrace)
             }
             loadAttributes(objectName)
         } catch (e: RemoteException) {
-            showError("Could not set attribute", e.message ?: e.toString(), null)
+            showError(t("mbeans.attribute.setFailed"), e.message ?: e.toString(), null)
         }
     }
 
@@ -405,8 +408,8 @@ class MBeansView : VmDataView() {
         Button(VaadinIcon.PLAY.create()) { invokeOperation(operationInfo) }.apply {
             addThemeVariants(ButtonVariant.TERTIARY)
             addClassName("jvmguard-field-icon-button")
-            setAriaLabel("Invoke operation")
-            setTooltipText("Invoke operation")
+            setAriaLabel(t("mbeans.operation.invoke"))
+            setTooltipText(t("mbeans.operation.invoke"))
             testId = "$ID_INVOKE_PREFIX${operationInfo.name}"
         }
 
@@ -414,7 +417,7 @@ class MBeansView : VmDataView() {
         val specs = try {
             MBeanOperations.valueEditSpecs(operationInfo)
         } catch (_: NonOpenTypeException) {
-            Notification.show("Cannot invoke: the operation's parameters are not all open types.")
+            Notification.show(t("mbeans.operation.notOpenTypes"))
             return
         }
         if (specs.isEmpty()) {
@@ -430,14 +433,14 @@ class MBeansView : VmDataView() {
         val objectName = currentObjectName ?: return
         try {
             val data = connection.invokeMBeanOperation(vm, objectName, operationInfo, values.toTypedArray())
-            val error = data.errorMessage
+            val error = mbeanErrorText(data.errorKey, data.errorParams, data.errorMessage)
             when {
-                error != null -> showError("Operation failed", error, data.stackTrace)
-                isVoid(operationInfo) -> Notification.show("The operation was invoked successfully.")
+                error != null -> showError(t("mbeans.operation.failed"), error, data.stackTrace)
+                isVoid(operationInfo) -> Notification.show(t("mbeans.operation.invoked"))
                 else -> OperationResultDialog(operationInfo, data.returnValue).open()
             }
         } catch (e: RemoteException) {
-            showError("Operation failed", e.message ?: e.toString(), null)
+            showError(t("mbeans.operation.failed"), e.message ?: e.toString(), null)
         }
     }
 
@@ -453,12 +456,12 @@ class MBeansView : VmDataView() {
     private fun showSelectSingleVm() {
         currentObjectName = null
         currentVm = null
-        val selectButton = Button("Select a VM", VaadinIcon.SEARCH.create()) { openSelector() }.apply {
+        val selectButton = Button(t("mbeans.selectVm.button"), VaadinIcon.SEARCH.create()) { openSelector() }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_SELECT_VM
         }
         val prompt = VerticalLayout(
-            Span("Please select a single named VM or a VM pool first."),
+            Span(t("mbeans.selectVm.prompt")),
             selectButton,
         ).apply {
             isPadding = false
@@ -491,9 +494,5 @@ class MBeansView : VmDataView() {
         private const val ATTRIBUTES_TAB = 0
 
         private const val REFRESH_EVERY_TICKS = 1
-
-        private const val NOT_CONNECTED = "Not connected to the jvmguard server."
-        private const val NO_VM = "The selected JVM is not available."
-        private const val NO_POOLED_VM = "No connected JVM in this pool."
     }
 }

@@ -6,6 +6,7 @@ import dev.jvmguard.data.config.SmtpConfig.Encryption
 import dev.jvmguard.data.user.Roles
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.Validators
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.checkbox.Checkbox
@@ -14,50 +15,48 @@ import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.ADMIN)
 @Route(value = "settings/email", layout = MainLayout::class)
-@PageTitle("jvmguard: Settings")
 class SmtpSettingsView : AbstractSettingsSectionView() {
 
-    private val fromEmail = EmailField("Sender email").apply {
+    private val fromEmail = EmailField(t("settings.email.sender")).apply {
         setWidthFull()
         testId = ID_FROM
     }
-    private val host = TextField("SMTP host").apply {
+    private val host = TextField(t("settings.email.host")).apply {
         setWidthFull()
         testId = ID_HOST
     }
-    private val port = IntegerField("SMTP port").apply {
+    private val port = IntegerField(t("settings.email.port")).apply {
         min = 1
         max = 65535
         width = "8rem"
         testId = ID_PORT
     }
-    private val encryption = EnumSelect("Encryption", Encryption::class.java) { it.toString() }
-    private val authenticate = Checkbox("Authenticate with the SMTP server").apply {
+    private val encryption = EnumSelect(t("settings.email.encryption"), Encryption::class.java)
+    private val authenticate = Checkbox(t("settings.email.authenticate")).apply {
         addClassName("jvmguard-settings-gap-before")
         testId = ID_AUTHENTICATE
         addValueChangeListener { updateAuthEnabled() }
     }
-    private val userName = TextField("Username").apply {
+    private val userName = TextField(t("settings.email.userName")).apply {
         setWidthFull()
         testId = ID_USER
     }
-    private val password = PasswordField("Password").apply {
+    private val password = PasswordField(t("settings.email.password")).apply {
         setWidthFull()
         testId = ID_PASSWORD
     }
-    private val testMail = Button("Send test email") { sendTestMail() }.apply {
+    private val testMail = Button(t("settings.email.test.title")) { sendTestMail() }.apply {
         addClassName("jvmguard-settings-gap-before")
         testId = ID_TEST
     }
 
     init {
-        add(settingsSection("E-Mail", fromEmail, host, port, encryption, authenticate, userName, password, testMail))
+        add(settingsSection(t("nav.settings.email"), fromEmail, host, port, encryption, authenticate, userName, password, testMail))
         updateAuthEnabled()
     }
 
@@ -69,7 +68,7 @@ class SmtpSettingsView : AbstractSettingsSectionView() {
         binder.forField(host)
             .bind({ it.smtpConfig.host }, { config, value -> config.smtpConfig.host = value })
         binder.forField(port)
-            .asRequired("Enter a port.")
+            .asRequired(t("settings.email.validation.port"))
             .bind({ it.smtpConfig.port }, { config, value -> config.smtpConfig.port = value })
         binder.forField(encryption)
             .bind({ it.smtpConfig.encryption }, { config, value -> config.smtpConfig.encryption = value })

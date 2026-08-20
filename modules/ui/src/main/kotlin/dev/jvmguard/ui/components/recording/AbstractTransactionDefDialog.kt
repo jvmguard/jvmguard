@@ -2,6 +2,7 @@ package dev.jvmguard.ui.components.recording
 
 import dev.jvmguard.agent.config.transactions.ClassFilterTransactionDef
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
@@ -19,21 +20,21 @@ abstract class AbstractTransactionDefDialog<T : ClassFilterTransactionDef>(
     private val policyForm = PolicyForm()
     private var naming: NamingForm? = null
 
-    private val discard = Checkbox("Discard matching transactions (record nothing)")
-    private val className = TextField("Class filter").apply {
+    private val discard = Checkbox(t("recording.discard"))
+    private val className = TextField(t("recording.transaction.classFilter")).apply {
         setWidthFull()
-        helperText = "Wildcard (comma-separated) or regular expression; * matches all."
+        helperText = t("recording.transaction.classFilter.helper")
     }
 
     protected fun build() {
-        headerTitle = (if (isNew) "Add " else "Edit ") + "$typeName transaction"
+        headerTitle = t("recording.transaction.dialog." + (if (isNew) "add" else "edit") + "." + typeKey)
         width = "60rem"
 
         naming = namingForm()
-        wizard.addTab("Definition", definitionTab())
-        wizard.addTab("Filter", VerticalLayout(className, discard).apply { isPadding = false; isSpacing = true })
-        naming?.let { wizard.addTab("Naming", it) }
-        wizard.addTab("Policies", policyForm)
+        wizard.addTab(t("recording.tab.definition"), definitionTab())
+        wizard.addTab(t("recording.tab.filter"), VerticalLayout(className, discard).apply { isPadding = false; isSpacing = true })
+        naming?.let { wizard.addTab(t("recording.tab.naming"), it) }
+        wizard.addTab(t("recording.tab.policies"), policyForm)
         add(wizard)
 
         bindShared()
@@ -43,10 +44,10 @@ abstract class AbstractTransactionDefDialog<T : ClassFilterTransactionDef>(
         policyForm.read(def.policy)
         naming?.read(def.naming)
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
-    protected abstract val typeName: String
+    protected abstract val typeKey: String
     protected abstract fun definitionTab(): Component
     protected open fun bindDefinition(binder: Binder<T>) {}
     protected open fun readDefinition(def: T) {}

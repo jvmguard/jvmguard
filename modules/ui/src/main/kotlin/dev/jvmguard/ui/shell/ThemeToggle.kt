@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.shell
 
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
@@ -63,7 +64,7 @@ class ThemeToggle : Button() {
 
     private fun updateIcon() {
         icon = (if (effectiveDark) VaadinIcon.SUN_O else VaadinIcon.MOON).create()
-        val label = if (effectiveDark) "Switch to light mode" else "Switch to dark mode"
+        val label = t(if (effectiveDark) "shell.theme.toLight" else "shell.theme.toDark")
         setAriaLabel(label)
         setTooltipText(label)
     }

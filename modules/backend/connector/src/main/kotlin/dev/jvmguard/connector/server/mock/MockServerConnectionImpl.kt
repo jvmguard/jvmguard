@@ -28,6 +28,7 @@ import dev.jvmguard.data.user.User
 import dev.jvmguard.data.user.viewsettings.ViewSettings
 import dev.jvmguard.data.vmdata.*
 import dev.jvmguard.connector.api.ServerConnection
+import dev.jvmguard.connector.api.SsoDiscoveryResult
 import dev.jvmguard.connector.api.ServerConnectionRegistry
 import dev.jvmguard.connector.api.log.LogFile
 import dev.jvmguard.connector.api.log.LogFileDescriptor
@@ -97,7 +98,10 @@ class MockServerConnectionImpl(override val user: User) : AbstractServerConnecti
         get() = InstallationInfo("1.0", "1000")
 
     override fun saveViewSettings(viewSettings: ViewSettings) {
-        realConnection.saveViewSettings(viewSettings)
+        // Browserless tests use the mock without the real login path, so there is no delegate to persist to
+        if (::realConnection.isInitialized) {
+            realConnection.saveViewSettings(viewSettings)
+        }
     }
 
     override fun saveSelf(user: User) {
@@ -123,7 +127,8 @@ class MockServerConnectionImpl(override val user: User) : AbstractServerConnecti
         this.globalConfig = globalConfig
     }
 
-    override fun testSsoDiscovery(issuerUri: String): String = "Mock: discovery test skipped"
+    override fun testSsoDiscovery(issuerUri: String): SsoDiscoveryResult =
+        SsoDiscoveryResult("settings.sso.discovery.mock")
 
     override val groupConfigs: Collection<GroupConfig>
         get() = mockEntities.getGroupConfigs()

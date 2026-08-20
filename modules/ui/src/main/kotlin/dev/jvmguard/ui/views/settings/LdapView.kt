@@ -8,6 +8,8 @@ import dev.jvmguard.ui.components.editDeleteKeys
 import dev.jvmguard.ui.components.menuButton
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.StagedListController
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
@@ -22,40 +24,38 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.ADMIN)
 @Route(value = "settings/ldap", layout = MainLayout::class)
-@PageTitle("jvmguard: Settings")
 class LdapView : AbstractSettingsSectionView() {
 
-    private val url = TextField("LDAP URL").apply {
+    private val url = TextField(t("settings.ldap.url")).apply {
         setWidthFull()
-        placeholder = "ldap://host:389"
+        placeholder = t("settings.ldap.url.placeholder")
         testId = ID_URL
     }
-    private val useStartTls = Checkbox("Use StartTLS")
-    private val authenticate = Checkbox("Authenticate to the directory").apply {
+    private val useStartTls = Checkbox(t("settings.ldap.startTls"))
+    private val authenticate = Checkbox(t("settings.ldap.authenticate")).apply {
         addClassName("jvmguard-settings-gap-before")
         addValueChangeListener { updateAuthEnabled() }
         testId = ID_AUTHENTICATE
     }
-    private val userName = TextField("Bind user name").apply {
+    private val userName = TextField(t("settings.ldap.bindUser")).apply {
         setWidthFull()
         testId = ID_USER_NAME
     }
-    private val password = PasswordField("Bind password").apply {
+    private val password = PasswordField(t("settings.ldap.bindPassword")).apply {
         setWidthFull()
         testId = ID_PASSWORD
     }
 
     private val mappingGrid = Grid(LdapUserMapping::class.java, false).apply {
         testId = ID_MAPPING_GRID
-        addColumn { it.searchBase }.setHeader("Search base").setAutoWidth(true)
-        addColumn { it.userFilter }.setHeader("User filter").setFlexGrow(1)
-        addColumn { it.accessLevel.toString() }.setHeader("Access level").setAutoWidth(true)
+        addColumn { it.searchBase }.setHeader(t("settings.ldap.mapping.searchBase")).setAutoWidth(true)
+        addColumn { it.userFilter }.setHeader(t("settings.ldap.mapping.userFilter")).setFlexGrow(1)
+        addColumn { enumLabel(it.accessLevel) }.setHeader(t("shell.userInfo.accessLevel")).setAutoWidth(true)
         addComponentColumn { rowActions(it) }.setFlexGrow(0).setAutoWidth(true)
         addItemDoubleClickListener { edit(it.item, false) }
         editDeleteKeys({ edit(it, false) }, ::confirmDelete)
@@ -63,13 +63,13 @@ class LdapView : AbstractSettingsSectionView() {
     }
 
     init {
-        add(settingsSection("LDAP", url, useStartTls, authenticate, userName, password))
+        add(settingsSection(t("settings.ldap.section"), url, useStartTls, authenticate, userName, password))
 
-        val addMapping = Button("Add mapping", VaadinIcon.PLUS.create()) { edit(LdapUserMapping(), true) }.apply {
+        val addMapping = Button(t("settings.ldap.addMapping"), VaadinIcon.PLUS.create()) { edit(LdapUserMapping(), true) }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_ADD_MAPPING
         }
-        val mappingTitle = H4("User mappings")
+        val mappingTitle = H4(t("settings.ldap.mappings"))
         val mappingHeader = HorizontalLayout(mappingTitle, addMapping).apply {
             addClassName("jvmguard-settings-gap-before")
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
@@ -84,7 +84,7 @@ class LdapView : AbstractSettingsSectionView() {
     @Suppress("DuplicatedCode")
     override fun bind(binder: Binder<GlobalConfig>) {
         binder.forField(url)
-            .withValidator({ it.isNullOrEmpty() || it.startsWith("ldap://") || it.startsWith("ldaps://") }, "Use an ldap:// or ldaps:// URL.")
+            .withValidator({ it.isNullOrEmpty() || it.startsWith("ldap://") || it.startsWith("ldaps://") }, t("settings.ldap.validation.url"))
             .bind({ it.ldapConfig.url }, { config, value -> config.ldapConfig.url = value })
         binder.forField(useStartTls)
             .bind({ it.ldapConfig.useStartTls }, { config, value -> config.ldapConfig.useStartTls = value })
@@ -110,9 +110,9 @@ class LdapView : AbstractSettingsSectionView() {
     }
 
     private fun rowActions(mapping: LdapUserMapping): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions for this mapping", "$ID_MAPPING_ROW_MENU-${mapping.searchBase}") {
-            addItem("Edit") { edit(mapping, false) }
-            addItem("Delete") { confirmDelete(mapping) }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.ldap.mapping.actions"), "$ID_MAPPING_ROW_MENU-${mapping.searchBase}") {
+            addItem(t("common.edit")) { edit(mapping, false) }
+            addItem(t("common.delete")) { confirmDelete(mapping) }
         }
 
     private fun edit(mapping: LdapUserMapping, isNew: Boolean) {
@@ -126,7 +126,7 @@ class LdapView : AbstractSettingsSectionView() {
     }
 
     private fun confirmDelete(mapping: LdapUserMapping) {
-        confirm("Delete mapping", "Delete the mapping for \"${mapping.searchBase}\"?", "Delete") {
+        confirm(t("settings.ldap.mapping.deleteTitle"), t("settings.ldap.mapping.deleteText", mapping.searchBase), t("common.delete")) {
             mappings.remove(mapping)
         }
     }

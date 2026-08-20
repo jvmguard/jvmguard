@@ -8,6 +8,8 @@ import dev.jvmguard.ui.components.recording.actionTypeIcon
 import dev.jvmguard.ui.components.recording.sets.SetSpec
 import dev.jvmguard.ui.components.recording.sets.setActionButtons
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
@@ -30,9 +32,9 @@ class TriggerActionsEditor(private val actions: MutableList<TriggerAction>) : Ve
 
     private val grid = Grid<TriggerAction>().apply {
         testId = ID_GRID
-        addComponentColumn(::actionCell).setHeader("Action").setFlexGrow(1)
+        addComponentColumn(::actionCell).setHeader(t("trigger.action.grid.header")).setFlexGrow(1)
         addComponentColumn(::rowActions).setKey(ACTIONS_KEY).setAutoWidth(true).setFlexGrow(0)
-        setEmptyStateComponent(Span("No actions yet. Use \"Add action\".").apply { addClassName("jvmguard-field-hint") })
+        setEmptyStateComponent(Span(t("trigger.action.grid.empty")).apply { addClassName("jvmguard-field-hint") })
         addItemDoubleClickListener { edit(it.item) }
         editDeleteKeys(::edit, ::remove)
         enableRowReorder(items = { actions }, onReordered = ::refresh)
@@ -43,13 +45,13 @@ class TriggerActionsEditor(private val actions: MutableList<TriggerAction>) : Ve
         isPadding = false
         isSpacing = true
         setSizeFull()
-        val add = dropdownButton("Add action", ID_ADD) {
-            ACTION_TYPES.forEach { type -> item(actionTypeIcon(type), type.toString()) { addAction(type) } }
+        val add = dropdownButton(t("trigger.action.add"), ID_ADD) {
+            ACTION_TYPES.forEach { type -> item(actionTypeIcon(type), enumLabel(type)) { addAction(type) } }
         }
         val setButtons = setActionButtons(setSpec())
         saveSetButton = setButtons.getOrNull(1) as? Button
         header.add(add, *setButtons.toTypedArray())
-        add(H5("Actions").apply { addClassName("jvmguard-form-subhead") }, header, grid)
+        add(H5(t("recording.actions")).apply { addClassName("jvmguard-form-subhead") }, header, grid)
         setFlexGrow(1.0, grid)
         refresh()
     }
@@ -72,12 +74,12 @@ class TriggerActionsEditor(private val actions: MutableList<TriggerAction>) : Ve
     }
 
     private fun actionCell(action: TriggerAction): Component =
-        cellRow(actionTypeIcon(action.actionType).create().apply { setSize("1.2em") }, Span(action.description))
+        cellRow(actionTypeIcon(action.actionType).create().apply { setSize("1.2em") }, Span(describe(action)))
 
     private fun rowActions(action: TriggerAction): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", "$ID_ROW_MENU-${actions.indexOf(action)}") {
-            addItem("Edit") { edit(action) }
-            addItem("Remove") { remove(action) }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "$ID_ROW_MENU-${actions.indexOf(action)}") {
+            addItem(t("common.edit")) { edit(action) }
+            addItem(t("common.remove")) { remove(action) }
         }
 
     private fun remove(action: TriggerAction) {
@@ -87,10 +89,8 @@ class TriggerActionsEditor(private val actions: MutableList<TriggerAction>) : Ve
 
     private fun setSpec(): SetSpec<TriggerAction, ActionSet> = SetSpec(
         setClass = ActionSet::class.java,
-        singularName = "action set",
-        pluralName = "action sets",
-        addSubtitle = "The actions in the selected set are added to this trigger.",
-        saveSubtitle = "Saved action sets can be added to other triggers.",
+        addSubtitle = t("trigger.actionSet.addSubtitle"),
+        saveSubtitle = t("trigger.actionSet.saveSubtitle"),
         loadSets = {
             Sessions.current()?.serverConnection?.actionSets ?: emptyList()
         },

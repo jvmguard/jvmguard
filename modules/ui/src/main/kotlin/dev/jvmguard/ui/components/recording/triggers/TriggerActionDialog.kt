@@ -6,6 +6,8 @@ import dev.jvmguard.data.config.triggers.actions.*
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.JvmGuardDialog
 import dev.jvmguard.ui.components.Validators
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.HasValidation
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.orderedlayout.FlexComponent
@@ -37,7 +39,7 @@ abstract class TriggerActionDialog protected constructor(
     protected fun build() {
         populate()
         add(body)
-        confirmFooter("Save", ID_SAVE) {
+        confirmFooter(t("common.save"), ID_SAVE) {
             if (writeBack()) {
                 onSave()
                 close()
@@ -56,7 +58,7 @@ abstract class TriggerActionDialog protected constructor(
         const val ID_REDACT = "trigger-action-redact"
 
         fun create(action: TriggerAction, isNew: Boolean, onSave: () -> Unit): TriggerActionDialog =
-            create(action, (if (isNew) "Add action: " else "Edit action: ") + action.actionType, null, onSave)
+            create(action, t(if (isNew) "trigger.action.dialog.add" else "trigger.action.dialog.edit", enumLabel(action.actionType)), null, onSave)
 
         fun create(
             action: TriggerAction,
@@ -118,8 +120,8 @@ private abstract class RecordArtifactActionDialog protected constructor(
     onSave: () -> Unit,
 ) : ArtifactActionDialog(action, title, onSave) {
 
-    protected val time = IntegerField("Recording time").apply { width = "8rem"; value = action.time }
-    protected val unit = EnumSelect("", TimeUnit::class.java) { it.toString() }.apply { value = action.timeUnit }
+    protected val time = IntegerField(t("trigger.action.recordingTime")).apply { width = "8rem"; value = action.time }
+    protected val unit = EnumSelect("", TimeUnit::class.java) { t("enum.TimeUnit.plural.${it.name}") }.apply { value = action.timeUnit }
 
     protected fun validateRecordArtifact(): Boolean = requireArtifactName(artifact) && requireRecordingTime(time)
 
@@ -135,28 +137,28 @@ private class RecordJpsActionDialog(private val action: RecordJpsAction, title: 
 
     private val unknownSubsystems = action.subsystems.filter { JProfilerSubsystem.fromId(it) == null }.toSet()
 
-    private val subsystems = MultiSelectComboBox<JProfilerSubsystem>("Recorded subsystems").apply {
+    private val subsystems = MultiSelectComboBox<JProfilerSubsystem>(t("trigger.action.subsystems")).apply {
         setItems(*JProfilerSubsystem.entries.toTypedArray())
-        setItemLabelGenerator { it.label }
+        setItemLabelGenerator { enumLabel(it) }
         setWidthFull()
         value = action.subsystems.mapNotNull { JProfilerSubsystem.fromId(it) }.toSet()
         addClassName("jvmguard-settings-gap-before")
     }
 
     // Point-in-time captures taken at the end of the recording window and stored in the same snapshot.
-    private val heapDump = Checkbox("Include heap dump").apply {
+    private val heapDump = Checkbox(t("trigger.action.heapDump")).apply {
         value = action.heapDump
         addClassName("jvmguard-settings-gap-before")
     }
 
-    private val heapDumpFullGc = Checkbox("Run a full GC before the heap dump").apply {
+    private val heapDumpFullGc = Checkbox(t("trigger.action.heapDumpFullGc")).apply {
         value = action.heapDumpFullGc
         isEnabled = action.heapDump
     }
 
-    private val mbeanSnapshot = Checkbox("Include MBean snapshot").apply { value = action.mbeanSnapshot }
+    private val mbeanSnapshot = Checkbox(t("trigger.action.mbeanSnapshot")).apply { value = action.mbeanSnapshot }
 
-    private val monitorDump = Checkbox("Include monitor dump").apply { value = action.monitorDump }
+    private val monitorDump = Checkbox(t("trigger.action.monitorDump")).apply { value = action.monitorDump }
 
     init {
         heapDump.addValueChangeListener { heapDumpFullGc.isEnabled = it.value }
@@ -172,7 +174,7 @@ private class RecordJpsActionDialog(private val action: RecordJpsAction, title: 
             return false
         }
         if (subsystems.value.isEmpty()) {
-            return fail(subsystems, "Select at least one subsystem.")
+            return fail(subsystems, t("trigger.action.subsystems.required"))
         }
         writeRecordArtifact()
         action.subsystems = subsystems.value.map { it.id }.toSet() + unknownSubsystems
@@ -193,19 +195,19 @@ private class RecordJfrActionDialog(
 
     private val mode = RadioButtonGroup<JfrConfigMode>().apply {
         setItems(*JfrConfigMode.entries.toTypedArray())
-        setItemLabelGenerator { it.toString() }
+        setItemLabelGenerator { enumLabel(it) }
         value = action.configMode
         addClassName("jvmguard-settings-gap-before")
     }
-    private val profile = TextField("Profile name").apply {
+    private val profile = TextField(t("trigger.action.profileName")).apply {
         setWidthFull()
-        helperText = "Predefined profiles: " + JfrDefaultProfile.entries.joinToString(", ") { it.toString() }
+        helperText = t("trigger.action.predefinedProfiles", JfrDefaultProfile.entries.joinToString(", ") { it.toString() })
         value = action.profileName
     }
-    private val settings = TextArea("JFR settings").apply { setWidthFull(); value = action.settings }
+    private val settings = TextArea(t("trigger.action.jfrSettings")).apply { setWidthFull(); value = action.settings }
 
     private val redact =
-        Checkbox("Redact sensitive data (system properties, environment variables, command lines)").apply {
+        Checkbox(t("trigger.action.redact")).apply {
             value = redactOption?.value == true
             testId = ID_REDACT
             addClassName("jvmguard-settings-gap-before")
@@ -229,7 +231,7 @@ private class RecordJfrActionDialog(
             return false
         }
         if (mode.value == JfrConfigMode.CONFIG_FILE && settings.value.isBlank()) {
-            return fail(settings, "Please enter JFR settings.")
+            return fail(settings, t("trigger.action.jfrSettings.required"))
         }
         writeRecordArtifact()
         action.configMode = mode.value
@@ -281,7 +283,7 @@ private class InboxActionDialog(action: InboxAction, title: String, onSave: () -
 private class LogActionDialog(private val action: LogAction, title: String, onSave: () -> Unit) :
     TextActionDialog(action, title, onSave) {
 
-    private val category = EnumSelect("Category", LogCategory::class.java) { it.toString() }.apply { value = action.category }
+    private val category = EnumSelect(t("trigger.action.category"), LogCategory::class.java).apply { value = action.category }
 
     init {
         build()
@@ -304,10 +306,10 @@ private class LogActionDialog(private val action: LogAction, title: String, onSa
 private class EmailActionDialog(private val action: EmailAction, title: String, onSave: () -> Unit) :
     TextActionDialog(action, title, onSave) {
 
-    private val email = TextField("Email").apply { setWidthFull(); value = action.email }
-    private val category = TextField("Category").apply {
+    private val email = TextField(t("trigger.action.email")).apply { setWidthFull(); value = action.email }
+    private val category = TextField(t("trigger.action.category")).apply {
         setWidthFull()
-        helperText = "e.g. " + LogCategory.entries.joinToString(", ") { it.toString() }
+        helperText = t("trigger.action.categoryExamples", LogCategory.entries.joinToString(", ") { it.toString() })
         value = action.category
     }
 
@@ -321,10 +323,10 @@ private class EmailActionDialog(private val action: EmailAction, title: String, 
 
     override fun writeBack(): Boolean {
         if (email.value.isNullOrBlank()) {
-            return fail(email, "Please enter an email address.")
+            return fail(email, t("trigger.action.email.required"))
         }
         if (!Validators.isValidEmail(email.value)) {
-            return fail(email, "The email address is invalid.")
+            return fail(email, t("trigger.action.email.invalid"))
         }
         if (!requireText(text)) {
             return false
@@ -339,26 +341,26 @@ private class EmailActionDialog(private val action: EmailAction, title: String, 
 private class WebhookActionDialog(private val action: WebhookAction, title: String, onSave: () -> Unit) :
     TriggerActionDialog(title, onSave) {
 
-    private val url = TextField("URL").apply { setWidthFull(); value = action.url }
-    private val method = EnumSelect("Method", HttpRequestMethod::class.java) { it.toString() }.apply { value = action.httpRequestMethod }
-    private val headers = TextArea("Headers").apply {
+    private val url = TextField(t("trigger.action.url")).apply { setWidthFull(); value = action.url }
+    private val method = EnumSelect(t("trigger.action.method"), HttpRequestMethod::class.java).apply { value = action.httpRequestMethod }
+    private val headers = TextArea(t("trigger.action.headers")).apply {
         setWidthFull()
-        helperText = "One header per line, as key=value. $TRIGGER_HELP"
+        helperText = t("trigger.action.headers.helper")
         value = action.headers
     }
-    private val bodyType = EnumSelect("Body", BodyContentType::class.java) { it.toString() }.apply { value = action.bodyContentType }
-    private val formData = TextArea("Form data").apply {
+    private val bodyType = EnumSelect(t("trigger.action.body"), BodyContentType::class.java).apply { value = action.bodyContentType }
+    private val formData = TextArea(t("trigger.action.formData")).apply {
         setWidthFull()
-        helperText = "Unencoded parameters as key=value, one per line. $TRIGGER_HELP"
+        helperText = t("trigger.action.formData.helper")
         value = action.formData
     }
-    private val json = TextArea("JSON").apply {
+    private val json = TextArea(t("trigger.action.json")).apply {
         setWidthFull()
-        helperText = "A JSON string sent in the request body. $TRIGGER_HELP"
+        helperText = t("trigger.action.json.helper")
         value = action.json
     }
-    private val timeout = IntegerField("Timeout (seconds)").apply { width = "10rem"; value = action.timeout }
-    private val ssl = Checkbox("Accept all SSL certificates").apply { value = action.isAcceptAllCertificates }
+    private val timeout = IntegerField(t("trigger.action.timeout")).apply { width = "10rem"; value = action.timeout }
+    private val ssl = Checkbox(t("trigger.action.acceptSsl")).apply { value = action.isAcceptAllCertificates }
 
     init {
         bodyType.addValueChangeListener { updateBody() }
@@ -372,19 +374,19 @@ private class WebhookActionDialog(private val action: WebhookAction, title: Stri
 
     override fun writeBack(): Boolean {
         when {
-            url.value.isNullOrBlank() -> return fail(url, "Please enter a URL.")
-            !isUrl(url.value) -> return fail(url, "The URL is not valid.")
+            url.value.isNullOrBlank() -> return fail(url, t("trigger.action.url.required"))
+            !isUrl(url.value) -> return fail(url, t("trigger.action.url.invalid"))
             headers.value.isNotBlank() && !KeyValuePairHelper.isKeyValuePairs(headers.value) ->
-                return fail(headers, "Headers must be key=value, one per line.")
+                return fail(headers, t("trigger.action.headers.invalid"))
 
             bodyType.value == BodyContentType.FORM_DATA && !KeyValuePairHelper.isKeyValuePairs(formData.value) ->
-                return fail(formData, "Form data must be key=value, one per line.")
+                return fail(formData, t("trigger.action.formData.invalid"))
 
             bodyType.value == BodyContentType.JSON && !isJson(json.value) ->
-                return fail(json, "Not a valid JSON expression.")
+                return fail(json, t("trigger.action.json.invalid"))
 
-            timeout.value == null -> return fail(timeout, "Please enter a timeout.")
-            (timeout.value ?: 0) <= 0 -> return fail(timeout, "The timeout must be greater than zero.")
+            timeout.value == null -> return fail(timeout, t("trigger.action.timeout.required"))
+            (timeout.value ?: 0) <= 0 -> return fail(timeout, t("trigger.action.timeout.positive"))
         }
         action.url = url.value
         action.httpRequestMethod = method.value
@@ -403,19 +405,16 @@ private class WebhookActionDialog(private val action: WebhookAction, title: Stri
     }
 }
 
-private const val TRIGGER_HELP =
-    "Use @TRIGGER@ to insert a description of the VM that caused the trigger to fire."
-
 private val JSON = JsonMapper.builder().build()
 
 private fun artifactNameField(initial: String): TextField =
-    TextField("Snapshot name").apply { setWidthFull(); value = initial }
+    TextField(t("trigger.action.snapshotName")).apply { setWidthFull(); value = initial }
 
 private fun inboxCheckbox(initial: Boolean): Checkbox =
-    Checkbox("Send to the inbox of all users with viewing rights").apply { value = initial }
+    Checkbox(t("trigger.action.sendToInbox")).apply { value = initial }
 
 private fun textAreaField(initial: String): TextArea =
-    TextArea("Text").apply { setWidthFull(); minHeight = "8rem"; value = initial }
+    TextArea(t("recording.naming.text")).apply { setWidthFull(); minHeight = "8rem"; value = initial }
 
 private fun timeRow(time: IntegerField, unit: EnumSelect<TimeUnit>): HorizontalLayout =
     HorizontalLayout(time, unit).apply {
@@ -430,14 +429,14 @@ private fun fail(field: HasValidation, message: String): Boolean {
 }
 
 private fun requireText(field: TextArea): Boolean =
-    field.value.isNotBlank() || fail(field, "Please enter some text.")
+    field.value.isNotBlank() || fail(field, t("trigger.action.text.required"))
 
 private fun requireArtifactName(field: TextField): Boolean =
-    !field.value.isNullOrBlank() || fail(field, "Please enter a name for the snapshot.")
+    !field.value.isNullOrBlank() || fail(field, t("trigger.action.snapshotName.required"))
 
 private fun requireRecordingTime(field: IntegerField): Boolean = when {
-    field.value == null -> fail(field, "Please enter a recording time.")
-    (field.value ?: 0) <= 0 -> fail(field, "The recording time must be greater than zero.")
+    field.value == null -> fail(field, t("trigger.action.recordingTime.required"))
+    (field.value ?: 0) <= 0 -> fail(field, t("trigger.action.recordingTime.positive"))
     else -> true
 }
 

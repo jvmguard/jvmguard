@@ -1,0 +1,118 @@
+---
+title: 监控 JVM
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+安装 jvmguard 之后，就可以将代理添加到本机上运行的 JVM 中。
+
+## 基本机制
+
+jvmguard 代理是一个 **Java 代理**，通过指定 `-javaagent` JVM 选项加载到 VM 中。Java 代理能够在类加载时
+对其进行插桩，也可以重新转换已经加载的类。
+
+要让一个 VM 做好监控准备，需要知道要插入到应用程序服务器或应用程序启动脚本中的实际 JVM 选项。jvmguard 代理
+已经包含在 jvmguard 安装目录中，jvmguard UI 会展示如何构造正确的 `-javaagent` JVM 选项。
+
+要开始，请点击标题栏中的“添加 VM”按钮。
+
+## 添加本地 VM
+
+由于 jvmguard 代理已经包含在 jvmguard 安装目录中，因此可以轻松监控本地运行的 VM。“添加 VM”对话框会针对
+最简单的情况（无需任何进一步配置）显示完整的 `-javaagent` JVM 选项，适用于监控单个 VM。
+
+<Figure src="ui/add_vms_local.png" />
+
+不带 "server" 选项时，代理会假定 jvmguard 服务器运行在 localhost 上。关于组名和池名的进一步说明见下文。
+
+## 命名 VM
+
+监控多个 VM 时，必须为它们命名，以便**在 jvmguard UI 中识别它们**。要分配 VM 名称，请将 `name` 选项传递给
+`-javaagent` JVM 选项：
+
+```
+-javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name]
+```
+
+每个名称同一时间只能由一个 VM 使用。如果第二个 VM 请求以相同的名称被监控，它会接管该名称，之前连接的 VM
+会被断开。如果有一批无法分配唯一名称的 VM，请参阅下面关于 VM 池的部分。
+
+{/* vm_duplicate_names.svg removed: it depicted the old "second VM is rejected" behavior. The actual behavior is
+     last-writer-wins: the new VM replaces the old one, which is disconnected. */}
+
+除了 VM 名称之外，还可以将 VM 组织成层级结构。默认情况下，VM 会被插入顶层组。要将其分配到其他组，请在
+JVM 选项中设置 `group` 选项：
+
+```
+-javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name],group=[group name]
+```
+
+在组名中，用正斜杠分隔层级，例如 `Web/Workers/Gen3`。一个完整的 `-javaagent` 参数如下所示：
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,name=web,group=Web/Workers/Gen3
+```
+
+同一组内的 VM 名称必须唯一。
+
+## VM 池
+
+有时无法为 VM 配置唯一名称，例如在**实例动态供应**的云环境中。在这种情况下，可以将 VM 分配到一个 VM 池：
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,pool=Web/Workers
+```
+
+与 `group` 选项一样，`pool` 选项接受以正斜杠作为层级分隔符的层级名称。`pool` 选项不能与 `name` 选项组合
+使用，但可以与 `group` 选项组合，此时池嵌套在该组之下。
+
+在池中，受监控的 VM 会被赋予一个带唯一标识符的名称。当 VM 断开时，该标识符不会被再次使用。与命名 VM 不同，
+单个池中 VM 的数据只保留较短的时间，因此每个实例没有关联的长期历史记录。不过，可以跟踪整个池的历史记录，
+以分析随时间变化的趋势。
+
+<Figure src="vm_pools.svg" />
+
+## 服务器端口
+
+默认情况下，jvmguard 服务器在端口 **8847** 上监听 VM 连接。需要在**防火墙中开放**这个端口，以允许受监控的
+VM 访问 jvmguard 服务器。
+
+可以通过在 `config/application.yaml` 中设置 [`vmPort` 属性](/docs/zh-cn/config/server-config)将 jvmguard
+服务器配置为使用不同的端口。如果该端口已被占用，或者要在同一台机器上安装多个 jvmguard 实例，则需要这样做。
+
+要告知代理使用这种非默认端口，必须在 `-javaagent` JVM 选项中添加 `port` 选项。例如：
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,port=8912,name=test
+```
+
+## 日志
+
+jvmguard 代理将错误记录到 Linux/Unix 上的 `$HOME/.jvmguard/log` 目录或 Windows 上的
+`%USERPROFILE%\.jvmguard\log` 目录。日志文件按需创建，如果没有任何日志输出，就不会创建文件。日志文件的名称为
+`<VM name>.log`，其中 &lt;VM name&gt; 是 `name` 或 `pool` 参数的值。如果 `name` 和 `pool` 都未指定，文件名为
+`jvm.log`。
+
+要记录到其他文件，可以在 `-javaagent` JVM 选项中添加 `logFile=<path to log file>` 选项。要完全禁用日志，
+可以追加 `logEnabled=false` 选项。
+
+## 加密和认证
+
+代理与服务器之间的双向认证和加密由与 `jvmguard.jar` 文件位于同一目录下的代理密钥库文件 `agent.ks` 启用。
+代理密钥库由服务器生成，位于 jvmguard 数据目录下的 `ssl` 目录中。
+
+当 `config/application.yaml` 中的 `vmUseSsl` 属性设置为 `true` 时，代理密钥库文件会自动添加到从 jvmguard UI
+下载的代理文件中。在这种情况下，加密和认证开箱即用。
+
+如果在设置好受监控的 VM 之后才打开或关闭加密和认证，则必须手动进行以下更改：
+
+* **打开加密**：找到 [jvmguard 数据目录]/ssl/agent.ks，并将其复制到所有受监控 VM 所在机器上的代理安装中。
+密钥库文件必须复制到与 jvmguard.jar 文件相同的目录。如果缺少正确的代理密钥库，服务器将拒绝来自代理的连接。
+* **关闭加密**：在所有受监控 VM 所在机器上的代理安装中，删除 jvmguard.jar 文件旁边的 agent.ks 文件。如果该
+文件存在而服务器未使用加密，代理将拒绝连接到服务器。
+
+如果想将代理密钥库文件放在其他路径，请在 `-javaagent` VM 参数中添加 `keyStore` 选项。例如：
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,keyStore=/sec/agent.ks,name=test
+```

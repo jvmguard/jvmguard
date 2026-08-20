@@ -5,33 +5,50 @@
 import {SITE} from '../consts';
 import {currentVersion} from '../data/release';
 import Logo from '../components/Logo.astro';
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  LOCALE_NAMES,
+  getMessages,
+  htmlLang,
+  localeUrl,
+  type Locale,
+} from '../i18n/ui';
 
 interface Props {
   title?: string;
   description?: string;
   /** Active nav label, for highlighting. */
   active?: 'overview' | 'security' | 'download' | 'compare' | 'docs';
+  locale?: Locale;
 }
 const {
   title = SITE.title,
   description = SITE.description,
   active = 'overview',
+  locale = DEFAULT_LOCALE,
 } = Astro.props;
 
+const m = getMessages(locale);
+
 const nav = [
-  {label: 'Overview', href: '/', key: 'overview'},
-  {label: 'Security', href: '/security', key: 'security'},
-  {label: 'Compare', href: '/compare', key: 'compare'},
-  {label: 'Download', href: '/download', key: 'download'},
-  {label: 'Docs', href: SITE.docs, key: 'docs'},
+  {label: m['nav.overview'], href: localeUrl(locale, '/'), key: 'overview'},
+  {label: m['nav.security'], href: localeUrl(locale, '/security'), key: 'security'},
+  {label: m['nav.compare'], href: localeUrl(locale, '/compare'), key: 'compare'},
+  {label: m['nav.download'], href: localeUrl(locale, '/download'), key: 'download'},
+  {label: m['nav.docs'], href: SITE.docs, key: 'docs'},
 ] as const;
+
+// The language switcher links to the same page in each locale.
+const pagePaths = {overview: '/', security: '/security', compare: '/compare', download: '/download'} as const;
+const currentPath = active in pagePaths ? pagePaths[active as keyof typeof pagePaths] : '/';
 
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={htmlLang(locale)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -58,14 +75,14 @@ import '../styles/global.css';
     </script>
   </head>
   <body>
-    <a class="skip" href="#main">Skip to content</a>
+    <a class="skip" href="#main">{m['a11y.skipToContent']}</a>
     <header class="masthead">
       <div class="shell shell--wide masthead__bar">
-        <a class="wordmark" href="/" aria-label={`${SITE.name} home`}>
+        <a class="wordmark" href={localeUrl(locale, '/')} aria-label={m['a11y.home']}>
           <Logo width={160} height={39} />
         </a>
         <div class="masthead__right">
-          <nav class="nav" aria-label="Primary">
+          <nav class="nav" aria-label={m['a11y.primaryNav']}>
             {nav.map((item) => (
               <a
                 href={item.href}
@@ -75,7 +92,7 @@ import '../styles/global.css';
               </a>
             ))}
           </nav>
-          <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme">
+          <button class="theme-toggle" id="theme-toggle" type="button" aria-label={m['a11y.toggleTheme']}>
             <svg class="icon icon--moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             <svg class="icon icon--sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
           </button>
@@ -92,10 +109,22 @@ import '../styles/global.css';
         <div class="footer__brand">
           <Logo width={120} height={29} />
         </div>
-        <p class="footer__note">Built by the team behind JProfiler.</p>
+        <p class="footer__note">{m['footer.note']}</p>
         {currentVersion !== 'dev' && (
           <p class="footer__version">v{currentVersion}</p>
         )}
+        <nav class="footer__langs" aria-label={m['a11y.language']}>
+          {LOCALES.map((l) => (
+            <a
+              href={localeUrl(l, currentPath)}
+              class:list={['footer__lang', { 'is-active': l === locale }]}
+              aria-current={l === locale ? 'true' : undefined}
+              hreflang={htmlLang(l)}
+            >
+              {LOCALE_NAMES[l]}
+            </a>
+          ))}
+        </nav>
       </div>
     </footer>
 
@@ -243,6 +272,23 @@ import '../styles/global.css';
         color: var(--ink-muted);
         font-size: var(--step--1);
         font-family: var(--font-mono);
+      }
+      .footer__langs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        margin-left: auto;
+      }
+      .footer__lang {
+        color: var(--ink-muted);
+        font-size: var(--step--1);
+        text-decoration: none;
+      }
+      .footer__lang:hover {
+        color: var(--ink);
+      }
+      .footer__lang.is-active {
+        color: var(--brand);
       }
     </style>
     <script is:inline>

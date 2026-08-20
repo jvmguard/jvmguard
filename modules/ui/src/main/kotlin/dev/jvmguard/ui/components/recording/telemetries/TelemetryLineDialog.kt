@@ -3,6 +3,7 @@ package dev.jvmguard.ui.components.recording.telemetries
 import dev.jvmguard.agent.config.telemetry.MBeanLineConfig
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexComponent
@@ -19,13 +20,13 @@ class TelemetryLineDialog(
 ) : JvmGuardDialog() {
 
     private val binder = Binder(MBeanLineConfig::class.java)
-    private val lineName = TextField("Line caption").apply { setWidthFull(); testId = ID_NAME }
-    private val beanName = TextField("MBean object name").apply { setWidthFull(); isReadOnly = true; testId = ID_BEAN }
-    private val attributePath = TextField("Path to the value").apply { setWidthFull(); isReadOnly = true; testId = ID_PATH }
-    private val selectButton = Button("Select", VaadinIcon.SEARCH.create()) { openPicker() }.apply { testId = ID_SELECT }
+    private val lineName = TextField(t("telemetry.line.caption")).apply { setWidthFull(); testId = ID_NAME }
+    private val beanName = TextField(t("telemetry.line.beanName")).apply { setWidthFull(); isReadOnly = true; testId = ID_BEAN }
+    private val attributePath = TextField(t("telemetry.line.path")).apply { setWidthFull(); isReadOnly = true; testId = ID_PATH }
+    private val selectButton = Button(t("common.select"), VaadinIcon.SEARCH.create()) { openPicker() }.apply { testId = ID_SELECT }
 
     init {
-        headerTitle = if (isNew) "Add telemetry line" else "Edit telemetry line"
+        headerTitle = t(if (isNew) "telemetry.line.dialog.add" else "telemetry.line.dialog.edit")
         width = "44rem"
         isResizable = false
 
@@ -41,12 +42,12 @@ class TelemetryLineDialog(
         add(VerticalLayout(lineName, beanRow, attributePath).apply { isPadding = false; isSpacing = true })
 
         binder.forField(lineName)
-            .asRequired("Enter a caption.")
-            .withValidator({ !nameTaken(it.trim()) }, "A line with this caption already exists.")
+            .asRequired(t("telemetry.line.caption.required"))
+            .withValidator({ !nameTaken(it.trim()) }, t("telemetry.line.caption.taken"))
             .bind({ it.lineName }, { l, v -> l.lineName = v.trim() })
         binder.readBean(line)
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
     private fun openPicker() {
@@ -61,7 +62,7 @@ class TelemetryLineDialog(
 
     private fun save() {
         if (beanName.value.isBlank() || attributePath.value.isBlank()) {
-            Notifications.show("Select an MBean value first.")
+            Notifications.show(t("telemetry.line.selectValueFirst"))
             return
         }
         if (!binder.writeBeanIfValid(line)) {

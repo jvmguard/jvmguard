@@ -1,5 +1,6 @@
 package dev.jvmguard.connector.api.log
 
+import dev.jvmguard.common.LocalizedSecurityException
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.FileAppender
@@ -13,10 +14,10 @@ class LogFileHandler(private val accessLevel: AccessLevel) {
     private val readableFiles = HashMap<String, LogFileType>()
 
     fun getLogFile(fileName: String): LogFile {
-        val logFileType = readableFiles[fileName] ?: throw SecurityException("Not allowed to read $fileName")
+        val logFileType = readableFiles[fileName] ?: throw LocalizedSecurityException("error.log.readNotAllowed", "Not allowed to read $fileName", fileName)
         val minimumAccessLevel = logFileType.minimumAccessLevel
         if (!accessLevel.isAtLeast(minimumAccessLevel)) {
-            throw SecurityException("The access level \"$minimumAccessLevel\" is required to view this log file.")
+            throw LocalizedSecurityException("error.log.accessRequired", "The access level \"$minimumAccessLevel\" is required to view this log file.", minimumAccessLevel)
         }
         return LogFileImpl(fileName)
     }

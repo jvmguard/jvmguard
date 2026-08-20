@@ -16,7 +16,10 @@ import dev.jvmguard.ui.components.recording.triggers.TriggerActionDialog
 import dev.jvmguard.ui.components.sparkline.Sparkline
 import dev.jvmguard.ui.components.sparkline.SparklineRenderers
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.displayName
 import dev.jvmguard.ui.server.runInBackground
+import dev.jvmguard.ui.server.t
+import dev.jvmguard.ui.server.errorText
 import dev.jvmguard.ui.views.data.mbeans.MBeansView
 import dev.jvmguard.ui.views.data.telemetry.TelemetryNavigation
 import dev.jvmguard.ui.views.data.transactions.TransactionsView
@@ -64,9 +67,9 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
         setDataProvider(dataProvider)
 
         nameColumn = addComponentHierarchyColumn { nameComponent(it) }
-            .setHeader("Name").setFlexGrow(1).setWidth("320px")
+            .setHeader(t("vms.tree.name")).setFlexGrow(1).setWidth("320px")
             .setComparator(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
-        addComponentColumn { statusComponent(it) }.setHeader("Status").setFlexGrow(0).setWidth("140px")
+        addComponentColumn { statusComponent(it) }.setHeader(t("vms.tree.status")).setFlexGrow(0).setWidth("140px")
             .setComparator(compareBy { it.statusSortValue() })
         sort(GridSortOrder.asc(nameColumn).build())
         lastSortColumn = nameColumn
@@ -115,7 +118,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
                     { it.sparklineState(telemetryType) },
                     { openTelemetry(it, telemetryType) })
             )
-            column.setHeader(telemetryType.name).setFlexGrow(0).setWidth(SPARKLINE_COLUMN_WIDTH)
+            column.setHeader(telemetryType.displayName()).setFlexGrow(0).setWidth(SPARKLINE_COLUMN_WIDTH)
                 .setComparator(compareBy { it.currentValue(telemetryType) })
             sparklineColumns[telemetryType] = column
         }
@@ -228,7 +231,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
             icon(VaadinIcon.WARNING) {
                 setSize(GRID_ICON_SIZE)
                 style.set("color", "var(--jvmguard-status-warning)")
-                setTooltipText("The jvmguard agent on this VM is outdated; it updates when the VM restarts.")
+                setTooltipText(t("vms.tree.outdatedAgent"))
             }
         }
         // The show + actions triggers form one tight cluster (no gap between them).
@@ -242,8 +245,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
 
     private fun statusComponent(item: VmTreeItem): Component = cellRow().apply {
         if (item is VmGroupItem) {
-            span(item.vmCount.toString()) { style.set("font-weight", "bold") }
-            span("JVMs")
+            span(t("vms.tree.groupCount", item.vmCount)) { style.set("font-weight", "bold") }
             return@apply
         }
         val vm = item as SingleVmItem
@@ -251,18 +253,18 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
             setSize("0.9em")
             style.set("color", if (vm.isConnected) "var(--jvmguard-status-ok)" else "var(--jvmguard-status-disabled)")
         }
-        span("since " + formatSince(currentTime - vm.statusChangeTime))
+        span(t("vms.tree.since", formatSince(currentTime - vm.statusChangeTime)))
     }
 
     private fun openTelemetry(item: VmTreeItem, telemetryType: TelemetryType) =
         TelemetryNavigation.open(item.selectionId, telemetryType, currentRange)
 
     private fun showMenu(item: VmTreeItem): Component =
-        menuButton(VaadinIcon.ANGLE_RIGHT, "Show", ID_SHOW) {
-            item("Transactions", { showTransactions(item) }) { testId = ID_SHOW_TRANSACTIONS }
-            item("Telemetries", { showTelemetries(item) }) { testId = ID_SHOW_TELEMETRIES }
+        menuButton(VaadinIcon.ANGLE_RIGHT, t("vms.tree.show"), ID_SHOW) {
+            item(t("nav.transactions"), { showTransactions(item) }) { testId = ID_SHOW_TRANSACTIONS }
+            item(t("nav.telemetries"), { showTelemetries(item) }) { testId = ID_SHOW_TELEMETRIES }
             if (canBrowseMBeans(item)) {
-                item("MBeans", { showMBeans(item) }) { testId = ID_SHOW_MBEANS }
+                item(t("nav.mbeans"), { showMBeans(item) }) { testId = ID_SHOW_MBEANS }
             }
         }
 
@@ -285,51 +287,51 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
     }
 
     private fun actionsMenu(vm: VM): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", ID_ACTIONS) {
-            item("Run GC", { runGc(vm) }) { testId = ID_ACTION_GC }
-            item("Heap dump…", { confirmHeapDump(vm) }) { testId = ID_ACTION_HEAP_DUMP }
-            item("Thread dump…", { confirmThreadDump(vm) }) { testId = ID_ACTION_THREAD_DUMP }
-            item("Record JProfiler snapshot…", { recordJps(vm) }) { testId = ID_ACTION_RECORD_JPS }
-            item("Record JFR snapshot…", { recordJfr(vm) }) { testId = ID_ACTION_RECORD_JFR }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("vms.tree.actions"), ID_ACTIONS) {
+            item(t("vms.action.runGc"), { runGc(vm) }) { testId = ID_ACTION_GC }
+            item(t("vms.action.heapDump"), { confirmHeapDump(vm) }) { testId = ID_ACTION_HEAP_DUMP }
+            item(t("vms.action.threadDump"), { confirmThreadDump(vm) }) { testId = ID_ACTION_THREAD_DUMP }
+            item(t("vms.action.recordJps"), { recordJps(vm) }) { testId = ID_ACTION_RECORD_JPS }
+            item(t("vms.action.recordJfr"), { recordJfr(vm) }) { testId = ID_ACTION_RECORD_JFR }
         }
 
     private fun recordJps(vm: VM) {
         val action = RecordJpsAction().apply { isCreateInboxItem = true }
-        TriggerActionDialog.create(action, "Record JProfiler snapshot") {
-            dispatch("Recording started. The snapshot will be delivered to your inbox.") { it.recordJps(vm, action) }
+        TriggerActionDialog.create(action, t("vms.recordJps.title")) {
+            dispatch(t("vms.recordJps.started")) { it.recordJps(vm, action) }
         }.open()
     }
 
     private fun recordJfr(vm: VM) {
         val action = RecordJfrAction().apply { isCreateInboxItem = true }
         val redactOption = TriggerActionDialog.RedactOption(redactDefault(vm))
-        TriggerActionDialog.create(action, "Record JFR snapshot", redactOption) {
-            dispatch("JFR recording started. The snapshot will be delivered to your inbox.") {
+        TriggerActionDialog.create(action, t("vms.recordJfr.title"), redactOption) {
+            dispatch(t("vms.recordJfr.started")) {
                 it.recordJfr(vm, action, redactOption.value)
             }
         }.open()
     }
 
     private fun runGc(vm: VM) =
-        dispatch("Garbage collection triggered for ${vm.name}") { it.runGC(vm) }
+        dispatch(t("vms.gc.triggered", vm.name)) { it.runGC(vm) }
 
     private fun confirmHeapDump(vm: VM) {
-        val redact = Checkbox("Redact strings and primitive values in the snapshot").apply {
+        val redact = Checkbox(t("vms.heapDump.redact")).apply {
             value = redactDefault(vm)
             testId = ID_HEAP_DUMP_REDACT
         }
         object : JvmGuardDialog() {
             init {
-                headerTitle = "Create HPROF snapshot"
+                headerTitle = t("vms.heapDump.title")
                 add(
                     VerticalLayout(
-                        Span("The HPROF snapshot will be delivered to your inbox. Creating it halts the JVM for a few seconds."),
+                        Span(t("vms.heapDump.text")),
                         redact
                     ).apply { isPadding = false }
                 )
-                confirmFooter("Create", ID_ACTION_HEAP_DUMP_CONFIRM) {
+                confirmFooter(t("vms.create"), ID_ACTION_HEAP_DUMP_CONFIRM) {
                     close()
-                    dispatch("HPROF snapshot requested. Check your inbox.") { it.heapDump(vm, redact.value) }
+                    dispatch(t("vms.heapDump.requested")) { it.heapDump(vm, redact.value) }
                 }
             }
         }.open()
@@ -344,10 +346,10 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
         }
 
     private fun confirmThreadDump(vm: VM) = confirm(
-        "Create thread dump",
-        "The thread dump will be delivered to your inbox.",
-        "Create"
-    ) { dispatch("Thread dump requested. Check your inbox.") { it.threadDump(vm) } }
+        t("vms.threadDump.title"),
+        t("vms.threadDump.text"),
+        t("vms.create")
+    ) { dispatch(t("vms.threadDump.requested")) { it.threadDump(vm) } }
 
     private fun dispatch(confirmation: String, action: (ServerConnection) -> Unit) {
         val connection = Sessions.current()?.serverConnection ?: return
@@ -358,10 +360,10 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
                 action(connection)
             } catch (e: Exception) {
                 if (e is SecurityException || e is AccessDeniedException || e is AuthenticationException) {
-                    ui.access { Notifications.show("Not allowed: ${e.message}") }
+                    ui.access { Notifications.show(t("vms.tree.notAllowed", errorText(e))) }
                 } else {
                     Loggers.SERVER.error("Background action failed", e)
-                    ui.access { Notifications.show("The operation failed: ${e.message}") }
+                    ui.access { Notifications.show(t("vms.tree.operationFailed", errorText(e))) }
                 }
             }
         }
@@ -405,10 +407,10 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
             val hours = minutes / 60
             val days = hours / 24
             return when {
-                days > 0 -> "${days}d ${hours % 24}h"
-                hours > 0 -> "${hours}h ${minutes % 60}m"
-                minutes > 0 -> "${minutes}m"
-                else -> "${seconds}s"
+                days > 0 -> t("time.duration.daysHours", days, hours % 24)
+                hours > 0 -> t("time.duration.hoursMinutes", hours, minutes % 60)
+                minutes > 0 -> t("time.duration.minutes", minutes)
+                else -> t("time.duration.seconds", seconds)
             }
         }
 

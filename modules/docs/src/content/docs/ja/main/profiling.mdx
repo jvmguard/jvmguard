@@ -1,0 +1,55 @@
+---
+title: 本番環境でのプロファイリング
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+本番環境でプロファイラーを常時実行すべきでない理由はいくつかあります。1つは、プロファイリング設定によっては許容できないほど高くなる可能性のあるオーバーヘッドです。プロファイラーは有用な情報の抽出を最大化することを目的としており、発生するオーバーヘッドについて明示的な保証はありません。また、JVMのネイティブプロファイリングインターフェース(JVMTI)の使用は、本番環境における追加のリスクです。非標準のガベージコレクターやその他のJVMチューニングオプションを使用しているかどうかによっては、安定性の懸念があるかもしれません。JVMはJVMTIなしの場合ほどには、JVMTIありでは広範にテストされていないからです。
+
+ただし、パフォーマンスの問題に対する最善の防御は多層防御です。APMツールや継続的プロファイラーで利用できる低オーバーヘッドの監視およびサンプリング手法から得られる以上の情報を必要とする状況が時々あります。
+
+## JProfilerスナップショットの記録
+
+このような場合、jvmguardは**JProfilerプロファイリングエージェント**をオンデマンドで監視対象のJVMにロードできます。JProfilerのネイティブJVMTIライブラリは本番環境での使用に最適化されており、jvmguardはサンプリングモードで記録するように設定するため、オーバーヘッドは低く保たれます。特にJava 17以降では、JVMTIサンプリングのオーバーヘッドは[asyncサンプリングと同等](https://www.ej-technologies.com/blog/2024/02/why-jvmti-sampling-is-better-than-async-sampling-on-modern-jvms/)です。この操作の結果はJProfilerスナップショットファイルで、jvmguardからダウンロードしてJProfilerで開くことができます。
+
+自分で何かをインストールしたりコピーしたりする必要はありません。特定のプラットフォームで初めてJProfilerスナップショットを記録するとき、jvmguardは監視対象VMのオペレーティングシステムとアーキテクチャに一致するJProfilerエージェントパッケージをダウンロードし、キャッシュしてエージェントに転送します。後続の記録ではキャッシュされたパッケージが再利用されます。これには、jvmguardサーバーがJProfilerのWebサイトに到達できることが必要です。
+
+プロファイリングエージェントがロードされると、そのJVMTIを再びオフにすることはできません。JVMが実行されている間、その状態のままになります。ただし通常、データ記録を行わないロード済みエージェントのオーバーヘッドは1%未満です。
+
+特定のVMのJProfilerスナップショットを取得するには、「VM」ビューに移動し、VMの横の「アクション」リンクをクリックして「JProfilerスナップショットを記録」を選択します。
+
+<Figure src="ui/vms_profiling_action.png" />
+
+記録の時間を設定し、記録するサブシステム(CPU、アロケーションとモニターブロッキング、およびJDBC、JPA、HTTP、MongoDBなど多数のJProfilerプローブ)を選択できます。jvmguardの監視は記録の影響を受けません。さらに、記録ウィンドウの終了時に追加データをキャプチャして同じスナップショットに保存できます。ヒープダンプ(オプションでフルガベージコレクションを先行)、MBeanスナップショット、モニターダンプです。
+
+<Figure src="ui/profiling_options.png" />
+
+CPU負荷が高すぎる場合に自動的にスナップショットを取得するには、CPUテレメトリのしきい値を設定し、「JProfilerスナップショットを記録」トリガーアクションを含むトリガーを設定できます。
+
+<Figure src="ui/trigger_profile.png" />
+
+プロファイリングされるのは最後に違反したVMのみであり、すべてのVMではないことに注意してください。
+
+## JProfilerでのJProfilerスナップショットの表示
+
+JProfilerスナップショットはjvmguardの受信トレイに配信され、そこからダウンロードできます。ファイル拡張子は「.jps」で、「JProfilerスナップショット」を意味します。JProfilerがインストールされている場合は、スナップショットファイルをダブルクリックして開くか、JProfilerのメインメニューから「Session」▸「Open Snapshot」を選択します。
+
+## JFRスナップショットの記録
+
+監視対象VMに関するより低レベルの情報を取得するもう1つの仕組みは、[JDK Flight Recorder (JFR)](https://en.wikipedia.org/wiki/JDK_Flight_Recorder)スナップショットを記録することです。監視対象VMのJavaバージョンは11以降である必要があり、JREに`jdk.jfr`モジュールが含まれている必要があります。JFR記録は非常に低いオーバーヘッドにでき、JVMTIをロードしません。
+
+JFRスナップショットを記録するには、「VM」ビューに移動し、VMの横の「アクション」リンクをクリックして「JDK Flight Recorderスナップショットを記録」を選択します。
+
+<Figure src="ui/jfr_recording_action.png" />
+
+JFR記録の時間を設定するほかに、定義済みの設定を選択するか、[JMC](https://openjdk.java.net/projects/jmc/)の「Flight recording template manager」からエクスポートされた`.jfc`設定ファイルの内容をアップロードできます。存在が保証されている2つの定義済み設定は「default」と「profile」です。jvmguardは、より多くの関連情報を記録するため、デフォルトで「profile」を使用することを推奨します。その他の設定は、監視対象のJVMの`lib/jfr`ディレクトリに`.jfc`ファイルを配置することで定義済みにできます。設定ファイルをアップロードする場合は、互換性のあるJavaバージョン向けに作成されていることを確認してください。
+
+<Figure src="ui/jfr_recording_options.png" />
+
+上記の他の記録と同様に、JFRスナップショットもトリガーと対応するJFR記録のトリガーアクションで自動的に記録できます。
+
+<Figure src="ui/trigger_jfr_recording.png" />
+
+[JMC](https://openjdk.java.net/projects/jmc/)を使用してJFRスナップショットを表示できますが、JProfilerスナップショットと同様にJProfilerの使用をお勧めします。CPU、アロケーション、モニターの記録に加えて、JProfilerはJFRイベントから構築される多数のプローブを表示します。
+
+<Figure src="external/jprofiler_jfr.png" />

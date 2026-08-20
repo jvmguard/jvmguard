@@ -7,5 +7,6 @@ class JvmGuardServiceInitListener : VaadinServiceInitListener {
 
     override fun serviceInit(event: ServiceInitEvent) {
         event.source.addSessionInitListener { it.session.errorHandler = JvmGuardErrorHandler() }
+        event.source.addUIInitListener { Locales.initUiLocale(it.ui) }
     }
 }

@@ -105,6 +105,8 @@ val e2eServerClasspath = e2eServerRuntime.elements.map { set -> set.joinToString
 // Dev-mode server startup downloads Node and builds a dev bundle. In CI that exceeds the startup window
 val e2eProductionMode = (findProperty("jvmguard.e2e.productionMode") as String?)?.toBoolean() ?: (System.getenv("CI") != null)
 
+val screenshotLocale = (findProperty("jvmguard.screenshots.locale") as String?) ?: "en"
+
 tasks {
 
     val dist = register("dist")
@@ -246,7 +248,7 @@ tasks {
     }
 
     register<Test>("screenshots") {
-        description = "Produces the help-PDF screenshots into build/e2e/screenshotsLight."
+        description = "Produces the help-PDF screenshots into build/e2e/screenshotsLight/<locale> (-Pjvmguard.screenshots.locale, default en)."
         group = "documentation"
         dependsOn("e2eStartServer")
         finalizedBy("e2eStopServer")
@@ -262,12 +264,13 @@ tasks {
         // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
         systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir",
-            layout.buildDirectory.dir("e2e/screenshotsLight").get().asFile.path)
+            layout.buildDirectory.dir("e2e/screenshotsLight/$screenshotLocale").get().asFile.path)
+        systemProperty("jvmguard.e2e.locale", screenshotLocale)
         outputs.upToDateWhen { false }
     }
 
     register<Test>("darkScreenshots") {
-        description = "Produces the dark-theme help-PDF screenshots into build/e2e/screenshotsDark."
+        description = "Produces the dark-theme help-PDF screenshots into build/e2e/screenshotsDark/<locale> (-Pjvmguard.screenshots.locale, default en)."
         group = "documentation"
         dependsOn("e2eStartServer")
         finalizedBy("e2eStopServer")
@@ -283,7 +286,8 @@ tasks {
         // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
         systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir",
-            layout.buildDirectory.dir("e2e/screenshotsDark").get().asFile.path)
+            layout.buildDirectory.dir("e2e/screenshotsDark/$screenshotLocale").get().asFile.path)
+        systemProperty("jvmguard.e2e.locale", screenshotLocale)
         systemProperty("jvmguard.e2e.darkScreenshots", "true")
         outputs.upToDateWhen { false }
     }

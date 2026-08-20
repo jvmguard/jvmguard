@@ -1,0 +1,107 @@
+---
+title: REST 导出 API
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+## 简介
+
+在 jvmguard UI 中，数据视图有一个导出按钮，可以以机器可读的格式提取所显示的数据，以便进一步处理。
+
+<Figure src="ui/export_button.png" />
+
+要自动化外部分析数据，或者将 jvmguard 接入其他监控系统，手动导出并不实用。在这种情况下，可以改用 REST
+导出 API。
+
+REST API 默认启用。可以通过在 `config/application.yaml` 中将
+[restApiEnabled 属性](/docs/zh-cn/config/server-config)设置为 `false` 来禁用它。启用后，API 在与 Web 服务器
+相同的端口上以 `/api` 路径提供服务，并使用相同的协议（HTTP 或 HTTPS）。
+
+启用之后，就可以向 Web 服务器端口发起 HTTP(S) 调用来获取记录的数据。与 Web UI 一样，可以请求单个 VM 的
+数据，也可以请求特定 VM 组的累积数据。
+
+## 使用 API
+
+对 API 的访问由 HTTP 基本认证保护。这意味着只有在使用 HTTPS 协议时凭据才会被加密。用户名是 jvmguard 的登录
+名，密码是在 jvmguard UI 中生成的 API 密钥。任何拥有 API 密钥的用户都可以使用数据导出端点，与访问级别无关。
+`/api/triggerBackup` 端点需要管理员权限。
+
+API 密钥在“外部访问”页面上创建，该页面可从 jvmguard UI 顶部用户下拉菜单中的“账户设置”进入。生成的
+API 密钥只会显示一次。如果确认对话框，新的 API 密钥将生效，之前的所有 API 密钥都将失效。
+
+返回的格式取决于 HTTP 请求的 "Accept" 头。支持以下 mime 类型：
+
+* **text/plain**：输出为纯文本。如果有多个列，则写入 CSV 数据。对于层级数据，只导出顶层。分隔符默认为
+逗号，但可以用 csvSeparator URL 查询参数更改。winLineBreak URL 查询参数可将默认换行符从 LF 改为 CR+LF。
+未发送 Accept 头时，这是默认格式。
+* **application/json**：输出为 JSON 格式。使用 application/json;charset=UTF-8 可确保无论其他 accept 头
+如何，输出都是 UTF-8 编码。
+* **application/xml**：输出为 XML 格式。
+
+对 REST API 的调用由 `/api` 前缀、一个或多个 URL 段以及一组查询参数组成。例如，如果 Web 服务器端口为
+8020，调用
+
+```
+http://localhost:8020/api/groups
+```
+
+会列出 jvmguard 中配置的所有组。URL
+
+```
+http://localhost:8020/api/transactions/callTree?group=Demo%2FWeb&interval=1h
+```
+
+获取 VM 组 "Demo/Web" 最近一小时的调用树数据。注意组名中经过 URL 编码的正斜杠。
+
+所有开始和结束时间可以用自 1970 年 1 月 1 日 UTC 午夜以来的毫秒数表示，也可以使用以下格式之一：
+
+| 格式 | 示例 | 说明 |
+|---|---|---|
+| `yyyy-MM-dd'T'HH:mm:ss.SSS`<br />`yyyy-MM-dd'T'HH:mm:ss`<br />`yyyy-MM-dd` | 2026-07-02T22:40:00.000<br />2026-07-02T22:40:00<br />2026-07-02 | 服务器本地时间的日期和时间。所有缩短形式等同于将省略部分补零。 |
+| `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`<br />`yyyy-MM-dd'T'HH:mm:ss'Z'`<br />`yyyy-MM-dd'Z'` | 2026-07-02T22:40:00.000Z<br />2026-07-02T22:40:00Z<br />2026-07-02Z | UTC 的日期和时间。所有缩短形式等同于将省略部分补零。 |
+
+## API 文档
+
+以下 URL 可用：
+
+* **/api/groups**：返回所有 VM 组的列表。组层级分隔符是正斜杠。记录选项树形表中的所有节点按广度优先的顺序
+返回。在 XML 和 JSON 中，"pool" 属性表明该组是否为 VM 池。
+* **/api/vms**：返回 VM 列表。名称包含 /api/groups URL 所返回的层级组路径。不返回单个池中 VM。
+
+| 查询参数 | 说明 |
+|---|---|
+| group | 要列出 VM 的特定组。未指定时返回所有 VM。 |
+| connected | 设置为 `true` 时，只返回当前已连接的 VM。 |
+
+* **/api/telemetries**：返回所有可用遥测类型的列表，供下面的 URL 使用。
+* **/api/telemetries/\{telemetryType\}**：返回指定的遥测数据。\{telemetryType\} 的值必须是上面的
+/api/telemetries URL 返回的值之一。
+
+| 查询参数 | 说明 |
+|---|---|
+| interval | 遥测间隔。可选值为 `10min`、`20min`、`40min`、`80min`、`3h`、`6h`、`12h`、`1d`、`3d`、`6d`、`12d`、`30d`、`60d`、`180d` |
+| startTime<br />endTime | 除间隔外，还可以指定开始或结束时间。时间格式见上文。如果省略，则以当前时间作为结束时间。 |
+| vm<br />group | 可以指定 VM 名称或组名。如果省略，则使用所有 VM。 |
+| pretty | 设置为 `true` 时，JSON 和 XML 输出将进行美化打印 |
+| csvSeparator | 请求 text/plain 时，可以指定自定义分隔符 |
+| winLineBreak | 设置为 `true` 且请求 text/plain 时，将写入 CR+LF 换行符而不是 LF 换行符。 |
+
+* **/api/transactions/callTree**：返回所选间隔的调用树数据。
+* **/api/transactions/hotSpots**：返回所选间隔的热点数据。
+* **/api/transactions/overdue**：返回所选间隔的超时未完成事务。
+
+| 查询参数 | 说明 |
+|---|---|
+| interval | 事务间隔。可选值为 `1min`、`10min`、`1h`、`1d` |
+| mergePolicies | 设置为 `true` 时，具有不同策略违规的事务会合并为单个节点。 |
+| startTime<br />endTime | 除间隔外，还可以指定开始或结束时间。时间格式见上文。如果省略，则以当前时间作为结束时间。 |
+| vm<br />group | 可以指定 VM 名称或组名。如果省略，则使用所有 VM。 |
+| pretty | 设置为 `true` 时，JSON 和 XML 输出将进行美化打印 |
+| csvSeparator | 请求 text/plain 时，可以指定自定义分隔符 |
+| winLineBreak | 设置为 `true` 且请求 text/plain 时，将写入 CR+LF 换行符而不是 LF 换行符。 |
+
+* **/api/triggerBackup**：触发数据库备份。该端点需要管理员权限，并以纯文本形式返回备份目录的绝对路径。
+备份文件写入 jvmguard 数据目录中的 `backup` 目录。要恢复此类备份，请停止 jvmguard 服务器，用 `backup` 目录的
+内容替换 `db` 目录的内容，然后重新启动 jvmguard 服务器。如果 REST API 使用不便，或者已在 jvmguard 安装中
+将其禁用，也可以在 jvmguard 数据目录中创建一个名为 `trigger_backup` 的文件。备份成功完成后，该文件会被
+删除，备份随即执行。

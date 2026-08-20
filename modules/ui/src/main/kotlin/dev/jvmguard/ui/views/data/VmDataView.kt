@@ -2,6 +2,7 @@ package dev.jvmguard.ui.views.data
 
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.CachedView
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.DetachEvent
@@ -50,8 +51,8 @@ abstract class VmDataView : VerticalLayout(), BeforeEnterObserver, CachedView {
         val selectButton = Button(VaadinIcon.SEARCH.create()) { openSelector() }.apply {
             addThemeVariants(ButtonVariant.TERTIARY)
             testId = ID_SELECT_BUTTON
-            setAriaLabel("Select group or JVM")
-            setTooltipText("Select group or JVM")
+            setAriaLabel(t("vms.selector.title"))
+            setTooltipText(t("vms.selector.title"))
         }
 
         val toolbar = HorizontalLayout(selectButton, breadcrumb).apply {
@@ -129,7 +130,7 @@ abstract class VmDataView : VerticalLayout(), BeforeEnterObserver, CachedView {
 
     protected open fun isSelectable(selection: VmIdentifier): Boolean = true
 
-    protected open fun selectorTitle(): String = "Select group or JVM"
+    protected open fun selectorTitle(): String = t("vms.selector.title")
 
     private fun select(selection: VmIdentifier) {
         val model = Sessions.vmSelectionModel()

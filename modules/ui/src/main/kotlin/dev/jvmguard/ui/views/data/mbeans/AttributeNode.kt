@@ -2,6 +2,7 @@ package dev.jvmguard.ui.views.data.mbeans
 
 import dev.jvmguard.mbean.common.CompositeDataWithType
 import dev.jvmguard.mbean.common.MBeanHelper
+import dev.jvmguard.ui.server.t
 import javax.management.Descriptor
 import javax.management.MBeanAttributeInfo
 import javax.management.MBeanInfo
@@ -68,7 +69,7 @@ class AttributeNode(
                 openType = compositeData.compositeType
                 resolvedValue = compositeData.values
             }
-            val treeItem = AttributeNode("Return value", resolvedValue, openType)
+            val treeItem = AttributeNode(t("mbeans.returnValue"), resolvedValue, openType)
             rootItem.addChild(treeItem)
             addChildren(resolvedValue, openType, treeItem)
             return rootItem

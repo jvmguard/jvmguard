@@ -1,0 +1,161 @@
+---
+// Download.astro: the download page, shared by all locales. Copy comes from
+// the locale's message catalog in src/i18n/ui.ts. Release data (URLs, version)
+// is locale-independent and lives in src/data/release.ts.
+import PageFrame from '../../layouts/PageFrame.astro';
+import {SITE} from '../../consts';
+import {currentVersion, downloadUrl, hasAsset} from '../../data/release';
+import {DEFAULT_LOCALE, getMessages, type Locale} from '../../i18n/ui';
+
+interface Props {
+  locale?: Locale;
+}
+const {locale = DEFAULT_LOCALE} = Astro.props;
+const m = getMessages(locale);
+
+const platforms = [
+  {
+    name: 'Windows',
+    file: '.exe',
+    links: [{label: m['download.btn.download'], href: downloadUrl('.exe'), primary: true, available: hasAsset('.exe')}],
+  },
+  {
+    name: 'macOS',
+    file: '.dmg',
+    links: [{label: m['download.btn.download'], href: downloadUrl('.dmg'), primary: true, available: hasAsset('.dmg')}],
+  },
+  {
+    name: 'Linux',
+    file: m['download.platform.linux.file'],
+    links: [
+      {label: m['download.btn.installerSh'], href: downloadUrl('unix_installer'), primary: true, available: hasAsset('unix_installer')},
+      {label: m['download.btn.tar'], href: downloadUrl('.tar.gz'), primary: false, available: hasAsset('.tar.gz')},
+      {label: m['download.btn.rpm'], href: downloadUrl('.rpm'), primary: false, available: hasAsset('.rpm')},
+      {label: m['download.btn.deb'], href: downloadUrl('.deb'), primary: false, available: hasAsset('.deb')},
+    ],
+  },
+];
+---
+
+<PageFrame
+  active="download"
+  locale={locale}
+  title={m['download.meta.title']}
+  description={m['download.meta.description']}
+>
+  <section class="shell shell--wide hero">
+    <p class="eyebrow">{m['download.hero.eyebrow']}</p>
+    <h1>{m['download.hero.title']}</h1>
+    <p class="lede">
+      {m['download.hero.lede']}
+    </p>
+    <p class="muted version-line">
+      {m['download.hero.currentVersion']} <strong>{currentVersion}</strong>
+      {currentVersion !== 'dev' && (
+        <> · <a href={SITE.changelog}>{m['download.hero.changelog']}</a></>
+      )}
+    </p>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 01</span>
+      <span class="rule__label">{m['download.installer.rule']}</span>
+    </div>
+    <div class="grid grid--3">
+      {platforms.map((p) => (
+        <article class="platform">
+          <h3>{p.name}</h3>
+          <p class="muted platform__file">{p.file}</p>
+          <div class="platform__links">
+            {p.links.map((l) => (
+              <a class:list={['btn', l.primary ? 'btn--primary' : 'btn--ghost', 'platform__link']} href={l.href}>
+                {l.label}
+              </a>
+            ))}
+          </div>
+          {currentVersion === 'dev' && (
+            <p class="muted platform__pending">{m['download.installer.pending']}</p>
+          )}
+        </article>
+      ))}
+    </div>
+    <p class="muted platform__note">
+      {m['download.installer.note.1']}<code>http://localhost:8020/</code>{m['download.installer.note.2']}<code>8847</code>{m['download.installer.note.3']}<a href={SITE.docsInstalling}>{m['download.installer.note.link']}</a>{m['download.installer.note.4']}
+    </p>
+  </section>
+
+  <section class="shell shell--wide">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
+      <span class="rule__label">{m['download.source.rule']}</span>
+    </div>
+    <div class="panel">
+      <p>
+        {m['download.source.p1']}
+      </p>
+      <pre class="code"><code>git clone https://github.com/jvmguard/jvmguard.git
+cd jvmguard
+./gradlew :server:bootRun</code></pre>
+      <p class="muted">
+        {m['download.source.note.1']}<code>Server started</code>{m['download.source.note.2']}<code>http://localhost:8020/</code>{m['download.source.note.3']}<code>8020</code>{m['download.source.note.4']}<code>8847</code>{m['download.source.note.5']}
+      </p>
+    </div>
+  </section>
+</PageFrame>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-5);
+  }
+  .version-line {
+    margin-top: var(--space-3);
+  }
+  .platform {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+  .platform h3 {
+    margin-top: 0;
+  }
+  .platform__file {
+    margin-bottom: var(--space-3);
+  }
+  .platform__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+  .platform__link {
+    width: 100%;
+    text-align: center;
+  }
+  .platform__pending {
+    margin-top: var(--space-2);
+    font-size: var(--step--1);
+  }
+  .platform__note {
+    margin-top: var(--space-5);
+    max-width: var(--measure);
+  }
+  .code {
+    margin: 0 0 var(--space-4);
+    background: var(--scope-bg);
+    color: #d7deea;
+    border: 1px solid #1f2733;
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    line-height: 1.7;
+  }
+  .code code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+  }
+</style>

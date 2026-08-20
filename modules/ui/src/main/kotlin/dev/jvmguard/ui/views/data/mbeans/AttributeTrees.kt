@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.data.mbeans
 
 import dev.jvmguard.ui.components.cellRow
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -24,11 +25,11 @@ fun valueDetailButton(node: AttributeNode): Button? {
     if (!node.isStringValue()) {
         return null
     }
-    return Button("show") { ValueDetailDialog(node.value.toString()).open() }.apply {
+    return Button(t("mbeans.value.show")) { ValueDetailDialog(node.value.toString()).open() }.apply {
         addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL)
         addClassName("jvmguard-field-icon-button")
-        setAriaLabel("Show the entire value")
-        setTooltipText("Show the entire value")
+        setAriaLabel(t("mbeans.value.showEntire"))
+        setTooltipText(t("mbeans.value.showEntire"))
         testId = ID_VALUE_DETAIL
     }
 }

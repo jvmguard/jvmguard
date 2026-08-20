@@ -5,6 +5,7 @@ import dev.jvmguard.data.config.GroupConfig
 import dev.jvmguard.data.user.AccessLevel
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.views.data.VmBreadcrumb
 import dev.jvmguard.ui.views.settings.AbstractSettingsPage
 import dev.jvmguard.ui.views.settings.SettingsArea
@@ -23,12 +24,14 @@ import com.vaadin.flow.shared.Registration
 
 abstract class AbstractRecordingSettingsView : AbstractSettingsPage() {
 
+    override val pageTitleKey: String get() = "pageTitle.recording"
+
     override val requiredAccessLevel: AccessLevel get() = AccessLevel.PROFILER
     override val settingsArea: SettingsArea get() = SettingsArea.RECORDING
 
     protected open val overrideCategory: ((GroupConfig) -> OptionalConfig)? get() = null
 
-    protected open val overrideLabel: String get() = "Override settings for this group"
+    protected open val overrideLabel: String get() = t("recording.settings.override")
 
     private val breadcrumb = VmBreadcrumb(::select)
     private val toolbarActions = HorizontalLayout().apply {
@@ -45,7 +48,7 @@ abstract class AbstractRecordingSettingsView : AbstractSettingsPage() {
     protected val content = VerticalLayout().apply {
         isPadding = false
         setWidthFull()
-        add(Span("Settings for this category will be added in a later phase.").apply { addClassName("jvmguard-field-hint") })
+        add(Span(t("recording.settings.placeholder")).apply { addClassName("jvmguard-field-hint") })
     }
 
     private var currentSelection: VmIdentifier = VmIdentifier.ROOT_GROUP_IDENTIFIER
@@ -59,8 +62,8 @@ abstract class AbstractRecordingSettingsView : AbstractSettingsPage() {
             val selectButton = Button(VaadinIcon.SEARCH.create()) { openSelector() }.apply {
                 addThemeVariants(ButtonVariant.TERTIARY)
                 testId = ID_SELECT_BUTTON
-                setAriaLabel("Select group")
-                setTooltipText("Select group")
+                setAriaLabel(t("recording.settings.selectGroup"))
+                setTooltipText(t("recording.settings.selectGroup"))
             }
             val toolbar = HorizontalLayout(selectButton, breadcrumb, overrideCheckbox, toolbarActions).apply {
                 addClassName("jvmguard-data-toolbar")

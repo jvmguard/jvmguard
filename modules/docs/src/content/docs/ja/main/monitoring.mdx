@@ -1,0 +1,99 @@
+---
+title: JVMの監視
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+jvmguardがインストールされると、ローカルマシンで実行されているJVMにエージェントを追加できます。
+
+## 基本的な仕組み
+
+jvmguardエージェントは**Javaエージェント**です。`-javaagent` JVMオプションを指定してVMにロードされます。Javaエージェントは、ロード時にクラスをインスツルメントしたり、すでにロードされたクラスを再変換したりできます。
+
+VMを監視対象にするには、アプリケーションサーバーやアプリケーションの起動スクリプトに挿入する必要がある実際のJVMオプションを知る必要があります。jvmguardエージェントはすでにjvmguardのインストールディレクトリにあり、jvmguard UIが正しい`-javaagent` JVMオプションの構築方法を表示します。
+
+まず、ヘッダーの「VMを追加」ボタンをクリックします。
+
+## ローカルVMの追加
+
+jvmguardエージェントはすでにjvmguardのインストールディレクトリにあるため、ローカルで実行されているVMを簡単に監視できます。「VMを追加」ダイアログには、追加設定なしの最も単純なケースの完全な`-javaagent` JVMオプションが表示されます。単一のVMの監視に適しています。
+
+<Figure src="ui/add_vms_local.png" />
+
+`server`オプションがない場合、エージェントはjvmguardサーバーがlocalhostで実行されていると仮定します。グループ名とプール名に関する詳細な説明は後述します。
+
+## VMの命名
+
+複数のVMを監視する場合、**jvmguard UIで識別できるように**名前を付ける必要があります。VM名を割り当てるには、`-javaagent` JVMオプションに`name`オプションを渡します。
+
+```
+-javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name]
+```
+
+各名前は、同時に1つのVMのみが使用できます。2番目のVMが同じ名前で監視を要求すると、そのVMが引き継ぎ、以前に接続されていたVMは切断されます。一意の名前を割り当てられないVMのプールがある場合は、後述のVMプールのセクションを参照してください。
+
+{/* vm_duplicate_names.svg removed: it depicted the old "second VM is rejected" behavior. The actual behavior is
+     last-writer-wins: the new VM replaces the old one, which is disconnected. */}
+
+VM名に加えて、VMを階層にグループ化できます。デフォルトでは、VMはトップレベルグループに挿入されます。別のグループに割り当てるには、JVMオプションに`group`オプションを設定します。
+
+```
+-javaagent:[path to jvmguard.jar]=server=[IP/host],name=[VM name],group=[group name]
+```
+
+グループ名では、`Web/Workers/Gen3`のようにスラッシュで階層レベルを区切ります。完全な`-javaagent`パラメータは次のようになります。
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,name=web,group=Web/Workers/Gen3
+```
+
+VM名は同じグループ内で一意である必要があります。
+
+## VMプール
+
+**インスタンスが動的にプロビジョニングされる**クラウド環境など、VMに一意の名前を設定できないことがあります。その場合、VMをVMプールに割り当てることができます。
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,pool=Web/Workers
+```
+
+`group`オプションと同様に、`pool`オプションは階層の区切りとしてスラッシュを使用する階層名を取ります。`pool`オプションは`name`オプションと組み合わせることはできません。`group`オプションとは組み合わせることができ、その場合、プールはそのグループの下にネストされます。
+
+プールでは、監視対象のVMには一意の識別子を持つ名前が与えられます。VMが切り離されると、この識別子が再び使用されることはありません。名前付きVMとは異なり、単一のプールVMのデータは短期間しか保持されないため、インスタンスごとの長期履歴はありません。ただし、プール全体の履歴をたどって、時間経過に伴う傾向を分析できます。
+
+<Figure src="vm_pools.svg" />
+
+## サーバーポート
+
+デフォルトでは、jvmguardサーバーはポート**8847**でVM接続をリッスンします。これは、監視対象VMがjvmguardサーバーに到達できるように**ファイアウォールで開く必要がある**ポートです。
+
+jvmguardサーバーは、`config/application.yaml`の[`vmPort`プロパティ](/docs/ja/config/server-config)を設定することで、別のポートを使用するように設定できます。これは、ポートがすでに使用されている場合や、同じマシンにjvmguardの複数のインスタンスをインストールする場合に必要です。
+
+このようなデフォルト以外のポートをエージェントに伝えるには、`-javaagent` JVMオプションに`port`オプションを追加する必要があります。例えば、次のようになります。
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,port=8912,name=test
+```
+
+## ロギング
+
+jvmguardエージェントは、Linux/Unixでは`$HOME/.jvmguard/log`、Windowsでは`%USERPROFILE%\.jvmguard\log`ディレクトリにエラーを記録します。ログファイルはオンデマンドで作成され、何も記録されなければファイルは作成されません。ログファイルの名前は`<VM name>.log`で、&lt;VM name&gt;は`name`または`pool`パラメータの値です。`name`と`pool`のどちらも指定されていない場合、ファイル名は`jvm.log`になります。
+
+別のファイルに記録するには、`-javaagent` JVMオプションに`logFile=<path to log file>`オプションを追加できます。ロギングを完全に無効にするには、`logEnabled=false`オプションを追加します。
+
+## 暗号化と認証
+
+相互認証と暗号化は、`jvmguard.jar`ファイルと同じディレクトリにあるエージェントキーストアファイル`agent.ks`によって有効になります。エージェントキーストアはサーバーによって生成され、jvmguardデータディレクトリの下の`ssl`ディレクトリにあります。
+
+`config/application.yaml`の`vmUseSsl`プロパティが`true`に設定されている場合、jvmguard UIからダウンロードするエージェントファイルにエージェントキーストアファイルが自動的に追加されます。その場合、暗号化と認証はそのまま機能します。
+
+監視対象VMをセットアップした後で暗号化と認証をオンまたはオフに切り替える場合は、次の変更を手動で行う必要があります。
+
+* **暗号化をオンにする**: [jvmguardデータディレクトリ]/ssl/agent.ksを見つけ、VMが監視されているすべてのマシンのエージェントインストールにコピーします。キーストアファイルは、jvmguard.jarファイルと同じディレクトリにコピーする必要があります。正しいエージェントキーストアが存在しない場合、サーバーはエージェントからの接続を拒否します。
+* **暗号化をオフにする**: VMが監視されているすべてのマシンのエージェントインストールで、jvmguard.jarファイルの隣にあるagent.ksファイルを削除します。そのファイルが存在し、サーバーが暗号化を使用していない場合、エージェントはサーバーへの接続を拒否します。
+
+エージェントキーストアファイルを別のパスに保持したい場合は、`-javaagent` VMパラメータに`keyStore`オプションを追加します。例えば、次のようになります。
+
+```
+-javaagent:/opt/jvmguard/jvmguard.jar=server=192.198.0.33,keyStore=/sec/agent.ks,name=test
+```

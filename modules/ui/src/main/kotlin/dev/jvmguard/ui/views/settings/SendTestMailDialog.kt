@@ -5,6 +5,7 @@ import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.components.JvmGuardDialog
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.runInBackground
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.html.Span
@@ -13,7 +14,7 @@ import com.vaadin.flow.component.textfield.EmailField
 
 class SendTestMailDialog(private val smtpConfig: SmtpConfig) : JvmGuardDialog() {
 
-    private val recipient = EmailField("Recipient").apply {
+    private val recipient = EmailField(t("settings.email.test.recipient")).apply {
         isClearButtonVisible = true
         setWidthFull()
         testId = ID_RECIPIENT
@@ -21,10 +22,10 @@ class SendTestMailDialog(private val smtpConfig: SmtpConfig) : JvmGuardDialog() 
     }
 
     init {
-        headerTitle = "Send test email"
+        headerTitle = t("settings.email.test.title")
         width = "30rem"
 
-        val hint = Span("An email with the subject \"$SUBJECT\" is sent to check the SMTP configuration.")
+        val hint = Span(t("settings.email.test.hint", SUBJECT))
             .apply { addClassName("jvmguard-field-hint") }
         add(VerticalLayout(hint, recipient).apply {
             isPadding = false
@@ -32,7 +33,7 @@ class SendTestMailDialog(private val smtpConfig: SmtpConfig) : JvmGuardDialog() 
         })
 
         lateinit var send: Button
-        send = confirmFooter("Send email", ID_SEND) { send(send) }
+        send = confirmFooter(t("settings.email.test.send"), ID_SEND) { send(send) }
     }
 
     private fun send(sendButton: Button) {
@@ -52,11 +53,11 @@ class SendTestMailDialog(private val smtpConfig: SmtpConfig) : JvmGuardDialog() 
             }
             ui.access {
                 if (error == null) {
-                    Notifications.show("Test email sent. Please check your inbox.")
+                    Notifications.show(t("settings.email.test.sent"))
                     close()
                 } else {
                     sendButton.isEnabled = true
-                    Notifications.show("The test email could not be sent: ${error.message}")
+                    Notifications.show(t("settings.email.test.failed", error.message))
                 }
             }
         }

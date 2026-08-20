@@ -38,6 +38,7 @@ import dev.jvmguard.data.user.*
 import dev.jvmguard.data.user.viewsettings.ViewSettings
 import dev.jvmguard.data.vmdata.*
 import dev.jvmguard.connector.api.ServerConnectionRegistry
+import dev.jvmguard.connector.api.SsoDiscoveryResult
 import dev.jvmguard.connector.api.log.LogFile
 import dev.jvmguard.connector.api.log.LogFileDescriptor
 import dev.jvmguard.connector.api.log.LogFileHandler
@@ -159,7 +160,7 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
     }
 
     @RequireAdmin
-    override fun testSsoDiscovery(issuerUri: String): String {
+    override fun testSsoDiscovery(issuerUri: String): SsoDiscoveryResult {
         val baseUri = issuerUri.trim().trimEnd('/')
         val discoveryUrl = "$baseUri/.well-known/openid-configuration"
         return try {
@@ -173,12 +174,12 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
                 .build()
             val response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString())
             if (response.statusCode() == 200) {
-                "Discovery OK: $discoveryUrl is reachable."
+                SsoDiscoveryResult("settings.sso.discovery.ok", discoveryUrl)
             } else {
-                "Discovery failed: HTTP ${response.statusCode()} from $discoveryUrl"
+                SsoDiscoveryResult("settings.sso.discovery.http", response.statusCode(), discoveryUrl)
             }
         } catch (e: Exception) {
-            "Discovery failed: ${e.message}"
+            SsoDiscoveryResult("settings.sso.discovery.failed", e.message ?: e.toString())
         }
     }
 
@@ -385,7 +386,8 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
         val error = checkMBeanParameters(vm, name, operationInfo)
         return if (error != null) {
             object : MBeanOperationData {
-                override fun getErrorMessage(): String = error
+                override fun getErrorMessage(): String = error.english
+                override fun getErrorKey(): String = error.key
                 override fun getStackTrace(): String? = null
                 override fun getReturnValue(): Any? = null
             }
@@ -400,7 +402,8 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
         val error = checkMBeanParameters(vm, name, attributeInfo)
         return if (error != null) {
             object : MBeanModificationData {
-                override fun getErrorMessage(): String = error
+                override fun getErrorMessage(): String = error.english
+                override fun getErrorKey(): String = error.key
                 override fun getStackTrace(): String? = null
             }
         } else {
@@ -448,20 +451,16 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
 
     override fun getAgentKeystore(): File? = vmManager.agentKeystore
 
+    private data class MBeanParameterError(val key: String, val english: String)
+
     companion object {
         private val SERVER_LOGGER: Logger = Loggers.SERVER
 
-        private fun checkMBeanParameters(vm: VM?, name: String?, info: Any?): String? {
-            if (vm == null || vm.isGroupNode) {
-                return "Select a single VM"
-            }
-            if (name == null) {
-                return "No MBean name provided"
-            }
-            if (info == null) {
-                return "No attribute/operation provided"
-            }
-            return null
+        private fun checkMBeanParameters(vm: VM?, name: String?, info: Any?): MBeanParameterError? = when {
+            vm == null || vm.isGroupNode -> MBeanParameterError("mbeans.error.selectSingleVm", "Select a single VM")
+            name == null -> MBeanParameterError("mbeans.error.noName", "No MBean name provided")
+            info == null -> MBeanParameterError("mbeans.error.noAttribute", "No attribute/operation provided")
+            else -> null
         }
     }
 }

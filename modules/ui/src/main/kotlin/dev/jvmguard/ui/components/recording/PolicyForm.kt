@@ -3,6 +3,7 @@ package dev.jvmguard.ui.components.recording
 import dev.jvmguard.agent.config.transactions.DurationType
 import dev.jvmguard.agent.config.transactions.Policy
 import dev.jvmguard.ui.components.EnumSelect
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.HasEnabled
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.MultiSelectComboBox
@@ -16,22 +17,22 @@ class PolicyForm : VerticalLayout() {
 
     private val binder = Binder(Policy::class.java)
 
-    private val active = Checkbox("Define policies").apply { testId = "policy-active" }
+    private val active = Checkbox(t("recording.policy.active")).apply { testId = "policy-active" }
 
     private val slowValue = IntegerField()
-    private val slowType = EnumSelect("", DurationType::class.java) { it.toString() }
+    private val slowType = EnumSelect("", DurationType::class.java)
     private val verySlowValue = IntegerField()
-    private val verySlowType = EnumSelect("", DurationType::class.java) { it.toString() }
+    private val verySlowType = EnumSelect("", DurationType::class.java)
     private val overdueValue = IntegerField()
-    private val overdueType = EnumSelect("", DurationType::class.java) { it.toString() }
+    private val overdueType = EnumSelect("", DurationType::class.java)
 
-    private val splitTree = Checkbox("Split the transaction tree for policy violations").apply {
+    private val splitTree = Checkbox(t("recording.policy.splitTree")).apply {
         addClassName("jvmguard-settings-gap-before")
     }
 
-    private val treatAsError = MultiSelectComboBox<ErrorSource>("Treat as error").apply {
+    private val treatAsError = MultiSelectComboBox<ErrorSource>(t("recording.policy.treatAsError")).apply {
         setItems(ErrorSource.entries)
-        setItemLabelGenerator { it.label }
+        setItemLabelGenerator { t(it.labelKey) }
         setWidthFull()
         testId = "policy-errors"
     }
@@ -49,9 +50,9 @@ class PolicyForm : VerticalLayout() {
         bind()
 
         add(active)
-        add(thresholdRow("Slow", slowValue, slowType))
-        add(thresholdRow("Very slow", verySlowValue, verySlowType))
-        add(thresholdRow("Overdue", overdueValue, overdueType))
+        add(thresholdRow(t("recording.policy.slow"), slowValue, slowType))
+        add(thresholdRow(t("recording.policy.verySlow"), verySlowValue, verySlowType))
+        add(thresholdRow(t("recording.policy.overdue"), overdueValue, overdueType))
         add(splitTree)
         add(treatAsError)
     }
@@ -121,11 +122,11 @@ class PolicyForm : VerticalLayout() {
         binder.forField(splitTree).bind({ it.isSplitTree }, { p, v -> p.isSplitTree = v })
     }
 
-    enum class ErrorSource(val label: String) {
-        ERROR_THROWABLE("Error throwables"),
-        RUNTIME_EXCEPTION("Runtime exceptions"),
-        CHECKED_EXCEPTION("Checked exceptions"),
-        LOGGED_ERROR("Logged errors"),
-        LOGGED_WARNING("Logged warnings"),
+    enum class ErrorSource(val labelKey: String) {
+        ERROR_THROWABLE("recording.policy.errorSource.errorThrowable"),
+        RUNTIME_EXCEPTION("recording.policy.errorSource.runtimeException"),
+        CHECKED_EXCEPTION("recording.policy.errorSource.checkedException"),
+        LOGGED_ERROR("recording.policy.errorSource.loggedError"),
+        LOGGED_WARNING("recording.policy.errorSource.loggedWarning"),
     }
 }

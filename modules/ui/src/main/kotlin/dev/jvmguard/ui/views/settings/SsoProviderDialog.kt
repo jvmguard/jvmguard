@@ -11,7 +11,9 @@ import dev.jvmguard.ui.components.editDeleteKeys
 import dev.jvmguard.ui.components.menuButton
 import dev.jvmguard.ui.server.ServerUrls
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
 import dev.jvmguard.ui.server.runInBackground
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
@@ -38,34 +40,34 @@ class SsoProviderDialog(
 
     private val binder = Binder(SsoProviderConfig::class.java)
 
-    private val displayName = TextField("Display name").apply { setWidthFull(); testId = ID_DISPLAY_NAME }
-    private val preset = EnumSelect("Provider type", SsoPreset::class.java) { it.toString() }.apply {
+    private val displayName = TextField(t("settings.sso.provider.displayName")).apply { setWidthFull(); testId = ID_DISPLAY_NAME }
+    private val preset = EnumSelect(t("settings.sso.provider.type"), SsoPreset::class.java).apply {
         testId = ID_PRESET
         addValueChangeListener { updatePresetFields() }
     }
-    private val issuerUri = TextField("Issuer URI").apply { setWidthFull(); testId = ID_ISSUER_URI }
-    private val clientId = TextField("Client ID").apply {
+    private val issuerUri = TextField(t("settings.sso.provider.issuerUri")).apply { setWidthFull(); testId = ID_ISSUER_URI }
+    private val clientId = TextField(t("settings.sso.provider.clientId")).apply {
         setWidthFull(); testId = ID_CLIENT_ID
-        helperText = "Optional, can be set via JVMGUARD_SSO_<NAME>_CLIENT_ID env var"
+        helperText = t("settings.sso.provider.clientId.helper")
     }
-    private val clientSecret = PasswordField("Client secret").apply {
+    private val clientSecret = PasswordField(t("settings.sso.provider.clientSecret")).apply {
         setWidthFull(); testId = ID_CLIENT_SECRET
-        helperText = "Optional, can be set via JVMGUARD_SSO_<NAME>_CLIENT_SECRET env var"
+        helperText = t("settings.sso.provider.clientSecret.helper")
     }
-    private val domainRestriction = TextField("Domain / tenant").apply {
+    private val domainRestriction = TextField(t("settings.sso.provider.domain")).apply {
         setWidthFull()
-        placeholder = "e.g. yourco.com"
+        placeholder = t("settings.sso.provider.domain.placeholder")
         testId = ID_DOMAIN
     }
-    private val claimName = TextField("Group claim name").apply {
+    private val claimName = TextField(t("settings.sso.provider.claimName")).apply {
         setWidthFull()
         testId = ID_CLAIM_NAME
     }
-    private val requireVerifiedEmail = Checkbox("Require verified email").apply { testId = ID_REQUIRE_VERIFIED_EMAIL }
-    private val enabled = Checkbox("Enabled").apply { testId = ID_ENABLED }
+    private val requireVerifiedEmail = Checkbox(t("settings.sso.provider.requireVerifiedEmail")).apply { testId = ID_REQUIRE_VERIFIED_EMAIL }
+    private val enabled = Checkbox(t("common.enabled")).apply { testId = ID_ENABLED }
     private var testButton: Button? = null
 
-    private val redirectUri = TextField("Authorized redirect URI").apply {
+    private val redirectUri = TextField(t("settings.sso.provider.redirectUri")).apply {
         isReadOnly = true
         setWidthFull()
         testId = ID_REDIRECT_URI
@@ -73,8 +75,8 @@ class SsoProviderDialog(
 
     private val accessRulesGrid = Grid(SsoGroupMapping::class.java, false).apply {
         testId = ID_RULES_GRID
-        addColumn { if (it.isCatchAll) "* (everyone else)" else it.claimValue }.setHeader("Group claim value").setFlexGrow(1)
-        addColumn { it.accessLevel.toString() }.setHeader("Access level").setAutoWidth(true)
+        addColumn { if (it.isCatchAll) t("settings.sso.rules.catchAllDisplay") else it.claimValue }.setHeader(t("settings.sso.rule.claimValue")).setFlexGrow(1)
+        addColumn { enumLabel(it.accessLevel) }.setHeader(t("shell.userInfo.accessLevel")).setAutoWidth(true)
         addComponentColumn { ruleActions(it) }.setFlexGrow(0).setAutoWidth(true)
         addItemDoubleClickListener { editRule(it.item, false) }
         editDeleteKeys({ editRule(it, false) }, ::confirmDeleteRule)
@@ -82,7 +84,7 @@ class SsoProviderDialog(
     }
 
     init {
-        headerTitle = if (isNew) "Add SSO provider" else "Edit SSO provider"
+        headerTitle = t(if (isNew) "settings.sso.provider.add" else "settings.sso.provider.edit")
         width = "36rem"
 
         bind()
@@ -98,26 +100,24 @@ class SsoProviderDialog(
             defaultVerticalComponentAlignment = FlexComponent.Alignment.END
             isPadding = false
         }
-        val redirectHint = Span(
-            "Register this exact URI as an authorized redirect URI in the console of the SSO provider. Renaming the provider changes it.",
-        ).apply { addClassName("jvmguard-field-hint") }
+        val redirectHint = Span(t("settings.sso.provider.redirectHint")).apply { addClassName("jvmguard-field-hint") }
 
-        val addRule = Button("Add rule", VaadinIcon.PLUS.create()) { editRule(SsoGroupMapping(), true) }.apply {
+        val addRule = Button(t("settings.sso.provider.addRule"), VaadinIcon.PLUS.create()) { editRule(SsoGroupMapping(), true) }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_ADD_RULE
         }
-        val rulesTitle = H4("Access rules")
+        val rulesTitle = H4(t("settings.sso.provider.rules"))
         val rulesHeader = HorizontalLayout(rulesTitle, addRule).apply {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
             setWidthFull()
             isPadding = false
             expand(rulesTitle)
         }
-        val rulesHint = Span("(empty = only pre-created users user with type \"SSO\" can sign in)").apply {
+        val rulesHint = Span(t("settings.sso.provider.rulesHint")).apply {
             addClassName("jvmguard-field-hint")
         }
 
-        val testConnection = Button("Test connection", VaadinIcon.CONNECT.create()) { runTestConnection() }.apply {
+        val testConnection = Button(t("settings.sso.provider.testConnection"), VaadinIcon.CONNECT.create()) { runTestConnection() }.apply {
             testId = ID_TEST_CONNECTION
         }
         testButton = testConnection
@@ -137,19 +137,19 @@ class SsoProviderDialog(
             isSpacing = true
         })
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
     @Suppress("DuplicatedCode")
     private fun bind() {
         binder.forField(displayName)
-            .asRequired("Enter a display name.")
-            .withValidator({ it !in existingDisplayNames }, "A provider with this name already exists.")
+            .asRequired(t("settings.sso.provider.validation.displayName"))
+            .withValidator({ it !in existingDisplayNames }, t("settings.sso.provider.validation.nameExists"))
             .bind({ it.displayName }, { p, v -> p.displayName = v })
         binder.forField(preset)
             .bind({ it.preset }, { p, v -> p.preset = v })
         binder.forField(issuerUri)
-            .asRequired("Enter an issuer URI.")
+            .asRequired(t("settings.sso.provider.validation.issuerUri"))
             .bind({ it.issuerUri }, { p, v -> p.issuerUri = v })
         binder.forField(clientId)
             .bind({ it.clientId }, { p, v -> p.clientId = v })
@@ -174,14 +174,14 @@ class SsoProviderDialog(
             issuerUri.isVisible = false
             issuerUri.value = SsoPreset.defaultIssuer(p)
             claimName.isVisible = false
-            domainRestriction.label = "Hosted domain"
-            domainRestriction.placeholder = "yourco.com"
+            domainRestriction.label = t("settings.sso.provider.hostedDomain")
+            domainRestriction.placeholder = t("settings.sso.provider.hostedDomain.placeholder")
         } else {
             displayName.isEnabled = true
             issuerUri.isVisible = true
             claimName.isVisible = (p == SsoPreset.GENERIC_OIDC)
-            domainRestriction.label = "Domain / tenant"
-            domainRestriction.placeholder = "e.g. yourco.com"
+            domainRestriction.label = t("settings.sso.provider.domain")
+            domainRestriction.placeholder = t("settings.sso.provider.domain.placeholder")
         }
         updateRedirectUri()
     }
@@ -195,14 +195,14 @@ class SsoProviderDialog(
         redirectUri.element.executeJs("navigator.clipboard && navigator.clipboard.writeText(this.value)")
     }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
-        setAriaLabel("Copy redirect URI")
-        setTooltipText("Copy")
+        setAriaLabel(t("settings.sso.provider.copyRedirect.aria"))
+        setTooltipText(t("settings.sso.provider.copyRedirect.tooltip"))
     }
 
     private fun ruleActions(rule: SsoGroupMapping): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions for this rule", "$ID_RULES_ROW_MENU-${rule.claimValue}") {
-            addItem("Edit") { editRule(rule, false) }
-            addItem("Delete") { confirmDeleteRule(rule) }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.sso.rules.actions"), "$ID_RULES_ROW_MENU-${rule.claimValue}") {
+            addItem(t("common.edit")) { editRule(rule, false) }
+            addItem(t("common.delete")) { confirmDeleteRule(rule) }
         }
 
     private fun editRule(rule: SsoGroupMapping, isNew: Boolean) {
@@ -230,7 +230,7 @@ class SsoProviderDialog(
     }
 
     private fun confirmDeleteRule(rule: SsoGroupMapping) {
-        confirm("Delete rule", "Delete the access rule for \"${if (rule.isCatchAll) "*" else rule.claimValue}\"?", "Delete") {
+        confirm(t("settings.sso.rules.deleteTitle"), t("settings.sso.rules.deleteText", if (rule.isCatchAll) "*" else rule.claimValue), t("common.delete")) {
             provider.accessRules.remove(rule)
             accessRulesGrid.setItems(provider.accessRules)
         }
@@ -247,19 +247,19 @@ class SsoProviderDialog(
     private fun runTestConnection() {
         val issuer = issuerUri.value.trim()
         if (issuer.isBlank()) {
-            Notifications.show("Enter an issuer URI first.")
+            Notifications.show(t("settings.sso.provider.enterIssuerFirst"))
             return
         }
         val connection = Sessions.current()?.serverConnection ?: return
         val button = testButton ?: return
-        button.text = "Testing..."
+        button.text = t("settings.sso.provider.testing")
         button.isEnabled = false
         val ui = UI.getCurrent()
         runInBackground {
             val result = connection.testSsoDiscovery(issuer)
             ui.access {
-                Notifications.show(result)
-                button.text = "Test connection"
+                Notifications.show(t(result.messageKey, *result.messageParams))
+                button.text = t("settings.sso.provider.testConnection")
                 button.isEnabled = true
             }
         }

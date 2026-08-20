@@ -262,6 +262,14 @@ class VmManagerImpl(
                 return "Connection to ${vm.verbose} not successful."
             }
 
+            override fun getErrorKey(): String {
+                return "mbeans.error.connectionFailed"
+            }
+
+            override fun getErrorParams(): Array<Any> {
+                return arrayOf(vm.verbose)
+            }
+
             override fun getStackTrace(): String? {
                 return null
             }
@@ -283,6 +291,14 @@ class VmManagerImpl(
         return result ?: object : MBeanModificationData {
             override fun getErrorMessage(): String {
                 return "Connection to ${vm.verbose} not successful."
+            }
+
+            override fun getErrorKey(): String {
+                return "mbeans.error.connectionFailed"
+            }
+
+            override fun getErrorParams(): Array<Any> {
+                return arrayOf(vm.verbose)
             }
 
             override fun getStackTrace(): String? {

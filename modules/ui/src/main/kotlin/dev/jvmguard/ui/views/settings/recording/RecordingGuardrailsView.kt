@@ -6,38 +6,37 @@ import dev.jvmguard.data.config.guardrails.GuardrailSettings
 import dev.jvmguard.data.user.Roles
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.settings.settingsSection
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.textfield.IntegerField
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.PROFILER)
 @Route(value = "recording/guardrails", layout = MainLayout::class)
-@PageTitle("jvmguard: Recording")
 class RecordingGuardrailsView : AbstractRecordingSettingsView() {
 
     override val overrideCategory: (GroupConfig) -> OptionalConfig get() = { it.guardrailSettings }
-    override val overrideLabel: String get() = "Override agent guardrails for this group"
+    override val overrideLabel: String get() = t("recording.settings.guardrails.override")
 
-    private val allowHeapDump = checkbox("Allow heap dumps", ID_ALLOW_HEAP_DUMP) { s, v -> s.allowHeapDump = v }
-    private val allowJps = checkbox("Allow JProfiler snapshots", ID_ALLOW_JPS) { s, v -> s.allowJps = v }
-    private val allowJfr = checkbox("Allow JFR recordings", ID_ALLOW_JFR) { s, v -> s.allowJfr = v }
+    private val allowHeapDump = checkbox(t("recording.settings.guardrails.allowHeapDump"), ID_ALLOW_HEAP_DUMP) { s, v -> s.allowHeapDump = v }
+    private val allowJps = checkbox(t("recording.settings.guardrails.allowJps"), ID_ALLOW_JPS) { s, v -> s.allowJps = v }
+    private val allowJfr = checkbox(t("recording.settings.guardrails.allowJfr"), ID_ALLOW_JFR) { s, v -> s.allowJfr = v }
     private val redactSnapshots =
-        checkbox("Redact heap dumps and JFR recordings by default", ID_REDACT_SNAPSHOTS) { s, v -> s.redactSnapshots = v }
+        checkbox(t("recording.settings.guardrails.redactSnapshots"), ID_REDACT_SNAPSHOTS) { s, v -> s.redactSnapshots = v }
     private val allowMbeanMutations =
-        checkbox("Allow MBean attribute writes and operations", ID_ALLOW_MBEAN_MUTATIONS) { s, v -> s.allowMbeanMutations = v }
+        checkbox(t("recording.settings.guardrails.allowMbeanMutations"), ID_ALLOW_MBEAN_MUTATIONS) { s, v -> s.allowMbeanMutations = v }
     private val allowConfigEdit =
-        checkbox("Allow editing the recording configuration", ID_ALLOW_CONFIG_EDIT) { s, v -> s.allowConfigEdit = v }
+        checkbox(t("recording.settings.guardrails.allowConfigEdit"), ID_ALLOW_CONFIG_EDIT) { s, v -> s.allowConfigEdit = v }
 
     private val maxRecordingMinutes =
-        integerField("Maximum recording duration (minutes, 0 = no limit)", ID_MAX_RECORDING, 1000) { s, v ->
+        integerField(t("recording.settings.guardrails.maxRecording"), ID_MAX_RECORDING, 1000) { s, v ->
             s.maxRecordingSeconds = v * 60
         }
     private val captureCooldown =
-        integerField("Minimum seconds between captures on a VM (0 = no limit)", ID_CAPTURE_COOLDOWN, null) { s, v ->
+        integerField(t("recording.settings.guardrails.captureCooldown"), ID_CAPTURE_COOLDOWN, null) { s, v ->
             s.captureCooldownSeconds = v
         }
 
@@ -48,10 +47,10 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
             content.removeAll()
             content.add(
                 settingsSection(
-                    "Diagnostic captures",
+                    t("recording.settings.guardrails.sectionCaptures"),
                     allowHeapDump, allowJps, allowJfr, redactSnapshots, maxRecordingMinutes, captureCooldown
                 ),
-                settingsSection("Mutating actions", allowMbeanMutations, allowConfigEdit),
+                settingsSection(t("recording.settings.guardrails.sectionMutating"), allowMbeanMutations, allowConfigEdit),
             )
             contentBuilt = true
         }

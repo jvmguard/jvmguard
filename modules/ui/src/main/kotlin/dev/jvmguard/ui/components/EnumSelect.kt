@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.components
 
+import dev.jvmguard.ui.server.enumLabel
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.ItemLabelGenerator
 import com.vaadin.flow.component.dependency.JsModule
@@ -9,6 +10,8 @@ import com.vaadin.flow.component.select.Select
 class EnumSelect<E : Enum<E>>(
     label: String, enumType: Class<E>, labelGenerator: ItemLabelGenerator<E>
 ) : Select<E>() {
+
+    constructor(label: String, enumType: Class<E>) : this(label, enumType, { enumLabel(it) })
 
     private val itemLabels: List<String> = enumType.enumConstants.map { labelGenerator.apply(it) }
 

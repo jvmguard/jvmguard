@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.data.mbeans
 
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Key
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -17,13 +18,13 @@ class ParameterDialog(
     private val form = MBeanValuesForm(specs)
 
     init {
-        headerTitle = "Invoke operation"
+        headerTitle = t("mbeans.operation.invoke")
         width = "36rem"
 
         val signature = Span(operationInfo.name + MBeanOperations.signatureSuffix(operationInfo)).apply {
             addClassName("jvmguard-mbean-operation-signature")
         }
-        val invoke = Button("Invoke") { invoke() }.apply {
+        val invoke = Button(t("mbeans.operation.invoke.button")) { invoke() }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_INVOKE
         }
@@ -34,7 +35,7 @@ class ParameterDialog(
             isSpacing = false
             style.set("gap", "0.75rem")
         })
-        footer.add(Button("Cancel") { close() }, invoke)
+        footer.add(Button(t("common.cancel")) { close() }, invoke)
     }
 
     private fun invoke() {

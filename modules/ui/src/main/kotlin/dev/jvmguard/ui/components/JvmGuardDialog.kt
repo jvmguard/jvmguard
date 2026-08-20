@@ -5,6 +5,7 @@ import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.dialog.Dialog
 import com.vaadin.flow.server.Command
+import dev.jvmguard.ui.server.t
 
 open class JvmGuardDialog : Dialog() {
 
@@ -38,7 +39,7 @@ open class JvmGuardDialog : Dialog() {
             addThemeVariants(ButtonVariant.PRIMARY)
             confirmTestId?.let { testId = it }
         }
-        footer.add(Button("Cancel") { close() }, confirm)
+        footer.add(Button(t("common.cancel")) { close() }, confirm)
         return confirm
     }
 

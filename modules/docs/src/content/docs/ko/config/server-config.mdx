@@ -1,0 +1,98 @@
+---
+title: 서버 구성
+---
+
+jvmguard UI에서 변경할 수 없는 jvmguard 구성 옵션은 jvmguard 설치 디렉터리의 텍스트 파일
+`config/application.yaml`에 포함되어 있습니다. 값을 변경하려면 텍스트 편집기로 해당 파일을 편집하고
+jvmguard 서버를 다시 시작하세요. 개별 키는 `-Djvmguard.<key>=<value>` 시스템 속성으로도 재정의할 수
+있습니다.
+
+속성 자체는 `config/application.yaml`에 주석으로 문서화되어 있습니다. 여기에서는 기본 매개변수를 조정해야
+하는 몇 가지 시나리오를 설명합니다.
+
+## 데이터 디렉터리
+
+**dataDirectory** 속성은 모든 가변 데이터가 있는 디렉터리를 가리킵니다. jvmguard가 다음 하위 디렉터리를
+생성합니다:
+
+* **db**: 내장 H2 데이터베이스가 포함됩니다.
+* **log**: 모든 로그 파일이 포함됩니다. 기본적으로 로그 파일은 로테이션됩니다. 로테이션 설정은 jvmguard 설치
+디렉터리의 `logback.xml` 파일에서 변경할 수 있습니다. "server", "connection", "event"의 세 가지 로그 파일에
+서로 다른 설정을 적용할 수 있습니다. 모든 로그 파일은 jvmguard UI에서 볼 수 있습니다.
+* **snapshots**: 메모리 스냅샷과 프로파일링 스냅샷이 이 디렉터리에 저장됩니다. 이러한 스냅샷은 jvmguard의
+"스냅샷" 뷰에서 다운로드하거나 삭제할 수 있습니다.
+* **ssl**: 이 디렉터리에는 인증 및 암호화를 위한 파일 쌍 agent.ks / server.ks와 웹 서버의 SSL 인증서가
+포함됩니다.
+
+같은 머신에서 두 개의 jvmguard 서버를 실행하는 경우 서로 다른 데이터 디렉터리를 가져야 합니다. 기본적으로
+설치 프로그램은 항상 데이터 디렉터리에 대해 같은 위치를 제안하므로 여러 설치의 경우 설치 프로그램에서 또는
+설치 후 `config/application.yaml`에서 조정해야 합니다.
+
+## 웹 서버
+
+jvmguard에는 기본적으로 포트 8020에서 수신하는 내장 웹 서버가 있습니다. **httpPort** 속성으로 해당 포트를
+조정하고 **useHttps**를 `true`로 설정하여 HTTPS로 전환할 수 있습니다.
+
+HTTPS를 사용하면 jvmguard는 jvmguard 데이터 디렉터리에 자체 서명된 인증서 `ssl/self_signed.ks`를 생성합니다.
+브라우저는 이 인증서에 대해 경고 메시지를 표시합니다. 공인 인증 기관에서 서명한 인증서가 있는 경우 PKCS12
+형식으로 `ssl/web.pkcs12`에 복사할 수 있습니다. 인증서 파일의 이름이 다른 경우 **keystoreName** 속성을
+지정할 수 있습니다.
+
+인증서가 비밀번호로 보호되는 경우 **keystorePassword** 속성에 지정할 수 있습니다. 비밀번호를 암호화할 수는
+없지만 최소한 명령줄 도구 `jvmguard_obfuscate`로 난독화할 수 있습니다:
+
+```
+jvmguard_obfuscate [password]
+```
+
+jvmguard를 리버스 프록시 뒤에 배치하는 경우 **reverseProxy** 속성을 `true`로 설정해야 합니다. 그러면 웹
+서버가 프록시 헤더를 분석하여 올바른 URL을 생성합니다. 리버스 프록시 문제로 인해 이것이 작동하지 않는
+경우 **reverseProxyHost**를 프록시의 호스트 이름으로 설정하세요. jvmguard가 경로 접두사 아래에서 제공되는
+경우 **contextPath** 속성을 해당 접두사(예: `jvmguard`)로 설정하되 앞뒤 슬래시 없이 설정하세요.
+
+[REST API 서비스](/docs/ko/main/rest)는 **restApiEnabled** 속성을 `false`로 설정하여 비활성화됩니다.
+활성화된 경우 REST API는 웹 서버와 같은 포트의 `/api` 경로에서 제공되며 웹 서버에 구성된 것과 동일한
+프로토콜(HTTP/HTTPS)을 사용합니다.
+
+## 모니터링되는 VM과의 통신
+
+모니터링되는 VM은 **vmPort** 속성으로 구성된 포트에서 TCP 연결을 생성합니다.
+
+기본적으로 모니터링되는 VM과 jvmguard 수집기 간의 통신은 암호화되지 않고 인증되지 않습니다. 즉, 모든 VM이
+jvmguard 서버에 연결할 수 있으며 jvmguard 에이전트는 반대편의 jvmguard 서버를 신뢰할 수 있는지 알 방법이
+없습니다. 이것은 특정 로컬 영역 네트워크에서는 허용될 수 있지만 WAN이나 인터넷을 통한 연결에는 적합하지
+않습니다.
+
+인증과 암호화를 활성화하려면 **vmUseSsl** 속성을 `true`로 설정하세요. 이 경우 `ssl/agent.ks`와
+`ssl/server.ks` 파일 쌍이 생성됩니다. 이제 서버는 `agent.ks` 파일을 소유한 에이전트의 연결만 허용하고
+에이전트는 `server.ks` 파일을 가진 서버에만 연결합니다. 또한 통신 프로토콜이 암호화됩니다.
+
+이 주제에 대한 자세한 내용은 [JVM 모니터링](/docs/ko/main/monitoring) 장을 참조하세요.
+
+## 시크릿에 대한 환경 변수 재정의
+
+컨테이너화된 배포에서는 시크릿을 데이터베이스에 저장하는 것보다 환경 변수를 통해 주입하는 것이 바람직한
+경우가 많습니다. 시작 시 jvmguard는 다음 환경 변수를 확인하고 [서버 관리](/docs/ko/config/admin) 및 [Single
+Sign-On](/docs/ko/config/sso) 설정의 해당 값을 재정의합니다:
+
+LDAP의 경우:
+
+```
+JVMGUARD_LDAP_PASSWORD
+```
+
+각 SSO 공급자의 경우 환경 변수 이름은 공급자의 표시 이름에서 파생되며, 대문자로 변환되고 영숫자가 아닌
+문자는 밑줄로 대체됩니다:
+
+```
+JVMGUARD_SSO_<NAME>_CLIENT_ID
+JVMGUARD_SSO_<NAME>_CLIENT_SECRET
+```
+
+예를 들어, "Google"이라는 공급자는 `JVMGUARD_SSO_GOOGLE_CLIENT_ID`와
+`JVMGUARD_SSO_GOOGLE_CLIENT_SECRET`을 사용합니다. "Company Okta"라는 공급자는
+`JVMGUARD_SSO_COMPANY_OKTA_CLIENT_ID`와 `JVMGUARD_SSO_COMPANY_OKTA_CLIENT_SECRET`을 사용합니다.
+
+이러한 재정의는 데이터베이스에서 구성이 로드된 후에 적용되며 저장된 값보다 우선합니다. 환경 변수가
+설정되어 있지 않으면 데이터베이스의 값이 사용됩니다. jvmguard가 재정의의 적용을 기록할 때 시크릿 값 자체는
+기록되지 않습니다.

@@ -8,8 +8,10 @@ import dev.jvmguard.ui.components.sparkline.SparklineRenderers
 import dev.jvmguard.ui.components.sparkline.SparklineState
 import dev.jvmguard.ui.server.ModificationListener
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
 import dev.jvmguard.ui.server.findVm
 import dev.jvmguard.ui.server.registerModificationListener
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.connector.api.ServerConnection
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.grid.Grid
@@ -40,13 +42,13 @@ class TelemetryOverviewPanel(private val selectionProvider: () -> VmIdentifier) 
         grid.addClassName("jvmguard-telemetry-overview-grid")
 
         grid.addColumn { it.name }
-            .setHeader("Telemetry").setFlexGrow(1).setWidth("280px")
+            .setHeader(t("telemetry.column.telemetry")).setFlexGrow(1).setWidth("280px")
 
-        lastDayColumn = sparklineColumn("Last day", SparkLineRange.LAST_DAY) { it.lastDayState() }
-        lastHourColumn = sparklineColumn("Last hour", SparkLineRange.LAST_HOUR) { it.lastHourState() }
+        lastDayColumn = sparklineColumn(enumLabel(SparkLineRange.LAST_DAY), SparkLineRange.LAST_DAY) { it.lastDayState() }
+        lastHourColumn = sparklineColumn(enumLabel(SparkLineRange.LAST_HOUR), SparkLineRange.LAST_HOUR) { it.lastHourState() }
 
         grid.addColumn(SparklineRenderers.display<TelemetryOverviewRow> { it.currentState() })
-            .setHeader("Current").setFlexGrow(0).setWidth(CURRENT_COLUMN_WIDTH)
+            .setHeader(t("telemetry.column.current")).setFlexGrow(0).setWidth(CURRENT_COLUMN_WIDTH)
 
         grid.addCellFocusListener { event ->
             focusedRow = event.item.orElse(null)
@@ -90,19 +92,19 @@ class TelemetryOverviewPanel(private val selectionProvider: () -> VmIdentifier) 
     fun reload() {
         val connection = Sessions.current()?.serverConnection
         if (connection == null) {
-            showMessage("Not connected to the jvmguard server.")
+            showMessage(t("telemetry.notConnected"))
             return
         }
         val types = displayedTelemetryTypes(connection)
         if (types.isEmpty()) {
-            showMessage(NO_DATA_TEXT)
+            showMessage(t("telemetry.overview.noData"))
             return
         }
         val selection = selectionProvider()
         val lastHour = holderFor(connection, selection, SparkLineRange.LAST_HOUR, types)
         val lastDay = holderFor(connection, selection, SparkLineRange.LAST_DAY, types)
         if (lastHour == null && lastDay == null) {
-            showMessage(NO_DATA_TEXT)
+            showMessage(t("telemetry.overview.noData"))
             return
         }
         grid.setItems(types.map {
@@ -137,7 +139,6 @@ class TelemetryOverviewPanel(private val selectionProvider: () -> VmIdentifier) 
 
         private const val SPARKLINE_COLUMN_WIDTH = "190px"
         private const val CURRENT_COLUMN_WIDTH = "130px"
-        private const val NO_DATA_TEXT = "There are no telemetries to display for this selection."
 
         private val TELEMETRY_ORDER: Comparator<TelemetryType> = compareBy(
             { Telemetry.getByMainId(it.telemetryIdentifier.mainId)?.ordinal ?: Int.MAX_VALUE },

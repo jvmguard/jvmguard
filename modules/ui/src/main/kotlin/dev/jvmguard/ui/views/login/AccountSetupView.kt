@@ -9,6 +9,8 @@ import dev.jvmguard.ui.components.TwoFactorEnroller
 import dev.jvmguard.ui.server.SecurityBridge
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.TwoFactor
+import dev.jvmguard.ui.server.t
+import dev.jvmguard.ui.server.errorText
 import dev.jvmguard.ui.views.vms.VmsView
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
@@ -19,20 +21,21 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
 @Route("setup")
-@PageTitle("jvmguard: Account setup")
-class AccountSetupView : VerticalLayout(), BeforeEnterObserver {
+class AccountSetupView : VerticalLayout(), BeforeEnterObserver, HasDynamicTitle {
 
-    private val newPassword = PasswordField("New password").apply {
+    override fun getPageTitle(): String = t("pageTitle.accountSetup")
+
+    private val newPassword = PasswordField(t("account.password.new")).apply {
         setWidthFull()
         testId = ID_NEW_PW
     }
-    private val confirmPassword = PasswordField("Confirm new password").apply {
+    private val confirmPassword = PasswordField(t("account.password.confirmNew")).apply {
         setWidthFull()
         testId = ID_CONFIRM_PW
     }
@@ -72,23 +75,23 @@ class AccountSetupView : VerticalLayout(), BeforeEnterObserver {
             isSpacing = true
             width = "420px"
             testId = ID_VIEW
-            add(H2("Complete your account setup").apply { addClassName("jvmguard-login-title") })
+            add(H2(t("login.setup.title")).apply { addClassName("jvmguard-login-title") })
         }
         if (needPassword) {
             card.add(
-                Span("You must choose a new password.").apply { addClassName("jvmguard-login-subtitle") },
+                Span(t("login.setup.passwordRequired")).apply { addClassName("jvmguard-login-subtitle") },
                 newPassword, confirmPassword,
             )
         }
         if (needEnroll) {
-            card.add(Span("Set up two-factor authentication.").apply { addClassName("jvmguard-login-subtitle") })
+            card.add(Span(t("login.setup.twofactorRequired")).apply { addClassName("jvmguard-login-subtitle") })
             enroller = TwoFactorEnroller(user?.loginName.orEmpty()).also { card.add(it) }
         }
-        val finish = Button("Finish") { finish() }.apply {
+        val finish = Button(t("login.setup.finish")) { finish() }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_FINISH
         }
-        val logout = Button("Log out") { logout() }.apply { testId = ID_LOGOUT }
+        val logout = Button(t("shell.logout")) { logout() }.apply { testId = ID_LOGOUT }
         card.add(finish, logout)
         add(card)
     }
@@ -114,7 +117,7 @@ class AccountSetupView : VerticalLayout(), BeforeEnterObserver {
         try {
             connection.saveSelf(user)
         } catch (e: Exception) {
-            ErrorDialog("Could not complete setup", e.message ?: e.toString(), null).open()
+            ErrorDialog(t("setup.failed"), errorText(e), null).open()
             return
         }
         Sessions.current()?.markSetupComplete()

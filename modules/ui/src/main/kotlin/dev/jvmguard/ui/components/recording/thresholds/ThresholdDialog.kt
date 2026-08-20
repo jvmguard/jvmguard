@@ -7,6 +7,8 @@ import dev.jvmguard.data.vmdata.ThresholdIdentifier
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.displayName
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
@@ -27,37 +29,37 @@ class ThresholdDialog(
     private val binder = Binder(Threshold::class.java)
 
     private val telemetrySelect = Select<TelemetryType>().apply {
-        label = "Telemetry"
+        label = t("threshold.telemetry")
         testId = ID_TELEMETRY
-        setItemLabelGenerator { it.name }
+        setItemLabelGenerator { it.displayName() }
         setItems(telemetryTypes.sortedWith(compareBy({ it.categoryName }, { it.name })))
         addValueChangeListener { updateUnits() }
     }
-    private val customName = TextField("Custom name (optional)").apply { setWidthFull() }
-    private val target = EnumSelect("Threshold target", Threshold.Target::class.java) { it.toString() }
+    private val customName = TextField(t("threshold.customName")).apply { setWidthFull() }
+    private val target = EnumSelect(t("threshold.target"), Threshold.Target::class.java)
 
-    private val lowerEnabled = Checkbox("Lower bound").apply {
+    private val lowerEnabled = Checkbox(t("threshold.lowerBound")).apply {
         testId = ID_LOWER_ENABLED
         addValueChangeListener { updateEnabled() }
     }
     private val lowerValue = IntegerField().apply { width = "10rem"; testId = ID_LOWER_VALUE }
     private val lowerUnit = Select<Int>().apply { width = "8rem" }
 
-    private val upperEnabled = Checkbox("Upper bound").apply {
+    private val upperEnabled = Checkbox(t("threshold.upperBound")).apply {
         testId = ID_UPPER_ENABLED
         addValueChangeListener { updateEnabled() }
     }
     private val upperValue = IntegerField().apply { width = "10rem"; testId = ID_UPPER_VALUE }
     private val upperUnit = Select<Int>().apply { width = "8rem" }
 
-    private val minimumTime = IntegerField("Minimum time").apply { width = "8rem" }
-    private val minimumTimeUnit = EnumSelect("", TimeUnit::class.java) { it.toString() }
-    private val inhibitTime = IntegerField("Inhibit duplicates for").apply { width = "8rem" }
-    private val inhibitTimeUnit = EnumSelect("", TimeUnit::class.java) { it.toString() }
-    private val continuous = Checkbox("No duplicates while the threshold remains continuously violated")
+    private val minimumTime = IntegerField(t("recording.minimumTime")).apply { width = "8rem" }
+    private val minimumTimeUnit = EnumSelect("", TimeUnit::class.java) { t("enum.TimeUnit.plural.${it.name}") }
+    private val inhibitTime = IntegerField(t("threshold.inhibit")).apply { width = "8rem" }
+    private val inhibitTimeUnit = EnumSelect("", TimeUnit::class.java) { t("enum.TimeUnit.plural.${it.name}") }
+    private val continuous = Checkbox(t("threshold.continuous"))
 
     init {
-        headerTitle = if (isNew) "Add threshold" else "Edit threshold"
+        headerTitle = t(if (isNew) "threshold.dialog.add" else "threshold.dialog.edit")
         width = "44rem"
         isResizable = false
 
@@ -76,7 +78,7 @@ class ThresholdDialog(
         bind()
         read()
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
     @Suppress("DuplicatedCode")
@@ -108,21 +110,21 @@ class ThresholdDialog(
         val type = telemetrySelect.value
         if (type == null) {
             telemetrySelect.isInvalid = true
-            telemetrySelect.errorMessage = "Select a telemetry."
+            telemetrySelect.errorMessage = t("threshold.telemetry.required")
             return
         }
         if (!lowerEnabled.value && !upperEnabled.value) {
-            Notifications.show("Please enable either a lower or an upper bound.")
+            Notifications.show(t("threshold.bound.required"))
             return
         }
         if (lowerEnabled.value && (lowerValue.value ?: 0) <= 0 || upperEnabled.value && (upperValue.value ?: 0) <= 0) {
-            Notifications.show("Enter a positive value for each enabled bound.")
+            Notifications.show(t("threshold.bound.positive"))
             return
         }
         val candidate = ThresholdIdentifier(type.telemetryIdentifier, customName.value.trim())
         if (siblings.any { ThresholdIdentifier(it.telemetryIdentifier, it.customName.usedValue) == candidate }) {
             customName.isInvalid = true
-            customName.errorMessage = "A threshold for this telemetry already exists. Assign a distinct custom name."
+            customName.errorMessage = t("threshold.duplicate")
             return
         }
         if (!binder.writeBeanIfValid(threshold)) {

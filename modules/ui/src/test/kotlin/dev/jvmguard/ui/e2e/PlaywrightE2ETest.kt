@@ -37,6 +37,9 @@ abstract class PlaywrightE2ETest {
     protected val baseUrl: String = System.getProperty("jvmguard.e2e.url", "http://localhost:8020")
     private val screenshotDir: String = System.getProperty("jvmguard.e2e.screenshotDir", "build/e2e")
 
+    /** Browser locale (Accept-Language) applied by [onPage] when the test does not pass one explicitly. */
+    private val contextLocale: String? = System.getProperty("jvmguard.e2e.locale")?.takeIf { it.isNotBlank() }
+
     fun Page.expectUrl(pattern: Pattern) =
         assertThat(this).hasURL(pattern, PageAssertions.HasURLOptions().setTimeout(defaultTimeoutMs))
 
@@ -83,12 +86,15 @@ abstract class PlaywrightE2ETest {
     /**
      * Runs [block] against a fresh 1400x900 browser page (as its receiver). [deviceScaleFactor] > 1
      * simulates a HiDPI display, where sub-pixel layout rounding surfaces bugs a 1:1 viewport hides.
+     * [locale] sets the browser locale (Accept-Language), exercising the UI's auto-detection; when null,
+     * the `jvmguard.e2e.locale` system property applies (the screenshot tasks set it per locale).
      */
-    protected fun onPage(deviceScaleFactor: Double = 1.0, block: Page.() -> Unit) {
+    protected fun onPage(deviceScaleFactor: Double = 1.0, locale: String? = null, block: Page.() -> Unit) {
         val contextOptions = Browser.NewContextOptions().setViewportSize(1400, 900).setDeviceScaleFactor(deviceScaleFactor)
         if (darkScreenshots) {
             contextOptions.setColorScheme(com.microsoft.playwright.options.ColorScheme.DARK)
         }
+        (locale ?: contextLocale)?.let { contextOptions.setLocale(it) }
         browser.newContext(contextOptions).use { context ->
             val page = context.newPage()
             page.setDefaultTimeout(defaultTimeoutMs)

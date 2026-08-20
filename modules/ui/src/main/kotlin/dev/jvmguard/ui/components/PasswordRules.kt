@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.components
 
 import dev.jvmguard.common.helper.PasswordHelper
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.textfield.PasswordField
 
 sealed interface PasswordResult {
@@ -25,16 +26,16 @@ object PasswordRules {
         listOf(newField, confirmField, currentField).forEach { it?.isInvalid = false }
         val password = newField.value
         if (password.isEmpty()) {
-            return if (required) invalid(newField, "Enter a password.") else PasswordResult.Unchanged
+            return if (required) invalid(newField, t("password.enter")) else PasswordResult.Unchanged
         }
         if (password.length < MIN_LENGTH) {
-            return invalid(newField, "At least $MIN_LENGTH characters.")
+            return invalid(newField, t("password.minLength", MIN_LENGTH))
         }
         if (password != confirmField.value) {
-            return invalid(confirmField, "The passwords do not match.")
+            return invalid(confirmField, t("password.mismatch"))
         }
         if (currentField != null && !PasswordHelper.validatePassword(currentField.value, currentHash ?: "")) {
-            return invalid(currentField, "Your current password is incorrect.")
+            return invalid(currentField, t("password.currentIncorrect"))
         }
         return PasswordResult.Valid(password)
     }

@@ -4,6 +4,7 @@ import dev.jvmguard.data.config.SsoGroupMapping
 import dev.jvmguard.data.user.AccessLevel
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.html.Span
@@ -21,19 +22,19 @@ class SsoGroupMappingDialog(
 
     private val binder = Binder(SsoGroupMapping::class.java)
 
-    private val claimValue = TextField("Group claim value").apply {
+    private val claimValue = TextField(t("settings.sso.rule.claimValue")).apply {
         setWidthFull()
         testId = ID_CLAIM_VALUE
     }
-    private val catchAll = Checkbox("Match everyone else in the domain (catch-all)").apply {
+    private val catchAll = Checkbox(t("settings.sso.rule.catchAll")).apply {
         testId = ID_CATCH_ALL
     }
-    private val accessLevel = EnumSelect("Access level", AccessLevel::class.java) { it.toString() }.apply {
+    private val accessLevel = EnumSelect(t("shell.userInfo.accessLevel"), AccessLevel::class.java).apply {
         testId = ID_ACCESS_LEVEL
     }
 
     init {
-        headerTitle = if (isNew) "Add access rule" else "Edit access rule"
+        headerTitle = t(if (isNew) "settings.sso.rule.add" else "settings.sso.rule.edit")
         width = "32rem"
 
         bind()
@@ -53,13 +54,11 @@ class SsoGroupMappingDialog(
             setResponsiveSteps(FormLayout.ResponsiveStep("0", 1))
         })
         if (!groupsSupported) {
-            content.add(Span("Google Workspace does not expose group claims via OpenID Connect. " +
-                "This rule applies to everyone in the configured domain.").apply {
+            content.add(Span(t("settings.sso.rule.noGroupsHint")).apply {
                 addClassName("jvmguard-field-hint")
             })
         } else {
-            content.add(Span("Matches a group/role claim value from the IdP token. " +
-                "Use the catch-all to allow anyone in the domain who doesn't match a specific rule.").apply {
+            content.add(Span(t("settings.sso.rule.hint")).apply {
                 addClassName("jvmguard-field-hint")
             })
         }
@@ -67,7 +66,7 @@ class SsoGroupMappingDialog(
         content.isSpacing = true
         add(content)
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
     private fun bind() {
@@ -99,12 +98,12 @@ class SsoGroupMappingDialog(
         }
         if (groupsSupported && !catchAll.value && mapping.claimValue.isBlank()) {
             claimValue.isInvalid = true
-            claimValue.errorMessage = "Enter a group claim value."
+            claimValue.errorMessage = t("settings.sso.rule.validation.claimValue")
             return
         }
         if (mapping.isCatchAll && catchAllExists) {
             claimValue.isInvalid = true
-            claimValue.errorMessage = "A catch-all rule already exists."
+            claimValue.errorMessage = t("settings.sso.rule.validation.catchAllExists")
             return
         }
         onSave(mapping)

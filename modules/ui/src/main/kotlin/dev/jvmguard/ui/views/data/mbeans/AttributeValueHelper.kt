@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.views.data.mbeans
 
+import dev.jvmguard.ui.server.t
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.management.openmbean.*
@@ -30,12 +31,12 @@ object AttributeValueHelper {
 
     private fun replacedTypeName(openType: OpenType<*>): String =
         if (openType is CompositeType && openType.typeName.startsWith(Map::class.java.name)) {
-            "map entry"
+            t("mbeans.value.mapEntry")
         } else {
             openType.typeName
         }
 
-    private fun nullVerbose(): String = "[null]"
+    private fun nullVerbose(): String = t("mbeans.value.null")
 
     private fun verboseValue(value: Any?, openType: OpenType<*>?): String = when {
         value == null -> nullVerbose()
@@ -47,5 +48,5 @@ object AttributeValueHelper {
         if (isArray(value)) (value as Array<*>).size else 0
 
     private fun arrayText(value: Any?): String =
-        if (value == null) nullVerbose() else "[${arrayLength(value)} elements]"
+        if (value == null) nullVerbose() else t("mbeans.value.arrayElements", arrayLength(value))
 }

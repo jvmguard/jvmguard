@@ -4,6 +4,7 @@ import dev.jvmguard.data.config.LdapUserMapping
 import dev.jvmguard.data.user.AccessLevel
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.JvmGuardDialog
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
@@ -18,26 +19,26 @@ class LdapMappingDialog(
 
     private val binder = Binder(LdapUserMapping::class.java)
 
-    private val searchBase = TextField("Search base").apply {
+    private val searchBase = TextField(t("settings.ldap.mapping.searchBase")).apply {
         setWidthFull()
         testId = ID_SEARCH_BASE
     }
-    private val userFilter = TextField("User filter").apply {
+    private val userFilter = TextField(t("settings.ldap.mapping.userFilter")).apply {
         setWidthFull()
         testId = ID_USER_FILTER
     }
-    private val accessLevel = EnumSelect("Access level", AccessLevel::class.java) { it.toString() }.apply {
+    private val accessLevel = EnumSelect(t("shell.userInfo.accessLevel"), AccessLevel::class.java).apply {
         testId = ID_ACCESS_LEVEL
     }
 
     init {
-        headerTitle = if (isNew) "Add user mapping" else "Edit user mapping"
+        headerTitle = t(if (isNew) "settings.ldap.mapping.add" else "settings.ldap.mapping.edit")
         width = "32rem"
 
         bind()
         binder.readBean(mapping)
 
-        val hint = Span("The user filter must contain ${LdapUserMapping.TOKEN_USER}, which is replaced with the login name.")
+        val hint = Span(t("settings.ldap.mapping.hint", LdapUserMapping.TOKEN_USER))
             .apply { addClassName("jvmguard-field-hint") }
         add(VerticalLayout(FormLayout(searchBase, userFilter, accessLevel).apply {
             setResponsiveSteps(FormLayout.ResponsiveStep("0", 1))
@@ -46,16 +47,16 @@ class LdapMappingDialog(
             isSpacing = true
         })
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
     private fun bind() {
         binder.forField(searchBase)
-            .asRequired("Enter a search base.")
+            .asRequired(t("settings.ldap.mapping.validation.searchBase"))
             .bind({ it.searchBase }, { m, value -> m.searchBase = value })
         binder.forField(userFilter)
-            .asRequired("Enter a user filter.")
-            .withValidator({ it.contains(LdapUserMapping.TOKEN_USER) }, "The filter must contain ${LdapUserMapping.TOKEN_USER}.")
+            .asRequired(t("settings.ldap.mapping.validation.userFilter"))
+            .withValidator({ it.contains(LdapUserMapping.TOKEN_USER) }, t("settings.ldap.mapping.validation.token", LdapUserMapping.TOKEN_USER))
             .bind({ it.userFilter }, { m, value -> m.userFilter = value })
         binder.forField(accessLevel)
             .bind({ it.accessLevel }, { m, value -> m.accessLevel = value })

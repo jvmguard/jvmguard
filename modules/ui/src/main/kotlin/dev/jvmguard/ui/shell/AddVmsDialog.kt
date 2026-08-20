@@ -8,6 +8,8 @@ import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.components.JvmGuardDialog
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -30,7 +32,7 @@ private const val POOL_PLACEHOLDER = "[a name for the VM pool]"
 fun openAddVms() {
     val session = Sessions.current() ?: return
     if (!session.user.accessLevel.isAtLeast(AccessLevel.PROFILER)) {
-        Notifications.show("You need at least \"${AccessLevel.PROFILER}\" access to add VMs.")
+        Notifications.show(t("shell.addVms.accessRequired", enumLabel(AccessLevel.PROFILER)))
         return
     }
     if (session.isLocalRequest()) {
@@ -43,16 +45,16 @@ fun openAddVms() {
 class AddVmsLocationDialog : JvmGuardDialog() {
 
     init {
-        headerTitle = "Add VMs"
+        headerTitle = t("shell.addVms")
         width = "34rem"
-        add(Span("Is the VM that should be monitored running on this machine or on a remote machine?"))
+        add(Span(t("shell.addVms.location.question")))
 
-        val cancel = Button("Cancel") { close() }
-        val remote = Button("Remote machine") {
+        val cancel = Button(t("common.cancel")) { close() }
+        val remote = Button(t("shell.addVms.location.remote")) {
             close()
             AddRemoteVmsDialog().open()
         }.apply { testId = ID_REMOTE_MACHINE }
-        val thisMachine = Button("This machine") {
+        val thisMachine = Button(t("shell.addVms.location.thisMachine")) {
             close()
             AddLocalVmsDialog().open()
         }.apply {
@@ -71,7 +73,7 @@ class AddVmsLocationDialog : JvmGuardDialog() {
 class AddLocalVmsDialog : JvmGuardDialog() {
 
     init {
-        headerTitle = "Add locally running VMs"
+        headerTitle = t("shell.addVms.local.title")
         width = DIALOG_WIDTH
 
         val connection = Sessions.current()?.serverConnection
@@ -91,17 +93,17 @@ class AddLocalVmsDialog : JvmGuardDialog() {
             isPadding = false
             isSpacing = true
             setWidthFull()
-            add(subtitle("Monitoring a VM is easy. Just add a JVM option to your start script."))
-            add(Span("Add the following JVM option to the Java invocation in your start script:"))
+            add(subtitle(t("shell.addVms.local.intro")))
+            add(Span(t("shell.addVms.local.jvmOption")))
             add(codeBlock(parameter))
-            add(hint("Enhancement: to give the VM a proper name and group, append the following to the parameter above:"))
+            add(hint(t("shell.addVms.local.nameGroup")))
             add(codeBlock("${separator}name=$ISSUER_PLACEHOLDER,group=$GROUP_PLACEHOLDER"))
-            add(hint("Advanced: for a pool of equivalent VMs (for example in a cloud environment), append this instead of name and group:"))
+            add(hint(t("shell.addVms.local.pool")))
             add(codeBlock("${separator}pool=$POOL_PLACEHOLDER"))
-            add(hint("Group and pool names can form a hierarchy such as level1/level2/level3."))
+            add(hint(t("shell.addVms.hierarchy")))
         })
 
-        footer.add(Button("Close") { close() }.apply { testId = ID_CLOSE })
+        footer.add(Button(t("common.close")) { close() }.apply { testId = ID_CLOSE })
     }
 
     companion object {
@@ -115,7 +117,7 @@ class AddRemoteVmsDialog : JvmGuardDialog() {
     private var selectedType = ArchiveFileType.TAR_GZ
 
     init {
-        headerTitle = "Add VMs"
+        headerTitle = t("shell.addVms")
         width = DIALOG_WIDTH
 
         val useSsl = Sessions.current()?.serverConnection?.let { runCatching { it.isUseSsl }.getOrDefault(false) } == true
@@ -124,23 +126,23 @@ class AddRemoteVmsDialog : JvmGuardDialog() {
             isPadding = false
             isSpacing = true
             setWidthFull()
-            add(subtitle("Monitoring a VM is easy. Just add a JVM option to your start script. The agent files can be downloaded below."))
-            add(step(1, "Download the agent", agentDownloadRow()))
-            add(step(2, "Copy the agent to the machine where the VM is running", Span(copyInstruction(useSsl))))
+            add(subtitle(t("shell.addVms.remote.intro")))
+            add(step(1, t("shell.addVms.remote.stepDownload"), agentDownloadRow()))
+            add(step(2, t("shell.addVms.remote.stepCopy"), Span(copyInstruction(useSsl))))
             add(
                 step(
-                    3, "Add the JVM option to the Java invocation in your start script",
+                    3, t("shell.addVms.remote.stepJvmOption"),
                     codeBlock("-javaagent:[path to jvmguard.jar]=server=[IP address or name of the jvmguard server],name=$ISSUER_PLACEHOLDER,group=$GROUP_PLACEHOLDER"),
-                    hint("Advanced: for a pool of equivalent VMs, append \",pool=$POOL_PLACEHOLDER\" instead of name and group. Group and pool names can form a hierarchy such as level1/level2/level3.")
+                    hint(t("shell.addVms.remote.pool", POOL_PLACEHOLDER))
                 )
             )
         })
 
-        footer.add(Button("Close") { close() }.apply { testId = ID_CLOSE })
+        footer.add(Button(t("common.close")) { close() }.apply { testId = ID_CLOSE })
     }
 
     private fun agentDownloadRow(): Component {
-        val archiveType = EnumSelect("", ArchiveFileType::class.java) { it.toString() }.apply {
+        val archiveType = EnumSelect("", ArchiveFileType::class.java) { enumLabel(it) }.apply {
             label = null
             width = "14rem"
             value = selectedType
@@ -150,12 +152,12 @@ class AddRemoteVmsDialog : JvmGuardDialog() {
         val download = Anchor().apply {
             setHref(DownloadHandler.fromInputStream { agentDownload() })
             element.setAttribute("download", true)
-            add(Button("Download", VaadinIcon.DOWNLOAD.create()).apply {
+            add(Button(t("common.download"), VaadinIcon.DOWNLOAD.create()).apply {
                 addThemeVariants(ButtonVariant.PRIMARY)
                 testId = ID_DOWNLOAD
             })
         }
-        return HorizontalLayout(Span("Archive format"), archiveType, download).apply {
+        return HorizontalLayout(Span(t("shell.addVms.remote.archiveFormat")), archiveType, download).apply {
             addClassName("jvmguard-addvms-download-row")
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
             isPadding = false
@@ -174,9 +176,9 @@ class AddRemoteVmsDialog : JvmGuardDialog() {
     }
 
     private fun copyInstruction(useSsl: Boolean): String = if (useSsl) {
-        "Communication with this jvmguard server is secured. The server certificate ${JvmGuardKeyManager.AGENT_STORE} is located next to jvmguard.jar."
+        t("shell.addVms.remote.copySsl", JvmGuardKeyManager.AGENT_STORE)
     } else {
-        "The location of the file jvmguard.jar is referenced in the next step."
+        t("shell.addVms.remote.copyPlain")
     }
 
     companion object {
@@ -196,7 +198,7 @@ private fun step(number: Int, title: String, vararg content: Component): Compone
         isSpacing = true
         setWidthFull()
     }
-    val label = Span("Step $number").apply { addClassName("jvmguard-step-label") }
+    val label = Span(t("shell.addVms.step", number)).apply { addClassName("jvmguard-step-label") }
     return HorizontalLayout(label, body).apply {
         addClassName("jvmguard-step")
         setWidthFull()
@@ -209,12 +211,12 @@ private fun codeBlock(text: String): Component {
     val code = Span(text).apply { addClassName("jvmguard-code-text") }
     val copy = Button(VaadinIcon.COPY_O.create()).apply {
         addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL)
-        setAriaLabel("Copy to clipboard")
-        setTooltipText("Copy")
+        setAriaLabel(t("common.copyToClipboard"))
+        setTooltipText(t("common.copy"))
     }
     copy.addClickListener {
         copy.element.executeJs($$"if (navigator.clipboard) { navigator.clipboard.writeText($0); }", text)
-        Notifications.show("Copied to clipboard.")
+        Notifications.show(t("common.copiedToClipboard"))
     }
     return HorizontalLayout(code, copy).apply {
         addClassName("jvmguard-code-block")

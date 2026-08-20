@@ -9,6 +9,8 @@ import dev.jvmguard.ui.components.PasswordRules
 import dev.jvmguard.ui.components.Validators
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.UserSession
+import dev.jvmguard.ui.server.t
+import dev.jvmguard.ui.server.errorText
 import dev.jvmguard.ui.views.login.AccountSetupView
 import dev.jvmguard.ui.views.login.LoginView
 import dev.jvmguard.ui.views.vms.VmsView
@@ -20,14 +22,15 @@ import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import com.vaadin.flow.server.auth.AnonymousAllowed
 
 @AnonymousAllowed
 @Route("install")
-@PageTitle("jvmguard: Set up jvmguard")
-class InstallWizardView : VerticalLayout(), BeforeEnterObserver {
+class InstallWizardView : VerticalLayout(), BeforeEnterObserver, HasDynamicTitle {
+
+    override fun getPageTitle(): String = t("pageTitle.setup")
 
     private lateinit var loginName: TextField
     private lateinit var fullName: TextField
@@ -62,20 +65,20 @@ class InstallWizardView : VerticalLayout(), BeforeEnterObserver {
             width = "420px"
 
             div { addClassName("jvmguard-login-logo") }
-            h2("Set up jvmguard") { addClassName("jvmguard-login-title") }
-            span("Create the administrator account to get started.") { addClassName("jvmguard-login-subtitle") }
+            h2(t("setup.title")) { addClassName("jvmguard-login-title") }
+            span(t("setup.subtitle")) { addClassName("jvmguard-login-subtitle") }
 
-            loginName = textField("Username") { testId = ID_NAME }
-            fullName = textField("Full name (optional)")
-            email = textField("Email (optional)") { testId = ID_EMAIL }
-            password = passwordField("Password") { testId = ID_PASSWORD }
-            confirm = passwordField("Confirm password") { testId = ID_CONFIRM }
-            require2fa = checkBox("Require two-factor authentication for all users") {
+            loginName = textField(t("login.username")) { testId = ID_NAME }
+            fullName = textField(t("setup.fullName"))
+            email = textField(t("setup.email")) { testId = ID_EMAIL }
+            password = passwordField(t("login.password")) { testId = ID_PASSWORD }
+            confirm = passwordField(t("setup.confirmPassword")) { testId = ID_CONFIRM }
+            require2fa = checkBox(t("setup.requireTwofactor")) {
                 value = true
                 testId = ID_2FA
                 addClassName("jvmguard-settings-gap-before")
             }
-            button("Create account") {
+            button(t("setup.createAccount")) {
                 testId = ID_SUBMIT
                 addThemeVariants(ButtonVariant.PRIMARY)
                 addClickListener { submit() }
@@ -94,14 +97,14 @@ class InstallWizardView : VerticalLayout(), BeforeEnterObserver {
         var valid = true
         if (loginName.value.trim().length !in 2..25) {
             loginName.isInvalid = true
-            loginName.errorMessage = "Enter 2 to 25 characters."
+            loginName.errorMessage = t("setup.username.invalid")
             valid = false
         } else {
             loginName.isInvalid = false
         }
         if (email.value.isNotBlank() && !Validators.isValidEmail(email.value)) {
             email.isInvalid = true
-            email.errorMessage = "Enter a valid email address."
+            email.errorMessage = t("setup.email.invalid")
             valid = false
         } else {
             email.isInvalid = false
@@ -129,7 +132,7 @@ class InstallWizardView : VerticalLayout(), BeforeEnterObserver {
             val target = if (session.forcedSetupRequired()) AccountSetupView::class.java else VmsView::class.java
             ui.ifPresent { it.navigate(target) }
         } catch (e: Exception) {
-            ErrorDialog("Could not complete setup", e.message ?: e.toString(), null).open()
+            ErrorDialog(t("setup.failed"), errorText(e), null).open()
         }
     }
 

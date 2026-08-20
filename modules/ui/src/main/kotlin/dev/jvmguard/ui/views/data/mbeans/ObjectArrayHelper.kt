@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.views.data.mbeans
 
+import dev.jvmguard.ui.server.t
 import java.math.BigDecimal
 import java.math.BigInteger
 import javax.management.MalformedObjectNameException
@@ -18,7 +19,7 @@ object ObjectArrayHelper {
                 try {
                     toObject(singleValue, componentClass, allowNullValues)
                 } catch (_: NumberFormatException) {
-                    throw MBeanConversionException("Could not convert \"$singleValue\" to ${componentClass.name}")
+                    throw MBeanConversionException(t("mbeans.value.arrayNotConvertible", singleValue, componentClass.name))
                 }
             }
             .toTypedArray()
@@ -96,7 +97,7 @@ object ObjectArrayHelper {
 
     private fun toObject(value: String, componentClass: Class<*>, allowNullValues: Boolean): Any? = when {
         value.isEmpty() ->
-            if (allowNullValues) null else throw MBeanConversionException("Null values not allowed for primitive arrays")
+            if (allowNullValues) null else throw MBeanConversionException(t("mbeans.value.nullNotAllowed"))
 
         componentClass == Boolean::class.javaObjectType -> value.toBoolean()
         componentClass == Byte::class.javaObjectType -> value.toByte()
@@ -112,7 +113,7 @@ object ObjectArrayHelper {
             try {
                 ObjectName(value)
             } catch (e: MalformedObjectNameException) {
-                throw MBeanConversionException(e.message ?: "Malformed object name")
+                throw MBeanConversionException(e.message ?: t("mbeans.value.malformedObjectName"))
             }
 
         componentClass == String::class.java -> if (value == EMPTY_STRING_MARKER) "" else value

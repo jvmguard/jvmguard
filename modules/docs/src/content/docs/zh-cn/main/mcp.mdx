@@ -1,0 +1,75 @@
+---
+title: MCP 服务器
+---
+
+## 简介
+
+jvmguard 包含一个 MCP 服务器，将其监控数据和诊断操作暴露给兼容 MCP 的 AI 编程助手，例如 Claude Code、
+Codex、Antigravity、OpenCode 和 Cursor。助手通过 Model Context Protocol 连接并调用工具，列出受监控的
+集群、读取遥测和事务数据，以及触发诊断捕获。
+
+MCP 服务器在与 Web 服务器相同的端口上以 `/mcp` 路径提供服务，并使用相同的协议（HTTP 或 HTTPS）。它使用
+可流式 HTTP 传输。
+
+## 启用 MCP 服务器
+
+MCP 服务器由 `config/application.yaml` 中的 **mcpEnabled** 属性控制，在默认配置中是启用的。可以将其设置为
+`false` 来禁用该端点。服务器属性的完整列表请参阅[服务器配置](/docs/zh-cn/config/server-config)。
+
+## 身份验证
+
+对 MCP 服务器的访问由 bearer token 保护。该 token 是在 jvmguard UI 中生成的 API 密钥，与
+[REST 导出 API](/docs/zh-cn/main/rest) 使用的密钥相同。助手在 HTTP `Authorization` 头中发送它：
+
+```
+Authorization: Bearer <API_KEY>
+```
+
+API 密钥在“外部访问”页面上创建，该页面可从 jvmguard UI 顶部用户下拉菜单中的“账户设置”进入。生成的密钥
+只会显示一次。保存后，新密钥立即生效，之前的所有密钥都将失效。
+
+密钥所属用户的访问级别决定助手可以执行的操作。任何拥有 API 密钥的用户都可以读取数据。对 VM 执行操作的
+诊断工具（例如堆转储和记录）需要分析员访问权限。
+
+密钥作为 bearer token 发送，因此只有在使用 HTTPS 时才会在传输中加密。对于通过网络连接的助手，应使用 HTTPS。
+
+除了访问级别之外，还可以在两个地方进一步限制助手可以执行的操作。服务器范围的设置位于
+[常规设置](/docs/zh-cn/main/ui#网络)的“网络”选项卡：MCP 只读模式和 IP 允许列表。针对单个捕获和变更操作的
+按 VM 组开关和限制位于记录设置的[代理护栏](/docs/zh-cn/main/ui#代理护栏)下，因此“分析员”可以为自己管理的
+组配置这些选项。当护栏违规阻止某个调用时，助手会收到一条说明原因的消息，以便进行相应调整。
+
+## 连接助手
+
+jvmguard UI 中的“外部访问”页面提供了一个集成助手。选择助手后，它会显示相应的命令或配置片段，并在密钥
+可见时自动填入密钥。
+
+手动设置时，注册一个使用可流式 HTTP 传输的远程 MCP 服务器，并提供端点 URL 和授权头。例如，使用
+Claude Code 命令行且 Web 服务器端口为 8020 时：
+
+```
+claude mcp add --transport http jvmguard http://localhost:8020/mcp\
+    --header "Authorization: Bearer <API_KEY>"
+```
+
+对于读取配置文件的助手，使用端点 URL 和带有相同 bearer token 的 `Authorization` 头。
+
+## 工具
+
+助手在连接时会发现可用的工具。它可以列出受监控的组和 VM，读取遥测和事务数据（例如调用树、热点和超时未完成
+事务），检查 MBean 和日志文件，以及读取触发器收件箱。
+
+它还可以在 VM 上捕获诊断数据，例如堆转储、线程转储以及 JFR 或 JProfiler 记录。除了读取 MBean 之外，它还可以
+设置可写的 MBean 属性并调用 MBean 操作。
+
+此外，它还可以将 VM 组的记录配置读取为 JSON 字符串，并在编辑后写回。读取结果包含一个生成的 schema，解释
+各个字段、枚举和多态类型，并附带一个完整的示例配置。这些变更工具需要分析员访问权限，而捕获工具还会将结果
+保存到快照文件列表中。
+
+## 分析捕获的产物
+
+助手可以下载捕获的产物并将其传递给其他工具进行分析。二进制产物（例如内存快照、JProfiler 快照或 JFR 记录）
+以下载链接的形式返回，助手将其获取到本地文件。
+
+文件下载到本地后，助手使用能够理解该格式的工具进行分析。JProfiler CPU 快照可以通过
+[JProfiler MCP 服务器](https://www.ej-technologies.com/jprofiler/mcp)打开，助手可以借此检查其调用树、热点、
+堆和探针。JFR 记录可以用 JProfiler 或 JDK 中的 JFR 工具读取。

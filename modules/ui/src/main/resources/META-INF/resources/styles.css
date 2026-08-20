@@ -237,6 +237,26 @@ html[jvmguard-scheme="dark"] .jvmguard-logo {
     .jvmguard-header vaadin-button.jvmguard-collapsible::part(label) {
         display: none;
     }
+
+    .jvmguard-header vaadin-button.jvmguard-collapsible {
+        padding-inline: 8px;
+    }
+
+    .jvmguard-header vaadin-menu-bar-button::part(suffix) {
+        display: none;
+    }
+
+    .jvmguard-header vaadin-menu-bar[class] vaadin-menu-bar-button {
+        padding-inline-start: 0;
+    }
+
+    .jvmguard-header vaadin-button.jvmguard-collapsible[class] {
+        padding-inline: 4px;
+    }
+
+    .jvmguard-header vaadin-button[data-testid="theme-toggle"] {
+        padding-inline: 4px;
+    }
 }
 
 /* header controls take the header foreground (white on the dark bar, dark ink on the light bar) */
@@ -276,15 +296,33 @@ html[jvmguard-scheme="dark"] .jvmguard-logo {
     color: var(--jvmguard-header-foreground);
 }
 
-/*
- * Fix overflow button problems at fractional DPI settings
- */
-.jvmguard-header vaadin-menu-bar.jvmguard-settings-cog {
-    min-width: 4.5rem;
+/* Slim header dropdowns: no padding after the trailing caret (the [class] bump is needed to outrank
+   the Aura menu-bar button padding, which otherwise wins the cascade). */
+.jvmguard-header vaadin-menu-bar[class] vaadin-menu-bar-button {
+    padding-inline-end: 0;
 }
 
-.jvmguard-header vaadin-menu-bar.jvmguard-settings-cog::part(container) {
+/*
+ * Fix overflow button problems at fractional DPI settings: the minimum stays just above the natural
+ * content width (~64px), so sub-pixel rounding never pushes the single item into an overflow button.
+ */
+.jvmguard-header vaadin-menu-bar.jvmguard-settings-cog,
+.jvmguard-header vaadin-menu-bar.jvmguard-language-select {
+    min-width: 60px;
+}
+
+.jvmguard-header vaadin-menu-bar.jvmguard-settings-cog::part(container),
+.jvmguard-header vaadin-menu-bar.jvmguard-language-select::part(container) {
     justify-content: center;
+}
+
+/* Small screens: with the caret dropped, the fractional-DPI guard shrinks to match. This must come
+   after the base rule to win at equal specificity. */
+@media (max-width: 640px) {
+    .jvmguard-header vaadin-menu-bar.jvmguard-settings-cog,
+    .jvmguard-header vaadin-menu-bar.jvmguard-language-select {
+        min-width: 32px;
+    }
 }
 
 /*

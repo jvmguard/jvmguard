@@ -2,6 +2,7 @@ package dev.jvmguard.ui.views.data
 
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.components.textLink
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
@@ -48,6 +49,6 @@ class VmBreadcrumb(private val onSelect: (VmIdentifier) -> Unit) : HorizontalLay
         }
 
         private fun displayName(identifier: VmIdentifier): String =
-            if (identifier.isRoot) "All JVMs" else identifier.toUnqualified().name
+            if (identifier.isRoot) t("vms.allJvms") else identifier.toUnqualified().name
     }
 }

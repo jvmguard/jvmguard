@@ -1,0 +1,76 @@
+---
+title: 生产环境中的分析
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+不应该让分析器在生产环境中一直运行，这有几个原因。首先，根据分析设置的不同，开销可能高到无法接受。分析器
+以最大化提取有用信息为目标，对所产生的开销没有明确的保证。此外，使用 JVM 的原生分析接口（JVMTI）在生产
+环境中是额外的风险。视是否使用非标准垃圾回收器或其他 JVM 调优选项而定，可能存在稳定性方面的顾虑，因为
+JVM 在启用 JVMTI 时的测试不如不启用时充分。
+
+然而，应对性能问题的最佳手段是纵深防御。有时会遇到一些情况，仅靠 APM 工具和持续分析器中可用的低开销监控
+和采样技术无法获得足够的信息。
+
+## 记录 JProfiler 快照
+
+对于这些情况，jvmguard 可以按需将 **JProfiler 分析代理**加载到受监控的 JVM 中。JProfiler 的原生 JVMTI
+库针对生产环境使用进行了优化，jvmguard 会将其配置为以采样模式记录，因此开销保持在较低水平。特别是对于
+Java 17+，JVMTI 采样的开销[与异步采样相当](https://www.ej-technologies.com/blog/2024/02/why-jvmti-sampling-is-better-than-async-sampling-on-modern-jvms/)。
+该操作的结果是一个 JProfiler 快照文件，可以从 jvmguard 下载并在 JProfiler 中打开。
+
+不需要自己安装或复制任何东西。第一次为某个平台记录 JProfiler 快照时，jvmguard 会下载与受监控 VM 的操作
+系统和架构匹配的 JProfiler 代理包，将其缓存并传输给代理。后续的记录会重用缓存的包。这要求 jvmguard 服务器
+能够访问 JProfiler 网站。
+
+分析代理一旦加载，其 JVMTI 就无法再关闭。只要 JVM 还在运行，它就会保持这种状态。不过，已加载代理在不记录
+任何数据时的开销通常低于 1%。
+
+要对特定 VM 记录 JProfiler 快照，请进入 VM 视图，点击 VM 旁边的“操作”链接，然后选择“记录 JProfiler
+快照”。
+
+<Figure src="ui/vms_profiling_action.png" />
+
+可以配置记录的时长，并选择记录哪些子系统：CPU、内存分配和监视器阻塞，以及 JDBC、JPA、HTTP、MongoDB 等
+多种 JProfiler 探针。jvmguard 监控不受记录影响。此外，还可以在记录窗口结束时捕获额外数据并存入同一个
+快照：堆转储（可选地在之前执行一次完整的垃圾回收）、MBean 快照和监视器转储。
+
+<Figure src="ui/profiling_options.png" />
+
+要在 CPU 负载过高时自动记录快照，可以为 CPU 遥测设置一个阈值，并配置一个包含“记录 JProfiler 快照”
+触发器操作的触发器。
+
+<Figure src="ui/trigger_profile.png" />
+
+注意，只有最后一个违规的 VM 会被分析，而不是所有违规的 VM。
+
+## 在 JProfiler 中查看 JProfiler 快照
+
+JProfiler 快照会送达到 jvmguard 收件箱，可以从那里下载。文件扩展名是 ".jps"，代表 "JProfiler snapshot"。
+如果安装了 JProfiler，可以双击快照文件将其打开，或者从 JProfiler 主菜单中选择 Session ▸ Open Snapshot。
+
+## 记录 JFR 快照
+
+获取受监控 VM 更底层信息的另一种机制是记录 [JDK Flight Recorder
+(JFR)](https://en.wikipedia.org/wiki/JDK_Flight_Recorder) 快照。受监控 VM 的 Java 版本必须为 11+，并且
+JRE 必须包含 `jdk.jfr` 模块。JFR 记录的开销可以非常低，而且不会加载 JVMTI。
+
+要记录 JFR 快照，请进入 VM 视图，点击 VM 旁边的“操作”链接，然后选择“记录 JDK Flight Recorder 快照”。
+
+<Figure src="ui/jfr_recording_action.png" />
+
+除了配置 JFR 记录的时长之外，还可以选择预定义设置，或者上传从 [JMC](https://openjdk.java.net/projects/jmc/)
+的“Flight recording template manager”导出的 `.jfc` 设置文件的内容。保证存在的两个预定义设置是 "default"
+和 "profile"。jvmguard 默认建议使用 "profile"，因为它记录更多相关信息。其他设置可以通过将 `.jfc` 文件放入
+受监控 JVM 的 `lib/jfr` 目录来预定义。如果上传设置文件，请确保它是为兼容的 Java 版本创建的。
+
+<Figure src="ui/jfr_recording_options.png" />
+
+与上面的其他记录一样，JFR 快照也可以通过触发器和相应的 JFR 记录触发器操作自动记录。
+
+<Figure src="ui/trigger_jfr_recording.png" />
+
+虽然可以使用 [JMC](https://openjdk.java.net/projects/jmc/) 查看 JFR 快照，但我们建议使用 JProfiler，就像
+查看 JProfiler 快照一样。除了 CPU、内存分配和监视器记录之外，JProfiler 还会显示一些由 JFR 事件构建的探针。
+
+<Figure src="external/jprofiler_jfr.png" />

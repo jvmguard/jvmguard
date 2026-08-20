@@ -1,0 +1,167 @@
+---
+// Compare.astro: the comparison page, shared by all locales. Copy comes from
+// the locale's message catalog in src/i18n/ui.ts.
+import PageFrame from '../../layouts/PageFrame.astro';
+import {
+  DEFAULT_LOCALE,
+  compareComparisons,
+  compareFits,
+  getMessages,
+  type Locale,
+} from '../../i18n/ui';
+
+interface Props {
+  locale?: Locale;
+}
+const {locale = DEFAULT_LOCALE} = Astro.props;
+const m = getMessages(locale);
+
+const comparisons = compareComparisons(m);
+const fits = compareFits(m);
+---
+
+<PageFrame
+  active="compare"
+  locale={locale}
+  title={m['compare.meta.title']}
+  description={m['compare.meta.description']}
+>
+  <section class="shell hero">
+    <p class="eyebrow">{m['compare.hero.eyebrow']}</p>
+    <h1>{m['compare.hero.title']}</h1>
+    <p class="lede">
+      {m['compare.hero.lede']}
+    </p>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 01</span>
+      <span class="rule__label">{m['compare.adjacent.rule']}</span>
+    </div>
+    <div class="cmp">
+      {comparisons.map((c) => (
+        <article class="cmp__row">
+          <header class="cmp__head">
+            <h2>{c.name}</h2>
+            <p class="muted">{c.base}</p>
+          </header>
+          <ul class="cmp__diff">
+            {c.differs.map((d) => (
+              <li>{d}</li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 02</span>
+      <span class="rule__label">{m['compare.isnot.rule']}</span>
+    </div>
+    <div class="panel isnot">
+      <p>
+        {m['compare.isnot.p']}
+      </p>
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="rule">
+      <span class="rule__no">§ 03</span>
+      <span class="rule__label">{m['compare.fits.rule']}</span>
+    </div>
+    <div class="panel fits">
+      <div class="fits__item">
+        <svg class="fits__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        <p>
+          {fits[0]}
+        </p>
+      </div>
+      <div class="fits__item">
+        <svg class="fits__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M12 8V4"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        <p>
+          {fits[1]}
+        </p>
+      </div>
+      <div class="fits__item">
+        <svg class="fits__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+        <p>
+          {fits[2]}
+        </p>
+      </div>
+    </div>
+  </section>
+</PageFrame>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-5);
+  }
+  .cmp {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .cmp__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    border-top: 1px solid var(--rule-strong);
+    padding-block: var(--space-5);
+  }
+  @media (min-width: 820px) {
+    .cmp__row {
+      grid-template-columns: 1fr 1.4fr;
+      gap: var(--space-6);
+    }
+  }
+  .cmp__head h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--step-2);
+  }
+  .cmp__head p {
+    margin: 0;
+  }
+  .cmp__diff {
+    margin: 0;
+    padding-left: 1.1rem;
+    max-width: none;
+  }
+  .cmp__diff li {
+    margin-bottom: var(--space-3);
+  }
+  .isnot h3 {
+    color: var(--brand-deep);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 820px) {
+    .grid--3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .fits__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  .fits__item + .fits__item {
+    margin-top: var(--space-4);
+  }
+  .fits__icon {
+    flex-shrink: 0;
+    color: var(--brand);
+    margin-top: 0.2rem;
+  }
+  .fits__item p {
+    margin: 0;
+    max-width: none;
+  }
+ </style>

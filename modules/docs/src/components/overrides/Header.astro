@@ -14,13 +14,24 @@ const dev = import.meta.env.DEV;
 const site = dev ? 'http://localhost:4321' : '';
 const docsSelf = dev ? 'http://localhost:4322/docs/main/introduction' : '/docs/main/introduction';
 
+// Locale-aware nav labels. Links to the marketing site stay un-prefixed (English) for now;
+// only the text labels switch with the docs locale (undefined = root/English).
+type NavKey = 'overview' | 'security' | 'compare' | 'download' | 'docs' | 'javadoc';
+const navLabels: Record<string, Record<NavKey, string>> = {
+  en: { overview: 'Overview', security: 'Security', compare: 'Compare', download: 'Download', docs: 'Docs', javadoc: 'Javadoc' },
+  ko: { overview: '개요', security: '보안', compare: '비교', download: '다운로드', docs: '문서', javadoc: 'Javadoc' },
+  ja: { overview: '概要', security: 'セキュリティ', compare: '比較', download: 'ダウンロード', docs: 'ドキュメント', javadoc: 'Javadoc' },
+  'zh-cn': { overview: '概览', security: '安全性', compare: '对比', download: '下载', docs: '文档', javadoc: 'Javadoc' },
+};
+const labels = navLabels[Astro.locals.starlightRoute.locale ?? 'en'] ?? navLabels.en;
+
 const nav = [
-  {label: 'Overview', href: site + '/'},
-  {label: 'Security', href: site + '/security'},
-  {label: 'Compare', href: site + '/compare'},
-  {label: 'Download', href: site + '/download'},
-  {label: 'Docs', href: docsSelf, active: true},
-  {label: 'Javadoc', href: site + '/javadoc'},
+  {label: labels.overview, href: site + '/'},
+  {label: labels.security, href: site + '/security'},
+  {label: labels.compare, href: site + '/compare'},
+  {label: labels.download, href: site + '/download'},
+  {label: labels.docs, href: docsSelf, active: true},
+  {label: labels.javadoc, href: site + '/javadoc'},
 ];
 
 const shouldRenderSearch =

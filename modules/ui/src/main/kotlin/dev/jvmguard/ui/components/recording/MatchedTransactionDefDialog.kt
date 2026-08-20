@@ -4,6 +4,7 @@ import dev.jvmguard.agent.config.transactions.MatchedTransactionDef
 import dev.jvmguard.agent.config.transactions.MatchedTransactionDef.InterceptionTarget
 import dev.jvmguard.agent.config.transactions.MatchedTransactionDef.MethodInterceptionMode
 import dev.jvmguard.ui.components.EnumSelect
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
@@ -16,22 +17,22 @@ class MatchedTransactionDefDialog(
     onSave: (MatchedTransactionDef) -> Unit,
 ) : AbstractTransactionDefDialog<MatchedTransactionDef>(def, isNew, onSave) {
 
-    override val typeName: String get() = "Matched"
+    override val typeKey: String get() = "matched"
 
-    private val target = EnumSelect("Intercept", InterceptionTarget::class.java) { it.toString() }.apply {
+    private val target = EnumSelect(t("recording.transaction.matched.intercept"), InterceptionTarget::class.java).apply {
         addValueChangeListener { updateConditional() }
     }
-    private val declaringClassName = TextField("Class or interface name").apply { setWidthFull() }
-    private val methodInterceptionMode = EnumSelect("Methods", MethodInterceptionMode::class.java) { it.toString() }.apply {
+    private val declaringClassName = TextField(t("recording.transaction.matched.className")).apply { setWidthFull() }
+    private val methodInterceptionMode = EnumSelect(t("recording.transaction.matched.methods"), MethodInterceptionMode::class.java).apply {
         setWidthFull()
     }
-    private val interceptSubclasses = Checkbox("Also intercept subclasses and implementations")
-    private val methodName = TextField("Method name").apply { setWidthFull() }
-    private val methodSignature = TextField("Method signature (optional)").apply {
+    private val interceptSubclasses = Checkbox(t("recording.transaction.matched.interceptSubclasses"))
+    private val methodName = TextField(t("recording.transaction.matched.methodName")).apply { setWidthFull() }
+    private val methodSignature = TextField(t("recording.transaction.matched.methodSignature")).apply {
         setWidthFull()
-        helperText = "JVM signature, e.g. (Ljava/lang/String;)V"
+        helperText = t("recording.transaction.matched.methodSignature.helper")
     }
-    private val staticMethods = Checkbox("Only static methods")
+    private val staticMethods = Checkbox(t("recording.transaction.matched.staticMethods"))
 
     init {
         build()
@@ -48,7 +49,7 @@ class MatchedTransactionDefDialog(
     override fun bindDefinition(binder: Binder<MatchedTransactionDef>) {
         binder.forField(target).bind({ it.interceptionTarget }, { d, v -> d.interceptionTarget = v })
         binder.forField(declaringClassName)
-            .asRequired("Enter a class or interface name.")
+            .asRequired(t("recording.transaction.matched.className.required"))
             .bind({ it.declaringClassName }, { d, v -> d.declaringClassName = v })
         binder.forField(methodInterceptionMode).bind({ it.methodInterceptionMode }, { d, v -> d.methodInterceptionMode = v })
         binder.forField(interceptSubclasses).bind({ it.isInterceptSubclasses }, { d, v -> d.isInterceptSubclasses = v })

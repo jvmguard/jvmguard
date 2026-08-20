@@ -6,6 +6,8 @@ import dev.jvmguard.data.user.User
 import dev.jvmguard.ui.components.*
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.StagedListController
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
@@ -19,32 +21,28 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.ADMIN)
 @Route(value = "settings/users", layout = MainLayout::class)
-@PageTitle("jvmguard: Settings")
 class UsersView : AbstractSettingsSectionView() {
 
-    private val use2fa = Checkbox("Require two-factor authentication").apply {
+    private val use2fa = Checkbox(t("settings.users.require2fa")).apply {
         testId = ID_USE_2FA
         addClassName("jvmguard-settings-gap-before")
     }
-    private val twoFactorHint = Span(
-        "Enabling two-factor authentication forces every user without an exemption to enroll an authenticator at their next login.",
-    ).apply { addClassName("jvmguard-field-hint") }
+    private val twoFactorHint = Span(t("settings.users.twoFactor.hint")).apply { addClassName("jvmguard-field-hint") }
 
     private val grid = Grid(User::class.java, false).apply {
         testId = ID_GRID
-        addColumn { it.loginName }.setHeader("Login name").setAutoWidth(true)
-        addColumn { it.userType.toString() }.setHeader("Type").setAutoWidth(true)
-        addColumn { it.fullName }.setHeader("Full name").setAutoWidth(true)
-        addColumn { it.email }.setHeader("Email").setAutoWidth(true)
-        addColumn { it.accessLevel.toString() }.setHeader("Access level").setAutoWidth(true)
-        addColumn { Formats.dateTime(it.lastLogin, "never") }
-            .setHeader("Last login").setAutoWidth(true)
+        addColumn { it.loginName }.setHeader(t("settings.users.edit.loginName")).setAutoWidth(true)
+        addColumn { enumLabel(it.userType) }.setHeader(t("settings.sso.type")).setAutoWidth(true)
+        addColumn { it.fullName }.setHeader(t("settings.users.edit.fullName")).setAutoWidth(true)
+        addColumn { it.email }.setHeader(t("settings.users.edit.email")).setAutoWidth(true)
+        addColumn { enumLabel(it.accessLevel) }.setHeader(t("shell.userInfo.accessLevel")).setAutoWidth(true)
+        addColumn { Formats.dateTime(it.lastLogin, t("settings.users.never")) }
+            .setHeader(t("settings.users.lastLogin")).setAutoWidth(true)
         addComponentColumn { rowActions(it) }.setFlexGrow(0).setAutoWidth(true)
         addItemDoubleClickListener { edit(it.item) }
         editDeleteKeys(::edit, ::confirmDelete)
@@ -53,11 +51,11 @@ class UsersView : AbstractSettingsSectionView() {
     }
 
     init {
-        val addUser = Button("Add user", VaadinIcon.PLUS.create()) { edit(User()) }.apply {
+        val addUser = Button(t("settings.users.addUser"), VaadinIcon.PLUS.create()) { edit(User()) }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_ADD
         }
-        val title = H4("Users & Roles")
+        val title = H4(t("nav.settings.users"))
         val header = HorizontalLayout(title, addUser).apply {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
             setWidthFull()
@@ -86,23 +84,23 @@ class UsersView : AbstractSettingsSectionView() {
     }
 
     private fun rowActions(user: User): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions for ${user.loginName}", "$ID_ROW_MENU-${user.loginName}") {
-            addItem("Edit") { edit(user) }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.users.row.actions", user.loginName), "$ID_ROW_MENU-${user.loginName}") {
+            addItem(t("common.edit")) { edit(user) }
             if (user.apiKeyHash.isNotEmpty()) {
-                addItem("Revoke API key") { confirmRevokeApiKey(user) }
+                addItem(t("settings.users.apiKey.revoke")) { confirmRevokeApiKey(user) }
             }
-            addItem("Delete") { confirmDelete(user) }
+            addItem(t("common.delete")) { confirmDelete(user) }
         }
 
     private fun confirmRevokeApiKey(user: User) {
         confirm(
-            "Revoke API key",
-            "Revoke the API key for \"${user.loginName}\"? The current key will stop working once you save the current changes.",
-            "Revoke",
+            t("settings.users.apiKey.revoke"),
+            t("settings.users.apiKey.revokeText", user.loginName),
+            t("settings.users.apiKey.revokeButton"),
         ) {
             user.apiKeyHash = ""
             users.markModified(user)
-            Notifications.show("The API key for \"${user.loginName}\" will be revoked when you save the current changes.")
+            Notifications.show(t("settings.users.apiKey.revokedNotice", user.loginName))
         }
     }
 
@@ -122,14 +120,14 @@ class UsersView : AbstractSettingsSectionView() {
 
     private fun confirmDelete(user: User) {
         if (user.loginName == Sessions.current()?.user?.loginName) {
-            Notifications.show("You cannot delete the account you are logged in with.")
+            Notifications.show(t("settings.users.delete.self"))
             return
         }
         if (user.loginName in loggedInUserNames()) {
-            Notifications.show("\"${user.loginName}\" is currently logged in and cannot be deleted.")
+            Notifications.show(t("settings.users.delete.loggedIn", user.loginName))
             return
         }
-        confirm("Delete user", "Delete the user \"${user.loginName}\"?", "Delete") {
+        confirm(t("settings.users.delete.title"), t("settings.users.delete.text", user.loginName), t("common.delete")) {
             users.remove(user)
         }
     }

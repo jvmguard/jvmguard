@@ -13,6 +13,7 @@ import dev.jvmguard.ui.components.trackSingleOpen
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.findVm
 import dev.jvmguard.ui.server.serverTime
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.data.VmDataView
 import dev.jvmguard.ui.views.data.transactions.TransactionDrill
@@ -32,19 +33,22 @@ import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.BeforeEnterEvent
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
 @Route(value = "telemetry", layout = MainLayout::class)
-@PageTitle("jvmguard: Telemetry")
 @Uses(Sparkline::class)
-class VmTelemetryView : VmDataView() {
+class VmTelemetryView : VmDataView(), HasDynamicTitle {
 
-    private enum class ViewMode(val label: String) {
-        TELEMETRY("Telemetry"),
-        OVERVIEW("Overview"),
+    override fun getPageTitle(): String = t("pageTitle.telemetry")
+
+    private enum class ViewMode(val labelKey: String) {
+        TELEMETRY("telemetry.viewMode.telemetry"),
+        OVERVIEW("telemetry.viewMode.overview");
+
+        val label: String get() = t(labelKey)
     }
 
     private var viewMode = ViewMode.TELEMETRY
@@ -87,7 +91,7 @@ class VmTelemetryView : VmDataView() {
     }
 
     private val typeSelect = Select<TelemetrySource>().apply {
-        label = "Telemetry"
+        label = t("telemetry.type")
         testId = ID_TYPE_SELECT
         setItemLabelGenerator { it.label }
         addValueChangeListener { event ->
@@ -101,7 +105,7 @@ class VmTelemetryView : VmDataView() {
     }
 
     private val nodeSelect = Select<TelemetryNode>().apply {
-        label = "Series"
+        label = t("telemetry.series")
         testId = ID_NODE_SELECT
         isVisible = false
         addValueChangeListener { event ->
@@ -217,15 +221,15 @@ class VmTelemetryView : VmDataView() {
         val menu = ContextMenu()
         menu.target = chart
         menu.trackSingleOpen()
-        menu.addItem("Freeze Y-axis") { event -> onFreezeToggle(event.source.isChecked) }.isCheckable = true
-        menu.addItem("Logarithmic Y-axis") { event ->
+        menu.addItem(t("telemetry.menu.freezeYAxis")) { event -> onFreezeToggle(event.source.isChecked) }.isCheckable = true
+        menu.addItem(t("telemetry.menu.logarithmicYAxis")) { event ->
             logarithmic = event.source.isChecked
             renderCurrent()
         }.isCheckable = true
-        zoomInItem = menu.addItem("Zoom in here") { navBar.zoomIn(contextTime()) }
-        zoomOutItem = menu.addItem("Zoom out here") { navBar.zoomOut(contextTime()) }
-        menu.addItem("Show call tree") { contextTime()?.let { openTransactions(it, TransactionMode.CALL_TREE) } }
-        menu.addItem("Show hot spots") { contextTime()?.let { openTransactions(it, TransactionMode.HOT_SPOTS) } }
+        zoomInItem = menu.addItem(t("telemetry.menu.zoomInHere")) { navBar.zoomIn(contextTime()) }
+        zoomOutItem = menu.addItem(t("telemetry.menu.zoomOutHere")) { navBar.zoomOut(contextTime()) }
+        menu.addItem(t("telemetry.menu.showCallTree")) { contextTime()?.let { openTransactions(it, TransactionMode.CALL_TREE) } }
+        menu.addItem(t("telemetry.menu.showHotSpots")) { contextTime()?.let { openTransactions(it, TransactionMode.HOT_SPOTS) } }
     }
 
     private fun openTransactions(time: Long, mode: TransactionMode) {
@@ -304,7 +308,7 @@ class VmTelemetryView : VmDataView() {
         val animate = navBar.consumeAnimatedNav()
         val connection = Sessions.current()?.serverConnection
         if (connection == null) {
-            showMessage("Not connected to the jvmguard server.")
+            showMessage(t("telemetry.notConnected"))
             return
         }
         ensureSources(connection)
@@ -312,7 +316,7 @@ class VmTelemetryView : VmDataView() {
         val source = selectedSource
         val vm = connection.findVm(currentSelection)
         if (source == null || vm == null) {
-            showMessage(NO_DATA_TEXT)
+            showMessage(t("telemetry.noData"))
             return
         }
         endTime = navBar.currentEndTime()
@@ -321,14 +325,14 @@ class VmTelemetryView : VmDataView() {
         navBar.setPreviousEnabled(data != null && !data.isNoPreviousData)
         val rootNode = data?.rootNode
         if (data == null || data.isNoPreviousData || rootNode == null) {
-            showMessage(NO_DATA_TEXT)
+            showMessage(t("telemetry.noData"))
             return
         }
         applyPendingSubId(rootNode)
         populateNodeSelect(rootNode)
         val node = currentNode()
         if (node == null) {
-            showMessage(NO_DATA_TEXT)
+            showMessage(t("telemetry.noData"))
         } else {
             renderNode(node, animate = animate)
         }
@@ -414,7 +418,7 @@ class VmTelemetryView : VmDataView() {
         nodeDepths = flat.toMap()
         val nodes = flat.map { it.first }
         nodeSelect.setItems(nodes)
-        nodeSelect.setItemLabelGenerator { "--".repeat(nodeDepths[it] ?: 0) + it.description }
+        nodeSelect.setItemLabelGenerator { "--".repeat(nodeDepths[it] ?: 0) + TelemetryChartModels.nodeLabel(it) }
         nodeSelect.value = nodes.firstOrNull { it.description == selectedNodeDescription } ?: nodes.firstOrNull()
         nodeSelect.isVisible = nodes.size > 1
     }
@@ -462,8 +466,5 @@ class VmTelemetryView : VmDataView() {
 
         const val PARAM_MODE = "view"
         const val MODE_OVERVIEW = "overview"
-
-        private const val NO_DATA_TEXT =
-            "There is no previously recorded data. Please try a wider time range."
     }
 }

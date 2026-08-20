@@ -6,6 +6,7 @@ import dev.jvmguard.data.user.AccessLevel
 import dev.jvmguard.data.user.User
 import dev.jvmguard.data.user.UserType
 import dev.jvmguard.ui.components.*
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.MultiSelectComboBox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
@@ -25,59 +26,59 @@ class UserEditDialog(
 
     private val binder = Binder(User::class.java)
 
-    private val userType = EnumSelect("User type", UserType::class.java) { it.toString() }.apply {
+    private val userType = EnumSelect(t("settings.users.edit.userType"), UserType::class.java).apply {
         addValueChangeListener { updateTypeVisibility() }
     }
-    private val loginName = TextField("Login name").apply {
+    private val loginName = TextField(t("settings.users.edit.loginName")).apply {
         setWidthFull()
         testId = ID_LOGIN_NAME
     }
-    private val ssoEmail = EmailField("SSO email").apply {
+    private val ssoEmail = EmailField(t("settings.users.edit.ssoEmail")).apply {
         setWidthFull()
         testId = ID_SSO_EMAIL
     }
-    private val ldapDn = TextField("LDAP distinguished name").apply {
+    private val ldapDn = TextField(t("settings.users.edit.ldapDn")).apply {
         setWidthFull()
         testId = ID_LDAP_DN
     }
-    private val fullName = TextField("Full name").apply {
+    private val fullName = TextField(t("settings.users.edit.fullName")).apply {
         setWidthFull()
         testId = ID_FULL_NAME
     }
-    private val email = EmailField("Email").apply {
+    private val email = EmailField(t("settings.users.edit.email")).apply {
         isClearButtonVisible = true
         setWidthFull()
         testId = ID_EMAIL
     }
-    private val accessLevel = EnumSelect("Access level", AccessLevel::class.java) { it.toString() }.apply {
+    private val accessLevel = EnumSelect(t("shell.userInfo.accessLevel"), AccessLevel::class.java).apply {
         addValueChangeListener { updateGroupsEnabled() }
         testId = ID_ACCESS_LEVEL
     }
-    private val associatedGroups = MultiSelectComboBox<String>("Associated VM groups").apply {
+    private val associatedGroups = MultiSelectComboBox<String>(t("settings.users.edit.associatedGroups")).apply {
         setItems(listOf(GroupHelper.ROOT_GROUP_ID) + groupPaths)
         setItemLabelGenerator { if (it == GroupHelper.ROOT_GROUP_ID) ALL_GROUPS_LABEL else it }
         setWidthFull()
     }
 
-    private val changePassword = Checkbox("Change password").apply {
+    private val changePassword = Checkbox(t("settings.users.edit.changePassword")).apply {
         isVisible = !isNew
         addValueChangeListener { updatePasswordVisibility() }
         testId = ID_CHANGE_PASSWORD
     }
-    private val newPassword = PasswordField(if (isNew) "Password" else "New password").apply {
+    private val newPassword = PasswordField(t(if (isNew) "settings.users.edit.password" else "settings.users.edit.newPassword")).apply {
         setWidthFull()
         testId = ID_PASSWORD
     }
-    private val confirmPassword = PasswordField("Confirm password").apply {
+    private val confirmPassword = PasswordField(t("settings.users.edit.confirmPassword")).apply {
         setWidthFull()
         testId = ID_CONFIRM_PASSWORD
     }
-    private val mustChangePassword = Checkbox("Must change password at next login").apply {
+    private val mustChangePassword = Checkbox(t("settings.users.edit.mustChange")).apply {
         testId = ID_MUST_CHANGE
     }
 
-    private val reset2fa = Checkbox("Reset two-factor authentication").apply { isVisible = use2faEnabled && !isNew }
-    private val exemptFrom2fa = Checkbox("Exempt from two-factor authentication").apply { isVisible = use2faEnabled }
+    private val reset2fa = Checkbox(t("settings.users.edit.reset2fa")).apply { isVisible = use2faEnabled && !isNew }
+    private val exemptFrom2fa = Checkbox(t("settings.users.edit.exempt2fa")).apply { isVisible = use2faEnabled }
 
     private val passwordSection = VerticalLayout(changePassword, newPassword, confirmPassword, mustChangePassword).apply {
         isPadding = false
@@ -85,7 +86,7 @@ class UserEditDialog(
     }
 
     init {
-        headerTitle = if (isNew) "Add user" else "Edit user"
+        headerTitle = t(if (isNew) "settings.users.addUser" else "settings.users.editUser")
         width = "32rem"
 
         bind()
@@ -104,15 +105,15 @@ class UserEditDialog(
                 isSpacing = true
             })
 
-        confirmFooter("Save", ID_SAVE) { save() }
+        confirmFooter(t("common.save"), ID_SAVE) { save() }
     }
 
     @Suppress("DuplicatedCode")
     private fun bind() {
         binder.forField(loginName)
-            .asRequired("Enter a login name.")
-            .withValidator({ it.length in 2..25 }, "Use between 2 and 25 characters.")
-            .withValidator({ it !in existingLoginNames }, "That login name is already taken.")
+            .asRequired(t("settings.users.edit.validation.loginName"))
+            .withValidator({ it.length in 2..25 }, t("settings.users.edit.validation.loginLength"))
+            .withValidator({ it !in existingLoginNames }, t("settings.users.edit.validation.loginTaken"))
             .bind({ it.loginName }, { u, value -> u.loginName = value })
         binder.forField(userType)
             .bind({ it.userType }, { u, value -> u.userType = value })
@@ -175,7 +176,7 @@ class UserEditDialog(
                 return
             }
             if (ssoEmail.value in existingLoginNames) {
-                ssoEmail.errorMessage = "That login name is already taken."
+                ssoEmail.errorMessage = t("settings.users.edit.validation.loginTaken")
                 ssoEmail.isInvalid = true
                 return
             }
@@ -208,7 +209,7 @@ class UserEditDialog(
     }
 
     companion object {
-        const val ALL_GROUPS_LABEL = "All VM groups"
+        val ALL_GROUPS_LABEL: String get() = t("settings.users.allGroups")
         const val ID_LOGIN_NAME = "user-login-name"
         const val ID_SSO_EMAIL = "user-sso-email"
         const val ID_LDAP_DN = "user-ldap-dn"

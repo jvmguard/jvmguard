@@ -9,6 +9,8 @@ import dev.jvmguard.ui.components.editDeleteKeys
 import dev.jvmguard.ui.components.menuButton
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.StagedListController
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
@@ -21,20 +23,18 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.ADMIN)
 @Route(value = "settings/sso", layout = MainLayout::class)
-@PageTitle("jvmguard: Settings")
 class SsoView : AbstractSettingsSectionView() {
 
     private val providerGrid = Grid(SsoProviderConfig::class.java, false).apply {
         testId = ID_PROVIDER_GRID
-        addColumn { it.displayName.ifEmpty { "(unnamed)" } }.setHeader("Display name").setFlexGrow(1)
-        addColumn { it.preset.toString() }.setHeader("Type").setAutoWidth(true)
-        addColumn { if (it.enabled) "Enabled" else "Disabled" }.setHeader("Status").setAutoWidth(true)
+        addColumn { it.displayName.ifEmpty { t("settings.sso.unnamed") } }.setHeader(t("settings.sso.provider.displayName")).setFlexGrow(1)
+        addColumn { enumLabel(it.preset) }.setHeader(t("settings.sso.type")).setAutoWidth(true)
+        addColumn { t(if (it.enabled) "common.enabled" else "common.disabled") }.setHeader(t("settings.sso.status")).setAutoWidth(true)
         addComponentColumn { rowActions(it) }.setFlexGrow(0).setAutoWidth(true)
         addItemDoubleClickListener { edit(it.item, false) }
         editDeleteKeys({ edit(it, false) }, ::confirmDelete)
@@ -42,16 +42,14 @@ class SsoView : AbstractSettingsSectionView() {
     }
 
     init {
-        val hint = Span(
-            "Configure external identity providers. Add access rules to automatically map groups of users to roles."
-        ).apply { addClassName("jvmguard-field-hint") }
-        add(settingsSection("Single Sign-On", hint))
+        val hint = Span(t("settings.sso.hint")).apply { addClassName("jvmguard-field-hint") }
+        add(settingsSection(t("nav.settings.sso"), hint))
 
-        val addProvider = Button("Add provider", VaadinIcon.PLUS.create()) { edit(SsoProviderConfig(), true) }.apply {
+        val addProvider = Button(t("settings.sso.addProvider"), VaadinIcon.PLUS.create()) { edit(SsoProviderConfig(), true) }.apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_ADD_PROVIDER
         }
-        val providerTitle = H4("Providers")
+        val providerTitle = H4(t("settings.sso.providers"))
         val providerHeader = HorizontalLayout(providerTitle, addProvider).apply {
             addClassName("jvmguard-settings-gap-before")
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
@@ -80,9 +78,9 @@ class SsoView : AbstractSettingsSectionView() {
     }
 
     private fun rowActions(provider: SsoProviderConfig): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions for this provider", "$ID_PROVIDER_ROW_MENU-${provider.displayName}") {
-            addItem("Edit") { edit(provider, false) }
-            addItem("Delete") { confirmDelete(provider) }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.sso.provider.actions"), "$ID_PROVIDER_ROW_MENU-${provider.displayName}") {
+            addItem(t("common.edit")) { edit(provider, false) }
+            addItem(t("common.delete")) { confirmDelete(provider) }
         }
 
     private fun edit(provider: SsoProviderConfig, isNew: Boolean) {
@@ -104,11 +102,11 @@ class SsoView : AbstractSettingsSectionView() {
             ?.count { it.userType == UserType.OIDC && it.ssoIssuer.trim() == provider.issuerUri.trim() }
             ?: 0
         val message = if (boundCount > 0) {
-            "Delete the provider \"${provider.displayName}\"? $boundCount user(s) are bound to this provider and will no longer be able to sign in."
+            t("settings.sso.provider.deleteText.bound", provider.displayName, boundCount)
         } else {
-            "Delete the provider \"${provider.displayName}\"?"
+            t("settings.sso.provider.deleteText", provider.displayName)
         }
-        confirm("Delete provider", message, "Delete") {
+        confirm(t("settings.sso.provider.deleteTitle"), message, t("common.delete")) {
             providers.remove(provider)
         }
     }

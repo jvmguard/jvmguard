@@ -1,0 +1,81 @@
+---
+title: MBean 浏览器
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+## 简介
+
+许多应用程序服务器和框架（例如 [Apache Camel](https://camel.apache.org)）使用 JMX
+暴露大量用于配置和监控的 MBean。JVM 本身也发布了一些[平台
+MXBean](https://docs.oracle.com/en/java/javase/25/docs/api/java.management/module-summary.html)，展示 JVM
+底层运行的相关信息。
+
+jvmguard 包含一个 MBean 浏览器，可以显示所选 VM 中所有已注册的 MBean。访问 MBean 服务器不需要 JMX
+的远程管理层，因为 jvmguard 代理已经在进程内运行，可以访问所有已注册的 MBean 服务器。
+
+jvmguard 支持 **Open MBean** 的类型系统。除了定义若干简单类型外，Open MBean 还可以定义不涉及自定义类的
+复杂数据类型。数组和表格也可作为数据结构使用。通过 **MXBean**，JMX 提供了一种从 Java 类自动创建 Open MBean
+的简便方式。例如，JVM 提供的 MBean 就是 MXBean。
+
+“MBean”视图显示一个所选 JVM 中所有已注册的 MBean。如果当前选中的是 VM 组，需要先切换到单个 VM。如果选中的
+是 VM 池，上下文区域会显示一个 🔍 图像按钮，点击它会列出池中的 VM。
+
+MBean 本身没有层级结构，jvmguard 将它们组织成一棵树：取对象域名中第一个冒号之前的部分作为第一层，并将所有
+属性作为递归嵌套的层级。属性值显示在前，属性键放在末尾的方括号中。`type` 属性会被优先排列在顶层节点的正下方。
+
+## 属性
+
+在显示 MBean 内容的树形表中，顶层是 MBean 属性。
+
+<Figure src="ui/mbean_browser.png" />
+
+以下数据结构以嵌套行的形式显示：
+
+* **数组**：基本类型数组和对象数组的元素以嵌套行显示，索引作为键名。
+* **复合数据**：复合数据类型中的所有条目都以嵌套行显示。每个条目可以是任意类型，因此嵌套可以持续到任意深度。
+* **表格数据**：最常见的情况是 MXBean 中的表格数据，java.util.Map 的实例被映射为具有一个键列和一个值列的
+表格数据类型。如果键是简单类型，映射会“内联”显示，每个键值对显示为一个嵌套行。如果键是复杂类型，则会插入
+一层“映射条目”元素，键和值嵌套在其中。具有复合键和多个值的通用表格类型也是如此。
+
+MBean 属性可以是可编辑的，此时其值旁边会显示一个**编辑**图标。只有访问级别至少为“分析员”的用户才能编辑
+MBean 属性。复合类型和表格类型无法在 MBean 浏览器中编辑，但数组和简单类型是可编辑的。
+
+如果值可以为 null（例如数组），编辑器会有一个复选框用于选择 null 状态。
+
+数组元素之间用分号分隔。末尾的一个分号可以忽略，因此 `1` 和 `1;` 是等价的。分号前缺少的值会被视为对象数组的
+null 值。对于字符串数组，可以用双引号（""）创建空元素，并通过引用整个元素来创建包含分号的元素。字符串元素
+中的双引号必须写成两个。例如，输入字符串数组值
+
+```
+"Test";"";;"embedded "" quote";"A;B";;
+```
+
+会创建如下字符串数组
+
+```
+new String[] {"Test", "", null, "embedded \" quote", "A;B", null}
+```
+
+jvmguard 可以从数值型 MBean 属性值创建**遥测**。在记录设置中[定义 MBean 遥测
+线](/docs/zh-cn/main/telemetries)时，**选择**按钮会打开一个顶部带有 VM 选择器的 MBean 属性浏览器。选择 VM
+之后，就可以选择 MBean 属性。与 MBean 浏览器不同，此时属性行是可选择的。
+
+遥测也可以跟踪复合数据或具有简单键和单个值的表格数据中的嵌套值。选择嵌套行时，会构建一个值路径，路径各段
+之间用正斜杠分隔。
+
+## 操作
+
+除了检查和修改 MBean 属性之外，还可以调用 MBean 操作并检查其返回值。MBean 操作是 MBean 接口上不是 setter
+或 getter 的方法。要能够调用 MBean 操作，用户的访问级别至少为“分析员”。
+
+<Figure src="ui/mbean_operations.png" />
+
+MBean 操作可以有一个或多个参数。输入参数时，适用与编辑 MBean 属性相同的规则和限制。
+
+<Figure src="ui/mbean_operation_arguments.png" />
+
+操作的返回值可能是复合、表格或数组类型，因此会显示一个内容类似于 MBean 属性树形表的新窗口。对于简单返回
+类型，只有一个名为“返回值”的行。对于其他类型，“返回值”是结果所添加到的根元素。
+
+<Figure src="ui/mbean_operation_return.png" />

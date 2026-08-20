@@ -4,29 +4,28 @@ import dev.jvmguard.data.config.GlobalConfig
 import dev.jvmguard.data.user.Roles
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.ADMIN)
 @Route(value = "settings/updates", layout = MainLayout::class)
-@PageTitle("jvmguard: Settings")
 class UpdatesSettingsView : AbstractSettingsSectionView() {
 
     private val version = Span().apply { addClassName("jvmguard-settings-version") }
-    private val checkDaily = Checkbox("Check for updates once a day").apply {
+    private val checkDaily = Checkbox(t("settings.updates.checkDaily")).apply {
         testId = ID_CHECK_DAILY
         addClassName("jvmguard-settings-spacious")
     }
-    private val checkNow = Button("Check for updates now") { checkNow() }
+    private val checkNow = Button(t("settings.updates.checkNow")) { checkNow() }
 
     init {
-        add(settingsSection("Updates", version, checkDaily, checkNow))
+        add(settingsSection(t("nav.settings.updates"), version, checkDaily, checkNow))
         loadVersion()
     }
 
@@ -37,7 +36,7 @@ class UpdatesSettingsView : AbstractSettingsSectionView() {
 
     private fun loadVersion() {
         Sessions.current()?.serverConnection?.installationInfo?.let {
-            version.text = "Installed version ${it.version} (build ${it.build})"
+            version.text = t("settings.updates.installed", it.version, it.build)
         }
     }
 
@@ -45,9 +44,9 @@ class UpdatesSettingsView : AbstractSettingsSectionView() {
         val result = Sessions.current()?.serverConnection?.checkForUpdates()
         val update = result?.updateVersion
         if (!update.isNullOrEmpty() && update != result.installedVersion) {
-            Notifications.show("Update available: $update (installed ${result.installedVersion}).")
+            Notifications.show(t("settings.updates.available", update, result.installedVersion))
         } else {
-            Notifications.show("jvmguard is up to date.")
+            Notifications.show(t("settings.updates.upToDate"))
         }
     }
 

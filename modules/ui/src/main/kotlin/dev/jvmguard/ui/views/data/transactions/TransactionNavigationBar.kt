@@ -2,6 +2,8 @@ package dev.jvmguard.ui.views.data.transactions
 
 import dev.jvmguard.data.transactions.TransactionCursor
 import dev.jvmguard.data.transactions.TransactionTreeInterval
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.ClickEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
@@ -25,7 +27,7 @@ class TransactionNavigationBar(
     private val onAutoTick: () -> Unit,
 ) {
 
-    enum class EndMode(val label: String) { NOW("Now"), DATE("Selected date") }
+    enum class EndMode { NOW, DATE }
 
     var selectedInterval: TransactionTreeInterval = TransactionTreeInterval.TEN_MINUTE
         private set
@@ -34,8 +36,9 @@ class TransactionNavigationBar(
     private var pollTicks = 0
 
     private val intervalSelect = Select<TransactionTreeInterval>().apply {
-        label = "Show"
+        label = t("transactions.show")
         setItems(*TransactionTreeInterval.entries.toTypedArray())
+        setItemLabelGenerator { enumLabel(it) }
         value = selectedInterval
         testId = ID_INTERVAL
         addValueChangeListener { event ->
@@ -47,9 +50,9 @@ class TransactionNavigationBar(
     }
 
     private val endModeSelect = Select<EndMode>().apply {
-        label = "Up to"
+        label = t("transactions.upTo")
         setItems(*EndMode.entries.toTypedArray())
-        setItemLabelGenerator { it.label }
+        setItemLabelGenerator { enumLabel(it) }
         value = endMode
         testId = ID_END_MODE
         addValueChangeListener { event ->
@@ -68,7 +71,7 @@ class TransactionNavigationBar(
     }
 
     private val dateField = DateTimePicker().apply {
-        label = "End"
+        label = t("transactions.end")
         step = Duration.ofMinutes(1)
         isVisible = false
         testId = ID_DATE
@@ -80,11 +83,11 @@ class TransactionNavigationBar(
     }
 
     private val previousButton =
-        iconButton(VaadinIcon.ANGLE_LEFT, "Previous interval", ID_PREVIOUS) { onPrevious() }
+        iconButton(VaadinIcon.ANGLE_LEFT, t("transactions.previousInterval"), ID_PREVIOUS) { onPrevious() }
     private val nextButton =
-        iconButton(VaadinIcon.ANGLE_RIGHT, "Next interval", ID_NEXT) { onNext() }
+        iconButton(VaadinIcon.ANGLE_RIGHT, t("transactions.nextInterval"), ID_NEXT) { onNext() }
 
-    private val autoUpdate = Checkbox("Auto-update").apply {
+    private val autoUpdate = Checkbox(t("transactions.autoUpdate")).apply {
         testId = ID_AUTO_UPDATE
         addClassName("jvmguard-telemetry-autoupdate")
     }

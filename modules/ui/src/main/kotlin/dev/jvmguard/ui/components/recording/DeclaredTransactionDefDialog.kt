@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.components.recording
 
 import dev.jvmguard.agent.config.transactions.DeclaredTransactionDef
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.TextField
@@ -11,11 +12,11 @@ class DeclaredTransactionDefDialog(
     onSave: (DeclaredTransactionDef) -> Unit,
 ) : AbstractTransactionDefDialog<DeclaredTransactionDef>(def, isNew, onSave) {
 
-    override val typeName: String get() = "Declared"
+    override val typeKey: String get() = "declared"
 
-    private val group = TextField("Restrict to group name (optional)").apply {
+    private val group = TextField(t("recording.transaction.declared.group")).apply {
         setWidthFull()
-        helperText = "Only Declared transactions with this group are recorded; leave empty for all."
+        helperText = t("recording.transaction.declared.group.helper")
     }
 
     init {

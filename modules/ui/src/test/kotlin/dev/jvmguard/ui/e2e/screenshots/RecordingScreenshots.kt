@@ -8,7 +8,6 @@ import dev.jvmguard.ui.components.recording.AbstractTransactionDefDialog
 import dev.jvmguard.ui.components.recording.NamingElementsEditor
 import dev.jvmguard.ui.components.recording.PolicySubDefDialog
 import dev.jvmguard.ui.components.recording.telemetries.TelemetryConfigDialog
-import dev.jvmguard.ui.components.recording.telemetries.TelemetryGrid
 import dev.jvmguard.ui.components.recording.telemetries.TelemetryLineDialog
 import dev.jvmguard.ui.components.recording.thresholds.ThresholdDialog
 import dev.jvmguard.ui.components.recording.thresholds.ThresholdGrid
@@ -64,7 +63,7 @@ class RecordingScreenshots : ScreenshotTest() {
         getByTestId("telemetry-add").click()
         getByTestId(TelemetryConfigDialog.ID_NAME).locator("input").fill("Heap usage")
         getByTestId(TelemetryConfigDialog.ID_SAVE).click()
-        getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName("Add line")).last().click()
+        getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName(l("telemetry.line.add"))).last().click()
         assertThat(getByTestId(TelemetryLineDialog.ID_SAVE)).isVisible()
         capture("telemetry_line_config")
     }
@@ -82,7 +81,7 @@ class RecordingScreenshots : ScreenshotTest() {
     fun triggersPolicy() = onPage {
         login()
         open("recording/triggers")
-        addTrigger("Policy trigger")
+        addTrigger(l("enum.TriggerType.POLICY"))
         assertThat(getByTestId(TriggerDialog.ID_SAVE)).isVisible()
         capture("triggers_policy") // TODO: unused
     }
@@ -104,9 +103,9 @@ class RecordingScreenshots : ScreenshotTest() {
         getByTestId(ThresholdGrid.ID_GRID).waitFor()
 
         // Navigate within the app (no page reload) so the draft, hence the new threshold, is preserved.
-        getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Triggers")).click()
+        getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName(l("nav.recording.triggers"))).click()
         getByTestId(TriggerGrid.ID_GRID).waitFor()
-        addTrigger("Threshold violation trigger")
+        addTrigger(l("enum.TriggerType.THRESHOLD"))
         assertThat(getByTestId(TriggerDialog.ID_THRESHOLD)).isVisible()
         capture("triggers_threshold") // TODO: unused
     }
@@ -115,7 +114,7 @@ class RecordingScreenshots : ScreenshotTest() {
     fun triggersConnection() = onPage {
         login()
         open("recording/triggers")
-        addTrigger("Connection count trigger")
+        addTrigger(l("enum.TriggerType.CONNECTION"))
         assertThat(getByTestId(TriggerDialog.ID_SAVE)).isVisible()
         capture("triggers_connection") // TODO: unused
     }
@@ -124,7 +123,7 @@ class RecordingScreenshots : ScreenshotTest() {
     fun triggerActionsList() = onPage {
         login()
         open("recording/triggers")
-        addTrigger("Connection count trigger")
+        addTrigger(l("enum.TriggerType.CONNECTION"))
         assertThat(getByTestId(TriggerActionsEditor.ID_GRID)).isVisible()
         capture("trigger_actions_list")
     }
@@ -133,8 +132,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun triggerActions() = onPage {
         login()
         open("recording/triggers")
-        addTrigger("Connection count trigger")
-        addAction("Create inbox entry")
+        addTrigger(l("enum.TriggerType.CONNECTION"))
+        addAction(l("enum.ActionType.INBOX"))
         assertThat(getByTestId(TriggerActionDialog.ID_SAVE)).isVisible()
         capture("trigger_actions")
     }
@@ -143,8 +142,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun triggerProfile() = onPage {
         login()
         open("recording/triggers")
-        addTrigger("Connection count trigger")
-        addAction("Record JProfiler snapshot")
+        addTrigger(l("enum.TriggerType.CONNECTION"))
+        addAction(l("enum.ActionType.RECORD_JPS"))
         assertThat(getByTestId(TriggerActionDialog.ID_SAVE)).isVisible()
         capture("trigger_profile")
     }
@@ -153,8 +152,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun triggerJfrRecording() = onPage {
         login()
         open("recording/triggers")
-        addTrigger("Connection count trigger")
-        addAction("Record JDK Flight Recorder snapshot")
+        addTrigger(l("enum.TriggerType.CONNECTION"))
+        addAction(l("enum.ActionType.RECORD_JFR"))
         assertThat(getByTestId(TriggerActionDialog.ID_SAVE)).isVisible()
         capture("trigger_jfr_recording")
     }
@@ -163,8 +162,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun triggerHeapDump() = onPage {
         login()
         open("recording/triggers")
-        addTrigger("Connection count trigger")
-        addAction("Save HPROF memory snapshot")
+        addTrigger(l("enum.TriggerType.CONNECTION"))
+        addAction(l("enum.ActionType.HEAP_DUMP"))
         assertThat(getByTestId(TriggerActionDialog.ID_SAVE)).isVisible()
         capture("trigger_heap_dump") // TODO: unused
     }
@@ -181,8 +180,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun matchedMethod() = onPage {
         login()
         openMatchedDialog()
-        selectEnum("Intercept", "Single method of a class or interface")
-        assertThat(getByText("Method name", Page.GetByTextOptions().setExact(true))).isVisible()
+        selectEnum(l("recording.transaction.matched.intercept"), l("enum.InterceptionTarget.METHOD"))
+        assertThat(getByText(l("recording.transaction.matched.methodName"), Page.GetByTextOptions().setExact(true))).isVisible()
         capture("matched_method")
     }
 
@@ -190,7 +189,7 @@ class RecordingScreenshots : ScreenshotTest() {
     fun matchedNaming() = onPage {
         login()
         openMatchedDialog()
-        openTab("Naming")
+        openTab(l("recording.tab.naming"))
         assertThat(getByTestId(NamingElementsEditor.ID_GRID)).isVisible()
         capture("matched_naming")
     }
@@ -206,7 +205,7 @@ class RecordingScreenshots : ScreenshotTest() {
     fun mappedNaming() = onPage {
         login()
         openCustomDialog()
-        openTab("Naming")
+        openTab(l("recording.tab.naming"))
         assertThat(getByTestId(NamingElementsEditor.ID_GRID)).isVisible()
         capture("mapped_naming")
     }
@@ -215,8 +214,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun instanceNameConfig() = onPage {
         login()
         openMatchedDialog()
-        openTab("Naming")
-        addNamingElement("Instance name")
+        openTab(l("recording.tab.naming"))
+        addNamingElement(l("recording.naming.type.instance"))
         assertThat(getByTestId("naming-element-save")).isVisible()
         capture("instance_name_config")
     }
@@ -225,8 +224,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun methodParameterConfig() = onPage {
         login()
         openMatchedDialog()
-        openTab("Naming")
-        addNamingElement("Method parameter")
+        openTab(l("recording.tab.naming"))
+        addNamingElement(l("recording.naming.type.methodParameter"))
         assertThat(getByTestId("naming-element-save")).isVisible()
         capture("method_parameter_config")
     }
@@ -242,8 +241,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun declaredFilter() = onPage {
         login()
         openDeclaredDialog()
-        openTab("Filter")
-        assertThat(getByText("Class filter", Page.GetByTextOptions().setExact(true))).isVisible()
+        openTab(l("recording.tab.filter"))
+        assertThat(getByText(l("recording.transaction.classFilter"), Page.GetByTextOptions().setExact(true))).isVisible()
         capture("declared_filter")
     }
 
@@ -251,8 +250,8 @@ class RecordingScreenshots : ScreenshotTest() {
     fun policySubdef() = onPage {
         login()
         openPolicySubdefDialog()
-        openTab("Policies")
-        assertThat(getByText("Slow", Page.GetByTextOptions().setExact(true))).isVisible()
+        openTab(l("recording.tab.policies"))
+        assertThat(getByText(l("recording.policy.slow"), Page.GetByTextOptions().setExact(true))).isVisible()
         capture("policy_subdef")
     }
 
@@ -298,7 +297,7 @@ class RecordingScreenshots : ScreenshotTest() {
     private fun Page.openTransactionsAt(tab: String) {
         open("recording/transactions")
         getByTestId("transaction-grid-declared").waitFor()
-        if (tab != "Declared") openTab(tab)
+        if (tab != "Declared") openTab(l("recording.transaction.type.${tab.lowercase()}"))
         getByTestId("transaction-grid-${tab.lowercase()}").waitFor()
     }
 
@@ -346,7 +345,7 @@ class RecordingScreenshots : ScreenshotTest() {
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).waitFor()
         // A class filter is required to save the definition.
         locator("vaadin-text-field")
-            .filter(Locator.FilterOptions().setHasText("Class or interface name"))
+            .filter(Locator.FilterOptions().setHasText(l("recording.transaction.matched.className")))
             .first().locator("input").fill("com.example.Service")
         getByTestId(AbstractTransactionDefDialog.ID_SAVE).click()
         getByTestId(AbstractTransactionDefDialog.ID_SAVE)
@@ -354,7 +353,7 @@ class RecordingScreenshots : ScreenshotTest() {
         val matchedGrid = getByTestId("transaction-grid-matched")
         matchedGrid.getByText("com.example.Service").waitFor()
         matchedGrid.locator("[data-testid^='transaction-row-menu-']").first().click()
-        getByText("Add policy specialization").click()
+        getByText(l("recording.subdef.dialog.add")).click()
         getByTestId(PolicySubDefDialog.ID_SAVE).waitFor()
     }
 }

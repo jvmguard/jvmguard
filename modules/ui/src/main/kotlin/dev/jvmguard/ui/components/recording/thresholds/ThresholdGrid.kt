@@ -8,6 +8,7 @@ import dev.jvmguard.ui.components.editDeleteKeys
 import dev.jvmguard.ui.components.enableRowReorder
 import dev.jvmguard.ui.components.menuButton
 import dev.jvmguard.ui.components.recording.RecordingGrid
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.html.Span
@@ -24,9 +25,9 @@ class ThresholdGrid(
 
     private val grid = Grid<Threshold>().apply {
         testId = ID_GRID
-        addComponentColumn(::nameCell).setHeader("Threshold").setFlexGrow(1)
+        addComponentColumn(::nameCell).setHeader(t("threshold.grid.header")).setFlexGrow(1)
         addComponentColumn(::rowActions).setKey(ACTIONS_KEY).setAutoWidth(true).setFlexGrow(0)
-        setEmptyStateComponent(emptyState("No thresholds yet. Use \"Add threshold\" to create one."))
+        setEmptyStateComponent(emptyState(t("threshold.grid.empty")))
         addItemDoubleClickListener { edit(it.item) }
         editDeleteKeys(::edit, ::delete)
         enableRowReorder(items = thresholds, onReordered = ::changed)
@@ -83,13 +84,13 @@ class ThresholdGrid(
     }
 
     private fun rowActions(threshold: Threshold): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", "threshold-row-menu-${displayName(threshold)}") {
-            addItem("Edit") { edit(threshold) }
-            addItem("Delete") { delete(threshold) }
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "threshold-row-menu-${displayName(threshold)}") {
+            addItem(t("common.edit")) { edit(threshold) }
+            addItem(t("common.delete")) { delete(threshold) }
         }
 
     private fun delete(threshold: Threshold) {
-        confirmDelete("threshold", displayName(threshold)) {
+        confirmDelete("recording.delete.threshold", displayName(threshold)) {
             thresholds().remove(threshold)
             changed()
         }

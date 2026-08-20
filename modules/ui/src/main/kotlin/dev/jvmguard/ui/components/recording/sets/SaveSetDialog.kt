@@ -7,6 +7,7 @@ import dev.jvmguard.data.config.sets.AbstractSet
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.components.JvmGuardDialog
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.TextField
@@ -14,27 +15,27 @@ import com.vaadin.flow.component.textfield.TextField
 class SaveSetDialog<T : Identifiable, S : AbstractSet<T>>(private val spec: SetSpec<T, S>) : JvmGuardDialog() {
 
     private val existing: List<S> = spec.loadSets().toList()
-    private val nameField = TextField("Name").apply {
+    private val nameField = TextField(t("recording.name")).apply {
         setWidthFull()
         testId = ID_NAME
     }
 
     init {
-        headerTitle = "Save ${spec.singularName}"
+        headerTitle = t("recording.set.dialog.save")
         width = "34rem"
         isResizable = false
 
         val intro = Span(spec.saveSubtitle).apply { addClassName("jvmguard-field-hint") }
         add(VerticalLayout(intro, nameField).apply { isPadding = false; isSpacing = true })
 
-        confirmFooter("Save", ID_CONFIRM) { save() }
+        confirmFooter(t("common.save"), ID_CONFIRM) { save() }
     }
 
     private fun save() {
         val name = nameField.value.trim()
         if (name.isEmpty()) {
             nameField.isInvalid = true
-            nameField.errorMessage = "Enter a name."
+            nameField.errorMessage = t("recording.validation.nameRequired")
             return
         }
         val connection = Sessions.current()?.serverConnection ?: return
@@ -47,7 +48,7 @@ class SaveSetDialog<T : Identifiable, S : AbstractSet<T>>(private val spec: SetS
             ListModification(emptyList(), emptyList(), listOf(spec.createSet(name, items)), spec.setClass)
         }
         connection.applyListModification(modification)
-        Notifications.show("Saved ${spec.singularName} \"$name\".")
+        Notifications.show(t("recording.set.saved", name))
         close()
     }
 

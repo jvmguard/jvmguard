@@ -27,8 +27,6 @@ abstract class AbstractRecordingListView<T : Identifiable, S : AbstractSet<T>> :
     protected abstract val addButtonTestId: String
 
     protected abstract val setClass: Class<S>
-    protected abstract val singularSetName: String
-    protected abstract val pluralSetName: String
     protected abstract val addSetSubtitle: String
     protected abstract val saveSetSubtitle: String
     protected abstract fun loadSets(): Collection<S>
@@ -80,8 +78,6 @@ abstract class AbstractRecordingListView<T : Identifiable, S : AbstractSet<T>> :
         val items = currentItems ?: mutableListOf()
         return SetSpec(
             setClass = setClass,
-            singularName = singularSetName,
-            pluralName = pluralSetName,
             addSubtitle = addSetSubtitle,
             saveSubtitle = saveSetSubtitle,
             loadSets = {

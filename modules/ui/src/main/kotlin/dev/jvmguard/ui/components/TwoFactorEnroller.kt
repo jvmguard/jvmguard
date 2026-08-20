@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.components
 
 import dev.jvmguard.ui.server.TwoFactor
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.connector.totp.QRCodeUtil
 import dev.jvmguard.connector.totp.TOTP
 import dev.jvmguard.connector.totp.TOTPData
@@ -13,7 +14,7 @@ class TwoFactorEnroller(loginName: String) : VerticalLayout() {
 
     private val totp = TOTPData(TwoFactor.ISSUER, loginName, TOTPData.createSecret())
 
-    val codeField = TextField("Authenticator code").apply {
+    val codeField = TextField(t("twofactor.code")).apply {
         width = "10rem"
         testId = ID_CODE
     }
@@ -21,13 +22,13 @@ class TwoFactorEnroller(loginName: String) : VerticalLayout() {
     init {
         isPadding = false
         isSpacing = true
-        val intro = Span("Scan this QR code with your authenticator app, then enter the 6-digit code to confirm.")
+        val intro = Span(t("twofactor.enroll.intro"))
             .apply { addClassName("jvmguard-field-hint") }
         val qr = Div().apply {
             addClassName("jvmguard-qr")
             element.setProperty("innerHTML", qrSvg())
         }
-        val manualKey = Span("Or enter this key manually: ${totp.secretAsBase32}")
+        val manualKey = Span(t("twofactor.enroll.manualKey", totp.secretAsBase32))
             .apply { addClassName("jvmguard-field-hint") }
         add(intro, qr, manualKey, codeField)
     }
@@ -37,7 +38,7 @@ class TwoFactorEnroller(loginName: String) : VerticalLayout() {
         if (TOTP.validate(totp.secretAsHex, codeField.value.orEmpty())) {
             return totp.secretAsHex
         }
-        codeField.errorMessage = "Incorrect authenticator code."
+        codeField.errorMessage = t("twofactor.code.incorrect")
         codeField.isInvalid = true
         return null
     }

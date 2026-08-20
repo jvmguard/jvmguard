@@ -1,0 +1,44 @@
+---
+title: 선언적 트랜잭션
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+jvmguard VM 그룹 구성에서 매칭 트랜잭션을 유지 관리하는 것은 개발 워크플로의 추가 단계이며 실제 코드와 쉽게
+동기화가 어긋날 수 있습니다. 매칭 트랜잭션은 외부 클래스에 필요하지만, 사용자 자신의 코드에서는 관심 있는
+메서드와 클래스에 직접 어노테이션을 지정하는 것이 훨씬 유지 관리하기 쉽습니다.
+
+이런 방식으로 정의된 트랜잭션을 선언적 트랜잭션이라고 합니다. jvmguard 어노테이션으로 소스 코드에 명시적으로
+선언하기 때문입니다.
+
+jvmguard 어노테이션은 JAR 파일 `api/jvmguard-annotations.jar`에 있습니다. Maven 또는 Gradle로 이 JAR 파일을
+다운로드하는 방법은 [javadoc 개요](/javadoc/overview-summary.html)를 참조하세요.
+
+모든 어노테이션은 클래스 보존 정책을 갖습니다. 즉, 클래스 파일에는 존재하지만 JVM이 메모리로 로드하지는
+않습니다. 특정 메서드에서 런타임 어노테이션을 쿼리하는 코드는 추가된 jvmguard 어노테이션으로 인해 혼동되지
+않습니다. 이 어노테이션은 클래스 로딩 단계에서 jvmguard에 의해서만 감지되고 로드된 클래스 객체에는 나타나지
+않기 때문입니다.
+
+선언적 트랜잭션의 사용법은
+[`@MethodTransaction`](/javadoc/dev/jvmguard/annotation/MethodTransaction.html) 및
+[`@ClassTransaction`](/javadoc/dev/jvmguard/annotation/ClassTransaction.html) 어노테이션의 **Javadoc에 자세히
+설명되어 있습니다**. Javadoc은 jvmguard 설치의 `api/doc` 디렉터리에도 있습니다.
+
+## 정책
+
+선언적 트랜잭션 어노테이션은 트랜잭션 명명만 정의하고 트랜잭션의 정책은 정의하지 않습니다. 정책은 운영
+측면에 더 가깝고 프로덕션에서 자주 조정해야 합니다.
+
+**그룹 이름**을 통해 jvmguard 구성에서 서로 다른 선언적 트랜잭션을 선택할 수 있습니다. 각 선언적 트랜잭션
+어노테이션에는 기본적으로 빈 문자열로 설정된 "group" 매개변수가 있을 수 있습니다.
+
+<Figure src="ui/declared_group.png" />
+
+구성된 그룹이 충분히 세분화되지 않았거나 특정 클래스를 별도로 지정하려는 경우 다음 단계로 이동하여 클래스
+필터를 추가합니다. 여기에서 선택한 그룹과 클래스에서 시작된 모든 선언적 트랜잭션을 버리는 것도 가능합니다.
+
+<Figure src="ui/declared_filter.png" />
+
+마법사의 마지막 단계에서 선택한 선언적 트랜잭션에 대한 정책을 정의합니다. 다른 트랜잭션 타입과 마찬가지로
+하단에 포괄적인 트랜잭션 정의를 유지하고 상단에 더 구체적인 트랜잭션 정의를 추가하는 것이 종종
+합리적입니다.

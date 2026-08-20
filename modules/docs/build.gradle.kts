@@ -2,12 +2,19 @@ import dev.jvmguard.build.*
 
 val npmBin = if (isWindows()) "npm.cmd" else "npm"
 
+// Screenshot locales: "en" maps to the flat images/ui/, the others toimages/ui/generated/<locale>/
+val screenshotLocales = listOf("en", "ko", "ja", "zh-CN")
+
 tasks {
 
     val copyScreenshots = register<Copy>("copyScreenshots") {
         group = "docs"
-        from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsLight")) { into("ui") }
-        from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsDark")) { into("ui") }
+        mustRunAfter(":ui:screenshots", ":ui:darkScreenshots")
+        screenshotLocales.forEach { locale ->
+            val target = if (locale == "en") "ui" else "ui/generated/$locale"
+            from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsLight/$locale")) { into(target) }
+            from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsDark/$locale")) { into(target) }
+        }
         into(layout.projectDirectory.dir("public/images"))
     }
 

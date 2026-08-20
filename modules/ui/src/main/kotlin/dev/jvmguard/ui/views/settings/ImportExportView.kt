@@ -7,6 +7,8 @@ import dev.jvmguard.ui.components.ErrorDialog
 import dev.jvmguard.ui.components.Notifications
 import dev.jvmguard.ui.components.confirm
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
+import dev.jvmguard.ui.server.errorText
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.vms.VmsView
 import com.vaadin.flow.component.UI
@@ -17,7 +19,7 @@ import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.upload.Upload
-import com.vaadin.flow.router.PageTitle
+import com.vaadin.flow.component.upload.UploadI18N
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.server.streams.DownloadHandler
 import com.vaadin.flow.server.streams.DownloadResponse
@@ -29,7 +31,6 @@ import javax.security.auth.login.CredentialException
 
 @RolesAllowed(Roles.ADMIN)
 @Route(value = "settings/import-export", layout = MainLayout::class)
-@PageTitle("jvmguard: Settings")
 class ImportExportView : AbstractSettingsPage() {
 
     init {
@@ -37,8 +38,8 @@ class ImportExportView : AbstractSettingsPage() {
     }
 
     private fun exportSection() = settingsSection(
-        "Export",
-        Span("The entire configuration is downloaded as a single file."),
+        t("common.export"),
+        Span(t("settings.impex.export.hint")),
         exportAnchor(),
     )
 
@@ -48,7 +49,7 @@ class ImportExportView : AbstractSettingsPage() {
             DownloadResponse(ByteArrayInputStream(bytes), ImportManager.SERVER_CONFIG_FILE_NAME, "application/json", bytes.size.toLong())
         })
         element.setAttribute("download", true)
-        add(Button("Export configuration", VaadinIcon.DOWNLOAD.create()).apply {
+        add(Button(t("settings.impex.export.button"), VaadinIcon.DOWNLOAD.create()).apply {
             addThemeVariants(ButtonVariant.PRIMARY)
             testId = ID_EXPORT
         })
@@ -61,12 +62,43 @@ class ImportExportView : AbstractSettingsPage() {
             setMaxFiles(1)
             isDropAllowed = true
             testId = ID_UPLOAD
+            setI18n(uploadI18n())
         }
         return settingsSection(
-            "Import",
-            Span("Uploading a configuration file overwrites the entire server configuration."),
+            t("common.import"),
+            Span(t("settings.impex.import.hint")),
             upload,
         )
+    }
+
+    // TODO remove when https://github.com/vaadin/platform/issues/7581 is implemented
+    private fun uploadI18n(): UploadI18N = UploadI18N().apply {
+        addFiles = UploadI18N.AddFiles().setOne(t("impex.upload.addFile")).setMany(t("impex.upload.addFiles"))
+        dropFiles = UploadI18N.DropFiles().setOne(t("impex.upload.dropFile")).setMany(t("impex.upload.dropFiles"))
+        error = UploadI18N.Error()
+            .setTooManyFiles(t("impex.upload.error.tooManyFiles"))
+            .setFileIsTooBig(t("impex.upload.error.tooBig"))
+            .setIncorrectFileType(t("impex.upload.error.wrongType"))
+        uploading = UploadI18N.Uploading()
+            .setStatus(
+                UploadI18N.Uploading.Status()
+                    .setConnecting(t("impex.upload.status.connecting"))
+                    .setStalled(t("impex.upload.status.stalled"))
+                    .setProcessing(t("impex.upload.status.processing"))
+                    .setHeld(t("impex.upload.status.held")),
+            )
+            .setRemainingTime(
+                UploadI18N.Uploading.RemainingTime()
+                    .setPrefix(t("impex.upload.remainingPrefix"))
+                    .setUnknown(t("impex.upload.remainingUnknown")),
+            )
+            .setError(
+                UploadI18N.Uploading.Error()
+                    .setServerUnavailable(t("impex.upload.error.unavailable"))
+                    .setUnexpectedServerError(t("impex.upload.error.server"))
+                    .setForbidden(t("impex.upload.error.forbidden")),
+            )
+        units = UploadI18N.Units().setSize(listOf("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"))
     }
 
     private fun onUploaded(data: ByteArray) {
@@ -82,7 +114,7 @@ class ImportExportView : AbstractSettingsPage() {
     }
 
     private fun confirmImport(bytes: ByteArray) {
-        confirm("Import configuration", "This overwrites the entire server configuration. Continue?", "Import") {
+        confirm(t("settings.impex.import.confirmTitle"), t("settings.impex.import.confirmText"), t("common.import")) {
             applyImport(bytes)
         }
     }
@@ -92,16 +124,16 @@ class ImportExportView : AbstractSettingsPage() {
         try {
             val config = connection.readConfig(bytes)
             if (config !is ServerInitConfig) {
-                Notifications.show("The file is not a valid jvmguard configuration export.")
+                Notifications.show(t("settings.impex.import.invalidFile"))
                 return
             }
             connection.applyInitConfig(config)
             UI.getCurrent().navigate(VmsView::class.java)
-            Notifications.show("Configuration imported.")
+            Notifications.show(t("settings.impex.import.success"))
         } catch (e: CredentialException) {
-            ErrorDialog("Import not permitted", e.message ?: e.toString(), null).open()
+            ErrorDialog(t("settings.impex.import.notPermitted"), errorText(e), null).open()
         } catch (e: Exception) {
-            ErrorDialog("Could not import configuration", e.message ?: e.toString(), null).open()
+            ErrorDialog(t("settings.impex.import.failed"), errorText(e), null).open()
         }
     }
 

@@ -1,0 +1,50 @@
+---
+title: 安装 jvmguard
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+## 安装程序
+
+所有主流平台都有对应的安装程序。默认情况下，安装程序显示图形界面，但如果以参数 `-c` 启动安装程序，它会显示
+**控制台界面**。在远程服务器上通过 ssh 安装 jvmguard 时需要使用这种方式。
+
+对于云端部署，可能需要在没有任何用户交互的情况下安装和配置 jvmguard 服务器。具体做法请参阅
+[无人值守安装](/docs/zh-cn/config/unattended-installations)帮助主题。
+
+安装程序会询问所有无法通过浏览器在 jvmguard UI 中配置的选项。最常需要调整的设置是 Web 服务器的 HTTPS/HTTP
+端口。
+
+<Figure src="external/installer_web_server.png" scale={1.75} />
+
+除了安装目录之外，jvmguard 安装还需要一个**数据目录**，用于存放所有可变数据，包括数据库、日志文件和安全证书。
+默认情况下，该目录在 Windows 上设置为程序数据目录（通常是 `C:\ProgramData`），在 Unix 和 macOS 上为
+`/var/opt/jvmguard`。如果在同一台机器上安装多个 jvmguard 实例，每个安装都必须有自己的数据目录。
+
+<Figure src="external/installer_data_dir.png" scale={1.75} />
+
+出于评估目的，安装程序只需要知道这些信息。如果是部署到生产环境，可能还需要调整其他选项。
+
+<Figure src="external/installer_advanced.png" scale={1.75} />
+
+## 以后更改初始配置
+
+安装程序会将配置写入安装目录中的 `config/application.yaml` 文件。要在以后更改配置，用文本编辑器编辑该文件并
+重启 jvmguard 服务器即可。这些选项在 `config/application.yaml` 中直接带有注释文档。更多信息请参阅
+[服务器配置](/docs/zh-cn/config/server-config)帮助。
+
+## 安装后的设置
+
+安装程序完成后，jvmguard 服务器已在运行，可以在浏览器中打开 `http[s]://localhost:[port]` 连接到 jvmguard UI。
+注意，如果为 Web 服务器选择了 HTTPS，则没有提供 HTTP 请求的端口。
+
+在使用 jvmguard 之前，必须先在 jvmguard UI 中完成设置步骤，配置**初始管理员用户**。其他管理员和非管理员用户
+可以以后再配置。
+
+默认情况下双重认证是启用的，但可以在这一步将其禁用。如果启用了双重认证，向导完成后需要使用身份验证器应用
+设置双重认证。以后可以在用户设置中为单个用户豁免双重认证。
+
+<Figure src="ui/installer_user.png" />
+
+完成设置步骤后，服务器即完全初始化，安装向导不会再次显示。不过，安装向导中的所有设置也都可以在 jvmguard UI
+中调整。此时会进入 VM 视图，可以按照下一章的说明继续设置受监控的 JVM。

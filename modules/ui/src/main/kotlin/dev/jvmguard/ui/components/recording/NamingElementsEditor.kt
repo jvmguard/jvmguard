@@ -3,6 +3,7 @@ package dev.jvmguard.ui.components.recording
 import dev.jvmguard.agent.config.transactions.NamingElement
 import dev.jvmguard.agent.config.transactions.naming.*
 import dev.jvmguard.ui.components.*
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -21,7 +22,7 @@ class NamingElementsEditor : VerticalLayout() {
 
     private val grid = Grid(NamingElement::class.java, false).apply {
         testId = ID_GRID
-        addColumn { it.displayName }.setHeader("Naming element").setFlexGrow(1)
+        addColumn { displayNameOf(it) }.setHeader(t("recording.naming.element")).setFlexGrow(1)
         addComponentColumn { rowActions(it) }.setFlexGrow(0).setAutoWidth(true)
         addItemDoubleClickListener { edit(it.item) }
         editDeleteKeys(::edit, ::remove)
@@ -34,9 +35,9 @@ class NamingElementsEditor : VerticalLayout() {
         isPadding = false
         isSpacing = true
         setSizeFull()
-        val hint = Span("The transaction name is built from these elements, in order.")
-        val addButton = menuButton(VaadinIcon.PLUS, "Add naming element", ID_ADD) {
-            ELEMENT_TYPES.forEach { type -> addItem(type.label) { addElement(type) } }
+        val hint = Span(t("recording.naming.hint"))
+        val addButton = menuButton(VaadinIcon.PLUS, t("recording.naming.add"), ID_ADD) {
+            ELEMENT_TYPES.forEach { type -> addItem(t(type.labelKey)) { addElement(type) } }
         }
         val header = HorizontalLayout(hint, addButton).apply {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
@@ -70,11 +71,11 @@ class NamingElementsEditor : VerticalLayout() {
     }
 
     private fun rowActions(element: NamingElement): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", "$ID_ROW_MENU-${elements.indexOf(element)}") {
+        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "$ID_ROW_MENU-${elements.indexOf(element)}") {
             if (hasDialog(element)) {
-                addItem("Edit") { edit(element) }
+                addItem(t("common.edit")) { edit(element) }
             }
-            addItem("Remove") { remove(element) }
+            addItem(t("common.remove")) { remove(element) }
         }
 
     private fun remove(element: NamingElement) {
@@ -86,13 +87,28 @@ class NamingElementsEditor : VerticalLayout() {
         grid.setItems(elements)
     }
 
-    private enum class ElementType(val label: String, val create: () -> NamingElement, val hasDialog: Boolean) {
-        CLASS_NAME("Class name", { ClassNameElement() }, true),
-        INSTANCE_CLASS_NAME("Instance class name", { InstanceClassNameElement() }, true),
-        INSTANCE("Instance name", { InstanceElement() }, true),
-        METHOD_PARAMETER("Method parameter", { MethodParameterElement() }, true),
-        METHOD_NAME("Method name", { MethodNameElement() }, false),
-        TEXT("Fixed text", { TextElement() }, true),
+    private fun displayNameOf(element: NamingElement): String = when (element) {
+        is InstanceClassNameElement -> t("recording.naming.row.instanceClassName." + element.packageMode.name.lowercase())
+        is ClassNameElement -> t("recording.naming.row.className." + element.packageMode.name.lowercase())
+        is MethodParameterElement -> withGetterChain(element, "recording.naming.row.methodParameter", element.parameterIndex)
+        is InstanceElement -> withGetterChain(element, "recording.naming.row.instance")
+        is MethodNameElement -> t("recording.naming.type.methodName")
+        is TextElement -> t("recording.naming.row.text", element.text)
+        else -> element.displayName
+    }
+
+    private fun withGetterChain(element: AbstractGetterElement, key: String, vararg params: Any): String {
+        val chain = element.getterChain.usedValue
+        return if (chain.isEmpty()) t(key, *params) else t("$key.getterChain", *params, chain)
+    }
+
+    private enum class ElementType(val labelKey: String, val create: () -> NamingElement, val hasDialog: Boolean) {
+        CLASS_NAME("recording.naming.type.className", { ClassNameElement() }, true),
+        INSTANCE_CLASS_NAME("recording.naming.type.instanceClassName", { InstanceClassNameElement() }, true),
+        INSTANCE("recording.naming.type.instance", { InstanceElement() }, true),
+        METHOD_PARAMETER("recording.naming.type.methodParameter", { MethodParameterElement() }, true),
+        METHOD_NAME("recording.naming.type.methodName", { MethodNameElement() }, false),
+        TEXT("recording.naming.type.text", { TextElement() }, true),
     }
 
     companion object {
@@ -112,15 +128,15 @@ private class NamingElementDialog(
 ) : JvmGuardDialog() {
 
     init {
-        headerTitle = "Naming element"
+        headerTitle = t("recording.naming.element")
         width = "34rem"
 
         val body = VerticalLayout().apply { isPadding = false; isSpacing = true }
         val apply: () -> Boolean = buildFields(body)
         add(body)
 
-        val cancel = Button("Cancel") { close() }
-        val save = Button("Save") {
+        val cancel = Button(t("common.cancel")) { close() }
+        val save = Button(t("common.save")) {
             if (apply()) {
                 onSave()
                 close()
@@ -135,7 +151,7 @@ private class NamingElementDialog(
     private fun buildFields(body: VerticalLayout): () -> Boolean {
         when (val e = element) {
             is TextElement -> {
-                val text = TextField("Text").apply { setWidthFull(); value = e.text }
+                val text = TextField(t("recording.naming.text")).apply { setWidthFull(); value = e.text }
                 body.add(text)
                 return { e.text = text.value; true }
             }
@@ -149,7 +165,7 @@ private class NamingElementDialog(
             }
 
             is MethodParameterElement -> {
-                val index = IntegerField("Parameter index (0-based)").apply { width = "12rem"; value = e.parameterIndex }
+                val index = IntegerField(t("recording.naming.parameterIndex")).apply { width = "12rem"; value = e.parameterIndex }
                 val getter = getterChainField(e.getterChain.usedValue)
                 body.add(index, getter)
                 return { e.parameterIndex = index.value ?: 0; applyGetterChain(e.getterChain, getter); true }
@@ -160,16 +176,16 @@ private class NamingElementDialog(
     }
 
     private fun packageModeField(body: VerticalLayout, element: ClassNameElement): () -> Boolean {
-        val mode = EnumSelect("Package name", ClassNameElement.PackageMode::class.java) { it.toString() }
+        val mode = EnumSelect(t("recording.naming.packageName"), ClassNameElement.PackageMode::class.java)
             .apply { setWidthFull(); value = element.packageMode }
         body.add(mode)
         return { element.packageMode = mode.value; true }
     }
 
     private fun getterChainField(initial: String): TextField =
-        TextField("Getter chain (optional)").apply {
+        TextField(t("recording.naming.getterChain")).apply {
             setWidthFull()
-            helperText = "Dot-separated getters applied before converting to a string, e.g. getId.name"
+            helperText = t("recording.naming.getterChain.helper")
             value = initial
         }
 

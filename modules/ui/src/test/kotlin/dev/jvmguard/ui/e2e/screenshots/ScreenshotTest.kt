@@ -8,6 +8,8 @@ import dev.jvmguard.ui.e2e.PlaywrightE2ETest
 import dev.jvmguard.ui.views.login.LoginView
 import dev.jvmguard.ui.views.vms.VmTreeGrid
 import org.junit.jupiter.api.Tag
+import java.util.Locale
+import java.util.ResourceBundle
 
 /**
  * Each test writes a PNG named exactly like the help figure (see `modules/docs/agent/help-screenshots.md`); the
@@ -16,6 +18,12 @@ import org.junit.jupiter.api.Tag
  */
 @Tag("screenshot")
 abstract class ScreenshotTest : PlaywrightE2ETest() {
+
+    /**
+     * The rendered label for a bundle key in the locale captured by this run (`-Pjvmguard.screenshots.locale`,
+     * English by default). Use it for every UI-label locator. Data names (MBeans, VM groups) stay literal.
+     */
+    protected fun l(key: String): String = labelBundle.getString(key)
 
     /**
      * Logs in and waits for the VM grid. The dev-mode server occasionally serves the first request slowly, so a login
@@ -54,6 +62,13 @@ abstract class ScreenshotTest : PlaywrightE2ETest() {
 
         private const val LOGIN_ATTEMPTS: Int = 3
         private const val LOGIN_GRID_TIMEOUT_MS: Double = 15_000.0
+
+        // The base bundle (English) is the fallback, like JvmGuardI18NProvider
+        val labelBundle: ResourceBundle = ResourceBundle.getBundle(
+            "vaadin-i18n/translations",
+            Locale.forLanguageTag(System.getProperty("jvmguard.e2e.locale")?.takeIf { it.isNotBlank() } ?: "en"),
+            ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES),
+        )
     }
 
     protected fun Page.capture(name: String) {

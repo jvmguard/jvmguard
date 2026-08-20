@@ -4,7 +4,41 @@ on:
   workflow_call:
 
 jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: [en, ko, ja, zh-CN]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+
+      - name: Generate screenshots (${{ matrix.locale }})
+        run: |
+          ./gradlew :ui:screenshots :ui:darkScreenshots -Pjvmguard.screenshots.locale=${{ matrix.locale }} --max-workers=1 -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: screenshots-${{ matrix.locale }}
+          path: |
+            build/gradle/ui/e2e/screenshotsLight/${{ matrix.locale }}/
+            build/gradle/ui/e2e/screenshotsDark/${{ matrix.locale }}/
+          retention-days: 1
+
   build:
+    needs: screenshots
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,6 +53,17 @@ jobs:
           cache-dependency-path: |
             modules/docs/package-lock.json
             modules/website/package-lock.json
+
+      - name: Download screenshots
+        uses: actions/download-artifact@v7
+        with:
+          pattern: screenshots-*
+          path: screenshot-artifacts
+
+      - name: Merge screenshot artifacts
+        run: |
+          mkdir -p build/gradle/ui/e2e
+          cp -r screenshot-artifacts/screenshots-*/. build/gradle/ui/e2e/
 
       - name: Fetch latest release info for website
         env:
@@ -44,6 +89,9 @@ jobs:
 
       - name: Build Javadoc
         run: ./gradlew :website:copyJavadoc
+
+      - name: Assemble screenshots into the sites
+        run: ./gradlew :docs:copyScreenshots :website:copyScreenshots
 
       - name: Build marketing site
         working-directory: modules/website

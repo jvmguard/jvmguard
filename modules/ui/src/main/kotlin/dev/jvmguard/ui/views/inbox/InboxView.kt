@@ -9,7 +9,9 @@ import dev.jvmguard.ui.components.confirm
 import dev.jvmguard.ui.components.menuButton
 import dev.jvmguard.ui.server.ModificationListener
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
 import dev.jvmguard.ui.server.registerModificationListener
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.login.LoginView
 import com.vaadin.flow.component.AttachEvent
@@ -26,8 +28,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import com.vaadin.flow.server.streams.DownloadHandler
 import com.vaadin.flow.server.streams.DownloadResponse
 import jakarta.annotation.security.PermitAll
@@ -36,15 +38,16 @@ import java.io.FileInputStream
 
 @PermitAll
 @Route(value = "inbox", layout = MainLayout::class)
-@PageTitle("jvmguard: Inbox")
-class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
+class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener, HasDynamicTitle {
+
+    override fun getPageTitle(): String = t("pageTitle.inbox")
 
     private val items = mutableListOf<InboxItem>()
     private var focusedItem: InboxItem? = null
     private var focusedColumnKey: String? = null
     private var multiMode = false
 
-    private val deleteMultipleButton = Button("Delete multiple", VaadinIcon.TRASH.create()) {
+    private val deleteMultipleButton = Button(t("inbox.deleteMultiple"), VaadinIcon.TRASH.create()) {
         if (multiMode) {
             confirmDeleteSelected()
         } else {
@@ -54,7 +57,7 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
         addThemeVariants(ButtonVariant.TERTIARY)
         testId = ID_DELETE_MULTIPLE
     }
-    private val cancelMultiButton = Button("Cancel") { exitMultiMode() }.apply {
+    private val cancelMultiButton = Button(t("common.cancel")) { exitMultiMode() }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
         testId = ID_CANCEL_MULTI
         isVisible = false
@@ -71,9 +74,9 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
         testId = ID_GRID
         addClassName("jvmguard-inbox-grid")
         addThemeVariants(GridVariant.NO_BORDER)
-        addComponentColumn { textCell(Formats.dateTime(it.date), it) }.setHeader("Date").setAutoWidth(true).setFlexGrow(0)
-        addComponentColumn { textCell(typeLabel(it), it) }.setHeader("Type").setAutoWidth(true).setFlexGrow(0)
-        addComponentColumn { nameCell(it) }.setHeader("Name").setKey(COL_NAME).setFlexGrow(1)
+        addComponentColumn { textCell(Formats.dateTime(it.date), it) }.setHeader(t("inbox.column.date")).setAutoWidth(true).setFlexGrow(0)
+        addComponentColumn { textCell(typeLabel(it), it) }.setHeader(t("inbox.column.type")).setAutoWidth(true).setFlexGrow(0)
+        addComponentColumn { nameCell(it) }.setHeader(t("inbox.column.name")).setKey(COL_NAME).setFlexGrow(1)
         addItemDoubleClickListener { primaryAction(it.item) }
         addCellFocusListener {
             focusedItem = it.item.orElse(null)
@@ -148,16 +151,16 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
         val name = textCell(item.name, item)
         val menu = menuButton(
             VaadinIcon.ELLIPSIS_DOTS_V,
-            "Actions for ${item.name}",
+            t("inbox.rowActions.aria", item.name),
             "$ID_ROW_MENU-${item.id}",
         ) {
             if (item.message.isNotBlank()) {
-                addItem("View message") { viewMessage(item) }
+                addItem(t("inbox.action.viewMessage")) { viewMessage(item) }
             }
             if (item.snapshotFileId != null) {
-                addItem("Download") { startDownload(item) }
+                addItem(t("common.download")) { startDownload(item) }
             }
-            addItem("Delete") { confirmDelete(listOf(item)) }
+            addItem(t("common.delete")) { confirmDelete(listOf(item)) }
         }
         return HorizontalLayout(name, menu).apply {
             setWidthFull()
@@ -207,13 +210,13 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
         multiMode = false
         applySelectionMode(Grid.SelectionMode.SINGLE)
         cancelMultiButton.isVisible = false
-        deleteMultipleButton.text = "Delete multiple"
+        deleteMultipleButton.text = t("inbox.deleteMultiple")
         deleteMultipleButton.isEnabled = true
     }
 
     private fun updateMultiButton() {
         val count = grid.selectedItems.size
-        deleteMultipleButton.text = if (count == 0) "Delete selected" else "Delete selected ($count)"
+        deleteMultipleButton.text = t("inbox.delete.selected", count)
         deleteMultipleButton.isEnabled = count > 0
     }
 
@@ -228,9 +231,7 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
         if (targets.isEmpty()) {
             return
         }
-        val header = if (targets.size == 1) "Delete message" else "Delete messages"
-        val text = if (targets.size == 1) "Really delete this message?" else "Really delete ${targets.size} messages?"
-        confirm(header, text, "Delete") {
+        confirm(t("inbox.delete.header", targets.size), t("inbox.delete.confirm", targets.size), t("common.delete")) {
             performDelete(targets)
             onDeleted()
         }
@@ -288,6 +289,6 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener {
         const val COL_NAME = "name"
         const val UNREAD_CLASS = "jvmguard-unread"
 
-        private fun typeLabel(item: InboxItem): String = item.snapshotFileType?.toString() ?: "Message"
+        private fun typeLabel(item: InboxItem): String = item.snapshotFileType?.let { enumLabel(it) } ?: t("inbox.type.message")
     }
 }

@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.datetimepicker.DateTimePicker
 import com.vaadin.flow.component.textfield.TextField
+import dev.jvmguard.ui.server.t
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -84,7 +85,7 @@ class MBeanValueField(private val spec: ValueEditSpec) {
             return when {
                 spec.isSimpleType(SimpleType.STRING) -> ""
                 spec.isNullable -> null
-                else -> throw MBeanConversionException("A value is required")
+                else -> throw MBeanConversionException(t("mbeans.value.required"))
             }
         }
         return when {
@@ -106,14 +107,14 @@ class MBeanValueField(private val spec: ValueEditSpec) {
         try {
             parse(text)
         } catch (_: NumberFormatException) {
-            throw MBeanConversionException("\"$text\" cannot be converted to ${spec.type}")
+            throw MBeanConversionException(t("mbeans.value.notConvertible", text, spec.type))
         }
 
     private fun parseObjectName(text: String): ObjectName =
         try {
             ObjectName(text)
         } catch (e: MalformedObjectNameException) {
-            throw MBeanConversionException("Not a valid ObjectName: ${e.message}")
+            throw MBeanConversionException(t("mbeans.value.invalidObjectName", e.message))
         }
 
     private fun initialText(): String {
@@ -131,12 +132,11 @@ class MBeanValueField(private val spec: ValueEditSpec) {
             return null
         }
         val elementType = openType.elementOpenType.typeName.substringAfterLast('.')
-        val quoting = if (openType.elementOpenType == SimpleType.STRING) {
-            " Quote empty strings or strings containing semicolons."
+        return if (openType.elementOpenType == SimpleType.STRING) {
+            t("mbeans.value.arrayHelperString", elementType)
         } else {
-            ""
+            t("mbeans.value.arrayHelper", elementType)
         }
-        return "Array of $elementType. Separate elements with semicolons, e.g. \"A;B;C\".$quoting"
     }
 
     companion object {

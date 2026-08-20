@@ -7,6 +7,7 @@ import dev.jvmguard.data.user.Roles
 import dev.jvmguard.data.vmdata.CustomTelemetryNodeIdentifier
 import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.checkbox.Checkbox
@@ -14,26 +15,24 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
 @RolesAllowed(Roles.ADMIN)
 @Route(value = "settings/display", layout = MainLayout::class)
-@PageTitle("jvmguard: Settings")
 class DisplaySettingsView : AbstractSettingsSectionView() {
 
-    private val titleEnabled = Checkbox("Use a custom window title").apply {
+    private val titleEnabled = Checkbox(t("settings.display.customTitle")).apply {
         testId = ID_TITLE_ENABLED
         addValueChangeListener { titleText.isEnabled = value }
     }
-    private val titleText = TextField("Window title").apply {
+    private val titleText = TextField(t("settings.display.windowTitle")).apply {
         setWidthFull()
         testId = ID_TITLE_TEXT
     }
-    private val defaultTheme = EnumSelect("Default theme", DefaultTheme::class.java) { it.toString() }
-    private val frequencyUnit = EnumSelect("Frequency unit for telemetries", FrequencyUnit::class.java) { it.toString() }
-    private val hiddenTelemetries = MultiSelectComboBox<String>("Hidden Declared telemetries").apply {
+    private val defaultTheme = EnumSelect(t("settings.display.defaultTheme"), DefaultTheme::class.java)
+    private val frequencyUnit = EnumSelect(t("settings.display.frequencyUnit"), FrequencyUnit::class.java)
+    private val hiddenTelemetries = MultiSelectComboBox<String>(t("settings.display.hiddenTelemetries")).apply {
         setWidthFull()
         testId = ID_HIDDEN_TELEMETRIES
         addValueChangeListener { event ->
@@ -46,11 +45,11 @@ class DisplaySettingsView : AbstractSettingsSectionView() {
     }
 
     init {
-        val frequencyHint = Span("Many small telemetries display frequency values; choose the unit that matches the average transaction volume.")
+        val frequencyHint = Span(t("settings.display.frequencyHint"))
             .apply { addClassName("jvmguard-field-hint") }
-        val telemetryHint = Span("Telemetries added with the @Telemetry annotation can be hidden when no longer needed.")
+        val telemetryHint = Span(t("settings.display.telemetryHint"))
             .apply { addClassName("jvmguard-field-hint") }
-        add(settingsSection("Display", titleEnabled, titleText, defaultTheme, frequencyUnit, frequencyHint, hiddenTelemetries, telemetryHint))
+        add(settingsSection(t("nav.settings.display"), titleEnabled, titleText, defaultTheme, frequencyUnit, frequencyHint, hiddenTelemetries, telemetryHint))
     }
 
     @Suppress("DuplicatedCode")

@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.data.mbeans
 
 import com.vaadin.flow.component.formlayout.FormLayout
+import dev.jvmguard.ui.server.t
 
 class MBeanValuesForm(specs: List<ValueEditSpec>) : FormLayout() {
 
@@ -19,7 +20,7 @@ class MBeanValuesForm(specs: List<ValueEditSpec>) : FormLayout() {
             try {
                 values.add(field.readValue())
             } catch (e: MBeanConversionException) {
-                field.markInvalid(e.message ?: "Invalid value")
+                field.markInvalid(e.message ?: t("mbeans.value.invalid"))
                 valid = false
             }
         }

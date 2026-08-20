@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.components
 
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.html.Anchor
@@ -11,7 +12,7 @@ import java.io.ByteArrayInputStream
 class ExportAnchor(testId: String) : Anchor() {
 
     init {
-        add(Button("Export", VaadinIcon.DOWNLOAD.create()).apply { addThemeVariants(ButtonVariant.TERTIARY) })
+        add(Button(t("common.export"), VaadinIcon.DOWNLOAD.create()).apply { addThemeVariants(ButtonVariant.TERTIARY) })
         element.setAttribute("download", true)
         isVisible = false
         this.testId = testId

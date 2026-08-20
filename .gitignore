@@ -4,6 +4,9 @@ buildSrc/build/
 /media/
 modules/website/public/javadoc/
 modules/website/public/jvmguard-annotations.jar
+# Generated localized screenshots (only the English images are committed, as the review baseline)
+modules/docs/public/images/ui/generated/
+modules/website/public/images/ui/generated/
 .gradle/
 .kotlin/
 

@@ -1,0 +1,57 @@
+---
+title: jvmguard 설치
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+## 설치 프로그램
+
+모든 주요 플랫폼용 설치 프로그램이 제공됩니다. 기본적으로 설치 프로그램은 GUI를 표시하지만, `-c` 인수로
+설치 프로그램을 시작하면 **콘솔 인터페이스**가 표시됩니다. ssh로 원격 서버에 jvmguard를 설치하는 경우 이
+방식이 필요합니다.
+
+클라우드 기반 배포에서는 사용자 상호 작용 없이 jvmguard 서버를 설치하고 구성하고 싶을 수 있습니다. 그 방법은
+[무인 설치](/docs/ko/config/unattended-installations) 도움말 항목을 참조하세요.
+
+설치 프로그램은 jvmguard UI의 브라우저에서 구성할 수 없는 모든 구성 옵션을 묻습니다. 가장 일반적으로
+조정해야 하는 설정은 웹 서버의 HTTPS/HTTP 포트입니다.
+
+<Figure src="external/installer_web_server.png" scale={1.75} />
+
+설치 디렉터리 외에도 jvmguard 설치에는 모든 가변 데이터가 저장되는 **데이터 디렉터리**가 필요합니다. 여기에는
+데이터베이스, 로그 파일 및 보안 인증서가 포함됩니다. 기본적으로 이 디렉터리는 Windows에서는 프로그램 데이터
+디렉터리(일반적으로 `C:\ProgramData`)로, Unix 및 macOS에서는 `/var/opt/jvmguard`로 설정됩니다. 같은 머신에
+jvmguard 인스턴스를 여러 개 설치하는 시나리오에서는 각 jvmguard 설치가 자체 데이터 디렉터리를 가져야 합니다.
+
+<Figure src="external/installer_data_dir.png" scale={1.75} />
+
+평가 목적이라면 설치 프로그램이 알아야 할 것은 이것이 전부입니다. 프로덕션 환경에 배포하는 경우 다른
+옵션을 조정하고 싶을 수 있습니다.
+
+<Figure src="external/installer_advanced.png" scale={1.75} />
+
+## 나중에 초기 구성 변경하기
+
+설치 프로그램은 구성을 설치 디렉터리의 `config/application.yaml` 파일에 기록합니다. 나중에 구성을
+변경하려면 텍스트 편집기로 해당 파일을 편집하고 jvmguard 서버를 다시 시작하세요. 옵션은
+`config/application.yaml`에 주석으로 직접 문서화되어 있습니다. 자세한 내용은 [서버
+구성](/docs/ko/config/server-config) 도움말을 참조하세요.
+
+## 설치 후 설정
+
+설치 프로그램이 완료되면 jvmguard 서버가 실행 중이며 브라우저에서 `http[s]://localhost:[port]`를 열어
+jvmguard UI에 연결할 수 있습니다. 웹 서버에 HTTPS를 선택한 경우 HTTP 요청을 처리하는 포트가 없다는 점에
+유의하세요.
+
+jvmguard를 사용하려면 먼저 jvmguard UI에서 **초기 관리자 사용자**를 구성하는 설정 단계를 완료해야 합니다.
+다른 관리자 및 비관리자 사용자는 나중에 구성할 수 있습니다.
+
+기본적으로 2단계 인증이 사용 설정되어 있지만 이 단계에서 해제할 수 있습니다. 2단계 인증이 사용 설정된
+경우 마법사가 완료되면 인증 앱으로 2단계 인증을 설정해야 합니다. 개별 사용자는 나중에 사용자 설정에서
+2단계 인증을 면제할 수 있습니다.
+
+<Figure src="ui/installer_user.png" />
+
+설정 단계를 완료하면 서버가 완전히 초기화되고 설치 마법사를 다시 표시할 수 없습니다. 그러나 설치 마법사의
+모든 설정은 jvmguard UI에서도 조정할 수 있습니다. 이제 VM 뷰로 이동하며, 다음 장에서 설명하는 대로
+모니터링되는 JVM을 계속 설정할 수 있습니다.

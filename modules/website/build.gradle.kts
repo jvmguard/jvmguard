@@ -3,13 +3,26 @@ import org.gradle.api.tasks.javadoc.Javadoc
 
 val npmBin = if (isWindows()) "npm.cmd" else "npm"
 
+// "en" maps to images/ui/, the others to images/ui/generated/<locale>/. Only English images are committed.
+val screenshotLocales = listOf("en", "ko", "ja", "zh-CN")
+
 tasks {
 
     val copyScreenshots = register<Copy>("copyScreenshots") {
         group = "website"
-        from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsLight")) { include("profiling_options.png") }
-        from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsDark")) { include("profiling_options_dark.png") }
-        into(layout.projectDirectory.dir("public/images/ui"))
+        mustRunAfter(":ui:screenshots", ":ui:darkScreenshots")
+        screenshotLocales.forEach { locale ->
+            val target = if (locale == "en") "ui" else "ui/generated/$locale"
+            from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsLight/$locale")) {
+                include("profiling_options.png")
+                into(target)
+            }
+            from(project(":ui").layout.buildDirectory.dir("e2e/screenshotsDark/$locale")) {
+                include("profiling_options_dark.png")
+                into(target)
+            }
+        }
+        into(layout.projectDirectory.dir("public/images"))
     }
 
     val copyJavadoc = register<Copy>("copyJavadoc") {

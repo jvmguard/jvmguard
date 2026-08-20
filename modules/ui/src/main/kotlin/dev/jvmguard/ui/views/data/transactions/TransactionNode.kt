@@ -5,6 +5,7 @@ import dev.jvmguard.agent.tree.AbstractTransactionTree.PolicyType
 import dev.jvmguard.data.transactions.TransactionTree
 import dev.jvmguard.data.transactions.TransactionTreeData
 import dev.jvmguard.data.transactions.TransactionTreeIdentifier
+import dev.jvmguard.ui.server.t
 
 class TransactionNode private constructor(
     private val tree: TransactionTree?,
@@ -51,7 +52,7 @@ class TransactionNode private constructor(
 
     companion object {
 
-        const val BACKTRACE_CONTAINER = "Cumulated backtraces"
+        val BACKTRACE_CONTAINER: String get() = t("transactions.cumulatedBacktraces")
 
         fun roots(data: TransactionTreeData, cumulateBacktraces: Boolean): List<TransactionNode> {
             val root = data.transactionTree

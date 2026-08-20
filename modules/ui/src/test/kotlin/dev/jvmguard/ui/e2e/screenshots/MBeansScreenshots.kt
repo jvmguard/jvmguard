@@ -15,7 +15,7 @@ class MBeansScreenshots : ScreenshotTest() {
         getByTestId(MBeansView.ID_TREE).waitFor()
         getByTestId(MBeansView.ID_FILTER).locator("input").fill("java.lang:type=Memory")
         getByText("Memory [type]").click()
-        getByText("Operations").click()
+        locator("vaadin-tab").filter(com.microsoft.playwright.Locator.FilterOptions().setHasText(l("mbeans.tabs.operations"))).click()
         assertThat(getByTestId(MBeansView.ID_INVOKE_PREFIX + "gc")).isVisible()
         capture("mbean_operations")
     }
@@ -36,8 +36,7 @@ class MBeansScreenshots : ScreenshotTest() {
         // The parameter is labelled by its type and position.
         getByLabel("java.lang.String p0").fill("global")
         getByTestId(ParameterDialog.ID_INVOKE).click()
-        // OperationResultDialog has no test id; located by its header text.
-        assertThat(getByText("Operation result")).isVisible()
+        assertThat(getByText(l("mbeans.operation.result.title"))).isVisible()
         capture("mbean_operation_return")
     }
 
@@ -48,7 +47,7 @@ class MBeansScreenshots : ScreenshotTest() {
         getByTestId(MBeansView.ID_TREE).waitFor()
         getByTestId(MBeansView.ID_FILTER).locator("input").fill("java.util.logging:type=Logging")
         getByText("Logging [type]").click()
-        getByText("Operations").click()
+        locator("vaadin-tab").filter(com.microsoft.playwright.Locator.FilterOptions().setHasText(l("mbeans.tabs.operations"))).click()
         assertThat(getByTestId(MBeansView.ID_INVOKE_PREFIX + OPERATION)).isVisible()
     }
 

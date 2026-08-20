@@ -6,6 +6,7 @@ import dev.jvmguard.ui.server.JvmGuardPrincipal
 import com.vaadin.flow.component.Component
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.UserSession
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.views.setup.InstallWizardView
 import dev.jvmguard.ui.views.vms.VmsView
 import com.vaadin.flow.component.Key
@@ -19,8 +20,8 @@ import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.server.VaadinServletRequest
 import com.vaadin.flow.server.auth.AnonymousAllowed
@@ -29,8 +30,9 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 @AnonymousAllowed
 @Route("login")
-@PageTitle("jvmguard: Log in")
-class LoginView : VerticalLayout(), BeforeEnterObserver {
+class LoginView : VerticalLayout(), BeforeEnterObserver, HasDynamicTitle {
+
+    override fun getPageTitle(): String = t("pageTitle.login")
 
     internal lateinit var userName: TextField
     internal lateinit var password: PasswordField
@@ -51,7 +53,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
             width = "360px"
 
             div { addClassName("jvmguard-login-logo") }
-            h2("Welcome to jvmguard") { addClassName("jvmguard-login-title") }
+            h2(t("login.welcome")) { addClassName("jvmguard-login-title") }
             errorMessage = Span().apply {
                 testId = ID_ERROR
                 isVisible = false
@@ -60,15 +62,15 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
                 style.set("font-size", "var(--vaadin-font-size-xs)")
             }
             add(errorMessage)
-            span("Please log in to your account") { addClassName("jvmguard-login-subtitle") }
-            userName = textField("Username") { testId = ID_USERNAME }
-            password = passwordField("Password") { testId = ID_PASSWORD }
-            authCode = textField("Authenticator code") {
+            span(t("login.subtitle")) { addClassName("jvmguard-login-subtitle") }
+            userName = textField(t("login.username")) { testId = ID_USERNAME }
+            password = passwordField(t("login.password")) { testId = ID_PASSWORD }
+            authCode = textField(t("login.authCode")) {
                 testId = ID_AUTHCODE
                 isVisible = use2fa
                 width = "10rem"
             }
-            loginButton = button("Log in") {
+            loginButton = button(t("login.submit")) {
                 testId = ID_SUBMIT
                 addThemeVariants(ButtonVariant.PRIMARY)
                 addClickListener { doLogin() }
@@ -79,7 +81,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
             if (ssoProviders.isNotEmpty()) {
                 div {
                     addClassName("jvmguard-login-divider")
-                    span("OR") { addClassName("jvmguard-login-divider-label") }
+                    span(t("login.sso.or")) { addClassName("jvmguard-login-divider-label") }
                 }
                 ssoProviders.forEach { provider ->
                     val icon: Component = if (provider.google) {
@@ -88,7 +90,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
                         VaadinIcon.SIGN_IN.create().apply { addClassName("jvmguard-sso-icon") }
                     }
                     val href = "/oauth2/authorization/${provider.registrationId}"
-                    add(Button("Sign in with ${provider.displayName}", icon).apply {
+                    add(Button(t("login.sso.signInWith", provider.displayName), icon).apply {
                         addClassName("jvmguard-sso-button")
                         addClickListener { ui.ifPresent { it.page.setLocation(href) } }
                     })
@@ -114,7 +116,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
         val errorCode = event.location.queryParameters.parameters["ssoError"]?.firstOrNull()
             ?: httpRequest?.session?.getAttribute("ssoError") as? String
         errorCode?.let { httpRequest?.session?.removeAttribute("ssoError") }
-        errorCode?.let { code -> SsoLoginError.fromCode(code)?.let { showError(it.message) } }
+        errorCode?.let { code -> SsoLoginError.fromCode(code)?.let { showError(t("login.sso." + it.code)) } }
 
         Sessions.captureMock(event.location.queryParameters)
         if (Sessions.isNewInstallation()) {
@@ -132,7 +134,7 @@ class LoginView : VerticalLayout(), BeforeEnterObserver {
             val target = if (session.forcedSetupRequired()) AccountSetupView::class.java else VmsView::class.java
             ui.ifPresent { it.navigate(target) }
         } catch (_: AuthenticationException) {
-            showError(if (use2fa) "Invalid user name, password, or authenticator code." else "Invalid user name or password.")
+            showError(t(if (use2fa) "login.failed.twofactor" else "login.failed"))
         }
     }
 

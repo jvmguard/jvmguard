@@ -12,7 +12,9 @@ import dev.jvmguard.ui.components.anyContextMenuOpen
 import dev.jvmguard.ui.server.ModificationListener
 import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.UserSession
+import dev.jvmguard.ui.server.displayName
 import dev.jvmguard.ui.server.registerModificationListener
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.CachedView
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.AttachEvent
@@ -20,34 +22,35 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import com.vaadin.flow.shared.Registration
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
 @Route(value = "", layout = MainLayout::class)
-@PageTitle("jvmguard: JVMs")
-class VmsView : VerticalLayout(), ModificationListener, CachedView {
+class VmsView : VerticalLayout(), ModificationListener, CachedView, HasDynamicTitle {
 
-    private val filterSelect = EnumSelect("Shown JVMs", VmFilter::class.java) { filterLabel(it) }.apply {
+    override fun getPageTitle(): String = t("pageTitle.vms")
+
+    private val filterSelect = EnumSelect(t("vms.filter.label"), VmFilter::class.java).apply {
         testId = ID_FILTER_SELECT
         value = VmFilter.CONNECTED
         addUserValueChangeListener(::controlsChanged)
     }
-    private val rangeSelect = EnumSelect("Range", SparkLineRange::class.java) { it.toString() }.apply {
+    private val rangeSelect = EnumSelect(t("vms.range"), SparkLineRange::class.java).apply {
         testId = ID_RANGE_SELECT
         value = SparkLineRange.LAST_HOUR
         addUserValueChangeListener(::controlsChanged)
     }
-    private val scaleModeSelect = EnumSelect("Scale", SparkLineScaleMode::class.java) { scaleModeLabel(it) }.apply {
+    private val scaleModeSelect = EnumSelect(t("vms.scale"), SparkLineScaleMode::class.java).apply {
         testId = ID_SCALE_SELECT
         value = SparkLineScaleMode.SEPARATE
         addUserValueChangeListener(::controlsChanged)
     }
-    private val columnChooser = MultiSelectComboBox<TelemetryType>("Telemetries").apply {
+    private val columnChooser = MultiSelectComboBox<TelemetryType>(t("nav.telemetries")).apply {
         testId = ID_TELEMETRIES
-        setItemLabelGenerator { it.name }
+        setItemLabelGenerator { it.displayName() }
         minWidth = TELEMETRIES_MIN_WIDTH
         maxWidth = TELEMETRIES_MAX_WIDTH
         setAutoExpand(MultiSelectComboBox.AutoExpandMode.HORIZONTAL)
@@ -147,14 +150,6 @@ class VmsView : VerticalLayout(), ModificationListener, CachedView {
 
         private const val TELEMETRIES_MIN_WIDTH = "16rem"
         private const val TELEMETRIES_MAX_WIDTH = "48rem"
-
-        private fun scaleModeLabel(scaleMode: SparkLineScaleMode): String = when (scaleMode) {
-            SparkLineScaleMode.SEPARATE -> "Separate"
-            SparkLineScaleMode.GROUP -> "Common per group"
-            SparkLineScaleMode.COMMON -> "Common"
-        }
-
-        private fun filterLabel(filter: VmFilter): String = filter.toString().replace(" JVMs", "")
 
         private fun sortedTypes(types: Collection<TelemetryType>): List<TelemetryType> =
             types.sortedBy { it.name }

@@ -1,11 +1,11 @@
 package dev.jvmguard.data.user
 
 import dev.jvmguard.common.config.ConfigStorage
+import dev.jvmguard.common.LocalizedCredentialException
 import dev.jvmguard.common.helper.ListModification
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
-import javax.security.auth.login.CredentialException
 
 @Component
 class UserManager(private val configStorage: ConfigStorage) {
@@ -52,12 +52,12 @@ class UserManager(private val configStorage: ConfigStorage) {
             val previousUser = idToUser.get(id)
             if (previousUser != null && previousUser.loginName != user.loginName) {
                 if (loginNameToUser.containsKey(user.loginName)) {
-                    throw CredentialException("The login name already exists")
+                    throw LocalizedCredentialException("settings.users.duplicateName", "The login name already exists")
                 }
                 loginNameToUser.remove(previousUser.loginName)
             }
         } else if (loginNameToUser.containsKey(user.loginName)) {
-            throw CredentialException("The login name already exists")
+            throw LocalizedCredentialException("settings.users.duplicateName", "The login name already exists")
         }
         configStorage.store(User::class.java, user)
         loginNameToUser[user.loginName] = user

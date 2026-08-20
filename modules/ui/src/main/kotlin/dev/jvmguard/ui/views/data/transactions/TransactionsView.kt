@@ -19,8 +19,8 @@ import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.value.ValueChangeMode
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.HasDynamicTitle
 import dev.jvmguard.agent.tree.AbstractTransactionTree.PolicyType
 import dev.jvmguard.common.helper.Direction
 import dev.jvmguard.connector.api.ServerConnection
@@ -29,16 +29,19 @@ import dev.jvmguard.data.vmdata.VM
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.components.*
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
 import dev.jvmguard.ui.server.findVm
 import dev.jvmguard.ui.server.serverTime
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.data.VmDataView
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
 @Route(value = "transactions", layout = MainLayout::class)
-@PageTitle("jvmguard: Transactions")
-class TransactionsView : VmDataView() {
+class TransactionsView : VmDataView(), HasDynamicTitle {
+
+    override fun getPageTitle(): String = t("pageTitle.transactions")
 
     private var mode = TransactionMode.CALL_TREE
     private var cursor: TransactionCursor? = null
@@ -59,14 +62,14 @@ class TransactionsView : VmDataView() {
         .setAutoWidth(false)
 
     private val timeColumn = grid.addComponentColumn(::timeCell)
-        .setHeader("Total time")
+        .setHeader(t("transactions.column.totalTime"))
         .setFlexGrow(0)
         .setWidth("220px")
         .setComparator(compareBy { it.time })
 
     private val modeTabs = Tabs().apply {
         testId = ID_MODE
-        TransactionMode.entries.forEach { add(Tab(it.label)) }
+        TransactionMode.entries.forEach { add(Tab(enumLabel(it))) }
         addSelectedChangeListener { event ->
             if (event.isFromClient) {
                 mode = TransactionMode.entries[selectedIndex]
@@ -84,7 +87,7 @@ class TransactionsView : VmDataView() {
     private val filterOptions = FilterOptionsMenu(ID_STATUS_FILTER) { applyFilterAndRender() }
 
     private val filterField = TextField().apply {
-        placeholder = "Filter by name"
+        placeholder = t("transactions.filterByName")
         testId = ID_FILTER
         valueChangeMode = ValueChangeMode.LAZY
         isClearButtonVisible = true
@@ -136,13 +139,13 @@ class TransactionsView : VmDataView() {
 
     init {
         grid.addColumn { Formats.count(it.count) }
-            .setHeader("Invocations")
+            .setHeader(t("transactions.column.invocations"))
             .setFlexGrow(0)
             .setWidth("130px")
             .setComparator(compareBy { it.count })
 
         grid.addColumn { Formats.time(it.averageTime) }
-            .setHeader("Avg. time")
+            .setHeader(t("transactions.column.avgTime"))
             .setFlexGrow(0)
             .setWidth("130px")
             .setComparator(compareBy { it.averageTime })
@@ -249,7 +252,7 @@ class TransactionsView : VmDataView() {
     }
 
     private fun withConnection(block: (ServerConnection) -> Unit) {
-        val connection = connection() ?: return showMessage(NOT_CONNECTED)
+        val connection = connection() ?: return showMessage(t("transactions.notConnected"))
         block(connection)
     }
 
@@ -276,7 +279,7 @@ class TransactionsView : VmDataView() {
             cursor = moved
             fetchAndRender(resetTimeLine = false)
             if (moved.gap > 0) {
-                Notifications.show("Skipped a data gap of ${gapText(moved.gap)}")
+                Notifications.show(t("transactions.dataGap", gapText(moved.gap)))
             }
         }
     }
@@ -309,7 +312,13 @@ class TransactionsView : VmDataView() {
             if (current == null || !current.availability.isAvailable) {
                 roots = emptyList()
                 // While auto-updating, an empty current interval most likely means data exists earlier
-                showMessage(if (current != null && navBar.isAutoUpdate()) NO_CURRENT_DATA_TEXT else NO_DATA_TEXT)
+                showMessage(
+                    if (current != null && navBar.isAutoUpdate()) {
+                        t("transactions.noCurrentData")
+                    } else {
+                        t("transactions.noData")
+                    }
+                )
                 current?.let(navBar::update)
                 if (mode.hasTimeLines) {
                     timeLinePanel.refresh(cursorVm(connection), navBar.selectedInterval, null, resetTimeLine, recenter)
@@ -334,9 +343,8 @@ class TransactionsView : VmDataView() {
             infoBadge.isVisible = false
             return
         }
-        val range = if (max == min) "$min" else "$min to $max"
-        infoBadge.text =
-            "Only $range % of the selected interval has recorded data; values may not be comparable to other intervals."
+        val range = if (max == min) "$min" else t("transactions.coverage.range", min, max)
+        infoBadge.text = t("transactions.coverage", range)
         infoBadge.isVisible = true
     }
 
@@ -344,16 +352,16 @@ class TransactionsView : VmDataView() {
         val menu = filterOptions.menu
         menu.addSeparator()
         // A non-interactive group label
-        menu.addItem(Span("Transaction state")).apply {
+        menu.addItem(Span(t("transactions.state.header"))).apply {
             addClassName("jvmguard-menu-header")
             isEnabled = false
         }
         val options = linkedMapOf(
-            "All" to null,
-            "Normal" to PolicyType.NORMAL,
-            "Slow" to PolicyType.SLOW,
-            "Very slow" to PolicyType.VERY_SLOW,
-            "Error" to PolicyType.ERROR,
+            t("transactions.state.all") to null,
+            t("transactions.state.normal") to PolicyType.NORMAL,
+            t("transactions.state.slow") to PolicyType.SLOW,
+            t("transactions.state.verySlow") to PolicyType.VERY_SLOW,
+            t("transactions.state.error") to PolicyType.ERROR,
         )
         options.forEach { (label, type) ->
             val item = menu.addItem(label) { selectStatus(type) }
@@ -385,7 +393,7 @@ class TransactionsView : VmDataView() {
                 }
             }
         if (displayed.isEmpty()) {
-            showMessage(if (filtering) "No transactions match the current filter." else NO_DATA_TEXT)
+            showMessage(if (filtering) t("transactions.noMatch") else t("transactions.noData"))
             return
         }
         maxTime = displayed.maxOf { it.time }
@@ -400,10 +408,13 @@ class TransactionsView : VmDataView() {
         if (!mode.hasTimeLines || !node.topLevel) {
             return null
         }
-        return menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Time line options", ID_ROW_MENU, tooltip = "Show a time line") {
+        return menuButton(
+            VaadinIcon.ELLIPSIS_DOTS_V, t("transactions.timeLine.options"), ID_ROW_MENU,
+            tooltip = t("transactions.timeLine.show"),
+        ) {
             TransactionTreeValueType.entries.forEach { valueType ->
                 item(
-                    "Show time line of ${valueType.toString().lowercase()}",
+                    t("transactions.timeLine.showOf", enumLabel(valueType).lowercase()),
                     { timeLinePanel.showTimeLine(node, valueType) })
             }
         }
@@ -464,9 +475,9 @@ class TransactionsView : VmDataView() {
     private fun gapText(gap: Long): String {
         val minutes = gap / 60_000
         return when {
-            minutes >= 2 * 24 * 60 -> "${minutes / (24 * 60)} days"
-            minutes >= 2 * 60 -> "${minutes / 60} hours"
-            else -> "$minutes minutes"
+            minutes >= 2 * 24 * 60 -> t("transactions.time.days", minutes / (24 * 60))
+            minutes >= 2 * 60 -> t("transactions.time.hours", minutes / 60)
+            else -> t("transactions.time.minutes", minutes)
         }
     }
 
@@ -485,11 +496,5 @@ class TransactionsView : VmDataView() {
         const val ID_STATUS_FILTER = "transaction-status-filter"
         const val ID_ROW_MENU = "transaction-row-menu"
         const val ID_EXPORT = "transaction-export"
-
-        private const val NOT_CONNECTED = "Not connected to the jvmguard server."
-        private const val NO_DATA_TEXT =
-            "No recorded transaction data is available for this selection. Try a wider interval or an earlier time."
-        private const val NO_CURRENT_DATA_TEXT =
-            "No current data has been recorded. Change to previous times to see historical data."
     }
 }

@@ -4,8 +4,14 @@
 //   `<name>_dark.png` sibling is always rendered and toggled with Starlight's [data-theme].
 // - Diagram SVGs: authored as light-mode (dark ink on pastel boxes); in dark mode a CSS invert filter
 //   makes them readable without needing per-diagram dark variants.
+// - Localized screenshots: on a non-default locale page, images/ui/generated/<locale>/<src> is used
+//   when it exists at build time, otherwise the English image is used. The dark variant is resolved
+//   the same way and independently, so a locale can ship a light image only.
 // - `scale`: intrinsic pixel density of the source, e.g. 1.75 for a screenshot captured at 175%
 //   fractional HiDPI. Emitted as an `x` density descriptor
+import fs from 'node:fs';
+import path from 'node:path';
+
 export interface Props {
   src: string;
   alt?: string;
@@ -13,11 +19,21 @@ export interface Props {
 }
 const { src, alt = '', scale } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const locale = Astro.locals.starlightRoute?.locale;
+// `public/images` is served verbatim, so existence is checked on disk at build time (static build:
+// this component only runs while prerendering).
+const imageExists = (rel: string) => fs.existsSync(path.join(process.cwd(), 'public/images', rel));
+// Only ui/ screenshots are localized: ui/<name>.png -> ui/generated/<locale>/<name>.png
+const pick = (rel: string) => {
+  if (!locale || !rel.startsWith('ui/')) return rel;
+  const localized = `ui/generated/${locale}/${rel.slice(3)}`;
+  return imageExists(localized) ? localized : rel;
+};
 const isPng = src.endsWith('.png');
 const isSvg = src.endsWith('.svg');
 const hasDark = isPng;
-const lightSrc = `${base}/images/${src}`;
-const darkSrc = hasDark ? `${base}/images/${src.replace(/\.png$/, '_dark.png')}` : null;
+const lightSrc = `${base}/images/${pick(src)}`;
+const darkSrc = hasDark ? `${base}/images/${pick(src.replace(/\.png$/, '_dark.png'))}` : null;
 const srcSet = (s: string) => (scale && scale > 0 ? `${s} ${scale}x` : undefined);
   const cls = isSvg ? 'figure figure-svg' : isPng ? 'figure figure-zoom' : 'figure';
 ---

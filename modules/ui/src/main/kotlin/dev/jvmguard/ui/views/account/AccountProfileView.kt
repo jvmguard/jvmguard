@@ -7,6 +7,7 @@ import dev.jvmguard.ui.components.PasswordResult
 import dev.jvmguard.ui.components.PasswordRules
 import dev.jvmguard.ui.components.Validators
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import dev.jvmguard.ui.views.settings.AbstractAccountSectionView
 import dev.jvmguard.ui.views.settings.settingsSection
@@ -18,28 +19,26 @@ import com.vaadin.flow.component.textfield.EmailField
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.PermitAll
 
 @PermitAll
 @Route(value = "account/profile", layout = MainLayout::class)
-@PageTitle("jvmguard: Account")
 class AccountProfileView : AbstractAccountSectionView() {
 
-    private val fullName = TextField("Full name").apply {
+    private val fullName = TextField(t("account.profile.fullName")).apply {
         setWidthFull()
         testId = ID_FULL_NAME
     }
-    private val email = EmailField("Email").apply {
+    private val email = EmailField(t("account.profile.email")).apply {
         isClearButtonVisible = true
         setWidthFull()
         testId = ID_EMAIL
     }
 
-    private val currentPassword = passwordField("Current password", ID_CURRENT_PW)
-    private val newPassword = passwordField("New password", ID_NEW_PW)
-    private val confirmPassword = passwordField("Confirm new password", ID_CONFIRM_PW)
+    private val currentPassword = passwordField(t("account.password.current"), ID_CURRENT_PW)
+    private val newPassword = passwordField(t("account.password.new"), ID_NEW_PW)
+    private val confirmPassword = passwordField(t("account.password.confirmNew"), ID_CONFIRM_PW)
 
     private val isOidc = Sessions.current()?.user?.userType == UserType.OIDC
 
@@ -50,16 +49,16 @@ class AccountProfileView : AbstractAccountSectionView() {
         if (isOidc) {
             val user = Sessions.current()!!.user
             val ssoInfo = VerticalLayout(
-                Span("Signed in via ${user.ssoIssuer}").apply { style.set("font-weight", "bold") },
-                Span("Email: ${user.loginName}"),
+                Span(t("account.sso.signedInVia", user.ssoIssuer)).apply { style.set("font-weight", "bold") },
+                Span(t("account.sso.email", user.loginName)),
             ).apply { isPadding = false; isSpacing = true }
-            user.fullName.takeIf { it.isNotBlank() }?.let { ssoInfo.add(Span("Name: $it")) }
-            add(settingsSection("SSO identity", ssoInfo))
+            user.fullName.takeIf { it.isNotBlank() }?.let { ssoInfo.add(Span(t("account.sso.name", it))) }
+            add(settingsSection(t("account.sso.section"), ssoInfo))
         } else {
-            val passwordHint = Span("Leave blank to keep your current password.").apply { addClassName("jvmguard-field-hint") }
+            val passwordHint = Span(t("account.password.hint")).apply { addClassName("jvmguard-field-hint") }
             add(
-                settingsSection("User information", FormLayout(fullName, email)),
-                settingsSection("Change password", VerticalLayout(currentPassword, newPassword, confirmPassword, passwordHint).apply {
+                settingsSection(t("nav.account.profile"), FormLayout(fullName, email)),
+                settingsSection(t("account.password.section"), VerticalLayout(currentPassword, newPassword, confirmPassword, passwordHint).apply {
                     isPadding = false
                     isSpacing = true
                 }),

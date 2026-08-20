@@ -63,12 +63,12 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     private val accessLevelValue = Span().apply { addClassName("jvmguard-user-info-value") }
     private val accountInfo = Div(
         userNameValue,
-        userInfoField("Access level", accessLevelValue),
-        userInfoField("Logged in since", loginSinceValue),
+        userInfoField(t("shell.userInfo.accessLevel"), accessLevelValue),
+        userInfoField(t("shell.userInfo.loggedInSince"), loginSinceValue),
     ).apply { addClassName("jvmguard-user-info") }
 
     private val userAvatar = Avatar().apply { addThemeVariants(AvatarVariant.LUMO_SMALL) }
-    private val addVmsButton = Button("Add VMs", VaadinIcon.PLUS.create()).apply {
+    private val addVmsButton = Button(t("shell.addVms"), VaadinIcon.PLUS.create()).apply {
         testId = ID_ADD_VMS
         addClassName("jvmguard-collapsible")
         addClickListener { openAddVms() }
@@ -85,10 +85,10 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     private val dataNav = buildDataNav()
 
     private val logEntries = listOf(
-        LogNavEntry("Server Log", ServerLogView::class.java, VaadinIcon.FILE_TEXT_O, AccessLevel.ADMIN, ID_LOG_NAV_SERVER),
-        LogNavEntry("Audit Log", AuditLogView::class.java, VaadinIcon.CLIPBOARD_CHECK, AccessLevel.ADMIN, ID_LOG_NAV_AUDIT),
-        LogNavEntry("Connection Log", ConnectionLogView::class.java, VaadinIcon.CONNECT, AccessLevel.PROFILER, ID_LOG_NAV_CONNECTION),
-        LogNavEntry("Event Log", EventLogView::class.java, VaadinIcon.BELL, AccessLevel.VIEWER, ID_LOG_NAV_EVENT),
+        LogNavEntry(t("nav.log.server"), ServerLogView::class.java, VaadinIcon.FILE_TEXT_O, AccessLevel.ADMIN, ID_LOG_NAV_SERVER),
+        LogNavEntry(t("nav.log.audit"), AuditLogView::class.java, VaadinIcon.CLIPBOARD_CHECK, AccessLevel.ADMIN, ID_LOG_NAV_AUDIT),
+        LogNavEntry(t("nav.log.connection"), ConnectionLogView::class.java, VaadinIcon.CONNECT, AccessLevel.PROFILER, ID_LOG_NAV_CONNECTION),
+        LogNavEntry(t("nav.log.event"), EventLogView::class.java, VaadinIcon.BELL, AccessLevel.VIEWER, ID_LOG_NAV_EVENT),
     )
     private val logNavItems = mutableListOf<Pair<SideNavItem, AccessLevel>>()
     private val logNav = SideNav().apply {
@@ -102,26 +102,26 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     }
 
     private val generalSettingsEntries = listOf(
-        SettingsNavEntry("Users & Roles", UsersView::class.java, VaadinIcon.USERS),
-        SettingsNavEntry("LDAP / Active Directory", LdapView::class.java, VaadinIcon.CONNECT),
-        SettingsNavEntry("Single Sign-On", SsoView::class.java, VaadinIcon.SIGN_IN_ALT),
-        SettingsNavEntry("Network", NetworkView::class.java, VaadinIcon.GLOBE),
-        SettingsNavEntry("Data retention", DataSettingsView::class.java, VaadinIcon.DATABASE),
-        SettingsNavEntry("E-Mail", SmtpSettingsView::class.java, VaadinIcon.ENVELOPE),
-        SettingsNavEntry("Display", DisplaySettingsView::class.java, VaadinIcon.DESKTOP),
-        SettingsNavEntry("Updates", UpdatesSettingsView::class.java, VaadinIcon.DOWNLOAD),
-        SettingsNavEntry("Import / Export", ImportExportView::class.java, VaadinIcon.FILE_TEXT),
+        SettingsNavEntry(t("nav.settings.users"), UsersView::class.java, VaadinIcon.USERS),
+        SettingsNavEntry(t("nav.settings.ldap"), LdapView::class.java, VaadinIcon.CONNECT),
+        SettingsNavEntry(t("nav.settings.sso"), SsoView::class.java, VaadinIcon.SIGN_IN_ALT),
+        SettingsNavEntry(t("nav.settings.network"), NetworkView::class.java, VaadinIcon.GLOBE),
+        SettingsNavEntry(t("nav.settings.data"), DataSettingsView::class.java, VaadinIcon.DATABASE),
+        SettingsNavEntry(t("nav.settings.email"), SmtpSettingsView::class.java, VaadinIcon.ENVELOPE),
+        SettingsNavEntry(t("nav.settings.display"), DisplaySettingsView::class.java, VaadinIcon.DESKTOP),
+        SettingsNavEntry(t("nav.settings.updates"), UpdatesSettingsView::class.java, VaadinIcon.DOWNLOAD),
+        SettingsNavEntry(t("nav.settings.impex"), ImportExportView::class.java, VaadinIcon.FILE_TEXT),
     )
     private val recordingSettingsEntries = listOf(
-        SettingsNavEntry("Transactions", RecordingTransactionsView::class.java, VaadinIcon.EXCHANGE),
-        SettingsNavEntry("Telemetries", RecordingTelemetriesView::class.java, VaadinIcon.CHART),
-        SettingsNavEntry("Thresholds", RecordingThresholdsView::class.java, VaadinIcon.DASHBOARD),
-        SettingsNavEntry("Triggers", RecordingTriggersView::class.java, VaadinIcon.BOLT),
-        SettingsNavEntry("Agent guardrails", RecordingGuardrailsView::class.java, VaadinIcon.SHIELD),
+        SettingsNavEntry(t("nav.transactions"), RecordingTransactionsView::class.java, VaadinIcon.EXCHANGE),
+        SettingsNavEntry(t("nav.telemetries"), RecordingTelemetriesView::class.java, VaadinIcon.CHART),
+        SettingsNavEntry(t("nav.recording.thresholds"), RecordingThresholdsView::class.java, VaadinIcon.DASHBOARD),
+        SettingsNavEntry(t("nav.recording.triggers"), RecordingTriggersView::class.java, VaadinIcon.BOLT),
+        SettingsNavEntry(t("nav.recording.guardrails"), RecordingGuardrailsView::class.java, VaadinIcon.SHIELD),
     )
     private val accountEntries = listOf(
-        SettingsNavEntry("User information", AccountProfileView::class.java, VaadinIcon.USER),
-        SettingsNavEntry("External access", AccountApiKeyView::class.java, VaadinIcon.KEY),
+        SettingsNavEntry(t("nav.account.profile"), AccountProfileView::class.java, VaadinIcon.USER),
+        SettingsNavEntry(t("nav.account.access"), AccountApiKeyView::class.java, VaadinIcon.KEY),
     )
     private val generalSettingsNav = buildNav(generalSettingsEntries).apply { isVisible = false }
     private val recordingSettingsNav = buildNav(recordingSettingsEntries).apply { isVisible = false }
@@ -131,9 +131,9 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         SettingsArea.RECORDING to recordingSettingsNav,
         SettingsArea.ACCOUNT to accountNav,
     )
-    private val drawerToggle = DrawerToggle().apply { setAriaLabel("Toggle navigation") }
+    private val drawerToggle = DrawerToggle().apply { setAriaLabel(t("shell.drawerToggle.aria")) }
 
-    private val settingsSave = Button("Save") { saveSettings() }.apply {
+    private val settingsSave = Button(t("common.save")) { saveSettings() }.apply {
         addThemeVariants(ButtonVariant.PRIMARY)
         addClassName("jvmguard-settings-save")
         testId = ID_SETTINGS_SAVE
@@ -150,8 +150,8 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     private var currentMode = ShellMode.DATA
     private var poller: NotificationPoller? = null
 
-    private val settingsTitle = H3("General Settings").apply { addClassName("jvmguard-settings-title") }
-    private val logTitle = H3("Logs").apply { addClassName("jvmguard-settings-title") }
+    private val settingsTitle = H3(t("nav.settings.general")).apply { addClassName("jvmguard-settings-title") }
+    private val logTitle = H3(t("nav.logs")).apply { addClassName("jvmguard-settings-title") }
 
     init {
         addClassName("jvmguard-shell")
@@ -164,13 +164,13 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         val logo = Div().apply { addClassName("jvmguard-logo") }
         userMenu = buildUserMenu()
         settingsMenu = buildSettingsMenu()
-        appHeader = HorizontalLayout(logo, addVmsButton, ThemeToggle(), userMenu, settingsMenu).apply {
+        appHeader = HorizontalLayout(logo, addVmsButton, ThemeToggle(), LanguageSelect(), userMenu, settingsMenu).apply {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
             setWidthFull()
             expand(logo)
         }
 
-        val cancel = Button("Cancel") { cancelSettings() }.apply { testId = ID_SETTINGS_CANCEL }
+        val cancel = Button(t("common.cancel")) { cancelSettings() }.apply { testId = ID_SETTINGS_CANCEL }
         val settingsLogo = Div().apply { addClassName("jvmguard-logo") }
         val separator = Div().apply { addClassName("jvmguard-settings-separator") }
         val titleGroup = HorizontalLayout(settingsLogo, separator, settingsTitle).apply {
@@ -185,7 +185,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
             isVisible = false
         }
 
-        val logClose = Button("Close") { closeLogs() }.apply { testId = ID_LOG_CLOSE }
+        val logClose = Button(t("common.close")) { closeLogs() }.apply { testId = ID_LOG_CLOSE }
         val logLogo = Div().apply { addClassName("jvmguard-logo") }
         val logSeparator = Div().apply { addClassName("jvmguard-settings-separator") }
         val logTitleGroup = HorizontalLayout(logLogo, logSeparator, logTitle).apply {
@@ -216,11 +216,11 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         addClassName("jvmguard-nav")
         fun item(label: String, viewClass: Class<out Component>, icon: IconFactory) =
             addItem(SideNavItem(label, viewClass, icon.create()))
-        item("VMs", VmsView::class.java, VaadinIcon.SERVER)
-        item("Transactions", TransactionsView::class.java, VaadinIcon.EXCHANGE)
-        item("Telemetries", VmTelemetryView::class.java, VaadinIcon.CHART)
-        item("MBeans", MBeansView::class.java, VaadinIcon.CUBES)
-        addItem(SideNavItem("Inbox", InboxView::class.java, VaadinIcon.INBOX.create()).apply {
+        item(t("nav.vms"), VmsView::class.java, VaadinIcon.SERVER)
+        item(t("nav.transactions"), TransactionsView::class.java, VaadinIcon.EXCHANGE)
+        item(t("nav.telemetries"), VmTelemetryView::class.java, VaadinIcon.CHART)
+        item(t("nav.mbeans"), MBeansView::class.java, VaadinIcon.CUBES)
+        addItem(SideNavItem(t("nav.inbox"), InboxView::class.java, VaadinIcon.INBOX.create()).apply {
             suffixComponent = inboxBadge
         })
     }
@@ -240,12 +240,12 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         addThemeVariants(MenuBarVariant.LUMO_TERTIARY, MenuBarVariant.LUMO_ICON)
         testId = ID_USER_MENU
         addClassName("jvmguard-collapsible")
-        val root = addItem(userAvatar).apply { element.setAttribute("aria-label", "Account") }
+        val root = addItem(userAvatar).apply { element.setAttribute("aria-label", t("shell.userMenu.aria")) }
         root.subMenu.apply {
             addComponent(accountInfo)
             addSeparator()
-            addItem("Account settings") { UI.getCurrent().navigate(AccountView::class.java) }.apply { testId = ID_ACCOUNT }
-            addItem("Log out") { logout() }.apply { testId = ID_LOGOUT }
+            addItem(t("shell.accountSettings")) { UI.getCurrent().navigate(AccountView::class.java) }.apply { testId = ID_ACCOUNT }
+            addItem(t("shell.logout")) { logout() }.apply { testId = ID_LOGOUT }
         }
     }
 
@@ -256,14 +256,14 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         addClassName("jvmguard-settings-cog")
         isVisible = false // shown for profiler+ in beforeEnter
         val cog = addItem(VaadinIcon.COG.create().apply { setSize("1.25rem") }).apply {
-            element.setAttribute("aria-label", "Settings")
-            element.setAttribute("title", "Settings")
+            element.setAttribute("aria-label", t("shell.settings.aria"))
+            element.setAttribute("title", t("shell.settings.aria"))
         }
-        generalSettingsItem = cog.subMenu.addItem("General Settings") { UI.getCurrent().navigate(SettingsView::class.java) }
+        generalSettingsItem = cog.subMenu.addItem(t("nav.settings.general")) { UI.getCurrent().navigate(SettingsView::class.java) }
             .apply { testId = ID_GENERAL_SETTINGS }
-        cog.subMenu.addItem("Recording Settings") { UI.getCurrent().navigate(RecordingSettingsView::class.java) }
+        cog.subMenu.addItem(t("nav.settings.recording")) { UI.getCurrent().navigate(RecordingSettingsView::class.java) }
             .apply { testId = ID_RECORDING_SETTINGS }
-        cog.subMenu.addItem("Logs") { openLogs() }.apply { testId = ID_LOGS }
+        cog.subMenu.addItem(t("nav.logs")) { openLogs() }.apply { testId = ID_LOGS }
     }
 
     private fun userInfoField(label: String, value: Span): Div =
@@ -322,7 +322,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         userAvatar.name = userName()
         userNameValue.text = userName()
         loginSinceValue.text = Formats.dateTime(user?.lastLogin)
-        accessLevelValue.text = user?.accessLevel?.toString().orEmpty()
+        accessLevelValue.text = user?.accessLevel?.let { enumLabel(it) }.orEmpty()
         settingsMenu.isVisible = user?.accessLevel?.isAtLeast(AccessLevel.PROFILER) == true
         generalSettingsItem.isVisible = user?.accessLevel?.isAtLeast(AccessLevel.ADMIN) == true
         logNavItems.forEach { (item, minLevel) -> item.isVisible = user?.accessLevel?.isAtLeast(minLevel) == true }
@@ -345,14 +345,14 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
         sections.firstOrNull { !it.isValid() }?.let { invalid ->
             ui.navigate((invalid as Component).javaClass)
             Notifications.closeAll()
-            Notifications.show("Please correct the highlighted fields before saving.")
+            Notifications.show(t("shell.settings.correctFields"))
             return
         }
         sections.forEach { it.applyToDraft() }
         try {
             Sessions.current()?.serverConnection?.let { Sessions.draft(area).persist(it) }
         } catch (e: CredentialException) {
-            ErrorDialog("Could not save settings", e.message ?: e.toString(), null).open()
+            ErrorDialog(t("shell.settings.saveFailed"), errorText(e), null).open()
             return
         }
         resetArea(area)

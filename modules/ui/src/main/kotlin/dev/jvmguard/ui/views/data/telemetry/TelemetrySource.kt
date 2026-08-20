@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.views.data.telemetry
 
 import dev.jvmguard.data.vmdata.*
+import dev.jvmguard.ui.server.enumLabel
 import dev.jvmguard.connector.api.ServerConnection
 
 sealed interface TelemetrySource {
@@ -47,7 +48,7 @@ object TelemetrySources {
             .filter { it != Telemetry.CUSTOM }
             .forEach {
                 sources.add(
-                    MainIdTelemetrySource(it.mainId, it.toString(), Telemetry.isTransactionsTelemetry(it.mainId), it.exportDescriptor)
+                    MainIdTelemetrySource(it.mainId, enumLabel(it), Telemetry.isTransactionsTelemetry(it.mainId), it.exportDescriptor)
                 )
             }
         connection.customTelemetryInfo.customTelemetryNodeIdentifiers.forEach { node ->

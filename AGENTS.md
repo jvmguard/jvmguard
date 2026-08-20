@@ -123,6 +123,33 @@ Orientation:
   (`./gradlew :ui:e2eTest`, its own `ServerMain` on 8123/8948). Full API and gotchas in
   web-ui-style.md.
 
+#### Localization (ko/ja/zh_CN)
+
+The UI is localized into Korean, Japanese and Simplified Chinese. The rules for any UI work:
+
+- **Catalog:** `modules/ui/src/main/resources/vaadin-i18n/translations*.properties` — the base file is
+  the English source of truth, plus `_ko`/`_ja`/`_zh_CN`; UTF-8, sorted by key. Terminology must follow
+  **[modules/docs/agent/i18n-glossary.md](./modules/docs/agent/i18n-glossary.md)**.
+- **Every user-facing string** goes through `t(key, vararg params)` (`dev.jvmguard.ui.server.Messages`);
+  backend enums render via `enumLabel(...)` (their `toString()`s stay English — REST/exports consume
+  them). Backend errors reach the UI localized only when coded (`LocalizableMessage`, `errorText`,
+  `mbeanErrorText`); unexpected errors, the event log, and inbox content stay English by design.
+  Page titles use `HasDynamicTitle` with `pageTitle.*` keys.
+- **Message rules:** MessageFormat always applies (even without params), so literal apostrophes are
+  doubled (`''`). Never interpolate a type noun via `{n}` — word the message generically or duplicate
+  the key per object type; placeholders are for quoted names, numbers, URLs. Plurals via
+  `{0,choice,...}`; CJK translations drop the wrapper but keep `{0}`.
+- **Provider/locale:** `JvmGuardI18NProvider` (English-first, no JVM-locale fallback) is returned by
+  `KeepAliveInstantiator.getI18NProvider()` — the keep-alive instantiator replaces the Spring one, so an
+  I18NProvider bean would never be consulted. Locale is auto-detected from Accept-Language; the header
+  `LanguageSelect` (globe icon, not on the login screen) persists the choice to `ViewSettings.locale`
+  and reloads; `Sessions.setCurrent` applies the stored choice at login.
+- **Tests:** `I18nBundleParityTest` guards the bundles (key/placeholder parity, pattern compilation,
+  apostrophes) and runs with `test`. Browserless and e2e tests run in English and locate by testId.
+  Screenshot tests resolve UI-label locators through `l("<key>")` (`ScreenshotTest`) so
+  `-Pjvmguard.screenshots.locale=<ko|ja|zh-CN>` captures every locale — see
+  [modules/docs/agent/help-screenshots.md](./modules/docs/agent/help-screenshots.md).
+
 ### Live demo data (the demo cluster) — the real-agent alternative to `?mock`
 
 `dev.jvmguard.demo.server.JvmGuardDemoServerStarter` (module **`:demo`**)
@@ -278,11 +305,16 @@ which `:agent:bootstrap`'s `copyDist` renames to `agent.jar` for `dist/agent/lib
   (Karibu-DSL, forms, Vaadin testing); extends `kotlin-style.md` (also linked above).
 - **[modules/docs/agent/help-screenshots.md](./modules/docs/agent/help-screenshots.md)** — how the documentation site's UI
   figures are generated from the Playwright screenshot tests.
+- **[modules/docs/agent/i18n-glossary.md](./modules/docs/agent/i18n-glossary.md)** — the mandatory ko/ja/zh_CN terminology
+  and message-construction rules for all localization (UI bundles, docs, website).
 - **[modules/docs/agent/serialization.md](./modules/docs/agent/serialization.md)** — config serialization architecture: the two
   mechanisms (Jackson for server beans, the custom codec for agent beans), the export file format, and
   who consumes what.
 - **`modules/docs`** — the product documentation, an Astro Starlight site (Markdown/MDX, light/dark,
   GitHub Pages). The `.mdx` pages under `src/content/docs` and `astro.config.mjs` are **hand-maintained**.
+  Localized into ko/ja/zh-cn (`src/content/docs/<locale>/`, English fallback; sidebar labels via
+  `translations` maps in `astro.config.mjs` — note the zh-CN keys are BCP-47 there). The marketing site
+  (`modules/website`) localizes through the typed catalog in `src/i18n/ui.ts` and per-locale page entries.
   Tasks: `:docs:copyScreenshots` pulls the Playwright UI shots into
   `public/images/ui/`; `:docs:npmBuild` builds the static site; `:docs:npmDev`/`npmPreview` serve it
   locally. Deployed by `.github/workflows/docs.yml`. When editing the docs, follow `modules/docs/agent/docs-voice.md`

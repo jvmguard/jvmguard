@@ -4,6 +4,7 @@ import dev.jvmguard.agent.config.transactions.MappedTransactionDef
 import dev.jvmguard.agent.config.transactions.MappedTransactionDef.AnnotatedTarget
 import dev.jvmguard.agent.config.transactions.MappedTransactionDef.MethodInterceptionMode
 import dev.jvmguard.ui.components.EnumSelect
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
@@ -16,22 +17,22 @@ class MappedTransactionDefDialog(
     onSave: (MappedTransactionDef) -> Unit,
 ) : AbstractTransactionDefDialog<MappedTransactionDef>(def, isNew, onSave) {
 
-    override val typeName: String get() = "Mapped"
+    override val typeKey: String get() = "mapped"
 
-    private val annotationName = TextField("Annotation class name").apply {
+    private val annotationName = TextField(t("recording.transaction.mapped.annotationName")).apply {
         setWidthFull()
-        helperText = "Fully qualified name of the annotation, e.g. com.example.Traced."
+        helperText = t("recording.transaction.mapped.annotationName.helper")
     }
-    private val annotatedTarget = EnumSelect("Annotation target", AnnotatedTarget::class.java) { it.toString() }.apply {
+    private val annotatedTarget = EnumSelect(t("recording.transaction.mapped.annotationTarget"), AnnotatedTarget::class.java).apply {
         addValueChangeListener { checkEnabled() }
     }
-    private val interceptSubclasses = Checkbox("Intercept subclasses").apply {
+    private val interceptSubclasses = Checkbox(t("recording.transaction.mapped.interceptSubclasses")).apply {
         addValueChangeListener { checkEnabled() }
     }
-    private val useDeclaringClassName = Checkbox("Use annotated class name for filter and naming")
-    private val methodInterceptionMode = EnumSelect("Method selection", MethodInterceptionMode::class.java) { it.toString() }.apply {
+    private val useDeclaringClassName = Checkbox(t("recording.transaction.mapped.useDeclaringClassName"))
+    private val methodInterceptionMode = EnumSelect(t("recording.transaction.mapped.methodSelection"), MethodInterceptionMode::class.java).apply {
         setWidthFull()
-        helperText = "If you annotate marker interfaces or abstract base classes, select \"All public methods\"."
+        helperText = t("recording.transaction.mapped.methodSelection.helper")
     }
 
     init {
@@ -48,7 +49,7 @@ class MappedTransactionDefDialog(
     @Suppress("DuplicatedCode")
     override fun bindDefinition(binder: Binder<MappedTransactionDef>) {
         binder.forField(annotationName)
-            .asRequired("Please enter a fully qualified annotation name.")
+            .asRequired(t("recording.transaction.mapped.annotationName.required"))
             .bind({ it.annotationName }, { d, v -> d.annotationName = v })
         binder.forField(annotatedTarget).bind({ it.annotatedTarget }, { d, v -> d.annotatedTarget = v })
         binder.forField(interceptSubclasses).bind({ it.isInterceptSubclasses }, { d, v -> d.isInterceptSubclasses = v })

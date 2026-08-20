@@ -9,7 +9,9 @@ import dev.jvmguard.data.vmdata.TelemetryInterval
 import dev.jvmguard.data.vmdata.VM
 import dev.jvmguard.ui.components.echart.EChart
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
 import dev.jvmguard.ui.server.serverTime
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.views.data.telemetry.TelemetryChartModels
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -48,8 +50,8 @@ class TransactionTimeLinePanel(
 
     private val closeButton = Button(VaadinIcon.CLOSE_SMALL.create()) { showAssociated() }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
-        setAriaLabel("Close time line")
-        setTooltipText("Back to the transactions telemetry")
+        setAriaLabel(t("transactions.timeLine.close.aria"))
+        setTooltipText(t("transactions.timeLine.close.tooltip"))
         testId = ID_CLOSE
         isVisible = false
         style.set("margin-inline-start", "auto")
@@ -117,26 +119,26 @@ class TransactionTimeLinePanel(
     private fun render() {
         val connection = Sessions.current()?.serverConnection
         if (connection == null) {
-            showMessage("Not connected to the jvmguard server.")
+            showMessage(t("transactions.notConnected"))
             return
         }
         val window = gridInterval.minimumTimeLineInterval
         if (window == null) {
-            showMessage(NO_DATA_TEXT)
+            showMessage(t("transactions.timeLine.noData"))
             return
         }
-        caption.text = window.toString()
+        caption.text = enumLabel(window)
         val currentMode = mode
         closeButton.isVisible = currentMode is Mode.Item
         val vm = vm ?: return
         val data = when (currentMode) {
             is Mode.Associated -> {
-                title.text = Telemetry.TRANSACTIONS.toString()
+                title.text = enumLabel(Telemetry.TRANSACTIONS)
                 connection.getTelemetryData(vm, Telemetry.TRANSACTIONS.mainId, window, telemetryEnd)
             }
 
             is Mode.Item -> {
-                title.text = "${currentMode.valueType} · ${currentMode.node.name}"
+                title.text = t("transactions.timeLine.itemTitle", enumLabel(currentMode.valueType), currentMode.node.name)
                 val treeInterval = window.getTransactionTreeTimeLineInterval() ?: return
                 connection.getTransactionTreeTimeLine(
                     vm, telemetryEnd - window.timeExtent, telemetryEnd, currentMode.node.identifier,
@@ -160,7 +162,7 @@ class TransactionTimeLinePanel(
     ) {
         val root = data?.rootNode
         if (data == null || root == null || data.isNoPreviousData) {
-            showMessage(NO_DATA_TEXT)
+            showMessage(t("transactions.timeLine.noData"))
             return
         }
         val frequencyUnit = Sessions.current()?.frequencyUnit ?: FrequencyUnit.PER_MINUTE
@@ -203,7 +205,5 @@ class TransactionTimeLinePanel(
     companion object {
         const val ID_CHART = "transaction-timeline-chart"
         const val ID_CLOSE = "transaction-timeline-close"
-
-        private const val NO_DATA_TEXT = "No time-line data is available for this selection."
     }
 }

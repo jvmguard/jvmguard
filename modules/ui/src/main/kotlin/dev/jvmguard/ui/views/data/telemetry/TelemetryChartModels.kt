@@ -4,7 +4,10 @@ import dev.jvmguard.data.config.FrequencyUnit
 import dev.jvmguard.data.vmdata.TelemetryData
 import dev.jvmguard.data.vmdata.TelemetryInterval
 import dev.jvmguard.data.vmdata.TelemetryNode
+import dev.jvmguard.data.vmdata.Telemetry
 import dev.jvmguard.data.vmdata.TelemetryType
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.components.echart.TelemetryChartModel
 import dev.jvmguard.ui.components.echart.TelemetryPoint
 import dev.jvmguard.ui.components.echart.TelemetrySeriesModel
@@ -20,6 +23,27 @@ class YRange(val min: Double?, val max: Double?)
 object TelemetryChartModels {
 
     private const val MISSING_INTERVAL_THRESHOLD_FACTOR = 5
+
+    private fun seriesName(data: TelemetryNode.Data): String = when (data.subId) {
+        TelemetryType.SUB_ID_NORMAL -> t("telemetry.series.normal")
+        TelemetryType.SUB_ID_SLOW -> t("telemetry.series.slow")
+        TelemetryType.SUB_ID_VERY_SLOW -> t("telemetry.series.verySlow")
+        TelemetryType.SUB_ID_ERROR -> t("telemetry.series.error")
+        TelemetryType.SUB_ID_AVERAGE -> t("telemetry.series.averageDuration")
+        else -> when (data.description) {
+            "Used" -> t("telemetry.series.used")
+            "Free" -> t("telemetry.series.free")
+            else -> data.description
+        }
+    }
+
+    fun nodeLabel(node: TelemetryNode): String = when (node.description) {
+        "Transactions" -> enumLabel(Telemetry.TRANSACTIONS)
+        "Average Transaction Duration" -> t("telemetry.name.averageTransactionDuration")
+        "Heap" -> t("telemetry.node.heap")
+        "Non-Heap" -> t("telemetry.node.nonHeap")
+        else -> node.description
+    }
 
     fun build(
         telemetryData: TelemetryData,
@@ -42,7 +66,7 @@ object TelemetryChartModels {
         val timestamps = telemetryData.timestamps ?: LongArray(0)
         var series = node.data.map { data ->
             TelemetrySeriesModel(
-                name = data.description,
+                name = seriesName(data),
                 colorKey = if (isTransactions) transactionColorKey(data.subId) else null,
                 points = buildPoints(timestamps, data.unitScaledData, stacked),
             )

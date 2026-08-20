@@ -1,6 +1,8 @@
 package dev.jvmguard.ui.views.log
 
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.views.login.LoginView
 import dev.jvmguard.ui.views.vms.VmsView
 import dev.jvmguard.connector.api.log.LogFile
@@ -24,6 +26,7 @@ import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.value.ValueChangeMode
 import com.vaadin.flow.router.BeforeEnterEvent
+import com.vaadin.flow.router.HasDynamicTitle
 import com.vaadin.flow.router.BeforeEnterObserver
 import com.vaadin.flow.server.streams.DownloadHandler
 import com.vaadin.flow.server.streams.DownloadResponse
@@ -37,13 +40,15 @@ interface LogModeView {
 }
 
 abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId: String) :
-    VerticalLayout(), BeforeEnterObserver, LogModeView {
+    VerticalLayout(), BeforeEnterObserver, LogModeView, HasDynamicTitle {
 
     private data class LogLine(val sequence: Long, val text: String)
 
-    override val logTitle: String get() = logFileType.toString()
+    override val logTitle: String get() = enumLabel(logFileType)
 
-    protected open val emptyStateHint: String get() = "No entries in this log yet."
+    override fun getPageTitle(): String = t("pageTitle.log", logTitle)
+
+    protected open val emptyStateHint: String get() = t("log.empty")
 
     protected open val infoText: String? get() = null
 
@@ -57,7 +62,7 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
         addValueChangeListener { openSelected() }
     }
     private val searchField = TextField().apply {
-        placeholder = "Filter"
+        placeholder = t("log.filter")
         isClearButtonVisible = true
         valueChangeMode = ValueChangeMode.LAZY
         testId = ID_SEARCH
@@ -67,14 +72,14 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
             refreshGrid()
         }
     }
-    private val autoScroll = Checkbox("Auto-scroll", true).apply {
+    private val autoScroll = Checkbox(t("log.autoScroll"), true).apply {
         testId = ID_AUTO_SCROLL
         addValueChangeListener { if (it.value) scrollToEnd() }
     }
     private val downloadAnchor = Anchor().apply {
         element.setAttribute("download", true)
         isVisible = false
-        add(Button("Download", VaadinIcon.DOWNLOAD.create()).apply {
+        add(Button(t("common.download"), VaadinIcon.DOWNLOAD.create()).apply {
             addThemeVariants(ButtonVariant.TERTIARY)
             testId = ID_DOWNLOAD
         })
@@ -175,7 +180,7 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
     private fun loadDescriptors() {
         val descriptors = Sessions.current()?.serverConnection?.getLogFileDescriptors(logFileType).orEmpty()
         emptyStateLabel.text = if (descriptors.isEmpty()) {
-            "No $logTitle files found. In development the server logs to the console."
+            t("log.noFiles", logTitle)
         } else {
             emptyStateHint
         }

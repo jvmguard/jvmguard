@@ -1,0 +1,38 @@
+---
+title: 声明式事务
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+在 jvmguard VM 组配置中维护匹配事务是开发工作流程中的一个额外步骤，很容易与实际代码失去同步。虽然匹配事务
+对于外部类是必需的，但对于自己的代码，直接注解关注的方法和类要容易维护得多。
+
+以这种方式定义的事务称为声明式事务，因为它们是用 jvmguard 注解在源代码中显式声明的。
+
+jvmguard 注解位于 JAR 文件 `api/jvmguard-annotations.jar` 中，如何通过 Maven 或 Gradle 下载此 JAR 文件，
+请参阅 [Javadoc 概览](/javadoc/overview-summary.html)。
+
+所有注解都使用 class 保留策略。这意味着它们存在于类文件中，但 JVM 不会将它们加载到内存。查询特定方法
+运行时注解的代码不会被额外的 jvmguard 注解干扰，因为它们只在类加载阶段被 jvmguard 检测，不会出现在已加载
+的类对象中。
+
+声明式事务的用法在 [`@MethodTransaction`](/javadoc/dev/jvmguard/annotation/MethodTransaction.html) 和
+[`@ClassTransaction`](/javadoc/dev/jvmguard/annotation/ClassTransaction.html) 注解的 **Javadoc 中有详细
+说明**。Javadoc 也包含在 jvmguard 安装目录的 `api/doc` 目录中。
+
+## 策略
+
+声明式事务注解只定义事务命名，不定义事务的策略。策略更靠近运维一侧，经常需要在生产环境中调整。
+
+可以通过**组名**在 jvmguard 配置中选择不同的声明式事务。每个声明式事务注解都可以有一个 "group" 参数，
+默认为空字符串。
+
+<Figure src="ui/declared_group.png" />
+
+如果配置的组粒度不够，或者要单独挑出某个特定的类，请进入下一步添加类过滤器。在这里也可以丢弃来自所选组
+和类的所有声明式事务。
+
+<Figure src="ui/declared_filter.png" />
+
+在向导的最后一步，为所选的声明式事务定义策略。与其他事务类型一样，通常合理的做法是在底部保留一个兜底
+事务定义，并在顶部添加更具体的事务定义。

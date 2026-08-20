@@ -26,7 +26,7 @@ class TelemetryScreenshots : ScreenshotTest() {
         login(demo = true)
         open("telemetry?${vmQuery(DEMO_VM)}")
         getByTestId(VmTelemetryView.ID_CHART).waitFor()
-        selectTelemetryType("Transactions", expectSeries = "Normal")
+        selectTelemetryType(l("enum.Telemetry.TRANSACTIONS"), expectSeries = l("telemetry.series.normal"))
         capture("telemetry_transactions")
     }
 
@@ -35,7 +35,7 @@ class TelemetryScreenshots : ScreenshotTest() {
         login(demo = true)
         open("telemetry?${vmQuery(DEMO_VM)}")
         getByTestId(VmTelemetryView.ID_CHART).waitFor()
-        selectTelemetryType("Heap Usage", expectSeries = "Used")
+        selectTelemetryType(l("enum.Telemetry.HEAP"), expectSeries = l("telemetry.series.used"))
         capture("telemetry_heap")
     }
 
@@ -53,9 +53,9 @@ class TelemetryScreenshots : ScreenshotTest() {
         login(demo = true)
         open("telemetry?${vmQuery(DEMO_VM)}")
         getByTestId(VmTelemetryView.ID_CHART).waitFor()
-        selectTelemetryType("Transactions", expectSeries = "Normal")
+        selectTelemetryType(l("enum.Telemetry.TRANSACTIONS"), expectSeries = l("telemetry.series.normal"))
         getByTestId(TelemetryNavigationBar.ID_INTERVAL).click()
-        selectOverlayOption("3 hours")
+        selectOverlayOption(l("enum.TelemetryInterval.THREE_HOURS"))
         // Wait until the chart has actually re-rendered at the 3-hour extent (see echart.ts data-xextent).
         locator("jvmguard-echart[data-xextent=\"${3 * 60 * 60 * 1000}\"]").first().waitFor()
         capture("telemetry_transactions_3hours")

@@ -2,13 +2,14 @@ package dev.jvmguard.ui.views.data
 
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.server.Sessions
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 
 class VmSelectorDialog(
     current: VmIdentifier,
     onSelect: (VmIdentifier) -> Unit,
     selectable: (VmIdentifier) -> Boolean = { true },
-    title: String = "Select group or JVM",
+    title: String = t("vms.selector.title"),
 ) : AbstractVmSelectorDialog(current, onSelect, selectable, title) {
 
     override fun configureColumns() {

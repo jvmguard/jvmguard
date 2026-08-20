@@ -5,6 +5,8 @@ import dev.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
 import dev.jvmguard.common.helper.DeepCopy
 import dev.jvmguard.ui.components.*
 import dev.jvmguard.ui.components.recording.RecordingGrid
+import dev.jvmguard.ui.server.enumLabel
+import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -22,9 +24,9 @@ class TelemetryGrid(
 
     private val tree = TreeGrid<TelemetryNode>().apply {
         testId = ID_GRID
-        addComponentHierarchyColumn(::nameCell).setHeader("Telemetry").setFlexGrow(1)
+        addComponentHierarchyColumn(::nameCell).setHeader(t("telemetry.grid.header")).setFlexGrow(1)
         addComponentColumn(::rowActions).setKey(ACTIONS_KEY).setAutoWidth(true).setFlexGrow(0)
-        setEmptyStateComponent(emptyState("No telemetries yet. Use \"Add telemetry\" to create one."))
+        setEmptyStateComponent(emptyState(t("telemetry.grid.empty")))
         addItemDoubleClickListener { editNode(it.item) }
         editDeleteKeys(::editNode, ::deleteNode)
         isAllRowsVisible = true
@@ -46,7 +48,7 @@ class TelemetryGrid(
         TelemetryConfigDialog(config, isNew = true, nameTaken = { nameExists(it, except = null) }) {
             telemetries().add(it)
             changed()
-            confirm("Add a line?", "\"${it.name}\" has no lines yet. Add one now?", "Add line") { addLine(it) }
+            confirm(t("telemetry.line.add.dialog.title"), t("telemetry.line.add.prompt", it.name), t("telemetry.line.add")) { addLine(it) }
         }.open()
     }
 
@@ -77,15 +79,15 @@ class TelemetryGrid(
     }
 
     private fun nodeName(node: TelemetryNode): String = when (node) {
-        is TelemetryNode.ConfigNode -> node.config.name.ifBlank { "(unnamed telemetry)" }
-        is TelemetryNode.LineNode -> node.line.lineName.ifBlank { "(unnamed line)" }
+        is TelemetryNode.ConfigNode -> node.config.name.ifBlank { t("telemetry.unnamed") }
+        is TelemetryNode.LineNode -> node.line.lineName.ifBlank { t("telemetry.line.unnamed") }
     }
 
     private fun detailText(node: TelemetryNode): String = when (node) {
         is TelemetryNode.ConfigNode -> buildList {
-            add(node.config.unit.toString())
+            add(enumLabel(node.config.unit))
             if (node.config.isStacked) {
-                add("stacked")
+                add(t("telemetry.detail.stacked"))
             }
         }.joinToString(", ", prefix = "[", postfix = "]")
 
@@ -93,17 +95,17 @@ class TelemetryGrid(
     }
 
     private fun rowActions(node: TelemetryNode): Component {
-        val menu = menuButton(VaadinIcon.ELLIPSIS_DOTS_V, "Actions", "telemetry-row-menu-${nodeName(node)}") {
-            addItem("Edit") { editNode(node) }
-            addItem("Delete") { deleteNode(node) }
+        val menu = menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "telemetry-row-menu-${nodeName(node)}") {
+            addItem(t("common.edit")) { editNode(node) }
+            addItem(t("common.delete")) { deleteNode(node) }
         }
         if (node !is TelemetryNode.ConfigNode) {
             return menu
         }
         val addLine = Button(VaadinIcon.PLUS.create()) { addLine(node.config) }.apply {
             addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL)
-            setAriaLabel("Add line")
-            setTooltipText("Add line")
+            setAriaLabel(t("telemetry.line.add"))
+            setTooltipText(t("telemetry.line.add"))
             testId = "telemetry-add-line-${nodeName(node)}"
         }
         return cellRow(addLine, menu)
@@ -135,12 +137,12 @@ class TelemetryGrid(
     }
 
     private fun deleteNode(node: TelemetryNode) = when (node) {
-        is TelemetryNode.ConfigNode -> confirmDelete("telemetry", nodeName(node)) {
+        is TelemetryNode.ConfigNode -> confirmDelete("recording.delete.telemetry", nodeName(node)) {
             telemetries().remove(node.config)
             changed()
         }
 
-        is TelemetryNode.LineNode -> confirmDelete("line", nodeName(node)) {
+        is TelemetryNode.LineNode -> confirmDelete("recording.delete.line", nodeName(node)) {
             node.parent.lines.remove(node.line)
             changed()
         }
