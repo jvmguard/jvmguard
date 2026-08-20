@@ -12,6 +12,7 @@ dependencies {
     api(project(":agent:bundle"))
     api("org.jooq:jool:0.9.14")
     implementation(libs.fastutil)
+    implementation(libs.hprof.redact)
     addJunit6()
 }
 

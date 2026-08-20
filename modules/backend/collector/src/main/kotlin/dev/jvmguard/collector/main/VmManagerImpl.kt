@@ -32,6 +32,7 @@ import dev.jvmguard.common.notification.ModificationType
 import dev.jvmguard.data.agent.UpdateArchiveFile
 import dev.jvmguard.data.config.GlobalConfig
 import dev.jvmguard.data.config.GroupHierarchyWrapper
+import dev.jvmguard.data.config.guardrails.GuardrailSettings
 import dev.jvmguard.data.config.thresholds.Threshold
 import dev.jvmguard.data.config.triggers.actions.RecordJfrAction
 import dev.jvmguard.data.config.triggers.actions.RecordJpsAction
@@ -130,9 +131,9 @@ class VmManagerImpl(
 
     override fun groupConfigsChanged() {
         initTriggersAndGroupThresholds()
-        for (entry in getConnections()) {
-            val groupHierarchyWrapper = configManager.getGroupHierarchyWrapper(entry.key)
-            setVmConfig(entry.value, groupHierarchyWrapper, false)
+        for ((key, value) in getConnections()) {
+            val groupHierarchyWrapper = configManager.getGroupHierarchyWrapper(key)
+            setVmConfig(value, groupHierarchyWrapper, false)
         }
     }
 
@@ -231,7 +232,7 @@ class VmManagerImpl(
     }
 
     override fun getMBeanNames(vm: VM, createPlatformServer: Boolean): Collection<String> {
-        val usedCreatePlatformServer = if (properties.isNoPlatformMBean) false else createPlatformServer
+        val usedCreatePlatformServer = !properties.isNoPlatformMBean && createPlatformServer
         val currentConnectionEntry = getConnectionEntry(vm)
         if (currentConnectionEntry != null) {
             val result = executeAndWait(vm, CommandType.MBEAN_LIST, MBeanListParameter(usedCreatePlatformServer), 1, TimeUnit.MINUTES) as MBeanListResult?
@@ -290,13 +291,16 @@ class VmManagerImpl(
         }
     }
 
-    override fun recordJfr(vm: VM, user: User, recordJfrAction: RecordJfrAction) {
-        collectorContext.executeLater(vm, setOf(collectorContext.getRecordJfrCommand(vm, user, recordJfrAction)))
+    override fun recordJfr(vm: VM, user: User, recordJfrAction: RecordJfrAction, redact: Boolean?) {
+        collectorContext.executeLater(vm, setOf(collectorContext.getRecordJfrCommand(vm, user, recordJfrAction, redact)))
     }
 
-    override fun heapDump(vm: VM, user: User) {
-        collectorContext.executeLater(vm, setOf(collectorContext.getHeapDumpCommand(vm, user, false, vm.name)))
+    override fun heapDump(vm: VM, user: User, redact: Boolean?) {
+        collectorContext.executeLater(vm, setOf(collectorContext.getHeapDumpCommand(vm, user, false, vm.name, redact)))
     }
+
+    override fun getGuardrailSettings(vm: VM): GuardrailSettings =
+        configManager.getGroupHierarchyWrapper(vm).guardrailSettings
 
     override fun threadDump(vm: VM, user: User) {
         collectorContext.executeLater(vm, setOf(collectorContext.getThreadDumpCommand(vm, user, false, vm.name)))
@@ -415,8 +419,8 @@ class VmManagerImpl(
     override val currentConnections: List<Connection>
         get() {
             val result = ArrayList<Connection>()
-            for (entry in getConnections()) {
-                result.add(entry.value.connection)
+            for ((_, value) in getConnections()) {
+                result.add(value.connection)
             }
             return result
         }
@@ -631,7 +635,10 @@ class VmManagerImpl(
                 }
             }
             if (fileMover != null) {
-                val snapshot = snapshotFileStorage.createSnapshotFile(vm, snapshotFileType, System.currentTimeMillis(), name, fileMover)
+                val redact = configManager.getGroupHierarchyWrapper(vm).guardrailSettings.redactSnapshots
+                val snapshot = snapshotFileStorage.createSnapshotFile(
+                    vm, snapshotFileType, System.currentTimeMillis(), name, fileMover, redact
+                )
 
                 if (snapshot != null && inboxAll) {
                     collectorContext.addInboxItems(vm.parentIdentifier, snapshot.name, "", snapshot, vm)

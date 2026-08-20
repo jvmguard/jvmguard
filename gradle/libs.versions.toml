@@ -26,6 +26,7 @@ cyclonedx = "3.2.4"
 # Pins the cyclonedx plugin's transitive Jackson (build tooling only) to a non-vulnerable release.
 jackson = "2.22.1"
 mcpSdk = "2.0.0"
+hprofRedact = "0.3.0"
 kover = "0.9.9"
 
 [libraries]
@@ -45,6 +46,7 @@ json = { module = "org.json:json", version.ref = "json" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
 nanojson = { module = "com.grack:nanojson", version.ref = "nanojson" }
 jdom = { module = "org.jdom:jdom2", version.ref = "jdom" }
+hprof-redact = { module = "me.bechberger:hprof-redact", version.ref = "hprofRedact" }
 fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 bouncycastle = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }

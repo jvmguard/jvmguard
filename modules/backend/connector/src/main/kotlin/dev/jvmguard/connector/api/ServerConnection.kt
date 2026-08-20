@@ -23,6 +23,7 @@ import dev.jvmguard.data.config.GroupConfig
 import dev.jvmguard.data.config.SmtpConfig
 import dev.jvmguard.data.config.external.ExternalConfig
 import dev.jvmguard.data.config.external.ServerInitConfig
+import dev.jvmguard.data.config.guardrails.GuardrailSettings
 import dev.jvmguard.data.config.sets.*
 import dev.jvmguard.data.config.triggers.actions.RecordJfrAction
 import dev.jvmguard.data.config.triggers.actions.RecordJpsAction
@@ -132,11 +133,13 @@ interface ServerConnection {
 
     fun getSnapshotFileSize(snapshotFile: SnapshotFile): Long
 
-    fun heapDump(vm: VM)
+    fun heapDump(vm: VM, redact: Boolean? = null)
     fun threadDump(vm: VM)
     fun runGC(vm: VM)
     fun recordJps(vm: VM, recordJpsAction: RecordJpsAction)
-    fun recordJfr(vm: VM, recordJfrAction: RecordJfrAction)
+    fun recordJfr(vm: VM, recordJfrAction: RecordJfrAction, redact: Boolean? = null)
+
+    fun getGuardrailSettings(vm: VM): GuardrailSettings
 
     fun getTransactionTreeCursor(
         vm: VM?,

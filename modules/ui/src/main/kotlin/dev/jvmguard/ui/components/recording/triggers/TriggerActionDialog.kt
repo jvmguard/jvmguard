@@ -49,16 +49,24 @@ abstract class TriggerActionDialog protected constructor(
 
     protected abstract fun writeBack(): Boolean
 
+    class RedactOption(var value: Boolean)
+
     companion object {
         const val ID_SAVE = "trigger-action-save"
+        const val ID_REDACT = "trigger-action-redact"
 
         fun create(action: TriggerAction, isNew: Boolean, onSave: () -> Unit): TriggerActionDialog =
-            create(action, (if (isNew) "Add action: " else "Edit action: ") + action.actionType, onSave)
+            create(action, (if (isNew) "Add action: " else "Edit action: ") + action.actionType, null, onSave)
 
-        fun create(action: TriggerAction, title: String, onSave: () -> Unit): TriggerActionDialog =
+        fun create(
+            action: TriggerAction,
+            title: String,
+            redactOption: RedactOption? = null,
+            onSave: () -> Unit,
+        ): TriggerActionDialog =
             when (action) {
                 is RecordJpsAction -> RecordJpsActionDialog(action, title, onSave)
-                is RecordJfrAction -> RecordJfrActionDialog(action, title, onSave)
+                is RecordJfrAction -> RecordJfrActionDialog(action, title, redactOption, onSave)
                 is ThreadDumpAction -> SnapshotActionDialog(action, title, onSave)
                 is HeapDumpAction -> SnapshotActionDialog(action, title, onSave)
                 is EmailAction -> EmailActionDialog(action, title, onSave)
@@ -176,8 +184,12 @@ private class RecordJpsActionDialog(private val action: RecordJpsAction, title: 
     }
 }
 
-private class RecordJfrActionDialog(private val action: RecordJfrAction, title: String, onSave: () -> Unit) :
-    RecordArtifactActionDialog(action, title, onSave) {
+private class RecordJfrActionDialog(
+    private val action: RecordJfrAction,
+    title: String,
+    private val redactOption: RedactOption?,
+    onSave: () -> Unit,
+) : RecordArtifactActionDialog(action, title, onSave) {
 
     private val mode = RadioButtonGroup<JfrConfigMode>().apply {
         setItems(*JfrConfigMode.entries.toTypedArray())
@@ -192,6 +204,13 @@ private class RecordJfrActionDialog(private val action: RecordJfrAction, title: 
     }
     private val settings = TextArea("JFR settings").apply { setWidthFull(); value = action.settings }
 
+    private val redact =
+        Checkbox("Redact sensitive data (system properties, environment variables, command lines)").apply {
+            value = redactOption?.value == true
+            testId = ID_REDACT
+            addClassName("jvmguard-settings-gap-before")
+        }
+
     init {
         mode.addValueChangeListener { updateMode() }
         updateMode()
@@ -200,6 +219,9 @@ private class RecordJfrActionDialog(private val action: RecordJfrAction, title: 
 
     override fun populate() {
         body.add(artifact, timeRow(time, unit), inbox, mode, profile, settings)
+        if (redactOption != null) {
+            body.add(redact)
+        }
     }
 
     override fun writeBack(): Boolean {
@@ -213,6 +235,7 @@ private class RecordJfrActionDialog(private val action: RecordJfrAction, title: 
         action.configMode = mode.value
         action.profileName = profile.value.orEmpty()
         action.settings = settings.value
+        redactOption?.value = redact.value
         return true
     }
 
@@ -419,10 +442,7 @@ private fun requireRecordingTime(field: IntegerField): Boolean = when {
 }
 
 private fun isUrl(value: String?): Boolean {
-    if (value.isNullOrBlank()) {
-        return false
-    }
-    return try {
+    return !value.isNullOrBlank() && try {
         URI(value).toURL()
         true
     } catch (_: Exception) {
@@ -430,12 +450,9 @@ private fun isUrl(value: String?): Boolean {
     }
 }
 
-// Blank means "no JSON body"; a bare string literal is rejected (matching V1).
+// Blank means "no JSON body"
 private fun isJson(value: String): Boolean {
-    if (value.isBlank()) {
-        return true
-    }
-    return try {
+    return value.isBlank() || try {
         JSON.readTree(value)
         !value.trim().startsWith("\"")
     } catch (_: Exception) {

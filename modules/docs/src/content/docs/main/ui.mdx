@@ -107,7 +107,15 @@ REST client may perform on the VMs of that group. A user with access level "prof
 VM group can manage them without administrator access.
 
 * **Diagnostic captures**  deny heap dumps, JProfiler snapshots or JFR recordings individually, cap the recording
-duration, and set a minimum interval between captures on the same VM.
+duration, and set a minimum interval between captures on the same VM. With **Redact heap dumps and JFR recordings by
+default**, snapshots captured for the group are stripped of sensitive data as they arrive on the server: all string
+contents and primitive values in heap dumps are zeroed (the heap structure and object sizes are preserved for
+analysis), and JFR recordings are scrubbed. On JDK 27 and later, system properties, environment variables and JVM
+command-line arguments are already redacted in-process (JEP 536), so those events are kept with `[REDACTED]`
+placeholders; note that the in-process redaction is filter-based — keys that do not match the JVM's default filters
+stay visible, and you can widen the filters with `-XX:FlightRecorderOptions` on the monitored JVM. On older JDKs the
+event types that routinely carry secrets — system properties, environment variables and process command lines — are
+dropped. Requesting users can still override the default for a single capture.
 * **Mutating actions**  deny actions that change a running VM without producing an artifact, such as invoking MBean
 operations or editing the recording configuration of a VM group.
 

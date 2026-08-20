@@ -114,8 +114,9 @@ class CollectorContext(
         }
     }
 
-    fun getRecordJfrCommand(vm: VM, user: User?, recordJfrAction: RecordJfrAction): Command {
+    fun getRecordJfrCommand(vm: VM, user: User?, recordJfrAction: RecordJfrAction, redact: Boolean? = null): Command {
         BaseResult.setTempDir(SnapshotFile.snapshotDirectory)
+        val resolvedRedact = resolveRedact(vm, redact)
         val predefined = recordJfrAction.configMode == JfrConfigMode.PREDEFINED
         val parameters = JfrRecordParameters(
             "VM " + vm.name,
@@ -125,19 +126,26 @@ class CollectorContext(
         )
         return Command(CommandType.JFR_SNAPSHOT, parameters, object : Handler<JfrSnapshotResult>() {
             override fun handle(result: JfrSnapshotResult) {
-                handleSnapshotToInboxItem(result, vm, user, recordJfrAction.isCreateInboxItem, recordJfrAction.artifactName, SnapshotFileType.JFR)
+                handleSnapshotToInboxItem(
+                    result, vm, user, recordJfrAction.isCreateInboxItem, recordJfrAction.artifactName,
+                    SnapshotFileType.JFR, resolvedRedact
+                )
             }
         })
     }
 
-    fun getHeapDumpCommand(vm: VM, user: User?, inboxAll: Boolean, name: String): Command {
+    fun getHeapDumpCommand(vm: VM, user: User?, inboxAll: Boolean, name: String, redact: Boolean? = null): Command {
         BaseResult.setTempDir(SnapshotFile.snapshotDirectory)
+        val resolvedRedact = resolveRedact(vm, redact)
         return Command(CommandType.HEAP_DUMP, null, object : Handler<HeapDumpResult>() {
             override fun handle(result: HeapDumpResult) {
-                handleSnapshotToInboxItem(result, vm, user, inboxAll, name, SnapshotFileType.HPZ)
+                handleSnapshotToInboxItem(result, vm, user, inboxAll, name, SnapshotFileType.HPZ, resolvedRedact)
             }
         })
     }
+
+    private fun resolveRedact(vm: VM, redact: Boolean?): Boolean =
+        redact ?: configManager.getGroupHierarchyWrapper(vm).guardrailSettings.redactSnapshots
 
     fun getThreadDumpCommand(vm: VM, user: User?, inboxAll: Boolean, name: String): Command {
         return Command(CommandType.THREAD_DUMP, null, object : Handler<ThreadDumpResult>() {
@@ -159,15 +167,22 @@ class CollectorContext(
         user: User?,
         inboxAll: Boolean,
         name: String,
-        snapshotFileType: SnapshotFileType
+        snapshotFileType: SnapshotFileType,
+        redact: Boolean = false,
     ) {
         val errorMessage = result.errorMessage
         if (errorMessage != null) {
             handleSnapshotError(errorMessage, vm, user, snapshotFileType)
         } else {
-            val snapshot = snapshotFileStorage.createSnapshotFile(vm, snapshotFileType, System.currentTimeMillis(), name, result)
-            logEvent(vm, null, LogCategory.INFO, "Recorded $snapshotFileType \"$name\"")
-            addArtifactInboxItem(user, inboxAll, vm, name, snapshot)
+            val snapshot = snapshotFileStorage.createSnapshotFile(
+                vm, snapshotFileType, System.currentTimeMillis(), name, result, redact
+            )
+            if (snapshot == null) {
+                handleSnapshotError("the snapshot could not be stored (see the server log)", vm, user, snapshotFileType)
+            } else {
+                logEvent(vm, null, LogCategory.INFO, "Recorded $snapshotFileType \"$name\"")
+                addArtifactInboxItem(user, inboxAll, vm, name, snapshot)
+            }
         }
     }
 

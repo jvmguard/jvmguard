@@ -69,41 +69,32 @@ class SnapshotFileStorage(
         }
     }
 
-    fun createSnapshotFile(vm: VM, type: SnapshotFileType, millis: Long, name: String, fileMover: FileMover): SnapshotFile? {
-        var snapshotFile: SnapshotFile? = null
+    fun createSnapshotFile(
+        vm: VM,
+        type: SnapshotFileType,
+        millis: Long,
+        name: String,
+        fileMover: FileMover,
+        redact: Boolean = false,
+    ): SnapshotFile? {
+        var snapshotFile: SnapshotFile?
         var movedFile: File? = null
         try {
-            dataSource.connection.use { connection ->
-                connection.autoCommit = false
-                try {
-                    connection.prepareStatement(
-                        "insert into $SNAPSHOT_FILE (vmId, type, snapshotTime, name, uncompressedLength) values (?,?,?,?,?)",
-                        Statement.RETURN_GENERATED_KEYS
-                    ).use { statement ->
-                        statement.setLong(1, vm.id)
-                        statement.setInt(2, type.databaseId)
-                        statement.setLong(3, millis)
-                        statement.setString(4, name)
-                        statement.setLong(5, fileMover.uncompressedLength)
-                        statement.execute()
-                        statement.generatedKeys.use { resultSet ->
-                            if (resultSet.next()) {
-                                val id = resultSet.getLong(1)
-                                val created = SnapshotFile(id, vm, type, millis, name)
-                                fileMover.moveToFile(created.file)
-                                movedFile = created.file
-                                created.updateUncompressedLength(fileMover.uncompressedLength)
-                                snapshotFile = created
-                            }
-                        }
-                    }
-                    connection.commit()
-                } catch (e: Exception) {
-                    connection.rollback()
-                    throw e
-                } finally {
-                    connection.autoCommit = true
+            // moving and redacting the file can take minutes for multi-GB heap dumps and must not hold a database transaction open
+            val created = insertSnapshotFileRow(vm, type, millis, name, fileMover.uncompressedLength) ?: return null
+            try {
+                fileMover.moveToFile(created.file)
+                movedFile = created.file
+                var uncompressedLength = fileMover.uncompressedLength
+                if (redact && SnapshotRedactor.supports(type)) {
+                    uncompressedLength = SnapshotRedactor.redact(created.file, type)
+                    updateUncompressedLength(created.id, uncompressedLength)
                 }
+                created.updateUncompressedLength(uncompressedLength)
+                snapshotFile = created
+            } catch (e: Exception) {
+                deleteSnapshotFileRow(created.id)
+                throw e
             }
         } catch (e: Exception) {
             snapshotFile = null
@@ -111,6 +102,61 @@ class SnapshotFileStorage(
             VmManagerImpl.SERVER_LOGGER.error("could not create snapshot file for {}", vm, e)
         }
         return snapshotFile
+    }
+
+    private fun insertSnapshotFileRow(vm: VM, type: SnapshotFileType, millis: Long, name: String, uncompressedLength: Long): SnapshotFile? {
+        var created: SnapshotFile? = null
+        dataSource.connection.use { connection ->
+            connection.autoCommit = false
+            try {
+                connection.prepareStatement(
+                    "insert into $SNAPSHOT_FILE (vmId, type, snapshotTime, name, uncompressedLength) values (?,?,?,?,?)",
+                    Statement.RETURN_GENERATED_KEYS
+                ).use { statement ->
+                    statement.setLong(1, vm.id)
+                    statement.setInt(2, type.databaseId)
+                    statement.setLong(3, millis)
+                    statement.setString(4, name)
+                    statement.setLong(5, uncompressedLength)
+                    statement.execute()
+                    statement.generatedKeys.use { resultSet ->
+                        if (resultSet.next()) {
+                            created = SnapshotFile(resultSet.getLong(1), vm, type, millis, name)
+                        }
+                    }
+                }
+                connection.commit()
+            } catch (e: Exception) {
+                connection.rollback()
+                throw e
+            } finally {
+                connection.autoCommit = true
+            }
+        }
+        return created
+    }
+
+    private fun updateUncompressedLength(id: Long, uncompressedLength: Long) {
+        dataSource.connection.use { connection ->
+            connection.prepareStatement("update $SNAPSHOT_FILE set uncompressedLength=? where id=?").use { statement ->
+                statement.setLong(1, uncompressedLength)
+                statement.setLong(2, id)
+                statement.execute()
+            }
+        }
+    }
+
+    private fun deleteSnapshotFileRow(id: Long) {
+        try {
+            dataSource.connection.use { connection ->
+                connection.prepareStatement("delete from $SNAPSHOT_FILE where id=?").use { statement ->
+                    statement.setLong(1, id)
+                    statement.execute()
+                }
+            }
+        } catch (e: Exception) {
+            VmManagerImpl.SERVER_LOGGER.error("could not delete snapshot file row {}", id, e)
+        }
     }
 
     fun deleteVMs(connection: Connection, vms: List<VM>) {

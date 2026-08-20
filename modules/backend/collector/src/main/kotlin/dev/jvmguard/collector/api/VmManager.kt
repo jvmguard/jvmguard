@@ -4,6 +4,7 @@ import dev.jvmguard.agent.data.MethodInfo
 import dev.jvmguard.agent.mbean.MBeanData
 import dev.jvmguard.agent.mbean.MBeanModificationData
 import dev.jvmguard.agent.mbean.MBeanOperationData
+import dev.jvmguard.data.config.guardrails.GuardrailSettings
 import dev.jvmguard.data.config.triggers.actions.RecordJfrAction
 import dev.jvmguard.data.config.triggers.actions.RecordJpsAction
 import dev.jvmguard.data.dashboard.Group
@@ -37,10 +38,12 @@ interface VmManager {
     fun getMethods(className: String, vm: VM): Collection<MethodInfo>
 
     fun runGC(vm: VM)
-    fun heapDump(vm: VM, user: User)
+    fun heapDump(vm: VM, user: User, redact: Boolean? = null)
     fun threadDump(vm: VM, user: User)
     fun recordJps(vm: VM, user: User, recordJpsAction: RecordJpsAction)
-    fun recordJfr(vm: VM, user: User, recordJfrAction: RecordJfrAction)
+    fun recordJfr(vm: VM, user: User, recordJfrAction: RecordJfrAction, redact: Boolean? = null)
+
+    fun getGuardrailSettings(vm: VM): GuardrailSettings
 
     fun deleteVM(vm: VM): Boolean
 

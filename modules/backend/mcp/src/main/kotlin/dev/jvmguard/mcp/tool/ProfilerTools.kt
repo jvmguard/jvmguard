@@ -51,7 +51,13 @@ class HeapDumpTool(ctx: McpToolContext) : McpTool(ctx) {
         val tool = Tool.builder(
             NAME,
             objectSchema(
-                mapOf("vm" to stringProperty("VM hierarchy path (from list_vms).")),
+                mapOf(
+                    "vm" to stringProperty("VM hierarchy path (from list_vms)."),
+                    "redact" to booleanProperty(
+                        "Redact the snapshot on arrival: zero all primitive values and string contents. " +
+                                "Default: the VM group's guardrail setting."
+                    ),
+                ),
                 listOf("vm"),
             ),
         ).description(
@@ -60,12 +66,13 @@ class HeapDumpTool(ctx: McpToolContext) : McpTool(ctx) {
                     "the dump appears in list_snapshot_files when ready."
         ).annotations(action("Heap dump")).build()
         return SyncToolSpecification(tool) { _, request ->
-            val vmPath = request.arguments()["vm"] as String
+            val args = request.arguments()
+            val vmPath = args["vm"] as String
             ctx.withConnection { conn ->
                 val vm = VmResolver.resolveVm(conn, vmPath)
                 ctx.requireCaptureAllowed(SnapshotFileType.HPZ, vm)
                 val triggeredAt = System.currentTimeMillis()
-                conn.heapDump(vm)
+                conn.heapDump(vm, args["redact"] as? Boolean)
                 ctx.recordCapture(vm)
                 jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.HPZ, triggeredAt, estimatedSeconds = 5)))
             }
@@ -120,6 +127,10 @@ class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
                     "durationSeconds" to integerProperty(
                         "Recording duration in seconds. Default: 60."
                     ),
+                    "redact" to booleanProperty(
+                        "Redact the recording on arrival: drop system properties, environment variables and " +
+                                "process command lines. Default: the VM group's guardrail setting."
+                    ),
                 ),
                 listOf("vm"),
             ),
@@ -143,7 +154,7 @@ class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
                     artifactName = vm.rawName
                 }
                 val triggeredAt = System.currentTimeMillis()
-                conn.recordJfr(vm, action)
+                conn.recordJfr(vm, action, args["redact"] as? Boolean)
                 ctx.recordCapture(vm)
                 jsonResult(
                     McpJson.write(

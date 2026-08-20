@@ -15,6 +15,7 @@ import dev.jvmguard.data.config.GlobalConfig
 import dev.jvmguard.data.config.GroupConfig
 import dev.jvmguard.data.config.external.ExternalConfig
 import dev.jvmguard.data.config.external.ServerInitConfig
+import dev.jvmguard.data.config.guardrails.GuardrailSettings
 import dev.jvmguard.data.config.sets.*
 import dev.jvmguard.data.config.triggers.actions.RecordJfrAction
 import dev.jvmguard.data.config.triggers.actions.RecordJpsAction
@@ -260,7 +261,7 @@ class MockServerConnectionImpl(override val user: User) : AbstractServerConnecti
         }
     }
 
-    override fun heapDump(vm: VM) {
+    override fun heapDump(vm: VM, redact: Boolean?) {
     }
 
     override fun threadDump(vm: VM) {
@@ -269,8 +270,10 @@ class MockServerConnectionImpl(override val user: User) : AbstractServerConnecti
     override fun recordJps(vm: VM, recordJpsAction: RecordJpsAction) {
     }
 
-    override fun recordJfr(vm: VM, recordJfrAction: RecordJfrAction) {
+    override fun recordJfr(vm: VM, recordJfrAction: RecordJfrAction, redact: Boolean?) {
     }
+
+    override fun getGuardrailSettings(vm: VM): GuardrailSettings = GuardrailSettings()
 
     override fun getMBeanNames(vm: VM, createPlatformServer: Boolean): Collection<String> = mockMBeans.getMBeanNames()
 

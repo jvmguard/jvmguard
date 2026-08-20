@@ -25,6 +25,8 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
     private val allowHeapDump = checkbox("Allow heap dumps", ID_ALLOW_HEAP_DUMP) { s, v -> s.allowHeapDump = v }
     private val allowJps = checkbox("Allow JProfiler snapshots", ID_ALLOW_JPS) { s, v -> s.allowJps = v }
     private val allowJfr = checkbox("Allow JFR recordings", ID_ALLOW_JFR) { s, v -> s.allowJfr = v }
+    private val redactSnapshots =
+        checkbox("Redact heap dumps and JFR recordings by default", ID_REDACT_SNAPSHOTS) { s, v -> s.redactSnapshots = v }
     private val allowMbeanMutations =
         checkbox("Allow MBean attribute writes and operations", ID_ALLOW_MBEAN_MUTATIONS) { s, v -> s.allowMbeanMutations = v }
     private val allowConfigEdit =
@@ -45,7 +47,10 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
         if (!contentBuilt) {
             content.removeAll()
             content.add(
-                settingsSection("Diagnostic captures", allowHeapDump, allowJps, allowJfr, maxRecordingMinutes, captureCooldown),
+                settingsSection(
+                    "Diagnostic captures",
+                    allowHeapDump, allowJps, allowJfr, redactSnapshots, maxRecordingMinutes, captureCooldown
+                ),
                 settingsSection("Mutating actions", allowMbeanMutations, allowConfigEdit),
             )
             contentBuilt = true
@@ -55,6 +60,7 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
         allowHeapDump.value = settings.allowHeapDump
         allowJps.value = settings.allowJps
         allowJfr.value = settings.allowJfr
+        redactSnapshots.value = settings.redactSnapshots
         allowMbeanMutations.value = settings.allowMbeanMutations
         allowConfigEdit.value = settings.allowConfigEdit
         maxRecordingMinutes.value = settings.maxRecordingSeconds / 60
@@ -99,6 +105,7 @@ class RecordingGuardrailsView : AbstractRecordingSettingsView() {
         const val ID_ALLOW_HEAP_DUMP = "guardrails-allow-heap-dump"
         const val ID_ALLOW_JPS = "guardrails-allow-jps"
         const val ID_ALLOW_JFR = "guardrails-allow-jfr"
+        const val ID_REDACT_SNAPSHOTS = "guardrails-redact-snapshots"
         const val ID_ALLOW_MBEAN_MUTATIONS = "guardrails-allow-mbean-mutations"
         const val ID_ALLOW_CONFIG_EDIT = "guardrails-allow-config-edit"
         const val ID_MAX_RECORDING = "guardrails-max-recording"

@@ -24,6 +24,7 @@ import dev.jvmguard.data.base.StoredConfig
 import dev.jvmguard.data.config.GlobalConfig
 import dev.jvmguard.data.config.GroupConfig
 import dev.jvmguard.data.config.external.ExternalConfig
+import dev.jvmguard.data.config.guardrails.GuardrailSettings
 import dev.jvmguard.data.config.external.ServerInitConfig
 import dev.jvmguard.data.config.sets.*
 import dev.jvmguard.data.config.triggers.actions.RecordArtifactAction
@@ -329,9 +330,9 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
     }
 
     @RequireProfiler
-    override fun heapDump(vm: VM) {
+    override fun heapDump(vm: VM, redact: Boolean?) {
         checkVmGroupAccess(vm)
-        vmManager.heapDump(vm, user)
+        vmManager.heapDump(vm, user, redact)
     }
 
     @RequireProfiler
@@ -420,10 +421,12 @@ class ServerConnectionImpl(@Suppress("SpringJavaInjectionPointsAutowiringInspect
     }
 
     @RequireProfiler
-    override fun recordJfr(vm: VM, recordJfrAction: RecordJfrAction) {
+    override fun recordJfr(vm: VM, recordJfrAction: RecordJfrAction, redact: Boolean?) {
         prepareRecordArtifactAction(recordJfrAction, vm)
-        vmManager.recordJfr(vm, user, recordJfrAction)
+        vmManager.recordJfr(vm, user, recordJfrAction, redact)
     }
+
+    override fun getGuardrailSettings(vm: VM): GuardrailSettings = vmManager.getGuardrailSettings(vm)
 
     private fun prepareRecordArtifactAction(recordArtifactAction: RecordArtifactAction, vm: VM) {
         checkVmGroupAccess(vm)

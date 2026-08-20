@@ -25,7 +25,10 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.AuthenticationException
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.UI
+import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.dependency.Uses
+import com.vaadin.flow.component.html.Span
+import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.grid.GridSortOrder
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.provider.SortDirection
@@ -299,19 +302,46 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
 
     private fun recordJfr(vm: VM) {
         val action = RecordJfrAction().apply { isCreateInboxItem = true }
-        TriggerActionDialog.create(action, "Record JFR snapshot") {
-            dispatch("JFR recording started. The snapshot will be delivered to your inbox.") { it.recordJfr(vm, action) }
+        val redactOption = TriggerActionDialog.RedactOption(redactDefault(vm))
+        TriggerActionDialog.create(action, "Record JFR snapshot", redactOption) {
+            dispatch("JFR recording started. The snapshot will be delivered to your inbox.") {
+                it.recordJfr(vm, action, redactOption.value)
+            }
         }.open()
     }
 
     private fun runGc(vm: VM) =
         dispatch("Garbage collection triggered for ${vm.name}") { it.runGC(vm) }
 
-    private fun confirmHeapDump(vm: VM) = confirm(
-        "Create HPROF snapshot",
-        "The HPROF snapshot will be delivered to your inbox. Creating it halts the JVM for a few seconds.",
-        "Create"
-    ) { dispatch("HPROF snapshot requested. Check your inbox.") { it.heapDump(vm) } }
+    private fun confirmHeapDump(vm: VM) {
+        val redact = Checkbox("Redact strings and primitive values in the snapshot").apply {
+            value = redactDefault(vm)
+            testId = ID_HEAP_DUMP_REDACT
+        }
+        object : JvmGuardDialog() {
+            init {
+                headerTitle = "Create HPROF snapshot"
+                add(
+                    VerticalLayout(
+                        Span("The HPROF snapshot will be delivered to your inbox. Creating it halts the JVM for a few seconds."),
+                        redact
+                    ).apply { isPadding = false }
+                )
+                confirmFooter("Create", ID_ACTION_HEAP_DUMP_CONFIRM) {
+                    close()
+                    dispatch("HPROF snapshot requested. Check your inbox.") { it.heapDump(vm, redact.value) }
+                }
+            }
+        }.open()
+    }
+
+    private fun redactDefault(vm: VM): Boolean =
+        try {
+            Sessions.current()?.serverConnection?.getGuardrailSettings(vm)?.redactSnapshots == true
+        } catch (e: Exception) {
+            Loggers.SERVER.warn("could not read guardrail settings for {}", vm, e)
+            false
+        }
 
     private fun confirmThreadDump(vm: VM) = confirm(
         "Create thread dump",
@@ -353,6 +383,8 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
         const val ID_ACTIONS = "vm-actions"
         const val ID_ACTION_GC = "vm-action-gc"
         const val ID_ACTION_HEAP_DUMP = "vm-action-heap-dump"
+        const val ID_ACTION_HEAP_DUMP_CONFIRM = "vm-action-heap-dump-confirm"
+        const val ID_HEAP_DUMP_REDACT = "vm-heap-dump-redact"
         const val ID_ACTION_THREAD_DUMP = "vm-action-thread-dump"
         const val ID_ACTION_RECORD_JPS = "vm-action-record-jps"
         const val ID_ACTION_RECORD_JFR = "vm-action-record-jfr"

@@ -14,6 +14,9 @@ open class GuardrailSettings @DefaultConstructor constructor() : OptionalConfig(
     var allowJfr: Boolean = true
         set(value) { field = changed(field, value) }
 
+    var redactSnapshots: Boolean = false
+        set(value) { field = changed(field, value) }
+
     var allowMbeanMutations: Boolean = true
         set(value) { field = changed(field, value) }
 

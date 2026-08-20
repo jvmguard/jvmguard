@@ -51,6 +51,16 @@ class RecordingGuardrailsTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
+    fun togglingRedactSnapshotsStagesToTheRootGroup() {
+        UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
+
+        assertFalse(rootGuardrails().redactSnapshots, "off by default")
+        use(checkbox(RecordingGuardrailsView.ID_REDACT_SNAPSHOTS)).click()
+
+        assertTrue(rootGuardrails().redactSnapshots, "the toggle is staged on the root group")
+    }
+
+    @Test
     fun togglingMbeanMutationsStagesToTheRootGroup() {
         UI.getCurrent().navigate(RecordingGuardrailsView::class.java)
 

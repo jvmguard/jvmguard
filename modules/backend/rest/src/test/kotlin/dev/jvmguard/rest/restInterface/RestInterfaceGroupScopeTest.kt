@@ -28,20 +28,13 @@ import dev.jvmguard.data.vmdata.*
 import dev.jvmguard.rest.entity.GroupEntity
 import dev.jvmguard.rest.provider.RestException
 import org.h2.jdbcx.JdbcDataSource
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.springframework.core.task.TaskExecutor
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import java.io.File
-import java.util.EnumSet
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import javax.management.MBeanAttributeInfo
 import javax.management.MBeanOperationInfo
@@ -68,7 +61,7 @@ class RestInterfaceGroupScopeTest {
         restInterface = RestInterfaceImpl(
             userManager, configManager, vmManager(),
             RestTelemetryProvider(unusedTelemetryProvider()), unusedTransactionProvider(),
-            BackupHandler(TaskExecutor { it.run() }, JvmGuardDirectories.getInstance(), dataSource)
+            BackupHandler({ it.run() }, JvmGuardDirectories.getInstance(), dataSource)
         )
     }
 
@@ -208,10 +201,11 @@ class RestInterfaceGroupScopeTest {
             override fun getClassNames(vm: VM, allClasses: Boolean): Collection<String> = throw UnsupportedOperationException()
             override fun getMethods(className: String, vm: VM): Collection<MethodInfo> = throw UnsupportedOperationException()
             override fun runGC(vm: VM) = throw UnsupportedOperationException()
-            override fun heapDump(vm: VM, user: User) = throw UnsupportedOperationException()
+            override fun heapDump(vm: VM, user: User, redact: Boolean?) = throw UnsupportedOperationException()
             override fun threadDump(vm: VM, user: User) = throw UnsupportedOperationException()
             override fun recordJps(vm: VM, user: User, recordJpsAction: RecordJpsAction) = throw UnsupportedOperationException()
-            override fun recordJfr(vm: VM, user: User, recordJfrAction: RecordJfrAction) = throw UnsupportedOperationException()
+            override fun recordJfr(vm: VM, user: User, recordJfrAction: RecordJfrAction, redact: Boolean?) = throw UnsupportedOperationException()
+            override fun getGuardrailSettings(vm: VM) = throw UnsupportedOperationException()
             override fun deleteVM(vm: VM): Boolean = throw UnsupportedOperationException()
             override fun getVms(ids: LongArray): Collection<VM> = throw UnsupportedOperationException()
             override fun getConnectedPooledVms(pool: VM): Collection<VM> = throw UnsupportedOperationException()
@@ -275,7 +269,7 @@ class RestInterfaceGroupScopeTest {
         @JvmStatic
         fun setUpClass() {
             CodecTypes.registerAll()
-            JvmGuardDirectories.init(createTempDirectory("jvmguard-rest-test").toString(), false, true)
+            JvmGuardDirectories.init(createTempDirectory("jvmguard-rest-test").toString(), integrationTest = false, dataDirectoryExplicit = true)
         }
     }
 }
