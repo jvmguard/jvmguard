@@ -25,6 +25,9 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
 
+      - name: Install CJK fonts
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+
       - name: Generate screenshots (${{ matrix.locale }})
         run: |
           ./gradlew :ui:screenshots :ui:darkScreenshots -Pjvmguard.screenshots.locale=${{ matrix.locale }} --max-workers=1 -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs

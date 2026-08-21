@@ -19,14 +19,18 @@ export interface Props {
 }
 const { src, alt = '', scale } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const locale = Astro.locals.starlightRoute?.locale;
+const route = Astro.locals.starlightRoute;
+const locale = route?.locale;
+// The generated screenshot dirs use BCP-47 (zh-CN), while starlightRoute.locale is the Starlight
+// config key / URL prefix (zh-cn). route.lang is the canonicalized BCP-47 tag, so it matches.
+const shotLocale = route?.lang;
 // `public/images` is served verbatim, so existence is checked on disk at build time (static build:
 // this component only runs while prerendering).
 const imageExists = (rel: string) => fs.existsSync(path.join(process.cwd(), 'public/images', rel));
 // Only ui/ screenshots are localized: ui/<name>.png -> ui/generated/<locale>/<name>.png
 const pick = (rel: string) => {
   if (!locale || !rel.startsWith('ui/')) return rel;
-  const localized = `ui/generated/${locale}/${rel.slice(3)}`;
+  const localized = `ui/generated/${shotLocale}/${rel.slice(3)}`;
   return imageExists(localized) ? localized : rel;
 };
 const isPng = src.endsWith('.png');
