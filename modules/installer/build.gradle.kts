@@ -87,7 +87,7 @@ tasks {
     register("release") {
         mustRunAfter(media)
         dependsOn(
-                ":agent:api:publishAndReleaseToMavenCentral"
+                ":agent:api:publishAndReleaseToMavenCentralGithub"
         )
         doLastWith(getReleaseTag("jvmguard"), execOperations) { releaseTag, execOps ->
             writeGitTag(execOps, releaseTag)
