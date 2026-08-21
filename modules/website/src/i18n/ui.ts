@@ -26,6 +26,14 @@ export function localeUrl(locale: Locale, path: string): string {
   return path === '/' ? prefix || '/' : `${prefix}${path}`;
 }
 
+/**
+ * Locale-aware URL into the docs site. The docs Starlight site uses the same
+ * locale codes: English at /docs/..., the others under /docs/<locale>/....
+ */
+export function docsUrl(locale: Locale, docsPath: string): string {
+  return locale === DEFAULT_LOCALE ? docsPath : docsPath.replace(/^\/docs/, `/docs/${locale}`);
+}
+
 export const en = {
   // PageFrame
   'nav.overview': 'Overview',

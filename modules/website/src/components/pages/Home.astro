@@ -6,6 +6,7 @@ import PageFrame from '../../layouts/PageFrame.astro';
 import {SITE} from '../../consts';
 import {
   DEFAULT_LOCALE,
+  docsUrl,
   getMessages,
   homeFeatures,
   homeSteps,
@@ -45,7 +46,7 @@ const shotBase = `/images/ui/${hasLocalizedShot ? shotDir : ''}profiling_options
     </p>
     <div class="btn-row">
       <a class="btn btn--primary" href={localeUrl(locale, '/download')}>{m['home.hero.cta.download']}</a>
-      <a class="btn btn--ghost" href={SITE.docs}>{m['home.hero.cta.docs']}</a>
+      <a class="btn btn--ghost" href={docsUrl(locale, SITE.docs)}>{m['home.hero.cta.docs']}</a>
       <a class="btn btn--ghost" href={SITE.repo}>{m['home.hero.cta.github']}</a>
     </div>
     <p class="hero__cred">{m['home.hero.cred']}</p>

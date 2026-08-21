@@ -5,7 +5,7 @@
 import PageFrame from '../../layouts/PageFrame.astro';
 import {SITE} from '../../consts';
 import {currentVersion, downloadUrl, hasAsset} from '../../data/release';
-import {DEFAULT_LOCALE, getMessages, type Locale} from '../../i18n/ui';
+import {DEFAULT_LOCALE, docsUrl, getMessages, type Locale} from '../../i18n/ui';
 
 interface Props {
   locale?: Locale;
@@ -81,7 +81,7 @@ const platforms = [
       ))}
     </div>
     <p class="muted platform__note">
-      {m['download.installer.note.1']}<code>http://localhost:8020/</code>{m['download.installer.note.2']}<code>8847</code>{m['download.installer.note.3']}<a href={SITE.docsInstalling}>{m['download.installer.note.link']}</a>{m['download.installer.note.4']}
+      {m['download.installer.note.1']}<code>http://localhost:8020/</code>{m['download.installer.note.2']}<code>8847</code>{m['download.installer.note.3']}<a href={docsUrl(locale, SITE.docsInstalling)}>{m['download.installer.note.link']}</a>{m['download.installer.note.4']}
     </p>
   </section>
 

@@ -11,6 +11,7 @@ import {
   LOCALE_NAMES,
   getMessages,
   htmlLang,
+  docsUrl,
   localeUrl,
   type Locale,
 } from '../i18n/ui';
@@ -36,7 +37,7 @@ const nav = [
   {label: m['nav.security'], href: localeUrl(locale, '/security'), key: 'security'},
   {label: m['nav.compare'], href: localeUrl(locale, '/compare'), key: 'compare'},
   {label: m['nav.download'], href: localeUrl(locale, '/download'), key: 'download'},
-  {label: m['nav.docs'], href: SITE.docs, key: 'docs'},
+  {label: m['nav.docs'], href: docsUrl(locale, SITE.docs), key: 'docs'},
 ] as const;
 
 // The language switcher links to the same page in each locale.
