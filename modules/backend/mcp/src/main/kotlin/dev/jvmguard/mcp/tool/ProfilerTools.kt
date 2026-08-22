@@ -17,6 +17,16 @@ private fun durationCapNote(requestedSeconds: Int, effectiveSeconds: Int): Map<S
         emptyMap()
     }
 
+internal fun effectiveRedact(guardrailRedact: Boolean, requested: Boolean?): Boolean =
+    guardrailRedact || (requested == true)
+
+internal fun redactForcedNote(guardrailRedact: Boolean, requested: Boolean?): Map<String, Any?> =
+    if (guardrailRedact && requested != true) {
+        mapOf("redaction" to "Redacted as required by the VM group's guardrail setting.")
+    } else {
+        emptyMap()
+    }
+
 internal fun captureAck(
     status: String,
     vmPath: String,
@@ -55,7 +65,8 @@ class HeapDumpTool(ctx: McpToolContext) : McpTool(ctx) {
                     "vm" to stringProperty("VM hierarchy path (from list_vms)."),
                     "redact" to booleanProperty(
                         "Redact the snapshot on arrival: zero all primitive values and string contents. " +
-                                "Default: the VM group's guardrail setting."
+                                "Default: the VM group's guardrail setting. When the guardrail requires " +
+                                "redaction, it cannot be turned off."
                     ),
                 ),
                 listOf("vm"),
@@ -72,9 +83,18 @@ class HeapDumpTool(ctx: McpToolContext) : McpTool(ctx) {
                 val vm = VmResolver.resolveVm(conn, vmPath)
                 ctx.requireCaptureAllowed(SnapshotFileType.HPZ, vm)
                 val triggeredAt = System.currentTimeMillis()
-                conn.heapDump(vm, args["redact"] as? Boolean)
+                val requestedRedact = args["redact"] as? Boolean
+                val guardrailRedact = ctx.guardrailsFor(vm).redactSnapshots
+                conn.heapDump(vm, effectiveRedact(guardrailRedact, requestedRedact))
                 ctx.recordCapture(vm)
-                jsonResult(McpJson.write(captureAck("capturing", vmPath, SnapshotFileType.HPZ, triggeredAt, estimatedSeconds = 5)))
+                jsonResult(
+                    McpJson.write(
+                        captureAck(
+                            "capturing", vmPath, SnapshotFileType.HPZ, triggeredAt, estimatedSeconds = 5,
+                            extras = redactForcedNote(guardrailRedact, requestedRedact),
+                        )
+                    )
+                )
             }
         }
     }
@@ -129,7 +149,8 @@ class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
                     ),
                     "redact" to booleanProperty(
                         "Redact the recording on arrival: drop system properties, environment variables and " +
-                                "process command lines. Default: the VM group's guardrail setting."
+                                "process command lines. Default: the VM group's guardrail setting. When the " +
+                                "guardrail requires redaction, it cannot be turned off."
                     ),
                 ),
                 listOf("vm"),
@@ -154,13 +175,16 @@ class RecordJfrTool(ctx: McpToolContext) : McpTool(ctx) {
                     artifactName = vm.rawName
                 }
                 val triggeredAt = System.currentTimeMillis()
-                conn.recordJfr(vm, action, args["redact"] as? Boolean)
+                val requestedRedact = args["redact"] as? Boolean
+                val guardrailRedact = ctx.guardrailsFor(vm).redactSnapshots
+                conn.recordJfr(vm, action, effectiveRedact(guardrailRedact, requestedRedact))
                 ctx.recordCapture(vm)
                 jsonResult(
                     McpJson.write(
                         captureAck(
                             "recording", vmPath, SnapshotFileType.JFR, triggeredAt, durationSeconds + 5, durationSeconds,
-                            extras = durationCapNote(requestedSeconds, durationSeconds),
+                            extras = durationCapNote(requestedSeconds, durationSeconds) +
+                                    redactForcedNote(guardrailRedact, requestedRedact),
                         )
                     )
                 )
