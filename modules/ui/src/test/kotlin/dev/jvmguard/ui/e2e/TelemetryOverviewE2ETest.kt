@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.e2e
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.WaitUntilState
@@ -81,9 +82,12 @@ class TelemetryOverviewE2ETest : PlaywrightE2ETest() {
         val overlay = locator("vaadin-dialog-overlay[opened]")
         assertThat(overlay).isVisible()
 
-        // Press Enter on the overlay, not the page body: the Select button's Enter shortcut is
-        // registered with listenOn(dialog), so the keydown must land inside the dialog's scope.
-        overlay.press("Enter")
+        // Since Vaadin 25.2.6 the overlay is hosted in the dialog's shadow DOM and a keydown dispatched
+        // on the overlay element itself no longer reaches that scope, so focus another tree row first like
+        // a keyboard user would.
+        val row = locator("vaadin-dialog[opened]").getByText("Database", Locator.GetByTextOptions().setExact(true)).first()
+        row.click()
+        row.press("Enter")
         assertThat(overlay).isHidden()
     }
 
