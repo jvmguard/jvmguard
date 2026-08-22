@@ -12,12 +12,12 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
-    "astro": "^7.2.0",
+    "astro": "^7.2.2",
     "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "concurrently": "^10.0.4",
+    "concurrently": "^10.0.5",
     "typescript": "^6.0.3"
   },
   "overrides": {
