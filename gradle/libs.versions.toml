@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.4.10"
-springBoot = "4.1.0"
+springBoot = "4.1.1"
 vaadin = "25.2.6"
 asm = "9.10.1"
 nanojson = "1.10"
@@ -25,7 +25,7 @@ cyclonedx = "3.2.4"
 # TODO check if this can be removed after the next cyclonedx release
 # Pins the cyclonedx plugin's transitive Jackson (build tooling only) to a non-vulnerable release.
 jackson = "2.22.2"
-mcpSdk = "2.0.0"
+mcpSdk = "2.0.1"
 hprofRedact = "0.3.0"
 kover = "0.9.9"
 
