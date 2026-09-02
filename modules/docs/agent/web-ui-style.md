@@ -107,8 +107,9 @@ testing (`com.vaadin:browserless-test-junit6`). Extend **`JvmGuardBrowserlessTes
 **E2E** (real browser) via Playwright: `./gradlew :ui:e2eTest` starts its **own** `ServerMain`
 (from `:server`, integration mode) on isolated ports (8123/8948), runs Playwright, and stops it
 (excluded from the normal `test`/`build`). Extend `PlaywrightE2ETest`, run each body in `onPage { … }` (a
-`Page` receiver). The e2e server runs in **production mode in CI** (a dev-mode start downloads Node and
-exceeds the startup window; `jvmguard.e2e.productionMode` overrides, default is `$CI` detection), and a
+`Page` receiver). The e2e server always runs in **production mode** (a dev-mode start downloads Node and
+exceeds the startup window in CI, and a dev bundle must never clobber the committed `prod.bundle`;
+`-Pjvmguard.e2e.productionMode=false` opts back into dev mode for UI iteration), and a
 failed start dumps the server log tail into the build output.
 
 - **Locate widgets by test id, never display text**: `Component.setTestId(ID)` ↔ `page.getByTestId(ID)`,

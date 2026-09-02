@@ -15,6 +15,7 @@ dependencies {
     api(libs.spring.boot.gradle.plugin)
     api(libs.vaadin.gradle.plugin)
     api(libs.kover.gradle.plugin)
+    api(libs.test.retry.gradle.plugin)
 
     // TODO check if this can be removed after the next cyclonedx release
     api(platform(libs.jackson.bom))

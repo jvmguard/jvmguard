@@ -223,7 +223,8 @@ test and the current JDK.
 - `checkTree` does not sleep blindly; it **polls the comparison every 5s** and returns on first match.
 - e2e server starts (`ServerProcessService`) take a `timeoutSeconds` parameter (e2e tasks pass 180) and
   **dump the server log tail on start failure**, so CI startup failures are diagnosable from the log.
-  The e2e servers run in production mode in CI (`jvmguard.e2e.productionMode`, default: `$CI` set).
+  The e2e servers always run in production mode (`jvmguard.e2e.productionMode`, default: `true`, so a
+  local dev-bundle build can never clobber the committed `prod.bundle`).
 
 **Running** (from the jvmguard root):
 - One test, current JDK: `./gradlew :integration:integrationTest --tests "*<TestName>"`

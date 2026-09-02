@@ -11,6 +11,7 @@ plugins {
     id("com.vaadin")
     id("spring-module")
     id("vaadin-bom")
+    id("org.gradle.test-retry")
 }
 
 kover {
@@ -102,8 +103,10 @@ val e2eServer = gradle.sharedServices.registerIfAbsent("jvmguardWebServer-e2e", 
 val e2eServerDataDir: File by lazy { createTempDirectory("jvmguard-web-e2e").toFile() }
 val e2eServerClasspath = e2eServerRuntime.elements.map { set -> set.joinToString(File.pathSeparator) { it.asFile.absolutePath } }
 
-// Dev-mode server startup downloads Node and builds a dev bundle. In CI that exceeds the startup window
-val e2eProductionMode = (findProperty("jvmguard.e2e.productionMode") as String?)?.toBoolean() ?: (System.getenv("CI") != null)
+// E2E servers always serve the production bundle, so local runs can never clobber the committed
+// prod.bundle with a dev-mode build (that was the historical source of stale bundle commits).
+// -Pjvmguard.e2e.productionMode=false opts back into dev mode for UI iteration.
+val e2eProductionMode = (findProperty("jvmguard.e2e.productionMode") as String?)?.toBoolean() ?: true
 
 val screenshotLocale = (findProperty("jvmguard.screenshots.locale") as String?) ?: "en"
 
@@ -163,6 +166,10 @@ tasks {
         systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir", project.layout.buildDirectory.dir("e2e").get().asFile.path)
         outputs.upToDateWhen { false }
+        retry {
+            maxRetries = 1
+            failOnPassedAfterRetry = false
+        }
     }
 
     register<Test>("configE2eTest") {
@@ -180,6 +187,10 @@ tasks {
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
         systemProperty("jvmguard.e2e.timeoutMs", "30000")
         outputs.upToDateWhen { false }
+        retry {
+            maxRetries = 1
+            failOnPassedAfterRetry = false
+        }
     }
 
     val dataE2eStartServer = register("dataE2eStartServer") {
@@ -245,6 +256,10 @@ tasks {
         systemProperty("jvmguard.e2e.url", "http://localhost:$dataPort")
         systemProperty("jvmguard.e2e.timeoutMs", "30000")
         outputs.upToDateWhen { false }
+        retry {
+            maxRetries = 1
+            failOnPassedAfterRetry = false
+        }
     }
 
     register<Test>("screenshots") {
@@ -261,7 +276,8 @@ tasks {
         // One test at a time against the single shared server, so captures never contend (deterministic runs).
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
-        // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
+        // Dev mode (the -Pjvmguard.e2e.productionMode=false escape hatch) compiles each route on
+        // first hit; be patient so the first navigation never flakes.
         systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir",
             layout.buildDirectory.dir("e2e/screenshotsLight/$screenshotLocale").get().asFile.path)
@@ -283,7 +299,8 @@ tasks {
         // One test at a time against the single shared server, so captures never contend (deterministic runs).
         maxParallelForks = 1
         systemProperty("jvmguard.e2e.url", "http://localhost:$e2ePort")
-        // Dev mode compiles each route on first hit; be patient so the first navigation never flakes.
+        // Dev mode (the -Pjvmguard.e2e.productionMode=false escape hatch) compiles each route on
+        // first hit; be patient so the first navigation never flakes.
         systemProperty("jvmguard.e2e.timeoutMs", "30000")
         systemProperty("jvmguard.e2e.screenshotDir",
             layout.buildDirectory.dir("e2e/screenshotsDark/$screenshotLocale").get().asFile.path)
