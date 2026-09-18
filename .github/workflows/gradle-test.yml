@@ -15,6 +15,13 @@ on:
         required: false
         type: boolean
         default: false
+      installer-test:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      install4j-license-key:
+        required: false
 
 permissions:
   contents: read
@@ -43,7 +50,13 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
 
+      - name: Install xvfb and window manager
+        if: ${{ inputs.installer-test }}
+        run: sudo apt-get update && sudo apt-get install -y xvfb openbox
+
       - name: Run Gradle
+        env:
+          INSTALL4J_LICENSE_KEY: ${{ secrets.install4j-license-key }}
         run: |
           ./gradlew ${{ inputs.tasks }} --continue --max-workers=1 -Dorg.gradle.jvmargs=-Xmx1500M -Dkotlin.daemon.jvm.options=-Xmx2G --no-watch-fs --stacktrace
 

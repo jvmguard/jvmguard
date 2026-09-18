@@ -2,14 +2,19 @@ import dev.jvmguard.build.*
 import com.install4j.gradle.Install4jTask
 
 plugins {
-    id("java-module")
+    id("kotlin-module")
     id("com.install4j.gradle")
 }
 
 configureInstall4j()
 
+sourceSets.create("installerTest")
+
 dependencies {
-    compileOnly(libs.install4j.runtime)
+    "installerTestImplementation"(platform(libs.junit.bom))
+    "installerTestImplementation"("org.junit.jupiter:junit-jupiter")
+    "installerTestImplementation"(libs.install4j.test)
+    "installerTestRuntimeOnly"("org.junit.platform:junit-platform-launcher")
 }
 
 val fullVersion = getProductVersion("jvmguard")
@@ -22,13 +27,13 @@ val applePrivateApiKey = providers.gradleProperty("applePrivateApiKey").orNull
 val digestSigningCommandLine = providers.gradleProperty("digestSigningCommandLine").orNull
 
 tasks {
-    val jar = named<Jar>("jar") {
-        include("dev/jvmguard/installer/**")
-    }
-
-    fun registerBuildMedia(name: String, mediaTypes: List<String>?): TaskProvider<Install4jTask> =
+    fun registerBuildMedia(
+        name: String,
+        mediaTypes: List<String>?,
+        destinationDir: File? = null,
+    ): TaskProvider<Install4jTask> =
         register<Install4jTask>(name) {
-            dependsOn(jar, ":dist")
+            dependsOn(":dist")
 
             val fullVersionForFileName = fullVersion.replace('.', '_')
             val majorVersion = getMajorVersion(fullVersion)
@@ -39,6 +44,9 @@ tasks {
 
             if (mediaTypes != null) {
                 this.mediaTypes.set(mediaTypes)
+            }
+            if (destinationDir != null) {
+                destination.set(destinationDir)
             }
 
             if (winCertPath == null && macCertPath == null) {
@@ -61,20 +69,43 @@ tasks {
 
             vmParameters.add("--enable-native-access=ALL-UNNAMED")
 
-            doFirstWith(fileSystemOperations, mediaDir) { fsOps, mediaDir ->
-                fsOps.delete { delete(mediaDir) }
-            }
+            if (destinationDir == null) {
+                doFirstWith(fileSystemOperations, mediaDir) { fsOps, mediaDir ->
+                    fsOps.delete { delete(mediaDir) }
+                }
 
-            val checksumFile = File("$mediaDir/sha256sums")
-            val checksumTargetFile = file("$mediaDir/sha256sums_$fullVersionForFileName.txt")
-            doLastWith(checksumFile, checksumTargetFile) {
-                    checksumFile, checksumTargetFile ->
-                checksumFile.renameTo(checksumTargetFile)
+                val checksumFile = File("$mediaDir/sha256sums")
+                val checksumTargetFile = file("$mediaDir/sha256sums_$fullVersionForFileName.txt")
+                doLastWith(checksumFile, checksumTargetFile) {
+                        checksumFile, checksumTargetFile ->
+                    checksumFile.renameTo(checksumTargetFile)
+                }
             }
         }
 
     val buildMedia = registerBuildMedia("buildMedia", null)
     val buildMediaLinux = registerBuildMedia("buildMediaLinux", listOf("unixInstaller", "unixArchive"))
+
+    val installerTestMediaDir = layout.buildDirectory.dir("installerTestMedia")
+    val buildInstallerTestMedia =
+        registerBuildMedia("buildInstallerTestMedia", listOf("unixInstaller"), installerTestMediaDir.get().asFile)
+
+    register<Test>("installerTest") {
+        dependsOn(buildInstallerTestMedia)
+
+        testClassesDirs = sourceSets["installerTest"].output.classesDirs
+        classpath = sourceSets["installerTest"].runtimeClasspath
+        useJUnitPlatform()
+        jvmArgs("--enable-native-access=ALL-UNNAMED")
+
+        val mediaFileName = "jvmguard_unix_installer_${fullVersion.replace('.', '_')}.sh"
+        systemProperty("test.media", installerTestMediaDir.get().asFile.resolve(mediaFileName).absolutePath)
+
+        // the Unix installer ships without a bundled JRE, point its launcher at the test toolchain's JDK
+        doFirst {
+            environment("INSTALL4J_JAVA_HOME", javaLauncher.get().metadata.installationPath.toString())
+        }
+    }
 
     val media = register("media") {
         dependsOn(buildMedia)

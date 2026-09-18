@@ -281,6 +281,22 @@ which `:agent:bootstrap`'s `copyDist` renames to `agent.jar` for `dist/agent/lib
   `:server`; `dev.jvmguard.common` lives in `:backend:data`.
   `modules/agent` — the agent loaded into monitored JVMs (independent of the server's
   Spring context and logging).
+- `modules/installer` — the install4j project (`jvmguard.install4j`, built with the
+  `com.install4j.gradle` plugin, version in `libs.versions.toml`; `:installer:media` builds all media,
+  `:installer:mediaLinux` the Unix installer/archive). The installer has **no custom code**: the
+  `config/application.yaml` read-modify-write cycle (preserve previous values on upgrade, write back
+  form input) is done with install4j 13.1's YAML actions — `ReadYamlPathAction`
+  (`$.jvmguard` → exploded installer variables + merged `jvmguardConfig` map) and
+  `ModifyYamlPathAction` (`valueVariableName=jvmguardConfig`, `overlayInstallerVariables` for the
+  write-back), shared between the installer and the "Configuration Helper" custom application.
+  `:installer:installerTest` (JUnit, `src/installerTest`, not part of `check`) builds the Unix
+  installer into `build/gradle/installer/installerTestMedia` (the release `media/` dir is untouched)
+  and drives its Swing GUI with the install4j Test API (`install4j-test`), asserting that form
+  values land in `config/application.yaml` and `config/jvmguard.varfile`. It runs unprivileged
+  (`-VnoPrivileges=true -Vjvmguard.noService=true` — installer variables are `-V`, not `-D`) and
+  needs a display; on headless machines the Test API wraps the installer in `xvfb-run` itself
+  (install `xvfb` plus `metacity`/`openbox`/`fluxbox`).
+
 - `gradle/libs.versions.toml` (all versions, single source), `settings.gradle.kts` (modules
   registered with explicit `include()`), the `foojay-resolver-convention` plugin provisions the
   JDK toolchains. The product-orchestration tasks (`dist`, `media`, `release`, `overwriteRelease`,

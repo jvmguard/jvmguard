@@ -100,7 +100,6 @@
   </launchers>
   <installerGui autoUpdateDescriptorUrl="https://jvmguard.dev/updates.xml">
     <customCode>
-      <archive location="../../build/gradle/installer/libs/installer.jar" />
       <resource location="../../dist/config/application.yaml" />
     </customCode>
     <applications>
@@ -144,7 +143,7 @@ return true;</property>
           </screen>
         </startup>
         <screens>
-          <screen id="2" beanClass="com.install4j.runtime.beans.screens.WelcomeScreen" styleId="5883">
+          <screen customizedId="welcome" id="2" beanClass="com.install4j.runtime.beans.screens.WelcomeScreen" styleId="5883">
             <actions>
               <group id="404" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <serializedBean>
@@ -192,7 +191,7 @@ return console.askOkCancel(message, true);
               </formComponent>
             </formComponents>
           </screen>
-          <screen name="License agreement" id="4069" beanClass="com.install4j.runtime.beans.screens.LicenseScreen">
+          <screen name="License agreement" customizedId="license" id="4069" beanClass="com.install4j.runtime.beans.screens.LicenseScreen">
             <condition>!Boolean.getBoolean("jvmguard.skipEula")</condition>
             <formComponents>
               <formComponent id="5393" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent">
@@ -200,7 +199,7 @@ return console.askOkCancel(message, true);
                   <property name="labelText" type="string">${i18n:LicenseLabel3}</property>
                 </serializedBean>
               </formComponent>
-              <formComponent id="5394" beanClass="com.install4j.runtime.beans.formcomponents.LicenseComponent" useExternalParametrization="true" externalParametrizationName="License Agreement" externalParametrizationMode="include">
+              <formComponent customizedId="license" id="5394" beanClass="com.install4j.runtime.beans.formcomponents.LicenseComponent" useExternalParametrization="true" externalParametrizationName="License Agreement" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="displayedTextFile" id="LocalizedExternalFile0">
                     <property name="languageIdToExternalFile">
@@ -225,7 +224,7 @@ return console.askOkCancel(message, true);
               </formComponent>
             </formComponents>
           </screen>
-          <screen id="4" beanClass="com.install4j.runtime.beans.screens.InstallationDirectoryScreen">
+          <screen customizedId="installationDir" id="4" beanClass="com.install4j.runtime.beans.screens.InstallationDirectoryScreen">
             <condition>!context.getBooleanVariable("sys.streamlinedInstallation")</condition>
             <actions>
               <group name="Initialize from previous" id="402" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
@@ -238,29 +237,43 @@ return console.askOkCancel(message, true);
                     </serializedBean>
                     <condition>context.getVariable("sys.responseFile") == null</condition>
                   </action>
-                  <action name="Read config file" id="323" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" multiExec="true">
+                  <action name="Read default config file" id="323" beanClass="com.install4j.extensions.yaml.ReadYamlPathAction" multiExec="true">
                     <serializedBean>
-                      <property name="script">
-                        <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">import dev.jvmguard.installer.*;
-
-String[] propertyNames = YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(new File(context.getResourceDirectory(),"application.yaml"), context);
-context.setVariable("jvmguardPropertyNames", propertyNames);
-
-File previousConfigFile = context.getDestinationFile("config/application.yaml");
-if (previousConfigFile.exists()) {
-    YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(previousConfigFile, context);
-}
-
-File mediaConfigFile = new File((String)context.getVariable("sys.mediaDir"), "application.yaml");
-if (mediaConfigFile.exists()) {
-    YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(mediaConfigFile, context);
-}
-
-return true;</property>
+                      <property name="file">
+                        <object class="java.io.File">
+                          <string>${installer:sys.resourceDir}/application.yaml</string>
                         </object>
                       </property>
+                      <property name="mappingToInstallerVariables" type="boolean" value="true" />
+                      <property name="mappingVariableName" type="string">jvmguardConfig</property>
+                      <property name="path" type="string">$.jvmguard</property>
                     </serializedBean>
+                  </action>
+                  <action name="Read previous config file" id="5948" beanClass="com.install4j.extensions.yaml.ReadYamlPathAction" multiExec="true">
+                    <serializedBean>
+                      <property name="file">
+                        <object class="java.io.File">
+                          <string>config/application.yaml</string>
+                        </object>
+                      </property>
+                      <property name="mappingToInstallerVariables" type="boolean" value="true" />
+                      <property name="mappingVariableName" type="string">jvmguardConfig</property>
+                      <property name="path" type="string">$.jvmguard</property>
+                    </serializedBean>
+                    <condition>context.getDestinationFile("config/application.yaml").exists()</condition>
+                  </action>
+                  <action name="Read media config file" id="5949" beanClass="com.install4j.extensions.yaml.ReadYamlPathAction" multiExec="true">
+                    <serializedBean>
+                      <property name="file">
+                        <object class="java.io.File">
+                          <string>${installer:sys.mediaDir}/application.yaml</string>
+                        </object>
+                      </property>
+                      <property name="mappingToInstallerVariables" type="boolean" value="true" />
+                      <property name="mappingVariableName" type="string">jvmguardConfig</property>
+                      <property name="path" type="string">$.jvmguard</property>
+                    </serializedBean>
+                    <condition>new File((String)context.getVariable("sys.mediaDir"), "application.yaml").exists()</condition>
                   </action>
                   <action name="Check if configured" id="1494" beanClass="com.install4j.runtime.beans.actions.control.SetVariableAction" multiExec="true">
                     <serializedBean>
@@ -304,7 +317,7 @@ return true;</property>
                   <property name="labelText" type="string">${i18n:SelectDirLabel(${compiler:sys.fullName})}</property>
                 </serializedBean>
               </formComponent>
-              <formComponent id="5403" beanClass="com.install4j.runtime.beans.formcomponents.InstallationDirectoryChooserComponent" useExternalParametrization="true" externalParametrizationName="Installation Directory Chooser" externalParametrizationMode="include">
+              <formComponent customizedId="installationDirChooser" id="5403" beanClass="com.install4j.runtime.beans.formcomponents.InstallationDirectoryChooserComponent" useExternalParametrization="true" externalParametrizationName="Installation Directory Chooser" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="requestFocus" type="boolean" value="true" />
                 </serializedBean>
@@ -334,7 +347,7 @@ return true;</property>
             </serializedBean>
             <beans>
               <link id="1979" targetId="412" />
-              <screen name="Data directory" id="1488" beanClass="com.install4j.runtime.beans.screens.FormScreen">
+              <screen name="Data directory" customizedId="dataDir" id="1488" beanClass="com.install4j.runtime.beans.screens.FormScreen">
                 <serializedBean>
                   <property name="subTitle" type="string">Choose where jvmguard stores its data</property>
                   <property name="title" type="string">Data Directory</property>
@@ -350,7 +363,7 @@ servers on the same computer, each installation has to have its own data directo
                     </serializedBean>
                   </formComponent>
                   <formComponent id="1490" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
-                  <formComponent id="1492" beanClass="com.install4j.runtime.beans.formcomponents.DirectoryChooserComponent">
+                  <formComponent customizedId="dataDirectory" id="1492" beanClass="com.install4j.runtime.beans.formcomponents.DirectoryChooserComponent">
                     <serializedBean>
                       <property name="labelText" type="string">Data directory:</property>
                       <property name="variableName" type="string">dataDirectory</property>
@@ -419,7 +432,7 @@ but you can run it under a dedicated existing service account.</property>
                   </group>
                 </formComponents>
               </screen>
-              <screen name="Configuration level" id="1992" beanClass="com.install4j.runtime.beans.screens.FormScreen">
+              <screen name="Configuration level" customizedId="configLevel" id="1992" beanClass="com.install4j.runtime.beans.screens.FormScreen">
                 <serializedBean>
                   <property name="subTitle" type="string">Do you want to configure advanced options?</property>
                   <property name="title" type="string">Advanced Options</property>
@@ -435,7 +448,7 @@ visually edited with the &lt;b&gt;configure&lt;/b&gt; executable at any time.</p
                     </serializedBean>
                   </formComponent>
                   <formComponent id="1997" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
-                  <formComponent id="1996" beanClass="com.install4j.runtime.beans.formcomponents.RadiobuttonsComponent">
+                  <formComponent customizedId="configLevel" id="1996" beanClass="com.install4j.runtime.beans.formcomponents.RadiobuttonsComponent">
                     <serializedBean>
                       <property name="radioButtonLabels" type="array" elementType="string" length="2">
                         <element index="0">Proceed immediately</element>
@@ -533,21 +546,20 @@ visually edited with the &lt;b&gt;configure&lt;/b&gt; executable at any time.</p
                       <property name="overwriteMode" type="enum" class="com.install4j.api.context.OverwriteMode" value="ALWAYS" />
                     </serializedBean>
                   </action>
-                  <action name="Merge properties into config file" id="399" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" actionElevationType="elevated">
+                  <action name="Merge properties into config file" id="399" beanClass="com.install4j.extensions.yaml.ModifyYamlPathAction" actionElevationType="elevated">
                     <serializedBean>
-                      <property name="script">
-                        <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">import dev.jvmguard.installer.*;
-
-Properties oldProperties = YamlConfigUtil.readJvmGuardSection(context.getDestinationFile("config/application.yaml"));
-
-File propertiesFile = new File((String)context.getVariable("jvmguardTempFile"));
-YamlConfigUtil.mergeJvmGuardSectionYaml(propertiesFile, true, context, oldProperties);
-
-return true;</property>
-                        </object>
+                      <property name="files" type="array" class="java.io.File" length="1">
+                        <element index="0">
+                          <object class="java.io.File">
+                            <string>${installer:jvmguardTempFile}</string>
+                          </object>
+                        </element>
                       </property>
+                      <property name="path" type="string">$.jvmguard</property>
+                      <property name="valueSource" type="enum" class="com.install4j.extensions.yaml.YamlValueSource" value="VARIABLE" />
+                      <property name="valueVariableName" type="string">jvmguardConfig</property>
                     </serializedBean>
+                    <condition>context.getVariable("jvmguardConfig") != null</condition>
                   </action>
                   <action name="Overwrite actual config file" id="400" beanClass="com.install4j.runtime.beans.actions.files.CopyFileAction" actionElevationType="elevated">
                     <serializedBean>
@@ -583,20 +595,21 @@ return true;</property>
               </group>
               <group name="Update config file from user input" id="4426" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <beans>
-                  <action name="Update config file from user input" id="397" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" actionElevationType="elevated">
+                  <action name="Update config file from user input" id="397" beanClass="com.install4j.extensions.yaml.ModifyYamlPathAction" actionElevationType="elevated">
                     <serializedBean>
-                      <property name="script">
-                        <object class="com.install4j.api.beans.ScriptProperty">
-                          <property name="value" type="string">import dev.jvmguard.installer.*;
-
-YamlConfigUtil.mergeJvmGuardSectionYaml(context.getDestinationFile("config/application.yaml"), true, context,
-    (String[])context.getVariable("jvmguardPropertyNames")
-);
-
-return true;</property>
-                        </object>
+                      <property name="files" type="array" class="java.io.File" length="1">
+                        <element index="0">
+                          <object class="java.io.File">
+                            <string>config/application.yaml</string>
+                          </object>
+                        </element>
                       </property>
+                      <property name="overlayInstallerVariables" type="boolean" value="true" />
+                      <property name="path" type="string">$.jvmguard</property>
+                      <property name="valueSource" type="enum" class="com.install4j.extensions.yaml.YamlValueSource" value="VARIABLE" />
+                      <property name="valueVariableName" type="string">jvmguardConfig</property>
                     </serializedBean>
+                    <condition>context.getVariable("jvmguardConfig") != null</condition>
                   </action>
                   <action id="4613" beanClass="com.install4j.runtime.beans.actions.text.FixCrLfAction" actionElevationType="elevated">
                     <serializedBean>
@@ -755,6 +768,33 @@ if (file.exists()) {
                   </property>
                 </serializedBean>
               </action>
+              <group name="Firewall rules" id="5950" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
+                <serializedBean>
+                  <property name="conditionExpression">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">return Util.isWindows() &amp;&amp; !context.getBooleanVariable("noPrivileges");</property>
+                    </object>
+                  </property>
+                </serializedBean>
+                <beans>
+                  <action name="Web UI firewall rule" id="5951" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated">
+                    <serializedBean>
+                      <property name="description" type="string">Web user interface of the jvmguard server</property>
+                      <property name="launcherId" type="string">70</property>
+                      <property name="localPorts" type="string">${installer:httpPort}</property>
+                      <property name="ruleName" type="string">jvmguard Web UI</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Monitored JVMs firewall rule" id="5952" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated">
+                    <serializedBean>
+                      <property name="description" type="string">Connections of monitored JVMs to the jvmguard server</property>
+                      <property name="launcherId" type="string">70</property>
+                      <property name="localPorts" type="string">${installer:vmPort}</property>
+                      <property name="ruleName" type="string">jvmguard Monitored JVMs</property>
+                    </serializedBean>
+                  </action>
+                </beans>
+              </group>
               <group name="Service" id="1348" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <serializedBean>
                   <property name="conditionExpression">
@@ -893,11 +933,23 @@ return true;</property>
               </formComponent>
             </formComponents>
           </screen>
-          <screen name="Banner with header at the top" id="5351" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="5883" finishScreen="true">
+          <screen name="Banner with header at the top" customizedId="finish" id="5351" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="5883" finishScreen="true">
             <serializedBean>
               <property name="title" type="string">Installation Completed</property>
             </serializedBean>
             <actions>
+              <action name="Save response file" id="5953" beanClass="com.install4j.runtime.beans.actions.misc.CreateResponseFileAction" actionElevationType="elevated">
+                <serializedBean>
+                  <property name="excludedVariables" type="array" elementType="string" length="1">
+                    <element index="0">sys.installationDir</element>
+                  </property>
+                  <property name="file">
+                    <object class="java.io.File">
+                      <string>config/jvmguard.varfile</string>
+                    </object>
+                  </property>
+                </serializedBean>
+              </action>
               <group id="4975" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <serializedBean>
                   <property name="conditionExpression">
@@ -1674,18 +1726,16 @@ context.goForward(1, true, true);
             <actions>
               <action id="5934" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" />
               <action id="5932" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
-              <action name="Read config file" id="460" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction">
+              <action name="Read config file" id="460" beanClass="com.install4j.extensions.yaml.ReadYamlPathAction">
                 <serializedBean>
-                  <property name="script">
-                    <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">import dev.jvmguard.installer.*;
-
-String[] propertyNames = YamlConfigUtil.yamlJvmGuardSectionToInstallerVariables(context.getDestinationFile("config/application.yaml"), context);
-context.setVariable("jvmguardPropertyNames", propertyNames);
-
-return true;</property>
+                  <property name="file">
+                    <object class="java.io.File">
+                      <string>config/application.yaml</string>
                     </object>
                   </property>
+                  <property name="mappingToInstallerVariables" type="boolean" value="true" />
+                  <property name="mappingVariableName" type="string">jvmguardConfig</property>
+                  <property name="path" type="string">$.jvmguard</property>
                 </serializedBean>
               </action>
             </actions>
@@ -1787,14 +1837,14 @@ You can edit that file directly, or use this wizard to change them. </property>
           </screen>
           <group name="Common configuration" id="412" beanClass="com.install4j.runtime.beans.groups.ScreenGroup">
             <beans>
-              <screen name="Web server" id="317" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="webServer">
+              <screen name="Web server" customizedId="webServer" id="317" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="webServer">
                 <serializedBean>
                   <property name="subTitle" type="string">Configure the web server for the user interface</property>
                   <property name="title" type="string">Web Server Configuration</property>
                 </serializedBean>
                 <formComponents>
                   <formComponent id="321" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
-                  <formComponent name="Port" id="319" beanClass="com.install4j.runtime.beans.formcomponents.IntegerTextfieldComponent">
+                  <formComponent name="Port" customizedId="httpPort" id="319" beanClass="com.install4j.runtime.beans.formcomponents.IntegerTextfieldComponent">
                     <serializedBean>
                       <property name="columns" type="int" value="5" />
                       <property name="helpText" type="string">&lt;html&gt;The bundled web server for the jvmguard user interface listens on this port.&lt;br&gt;
@@ -1805,7 +1855,7 @@ The default value is &lt;b&gt;8020&lt;/b&gt;.</property>
                       <property name="variableName" type="string">httpPort</property>
                     </serializedBean>
                   </formComponent>
-                  <formComponent name="HTTPS" id="1042" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent" insetTop="10">
+                  <formComponent name="HTTPS" customizedId="useHttps" id="1042" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent" insetTop="10">
                     <serializedBean>
                       <property name="checkboxText" type="string">Use HTTPS</property>
                       <property name="helpText" type="string">&lt;html&gt;Select this option if the above port should use the HTTPS protocol.&lt;br&gt;
@@ -1859,7 +1909,7 @@ return configLevel == null || configLevel == 1;</property>
               </property>
             </serializedBean>
             <beans>
-              <screen name="External Access" id="5807" beanClass="com.install4j.runtime.beans.screens.FormScreen">
+              <screen name="External Access" customizedId="externalAccess" id="5807" beanClass="com.install4j.runtime.beans.screens.FormScreen">
                 <serializedBean>
                   <property name="subTitle" type="string">Configure external access to the jvmguard server</property>
                   <property name="title" type="string">External Access</property>
@@ -1883,7 +1933,7 @@ Both use the protocol (HTTP or HTTPS) that is configured for the web server and 
                       <property name="variableName" type="string">restApiEnabled</property>
                     </serializedBean>
                   </formComponent>
-                  <formComponent id="5916" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                  <formComponent customizedId="mcpEnabled" id="5916" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                     <serializedBean>
                       <property name="checkboxText" type="string">Enable MCP server</property>
                       <property name="initiallySelected" type="boolean" value="true" />
@@ -1892,7 +1942,7 @@ Both use the protocol (HTTP or HTTPS) that is configured for the web server and 
                   </formComponent>
                 </formComponents>
               </screen>
-              <screen name="SSL" id="1038" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="ssl">
+              <screen name="SSL" customizedId="ssl" id="1038" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="ssl">
                 <serializedBean>
                   <property name="subTitle" type="string">Configure how to secure connections between JVMs and the jvmguard server</property>
                   <property name="title" type="string">Authentication and Encryption</property>
@@ -1913,7 +1963,7 @@ jvmguard UI already contain the correct certificate file.
                     </serializedBean>
                   </formComponent>
                   <formComponent id="1040" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
-                  <formComponent id="1041" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                  <formComponent customizedId="vmUseSsl" id="1041" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                     <serializedBean>
                       <property name="checkboxText" type="string">Use SSL for JVM connections</property>
                       <property name="variableName" type="string">vmUseSsl</property>
@@ -1921,7 +1971,7 @@ jvmguard UI already contain the correct certificate file.
                   </formComponent>
                 </formComponents>
               </screen>
-              <screen name="Monitored JVMs" id="548" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="monitoredJVMs">
+              <screen name="Monitored JVMs" customizedId="monitoredJvms" id="548" beanClass="com.install4j.runtime.beans.screens.FormScreen" wizardIndexChangeType="step" wizardIndexKey="monitoredJVMs">
                 <serializedBean>
                   <property name="subTitle" type="string">Configure how monitored JVMs connect to the jvmguard server</property>
                   <property name="title" type="string">Monitored JVM Options</property>
@@ -1937,7 +1987,7 @@ application, you can change that port below:
                     </serializedBean>
                   </formComponent>
                   <formComponent id="550" beanClass="com.install4j.runtime.beans.formcomponents.SpacerComponent" />
-                  <formComponent id="551" beanClass="com.install4j.runtime.beans.formcomponents.IntegerTextfieldComponent">
+                  <formComponent customizedId="vmPort" id="551" beanClass="com.install4j.runtime.beans.formcomponents.IntegerTextfieldComponent">
                     <serializedBean>
                       <property name="columns" type="int" value="5" />
                       <property name="helpText" type="string">&lt;html&gt;The port on which the monitored JVMs connect to the jvmguard server.&lt;br&gt;
@@ -2325,8 +2375,8 @@ Changes only come into effect after you restart the jvmguard server.</property>
       </variables>
     </macosFolder>
     <macosFolderArchive name="Mac OS X Folder Archive" id="2006" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.version}" installDir="jvmguard" archiveType="tgz" architecture="universal" />
-    <linuxRPM name="Linux RPM" id="5923" overwriteNeverAsConfigFiles="true" />
-    <linuxDeb name="Linux Deb Archive" id="5924" overwriteNeverAsConfigFiles="true" />
+    <linuxRPM name="Linux RPM" id="5923" mediaFileName="${compiler:sys.shortName}_linux_rpm_${compiler:sys.version}" arch="x86_64" overwriteNeverAsConfigFiles="true" require64BitVm="true" />
+    <linuxDeb name="Linux Deb" id="5924" mediaFileName="${compiler:sys.shortName}_linux_deb_${compiler:sys.version}" overwriteNeverAsConfigFiles="true" require64BitVm="true" architectureSet="true" architecture="amd64" description="Profiling access to production JVMs" />
   </mediaSets>
   <buildIds buildAll="false">
     <mediaSet refId="23" />
