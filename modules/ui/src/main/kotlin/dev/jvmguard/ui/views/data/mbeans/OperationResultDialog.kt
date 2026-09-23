@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Key
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.treegrid.TreeGrid
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 import javax.management.MBeanOperationInfo
@@ -30,7 +31,7 @@ class OperationResultDialog(
         val root = AttributeNode.buildReturnValueTree(operationInfo.descriptor, returnValue)
         val treeData = TreeData<AttributeNode>()
         addAttributeNodes(treeData, null, root.children)
-        tree.setDataProvider(TreeDataProvider(treeData))
+        tree.setDataProvider(TreeDataProvider(treeData, HierarchyFormat.NESTED))
         tree.expandRecursively(treeData.rootItems, Int.MAX_VALUE)
 
         add(tree)

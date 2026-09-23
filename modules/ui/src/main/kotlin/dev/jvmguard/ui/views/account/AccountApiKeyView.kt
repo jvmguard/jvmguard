@@ -112,7 +112,7 @@ class AccountApiKeyView : AbstractAccountSectionView() {
         setTooltipText(t("common.copy"))
     }
 
-    private fun mcpCopyButton(): Button = Button(VaadinIcon.COPY_O.create()) {
+    private fun mcpCopyButton(): Button = Button(VaadinIcon.COPY.create()) {
         mcpSnippet.element.executeJs($$"if (navigator.clipboard) { navigator.clipboard.writeText($0); }", mcpSnippet.text)
         Notifications.show(t("common.copiedToClipboard"))
     }.apply {

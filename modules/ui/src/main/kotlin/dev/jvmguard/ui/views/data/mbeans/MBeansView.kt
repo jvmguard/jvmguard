@@ -27,6 +27,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout
 import com.vaadin.flow.component.tabs.TabSheet
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.component.treegrid.TreeGrid
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 import com.vaadin.flow.data.value.ValueChangeMode
@@ -94,7 +95,7 @@ class MBeansView : VmDataView(), HasDynamicTitle {
         setSizeFull()
     }
 
-    private val attributeInfoIcon = VaadinIcon.INFO_CIRCLE_O.create().apply {
+    private val attributeInfoIcon = VaadinIcon.INFO_CIRCLE.create().apply {
         setSize(GRID_ICON_SIZE)
         addClassName("jvmguard-mbean-info-icon")
     }
@@ -277,7 +278,7 @@ class MBeansView : VmDataView(), HasDynamicTitle {
     }
 
     private fun showAttributeTree(treeData: TreeData<AttributeNode>, keepExpansion: Set<List<String>>) {
-        attributeTree.setDataProvider(TreeDataProvider(treeData))
+        attributeTree.setDataProvider(TreeDataProvider(treeData, HierarchyFormat.NESTED))
         attributeTreeData = treeData
         restoreAttributeExpansion(treeData, keepExpansion)
         lastAttributeSignature = attributeSignature(treeData)
@@ -330,7 +331,7 @@ class MBeansView : VmDataView(), HasDynamicTitle {
     }
 
     private fun clearAttributes() {
-        attributeTree.setDataProvider(TreeDataProvider(TreeData()))
+        attributeTree.setDataProvider(TreeDataProvider(TreeData(), HierarchyFormat.NESTED))
         attributeTreeData = null
         lastAttributeSignature = null
         currentObjectName = null
@@ -338,7 +339,7 @@ class MBeansView : VmDataView(), HasDynamicTitle {
     }
 
     private fun nameCell(node: MBeanNode): Component {
-        val icon = (if (node is MBeanLeafNode) VaadinIcon.CUBE else VaadinIcon.FOLDER_O).create()
+        val icon = (if (node is MBeanLeafNode) VaadinIcon.CUBE else VaadinIcon.FOLDER).create()
         icon.setSize(GRID_ICON_SIZE)
         return cellRow(icon, Span(node.name))
     }

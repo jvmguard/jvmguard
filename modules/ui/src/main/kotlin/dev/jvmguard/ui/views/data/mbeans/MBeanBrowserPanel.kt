@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.splitlayout.SplitLayout
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.component.treegrid.TreeGrid
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 import com.vaadin.flow.data.value.ValueChangeMode
@@ -113,7 +114,7 @@ class MBeanBrowserPanel(
             return
         }
         selectedObjectName = objectName
-        attributeTree.setDataProvider(TreeDataProvider(buildAttributeTree(beanInfo, data.values)))
+        attributeTree.setDataProvider(TreeDataProvider(buildAttributeTree(beanInfo, data.values), HierarchyFormat.NESTED))
         onAttributeSelected(null)
     }
 
@@ -138,12 +139,12 @@ class MBeanBrowserPanel(
     private fun clearAttributes() {
         selectedObjectName = null
         parents.clear()
-        attributeTree.setDataProvider(TreeDataProvider(TreeData()))
+        attributeTree.setDataProvider(TreeDataProvider(TreeData(), HierarchyFormat.NESTED))
         onAttributeSelected(null)
     }
 
     private fun nameCell(node: MBeanNode): Component {
-        val icon = (if (node is MBeanLeafNode) VaadinIcon.CUBE else VaadinIcon.FOLDER_O).create()
+        val icon = (if (node is MBeanLeafNode) VaadinIcon.CUBE else VaadinIcon.FOLDER).create()
         icon.setSize("1em")
         return cellRow(icon, Span(node.name))
     }

@@ -84,7 +84,7 @@ class ThresholdGrid(
     }
 
     private fun rowActions(threshold: Threshold): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "threshold-row-menu-${displayName(threshold)}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("recording.actions"), "threshold-row-menu-${displayName(threshold)}") {
             addItem(t("common.edit")) { edit(threshold) }
             addItem(t("common.delete")) { delete(threshold) }
         }

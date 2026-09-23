@@ -83,7 +83,7 @@ class TriggerGrid(
     }
 
     private fun rowActions(trigger: Trigger): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "trigger-row-menu-${triggers().indexOf(trigger)}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("recording.actions"), "trigger-row-menu-${triggers().indexOf(trigger)}") {
             addItem(t("common.edit")) { edit(trigger) }
             addItem(t(if (trigger.isEnabled) "common.disable" else "common.enable")) {
                 trigger.isEnabled = !trigger.isEnabled

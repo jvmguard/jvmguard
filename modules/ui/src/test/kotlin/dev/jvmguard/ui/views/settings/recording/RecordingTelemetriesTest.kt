@@ -127,7 +127,9 @@ class RecordingTelemetriesTest : JvmGuardBrowserlessTest() {
         @Suppress("UNCHECKED_CAST")
         val telemetryTree = find<TreeGrid<*>>().all().first() as TreeGrid<Any>
         val actionsCell = use(telemetryTree).getCellComponent(0, TelemetryGrid.ACTIONS_KEY)
-        use(find<Button>(actionsCell).all().first(testId("telemetry-add-line-Memory"))).click()
+        val addLineButton = actionsCell.children.toList().filterIsInstance<Button>()
+            .first { it.testId == "telemetry-add-line-Memory" }
+        addLineButton.click()
 
         val lineDialog = find<TelemetryLineDialog>().single()
         use(find<Button>(lineDialog).all().first { it.text == "Select" }).click()

@@ -18,6 +18,9 @@ import com.vaadin.flow.component.splitlayout.SplitLayout
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.component.textfield.TextField
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat
+import com.vaadin.flow.data.provider.hierarchy.TreeData
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 import com.vaadin.flow.data.value.ValueChangeMode
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.router.HasDynamicTitle
@@ -397,7 +400,9 @@ class TransactionsView : VmDataView(), HasDynamicTitle {
             return
         }
         maxTime = displayed.maxOf { it.time }
-        grid.setItems(displayed) { it.children }
+        val treeData = TreeData<TransactionNode>()
+        treeData.addItems(displayed) { it.children }
+        grid.setDataProvider(TreeDataProvider(treeData, HierarchyFormat.NESTED))
         showGrid()
         updateExport(displayed)
     }
@@ -409,7 +414,7 @@ class TransactionsView : VmDataView(), HasDynamicTitle {
             return null
         }
         return menuButton(
-            VaadinIcon.ELLIPSIS_DOTS_V, t("transactions.timeLine.options"), ID_ROW_MENU,
+            VaadinIcon.ELLIPSIS_V, t("transactions.timeLine.options"), ID_ROW_MENU,
             tooltip = t("transactions.timeLine.show"),
         ) {
             TransactionTreeValueType.entries.forEach { valueType ->

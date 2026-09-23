@@ -17,6 +17,6 @@ fun actionTypeIcon(type: ActionType): VaadinIcon = when (type) {
     ActionType.HEAP_DUMP -> VaadinIcon.DATABASE
     ActionType.EMAIL -> VaadinIcon.ENVELOPE
     ActionType.WEBHOOK -> VaadinIcon.GLOBE
-    ActionType.LOG -> VaadinIcon.FILE_TEXT_O
+    ActionType.LOG -> VaadinIcon.FILE_TEXT
     ActionType.INBOX -> VaadinIcon.INBOX
 }

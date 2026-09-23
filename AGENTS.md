@@ -85,7 +85,7 @@ embedded web server are all in the one context. Notes:
 The UI is a single Vaadin 25 frontend, served by the Spring Boot app's **embedded Tomcat 11
 (`jakarta`)** at the root `/`, reusing the in-process backend.
 
-- Vaadin **25.1 (Flow)**, **Aura** theme, free/open-source components only (no commercial Vaadin).
+- Vaadin **25.3 (Flow)**, **Aura** theme, free/open-source components only (no commercial Vaadin).
 - **Kotlin** — the entire module (production + tests) is Kotlin (`kotlin("jvm")`), built with the
   **Karibu-DSL** (`com.github.mvysny.karibudsl:karibu-dsl`). Follow
   **[modules/docs/agent/kotlin-style.md](./modules/docs/agent/kotlin-style.md)** (general Kotlin + interop) and
@@ -102,7 +102,7 @@ The UI is a single Vaadin 25 frontend, served by the Spring Boot app's **embedde
 #### Working on the UI
 
 Theming, components, forms, and testing conventions live in **[modules/docs/agent/web-ui-style.md](./modules/docs/agent/web-ui-style.md)**
-(read it before touching UI code, and verify APIs against the Vaadin 25.1 MCP server, not memory).
+(read it before touching UI code, and verify APIs against the Vaadin 25.3 MCP server, not memory).
 Orientation:
 
 - **Package layout (extend, don't flatten):** `dev.jvmguard.ui.AppShell` (root `AppShellConfigurator`);

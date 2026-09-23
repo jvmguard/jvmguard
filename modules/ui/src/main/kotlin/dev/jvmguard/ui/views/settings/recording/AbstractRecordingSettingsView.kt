@@ -11,7 +11,6 @@ import dev.jvmguard.ui.views.settings.AbstractSettingsPage
 import dev.jvmguard.ui.views.settings.SettingsArea
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.checkbox.Checkbox
@@ -20,7 +19,6 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
-import com.vaadin.flow.shared.Registration
 
 abstract class AbstractRecordingSettingsView : AbstractSettingsPage() {
 
@@ -52,7 +50,6 @@ abstract class AbstractRecordingSettingsView : AbstractSettingsPage() {
     }
 
     private var currentSelection: VmIdentifier = VmIdentifier.ROOT_GROUP_IDENTIFIER
-    private var modelRegistration: Registration? = null
     private var built = false
 
     override fun onAttach(attachEvent: AttachEvent) {
@@ -76,17 +73,11 @@ abstract class AbstractRecordingSettingsView : AbstractSettingsPage() {
                 setFlexGrow(1.0, breadcrumb)
             }
             add(toolbar, content)
+            whenAttached { Sessions.recordingGroupSelection().addListener(::applySelection) }
             built = true
         }
         val model = Sessions.recordingGroupSelection()
-        modelRegistration = model.addListener(::applySelection)
         applySelection(model.selection)
-    }
-
-    override fun onDetach(detachEvent: DetachEvent) {
-        modelRegistration?.remove()
-        modelRegistration = null
-        super.onDetach(detachEvent)
     }
 
     private fun applySelection(selection: VmIdentifier) {

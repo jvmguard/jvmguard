@@ -77,7 +77,7 @@ class TriggerActionsEditor(private val actions: MutableList<TriggerAction>) : Ve
         cellRow(actionTypeIcon(action.actionType).create().apply { setSize("1.2em") }, Span(describe(action)))
 
     private fun rowActions(action: TriggerAction): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "$ID_ROW_MENU-${actions.indexOf(action)}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("recording.actions"), "$ID_ROW_MENU-${actions.indexOf(action)}") {
             addItem(t("common.edit")) { edit(action) }
             addItem(t("common.remove")) { remove(action) }
         }

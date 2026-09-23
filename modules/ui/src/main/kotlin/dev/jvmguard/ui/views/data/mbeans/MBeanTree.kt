@@ -2,6 +2,7 @@ package dev.jvmguard.ui.views.data.mbeans
 
 import dev.jvmguard.ui.components.nameMatchesFilter
 import com.vaadin.flow.component.treegrid.TreeGrid
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 
@@ -16,7 +17,7 @@ fun populateMBeanTree(
     val root = MBeanNode.buildTree(filtered)
     val treeData = TreeData<MBeanNode>()
     addMBeanNodes(treeData, null, root.children)
-    tree.setDataProvider(TreeDataProvider(treeData))
+    tree.setDataProvider(TreeDataProvider(treeData, HierarchyFormat.NESTED))
     if (query.isNotEmpty()) {
         tree.expandRecursively(treeData.rootItems, Int.MAX_VALUE)
     }

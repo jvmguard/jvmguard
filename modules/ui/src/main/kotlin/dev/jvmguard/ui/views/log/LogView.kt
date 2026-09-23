@@ -30,7 +30,6 @@ import com.vaadin.flow.router.HasDynamicTitle
 import com.vaadin.flow.router.BeforeEnterObserver
 import com.vaadin.flow.server.streams.DownloadHandler
 import com.vaadin.flow.server.streams.DownloadResponse
-import com.vaadin.flow.shared.Registration
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -97,7 +96,6 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
     private var filter = ""
     private var logFile: LogFile? = null
     private var currentFileName: String? = null
-    private var pollRegistration: Registration? = null
     private var scrollWired = false
 
     init {
@@ -117,6 +115,8 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
         infoText?.let { add(Span(it).apply { addClassName("jvmguard-field-hint") }) }
         add(toolbar, grid)
         expand(grid)
+
+        whenAttached { ui -> ui.addPollListener { appendDelta() } }
     }
 
     override fun beforeEnter(event: BeforeEnterEvent) {
@@ -132,7 +132,6 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
     override fun onAttach(attachEvent: AttachEvent) {
         super.onAttach(attachEvent)
         loadDescriptors()
-        pollRegistration = attachEvent.ui.addPollListener { appendDelta() }
         wireUserScrollDetection()
     }
 
@@ -171,8 +170,6 @@ abstract class AbstractLogView(private val logFileType: LogFileType, viewTestId:
     }
 
     override fun onDetach(detachEvent: DetachEvent) {
-        pollRegistration?.remove()
-        pollRegistration = null
         closeLogFile()
         super.onDetach(detachEvent)
     }

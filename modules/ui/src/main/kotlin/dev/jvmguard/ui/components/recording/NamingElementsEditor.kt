@@ -71,7 +71,7 @@ class NamingElementsEditor : VerticalLayout() {
     }
 
     private fun rowActions(element: NamingElement): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "$ID_ROW_MENU-${elements.indexOf(element)}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("recording.actions"), "$ID_ROW_MENU-${elements.indexOf(element)}") {
             if (hasDialog(element)) {
                 addItem(t("common.edit")) { edit(element) }
             }

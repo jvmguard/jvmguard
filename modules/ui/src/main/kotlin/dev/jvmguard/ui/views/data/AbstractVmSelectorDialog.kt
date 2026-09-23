@@ -13,6 +13,7 @@ import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 
@@ -37,7 +38,7 @@ abstract class AbstractVmSelectorDialog(
         configureColumns()
         tree.setSizeFull()
         val treeData = buildTreeData()
-        tree.setDataProvider(TreeDataProvider(treeData))
+        tree.setDataProvider(TreeDataProvider(treeData, HierarchyFormat.NESTED))
         tree.addItemDoubleClickListener { if (selectable(it.item)) confirm(it.item) }
 
         val select = Button(t("vms.selector.select")) {

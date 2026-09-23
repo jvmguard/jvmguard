@@ -48,7 +48,7 @@ class TransactionTimeLinePanel(
 
     private val caption = Span().apply { addClassName("jvmguard-timeline-range") }
 
-    private val closeButton = Button(VaadinIcon.CLOSE_SMALL.create()) { showAssociated() }.apply {
+    private val closeButton = Button(VaadinIcon.CLOSE.create()) { showAssociated() }.apply {
         addThemeVariants(ButtonVariant.TERTIARY)
         setAriaLabel(t("transactions.timeLine.close.aria"))
         setTooltipText(t("transactions.timeLine.close.tooltip"))

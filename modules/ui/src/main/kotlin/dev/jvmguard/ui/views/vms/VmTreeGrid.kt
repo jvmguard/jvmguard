@@ -287,7 +287,7 @@ class VmTreeGrid : SelectableTreeGrid<VmTreeItem>() {
     }
 
     private fun actionsMenu(vm: VM): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("vms.tree.actions"), ID_ACTIONS) {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("vms.tree.actions"), ID_ACTIONS) {
             item(t("vms.action.runGc"), { runGc(vm) }) { testId = ID_ACTION_GC }
             item(t("vms.action.heapDump"), { confirmHeapDump(vm) }) { testId = ID_ACTION_HEAP_DUMP }
             item(t("vms.action.threadDump"), { confirmThreadDump(vm) }) { testId = ID_ACTION_THREAD_DUMP }

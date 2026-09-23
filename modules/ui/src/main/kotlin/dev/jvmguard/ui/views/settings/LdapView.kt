@@ -110,7 +110,7 @@ class LdapView : AbstractSettingsSectionView() {
     }
 
     private fun rowActions(mapping: LdapUserMapping): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.ldap.mapping.actions"), "$ID_MAPPING_ROW_MENU-${mapping.searchBase}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("settings.ldap.mapping.actions"), "$ID_MAPPING_ROW_MENU-${mapping.searchBase}") {
             addItem(t("common.edit")) { edit(mapping, false) }
             addItem(t("common.delete")) { confirmDelete(mapping) }
         }

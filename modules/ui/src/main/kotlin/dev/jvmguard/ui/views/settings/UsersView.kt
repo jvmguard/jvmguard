@@ -84,7 +84,7 @@ class UsersView : AbstractSettingsSectionView() {
     }
 
     private fun rowActions(user: User): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.users.row.actions", user.loginName), "$ID_ROW_MENU-${user.loginName}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("settings.users.row.actions", user.loginName), "$ID_ROW_MENU-${user.loginName}") {
             addItem(t("common.edit")) { edit(user) }
             if (user.apiKeyHash.isNotEmpty()) {
                 addItem(t("settings.users.apiKey.revoke")) { confirmRevokeApiKey(user) }

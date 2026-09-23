@@ -150,7 +150,7 @@ class InboxView : VerticalLayout(), BeforeEnterObserver, ModificationListener, H
     private fun nameCell(item: InboxItem): Component {
         val name = textCell(item.name, item)
         val menu = menuButton(
-            VaadinIcon.ELLIPSIS_DOTS_V,
+            VaadinIcon.ELLIPSIS_V,
             t("inbox.rowActions.aria", item.name),
             "$ID_ROW_MENU-${item.id}",
         ) {

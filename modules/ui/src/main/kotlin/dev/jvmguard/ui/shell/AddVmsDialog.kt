@@ -209,7 +209,7 @@ private fun step(number: Int, title: String, vararg content: Component): Compone
 
 private fun codeBlock(text: String): Component {
     val code = Span(text).apply { addClassName("jvmguard-code-text") }
-    val copy = Button(VaadinIcon.COPY_O.create()).apply {
+    val copy = Button(VaadinIcon.COPY.create()).apply {
         addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL)
         setAriaLabel(t("common.copyToClipboard"))
         setTooltipText(t("common.copy"))

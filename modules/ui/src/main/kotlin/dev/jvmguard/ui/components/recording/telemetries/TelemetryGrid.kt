@@ -14,6 +14,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.treegrid.TreeGrid
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat
 import com.vaadin.flow.data.provider.hierarchy.TreeData
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider
 
@@ -60,7 +61,7 @@ class TelemetryGrid(
             config.lines.forEach { data.addItem(node, TelemetryNode.LineNode(it, config)) }
             node
         }
-        tree.setDataProvider(TreeDataProvider(data))
+        tree.setDataProvider(TreeDataProvider(data, HierarchyFormat.NESTED))
         tree.expandRecursively(roots, 1)
     }
 
@@ -95,7 +96,7 @@ class TelemetryGrid(
     }
 
     private fun rowActions(node: TelemetryNode): Component {
-        val menu = menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("recording.actions"), "telemetry-row-menu-${nodeName(node)}") {
+        val menu = menuButton(VaadinIcon.ELLIPSIS_V, t("recording.actions"), "telemetry-row-menu-${nodeName(node)}") {
             addItem(t("common.edit")) { editNode(node) }
             addItem(t("common.delete")) { deleteNode(node) }
         }

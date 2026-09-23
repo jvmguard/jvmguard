@@ -1,14 +1,14 @@
 # web — UI style guide
 
-Conventions for `modules/ui` (Vaadin 25.1 / Aura + Karibu-DSL). **Extends
+Conventions for `modules/ui` (Vaadin 25.3 / Aura + Karibu-DSL). **Extends
 [kotlin-style.md](./kotlin-style.md) — read that first** for the general Kotlin language and
 Kotlin ⇄ Java interop rules. This doc covers only the UI-specific layer.
 
-## Verify against Vaadin 25.1, don't recall
+## Verify against Vaadin 25.3, don't recall
 
-Training data predates 25.1, so from memory you will reproduce Vaadin 8 / old-Flow patterns and miss new
+Training data predates 25.3, so from memory you will reproduce Vaadin 8 / old-Flow patterns and miss new
 features. Before using any component, API, theming token, or binding pattern, check the **Vaadin MCP
-server** (`https://mcp.vaadin.com/docs`). Prefer 25.1 features (Signals, the current free component set, Aura).
+server** (`https://mcp.vaadin.com/docs`). Prefer 25.3 features (Signals, the current free component set, Aura).
 
 - **Load Aura via `settings.addLink(Aura.STYLESHEET, …)`** in `AppShellConfigurator.configurePage()`.
   `@Theme` is gone. Use `addLink` rather than `@StyleSheet` (which runs a server-side content-hash calling

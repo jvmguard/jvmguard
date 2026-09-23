@@ -26,7 +26,6 @@ import dev.jvmguard.ui.views.setup.InstallWizardView
 import dev.jvmguard.ui.views.vms.VmsView
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.applayout.AppLayout
 import com.vaadin.flow.component.applayout.DrawerToggle
@@ -52,6 +51,7 @@ import com.vaadin.flow.router.AfterNavigationEvent
 import com.vaadin.flow.router.AfterNavigationObserver
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
+import com.vaadin.flow.shared.Registration
 import jakarta.annotation.security.PermitAll
 import javax.security.auth.login.CredentialException
 
@@ -85,7 +85,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     private val dataNav = buildDataNav()
 
     private val logEntries = listOf(
-        LogNavEntry(t("nav.log.server"), ServerLogView::class.java, VaadinIcon.FILE_TEXT_O, AccessLevel.ADMIN, ID_LOG_NAV_SERVER),
+        LogNavEntry(t("nav.log.server"), ServerLogView::class.java, VaadinIcon.FILE_TEXT, AccessLevel.ADMIN, ID_LOG_NAV_SERVER),
         LogNavEntry(t("nav.log.audit"), AuditLogView::class.java, VaadinIcon.CLIPBOARD_CHECK, AccessLevel.ADMIN, ID_LOG_NAV_AUDIT),
         LogNavEntry(t("nav.log.connection"), ConnectionLogView::class.java, VaadinIcon.CONNECT, AccessLevel.PROFILER, ID_LOG_NAV_CONNECTION),
         LogNavEntry(t("nav.log.event"), EventLogView::class.java, VaadinIcon.BELL, AccessLevel.VIEWER, ID_LOG_NAV_EVENT),
@@ -104,7 +104,7 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     private val generalSettingsEntries = listOf(
         SettingsNavEntry(t("nav.settings.users"), UsersView::class.java, VaadinIcon.USERS),
         SettingsNavEntry(t("nav.settings.ldap"), LdapView::class.java, VaadinIcon.CONNECT),
-        SettingsNavEntry(t("nav.settings.sso"), SsoView::class.java, VaadinIcon.SIGN_IN_ALT),
+        SettingsNavEntry(t("nav.settings.sso"), SsoView::class.java, VaadinIcon.SIGN_IN),
         SettingsNavEntry(t("nav.settings.network"), NetworkView::class.java, VaadinIcon.GLOBE),
         SettingsNavEntry(t("nav.settings.data"), DataSettingsView::class.java, VaadinIcon.DATABASE),
         SettingsNavEntry(t("nav.settings.email"), SmtpSettingsView::class.java, VaadinIcon.ENVELOPE),
@@ -148,13 +148,18 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     private var currentArea: SettingsArea? = null
     private var currentSection: SettingsModeView? = null
     private var currentMode = ShellMode.DATA
-    private var poller: NotificationPoller? = null
 
     private val settingsTitle = H3(t("nav.settings.general")).apply { addClassName("jvmguard-settings-title") }
     private val logTitle = H3(t("nav.logs")).apply { addClassName("jvmguard-settings-title") }
 
     init {
         addClassName("jvmguard-shell")
+        whenAttached { ui ->
+            Sessions.current()?.let { session ->
+                val started = NotificationPoller.start(ui, session)
+                Registration { started.stop() }
+            }
+        }
         addToDrawer(dataNav)
         addToDrawer(generalSettingsNav)
         addToDrawer(recordingSettingsNav)
@@ -390,16 +395,9 @@ class MainLayout : AppLayout(), BeforeEnterObserver, AfterNavigationObserver, Mo
     override fun onAttach(attachEvent: AttachEvent) {
         super.onAttach(attachEvent)
         Sessions.current()?.let { session ->
-            poller = NotificationPoller.start(attachEvent.ui, session)
             registerModificationListener(session)
             refreshInboxBadge()
         }
-    }
-
-    override fun onDetach(detachEvent: DetachEvent) {
-        poller?.stop()
-        poller = null
-        super.onDetach(detachEvent)
     }
 
     override fun modifyNotified(modificationTypes: Set<ModificationType>) {

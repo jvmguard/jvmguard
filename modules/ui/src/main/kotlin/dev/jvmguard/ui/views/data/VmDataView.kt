@@ -5,7 +5,6 @@ import dev.jvmguard.ui.server.Sessions
 import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.CachedView
 import com.vaadin.flow.component.AttachEvent
-import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.icon.VaadinIcon
@@ -16,7 +15,6 @@ import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterObserver
 import com.vaadin.flow.router.QueryParameters
 import com.vaadin.flow.router.RouteConfiguration
-import com.vaadin.flow.shared.Registration
 
 abstract class VmDataView : VerticalLayout(), BeforeEnterObserver, CachedView {
 
@@ -31,8 +29,6 @@ abstract class VmDataView : VerticalLayout(), BeforeEnterObserver, CachedView {
     protected var currentSelection: VmIdentifier = VmIdentifier.ROOT_GROUP_IDENTIFIER
         private set
 
-    private var modelRegistration: Registration? = null
-    private var pollRegistration: Registration? = null
     private var lastRenderedSelection: VmIdentifier? = null
 
     protected var selectionRendered = false
@@ -67,6 +63,9 @@ abstract class VmDataView : VerticalLayout(), BeforeEnterObserver, CachedView {
 
         add(toolbar, content)
         setFlexGrow(1.0, content)
+
+        whenAttached { Sessions.vmSelectionModel().addListener(::applySelection) }
+        whenAttached { ui -> ui.addPollListener { onPollTick() } }
     }
 
     override fun beforeEnter(event: BeforeEnterEvent) {
@@ -87,25 +86,14 @@ abstract class VmDataView : VerticalLayout(), BeforeEnterObserver, CachedView {
     override fun onAttach(attachEvent: AttachEvent) {
         super.onAttach(attachEvent)
         selectionRendered = false
-        val model = Sessions.vmSelectionModel()
-        modelRegistration = model.addListener(::applySelection)
         applyPendingSeed()
-        applySelection(model.selection)
-        pollRegistration = attachEvent.ui.addPollListener { onPollTick() }
+        applySelection(Sessions.vmSelectionModel().selection)
     }
 
     private fun applyPendingSeed() {
         val seed = pendingSeed ?: return
         pendingSeed = null
         Sessions.vmSelectionModel().set(seed)
-    }
-
-    override fun onDetach(detachEvent: DetachEvent) {
-        pollRegistration?.remove()
-        pollRegistration = null
-        modelRegistration?.remove()
-        modelRegistration = null
-        super.onDetach(detachEvent)
     }
 
     private fun applySelection(selection: VmIdentifier) {

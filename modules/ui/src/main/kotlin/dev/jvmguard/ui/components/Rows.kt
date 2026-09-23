@@ -10,7 +10,7 @@ const val GRID_ICON_SIZE = "1.4em"
 
 fun vmTypeIcon(type: VmType): VaadinIcon = when (type) {
     VmType.POOL, VmType.POOLED -> VaadinIcon.CLUSTER
-    VmType.GROUP -> VaadinIcon.FOLDER_O
+    VmType.GROUP -> VaadinIcon.FOLDER
     else -> VaadinIcon.SERVER
 }
 

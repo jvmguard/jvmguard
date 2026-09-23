@@ -101,7 +101,6 @@ tasks {
         val mediaFileName = "jvmguard_unix_installer_${fullVersion.replace('.', '_')}.sh"
         systemProperty("test.media", installerTestMediaDir.get().asFile.resolve(mediaFileName).absolutePath)
 
-        // the Unix installer ships without a bundled JRE, point its launcher at the test toolchain's JDK
         doFirst {
             environment("INSTALL4J_JAVA_HOME", javaLauncher.get().metadata.installationPath.toString())
         }

@@ -200,7 +200,7 @@ class SsoProviderDialog(
     }
 
     private fun ruleActions(rule: SsoGroupMapping): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.sso.rules.actions"), "$ID_RULES_ROW_MENU-${rule.claimValue}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("settings.sso.rules.actions"), "$ID_RULES_ROW_MENU-${rule.claimValue}") {
             addItem(t("common.edit")) { editRule(rule, false) }
             addItem(t("common.delete")) { confirmDeleteRule(rule) }
         }

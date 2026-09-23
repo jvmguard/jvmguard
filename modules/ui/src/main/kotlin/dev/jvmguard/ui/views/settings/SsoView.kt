@@ -78,7 +78,7 @@ class SsoView : AbstractSettingsSectionView() {
     }
 
     private fun rowActions(provider: SsoProviderConfig): Component =
-        menuButton(VaadinIcon.ELLIPSIS_DOTS_V, t("settings.sso.provider.actions"), "$ID_PROVIDER_ROW_MENU-${provider.displayName}") {
+        menuButton(VaadinIcon.ELLIPSIS_V, t("settings.sso.provider.actions"), "$ID_PROVIDER_ROW_MENU-${provider.displayName}") {
             addItem(t("common.edit")) { edit(provider, false) }
             addItem(t("common.delete")) { confirmDelete(provider) }
         }

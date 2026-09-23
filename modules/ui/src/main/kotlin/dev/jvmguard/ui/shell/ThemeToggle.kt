@@ -63,7 +63,7 @@ class ThemeToggle : Button() {
     }
 
     private fun updateIcon() {
-        icon = (if (effectiveDark) VaadinIcon.SUN_O else VaadinIcon.MOON).create()
+        icon = (if (effectiveDark) VaadinIcon.SUN else VaadinIcon.MOON).create()
         val label = t(if (effectiveDark) "shell.theme.toLight" else "shell.theme.toDark")
         setAriaLabel(label)
         setTooltipText(label)

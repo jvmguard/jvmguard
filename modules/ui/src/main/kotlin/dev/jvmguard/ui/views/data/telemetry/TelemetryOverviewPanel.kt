@@ -64,7 +64,6 @@ class TelemetryOverviewPanel(private val selectionProvider: () -> VmIdentifier) 
         super.onAttach(attachEvent)
         val session = Sessions.current() ?: return
         registerModificationListener(session)
-        addDetachListener { it.unregisterListener() }
     }
 
     override fun modifyNotified(modificationTypes: Set<ModificationType>) = reload()
