@@ -1,6 +1,7 @@
 package dev.jvmguard.ui.components.recording
 
 import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.HasValidation
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.tabs.Tab
@@ -48,6 +49,20 @@ class WizardTabs : VerticalLayout() {
         panels.forEachIndexed { i, panel ->
             panel.style.set("visibility", if (i == index) "visible" else "hidden")
         }
+    }
+
+    fun revealFirstInvalidField() {
+        val index = panels.indexOfFirst { it.containsInvalidField() }
+        if (index >= 0) {
+            tabs.selectedIndex = index
+        }
+    }
+
+    private fun Component.containsInvalidField(): Boolean {
+        if ((this as? HasValidation)?.isInvalid == true) {
+            return true
+        }
+        return children.anyMatch { it.containsInvalidField() }
     }
 
     companion object {

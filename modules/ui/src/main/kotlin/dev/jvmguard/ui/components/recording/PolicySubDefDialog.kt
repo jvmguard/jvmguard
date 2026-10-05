@@ -60,6 +60,7 @@ class PolicySubDefDialog(
 
     private fun save() {
         if (!binder.writeBeanIfValid(subDef) || !policyForm.writeIfValid(subDef.policy)) {
+            wizard.revealFirstInvalidField()
             return
         }
         onSave(subDef)
