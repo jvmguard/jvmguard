@@ -7,6 +7,9 @@ import Figure from '../../../components/Figure.astro';
 Many frameworks use annotations for designating important classes and entry points that could be turned into
 transactions in jvmguard. With the "Mapped invocations" transaction type you can let jvmguard do this work for you.
 
+For the OpenTelemetry and Micrometer tracing annotations `@WithSpan` and `@Observed`, jvmguard provides a
+dedicated [OTel transaction type](/docs/advanced/otel) with a preconfigured definition.
+
 ## Method and class annotations
 
 A Mapped transaction definition takes the fully qualified class name of the annotation that you are interested in.
@@ -30,7 +33,24 @@ the methods in the annotated class, use this option to create transactions from 
 
 <Figure src="ui/mapped_transactions.png" />
 
+## Filtering by annotation values
+
+In addition to the class filter, a Mapped transaction definition can filter by the value of an annotation
+attribute. On the "Filter" tab, enter an attribute name and a value pattern. The value pattern is a wildcard
+(comma-separated) or a regular expression, just like the class filter. Only annotations where the attribute is
+present and its value matches the pattern create transactions.
+
+Attribute values are read from the class file when the class is instrumented: strings are used as-is, primitives
+are converted to strings, enum constants are matched by name, class values by their simple name, and array
+values are joined into a comma-separated list.
+
 ## Naming
+
+With the "Annotation attribute" naming element, you can add the value of an annotation attribute to the
+transaction name, for example the value of a `@WithSpan` annotation on a Mapped transaction definition for that
+annotation. The value is captured when the class is instrumented. Note that if you change the naming without
+retransforming already instrumented classes, the captured values are not available and the element adds nothing
+to the transaction name.
 
 When you use annotations on classes with the setting for intercepting public methods in derived classes, the question
 remains what class name should be used in the transaction naming.

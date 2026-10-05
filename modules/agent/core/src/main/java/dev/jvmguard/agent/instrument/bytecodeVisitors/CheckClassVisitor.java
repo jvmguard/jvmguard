@@ -5,11 +5,13 @@ import dev.jvmguard.agent.callee.Handler;
 import dev.jvmguard.agent.callee.MatchedHandler;
 import dev.jvmguard.agent.instrument.Instrumenter;
 import dev.jvmguard.agent.instrument.InterceptionClassHierarchyVisitor;
+import dev.jvmguard.agent.instrument.classInfo.AnnotationAttributeInfo;
 import dev.jvmguard.agent.instrument.classInfo.ClassFileInfo;
 import dev.jvmguard.agent.instrument.classInfo.ClassFileInfo.PartiallyDefinedInfo;
 import dev.jvmguard.agent.instrument.classInfo.ClassFileInfo.TriState;
 import dev.jvmguard.agent.instrument.classInfo.DeclaredAnnotationInfo;
 import dev.jvmguard.agent.instrument.classInfo.DeclaredAnnotations;
+import dev.jvmguard.agent.instrument.interceptions.AnnotationInterception;
 import dev.jvmguard.agent.instrument.interceptions.BaseInterception;
 import dev.jvmguard.agent.instrument.interceptions.DeclaredConcreteMethodInterception;
 import dev.jvmguard.agent.instrument.interceptions.TransactionInterception;
@@ -17,9 +19,11 @@ import dev.jvmguard.agent.instrument.model.InterceptionMethod;
 import dev.jvmguard.agent.instrument.transaction.DefinitionSite;
 import dev.jvmguard.agent.instrument.transaction.DefinitionSite.AnnotationDefinitionSite;
 import dev.jvmguard.agent.instrument.transaction.TransactionDefinition;
+import dev.jvmguard.agent.instrument.transaction.annotation.AnnotationCaptureVisitor;
 import dev.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import dev.jvmguard.agent.instrument.transaction.annotation.AnnotationTransactionDefList;
 import dev.jvmguard.agent.instrument.transaction.annotation.MappedAnnotationDefinition;
+import dev.jvmguard.agent.instrument.transaction.annotation.OtelAnnotationDefinition;
 import dev.jvmguard.agent.instrument.transaction.annotation.DeclaredAnnotationDefinition;
 import dev.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
 import dev.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefList;
@@ -63,6 +67,7 @@ public class CheckClassVisitor extends ClassVisitor {
     private Map<InterceptionMethod, Telemetry> telemetryMethods;
 
     private Map<String, Set<InterceptionMethod>> inheritableMethodAnnotationsToMethods = new HashMap<>();
+    private Map<String, Map<InterceptionMethod, Map<String, String>>> inheritableMethodAnnotationAttributes = new HashMap<>();
 
     private boolean loadClass;
 
@@ -133,20 +138,39 @@ public class CheckClassVisitor extends ClassVisitor {
                 });
             }
         } else if (visible) {
-            classAnnotations.add(desc.intern());
             List<AnnotationTransactionDefList> annotationDefLists = instrumenter.getAnnotationDefinitions().get(desc);
+            boolean attributeCapture = false;
             if (annotationDefLists != null) {
                 for (AnnotationTransactionDefList annotationDefList : annotationDefLists) {
                     if (annotationDefList.getDefinition() instanceof MappedAnnotationDefinition) {
                         MappedAnnotationDefinition customAnnotationDefinition = (MappedAnnotationDefinition)annotationDefList.getDefinition();
+                        if (customAnnotationDefinition.isAttributeCapture()) {
+                            attributeCapture = true;
+                        }
                         if (customAnnotationDefinition.isClassWithImplementingOnly()) {
                             definitionsWithPublicMethods.add(customAnnotationDefinition);
+                            if (publicMethods == null) {
+                                publicMethods = new HashSet<>();
+                            }
+                        } else if (isOtelClassDefinition(customAnnotationDefinition)) {
+                            // the class-level @Observed interception is narrowed to public methods
+                            // without a method-level OTel annotation at visitEnd
                             if (publicMethods == null) {
                                 publicMethods = new HashSet<>();
                             }
                         }
                     }
                 }
+            }
+            if (attributeCapture) {
+                return new AnnotationCaptureVisitor() {
+                    @Override
+                    protected void onEnd(Map<String, String> attributes) {
+                        classAnnotations.add(new AnnotationAttributeInfo(desc.intern(), attributes));
+                    }
+                };
+            } else {
+                classAnnotations.add(desc.intern());
             }
         }
         return null;
@@ -240,24 +264,62 @@ public class CheckClassVisitor extends ClassVisitor {
                         });
                     }
                 } else if (visible) {
+                    final String internedDesc = desc.intern();
                     final List<AnnotationTransactionDefList> transactionDefLists = instrumenter.getAnnotationDefinitions().get(desc);
+                    AnnotationVisitor attributeVisitor = null;
                     if (transactionDefLists != null) {
+                        boolean attributeCapture = false;
                         for (AnnotationTransactionDefList transactionDefList : transactionDefLists) {
                             AnnotationDefinition annotationDefinition = transactionDefList.getDefinition();
-                            if (annotationDefinition.isMethodAnnotation() && !annotationDefinition.isInheritable()) { // inheritable method annotations will be handled by the class hierarchy visitor.
-                                Handler handler = transactionDefList.getHandler(lookupAnnotationDefinitionSite.init(dottedClassName, dottedClassName));
-                                if (handler != null) {
-                                    addMethodInterception(lookupMethod, new TransactionInterception(annotationDefinition, handler));
+                            if (annotationDefinition instanceof MappedAnnotationDefinition && ((MappedAnnotationDefinition)annotationDefinition).isAttributeCapture()) {
+                                attributeCapture = true;
+                                break;
+                            }
+                        }
+                        if (attributeCapture) {
+                            attributeVisitor = new AnnotationCaptureVisitor() {
+                                @Override
+                                protected void onEnd(Map<String, String> attributes) {
+                                    for (AnnotationTransactionDefList transactionDefList : transactionDefLists) {
+                                        AnnotationDefinition annotationDefinition = transactionDefList.getDefinition();
+                                        // inheritable method annotations will be handled by the class hierarchy visitor
+                                        if (annotationDefinition.isMethodAnnotation() && !annotationDefinition.isInheritable()) {
+                                            if (annotationDefinition instanceof MappedAnnotationDefinition && !((MappedAnnotationDefinition)annotationDefinition).matchesValueFilter(attributes)) {
+                                                continue;
+                                            }
+                                            Handler handler = transactionDefList.getHandler(lookupAnnotationDefinitionSite.init(dottedClassName, dottedClassName));
+                                            if (handler != null) {
+                                                addMethodInterception(new InterceptionMethod(name, methodDesc),
+                                                    new TransactionInterception(annotationDefinition, handler, attributes));
+                                            }
+                                        }
+                                    }
+                                    if (instrumenter.getInheritableMethodAnnotations().contains(internedDesc)) {
+                                        // the class hierarchy visitor needs the attributes to evaluate the value
+                                        // filter and the naming of inheritable method annotations
+                                        inheritableMethodAnnotationAttributes.computeIfAbsent(internedDesc, k -> new HashMap<>())
+                                            .put(new InterceptionMethod(name, methodDesc), attributes);
+                                    }
+                                }
+                            };
+                        } else {
+                            for (AnnotationTransactionDefList transactionDefList : transactionDefLists) {
+                                AnnotationDefinition annotationDefinition = transactionDefList.getDefinition();
+                                if (annotationDefinition.isMethodAnnotation() && !annotationDefinition.isInheritable()) { // inheritable method annotations will be handled by the class hierarchy visitor.
+                                    Handler handler = transactionDefList.getHandler(lookupAnnotationDefinitionSite.init(dottedClassName, dottedClassName));
+                                    if (handler != null) {
+                                        addMethodInterception(lookupMethod, new TransactionInterception(annotationDefinition, handler));
+                                    }
                                 }
                             }
                         }
                     }
-                    String internedDesc = desc.intern();
                     methodAnnotations.add(internedDesc);
                     if (instrumenter.getInheritableMethodAnnotations().contains(internedDesc)) {
                         Set<InterceptionMethod> methods = inheritableMethodAnnotationsToMethods.computeIfAbsent(internedDesc, k -> new HashSet<>());
                         methods.add(new InterceptionMethod(name, methodDesc));
                     }
+                    return attributeVisitor;
                 }
                 return null;
             }
@@ -333,6 +395,11 @@ public class CheckClassVisitor extends ClassVisitor {
 
         for (Entry<String, Set<InterceptionMethod>> entry : inheritableMethodAnnotationsToMethods.entrySet()) {
             instrumenter.setMethodAnnotations(dottedClassName, entry.getKey(), entry.getValue());
+            Map<InterceptionMethod, Map<String, String>> attributes = inheritableMethodAnnotationAttributes.get(entry.getKey());
+            // when no attributes were captured in this pass, clear attributes stored by an earlier pass, so
+            // the class hierarchy visitor falls back to the full stored method set
+            instrumenter.setMethodAnnotationAttributes(dottedClassName, entry.getKey(),
+                attributes != null ? attributes : Collections.emptyMap());
         }
 
         boolean noTransaction = false;
@@ -348,6 +415,25 @@ public class CheckClassVisitor extends ClassVisitor {
             if (publicMethods != null) {
                 publicMethods.removeAll(declaredAnnotations.getNoTransactionMethods());
             }
+            for (InterceptionMethod declaredMethod : declaredAnnotations.getMethodTransactions().keySet()) {
+                Set<BaseInterception> interceptions = methodInterceptions.get(declaredMethod);
+                if (interceptions != null) {
+                    interceptions.removeIf(CheckClassVisitor::isMappedInterception);
+                }
+            }
+        }
+        // a method with both @WithSpan and @Observed only gets the @WithSpan interception
+        for (Set<BaseInterception> interceptions : methodInterceptions.values()) {
+            boolean hasWithSpan = false;
+            for (BaseInterception interception : interceptions) {
+                if (isOtelInterception(interception, OtelAnnotationDefinition.Kind.WITH_SPAN)) {
+                    hasWithSpan = true;
+                    break;
+                }
+            }
+            if (hasWithSpan) {
+                interceptions.removeIf(interception -> isOtelInterception(interception, OtelAnnotationDefinition.Kind.OBSERVED));
+            }
         }
         classFileInfo.setNoTransaction(noTransaction);
         instrumenter.setDeclaredAnnotations(dottedClassName, declaredAnnotations);
@@ -361,6 +447,7 @@ public class CheckClassVisitor extends ClassVisitor {
         } else {
             classFileInfo.setMethodAnnotations(null);
         }
+        Set<InterceptionMethod> classAnnotationPublicMethods = publicMethods;
         if (publicMethods != null) {
             if (declaredClassTransactionInfo != null) {
                 Logger.log(Subsystem.INSTRUMENTATION, 6, false, "setting defined methods %s for dev ops transaction\n", publicMethods);
@@ -378,7 +465,73 @@ public class CheckClassVisitor extends ClassVisitor {
             if (!interceptionClassHierarchyVisitor.isFullyDefined()) {
                 getPartiallyDefinedInfo(true).setClassInterceptionCount(classInterceptions.size());
             }
+            restrictOtelClassInterceptions(classInterceptions, classAnnotationPublicMethods, methodInterceptions);
         }
+    }
+
+    /**
+     * A method with both @WithSpan and @Observed only gets the @WithSpan interception. The method-level
+     * half of that rule is enforced above by removing OBSERVED method interceptions; this restricts the
+     * class-level @Observed interception to the public methods that do not carry a method-level OTel
+     * annotation.
+     */
+    private static void restrictOtelClassInterceptions(Set<BaseInterception> classInterceptions, Set<InterceptionMethod> publicMethods, Map<InterceptionMethod, Set<BaseInterception>> methodInterceptions) {
+        if (publicMethods == null) {
+            return;
+        }
+        boolean hasOtelClassInterception = false;
+        for (BaseInterception interception : classInterceptions) {
+            if (isOtelClassInterception(interception)) {
+                hasOtelClassInterception = true;
+                break;
+            }
+        }
+        if (!hasOtelClassInterception) {
+            return;
+        }
+        Set<InterceptionMethod> remainingMethods = new HashSet<>(publicMethods);
+        for (Entry<InterceptionMethod, Set<BaseInterception>> entry : methodInterceptions.entrySet()) {
+            for (BaseInterception interception : entry.getValue()) {
+                if (isOtelMethodInterception(interception)) {
+                    remainingMethods.remove(entry.getKey());
+                    break;
+                }
+            }
+        }
+        for (BaseInterception interception : classInterceptions) {
+            if (isOtelClassInterception(interception)) {
+                ((AnnotationInterception)interception).restrictToMethods(remainingMethods);
+            }
+        }
+    }
+
+    private static boolean isMappedInterception(BaseInterception interception) {
+        return interception instanceof TransactionInterception &&
+            ((TransactionInterception)interception).getDefinition() instanceof MappedAnnotationDefinition;
+    }
+
+    private static boolean isOtelInterception(BaseInterception interception, OtelAnnotationDefinition.Kind kind) {
+        if (interception instanceof TransactionInterception) {
+            TransactionDefinition definition = ((TransactionInterception)interception).getDefinition();
+            return definition instanceof OtelAnnotationDefinition && ((OtelAnnotationDefinition)definition).getKind() == kind;
+        }
+        return false;
+    }
+
+    private static boolean isOtelClassDefinition(TransactionDefinition definition) {
+        return definition instanceof OtelAnnotationDefinition && !((OtelAnnotationDefinition)definition).isMethodAnnotation();
+    }
+
+    private static boolean isOtelClassInterception(BaseInterception interception) {
+        return interception instanceof TransactionInterception && isOtelClassDefinition(((TransactionInterception)interception).getDefinition());
+    }
+
+    private static boolean isOtelMethodInterception(BaseInterception interception) {
+        if (interception instanceof TransactionInterception) {
+            TransactionDefinition definition = ((TransactionInterception)interception).getDefinition();
+            return definition instanceof OtelAnnotationDefinition && ((OtelAnnotationDefinition)definition).isMethodAnnotation();
+        }
+        return false;
     }
 
     public Set<BaseInterception> getClassInterceptions() {

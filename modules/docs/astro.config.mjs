@@ -58,6 +58,7 @@ export default defineConfig({
       items: [
         { label: 'Declared transactions', slug: 'advanced/declared', translations: { ko: '선언적 트랜잭션', ja: '宣言型トランザクション', 'zh-CN': '声明式事务' } },
         { label: 'Mapped transactions', slug: 'advanced/mapped', translations: { ko: '매핑 트랜잭션', ja: 'マッピングトランザクション', 'zh-CN': '映射事务' } },
+        { label: 'OTel transactions', slug: 'advanced/otel', translations: { ko: 'OTel 트랜잭션', ja: 'OTelトランザクション', 'zh-CN': 'OTel 事务' } },
         { label: 'Matched transactions', slug: 'advanced/matched', translations: { ko: '매칭 트랜잭션', ja: 'マッチングトランザクション', 'zh-CN': '匹配事务' } },
       ],
     },

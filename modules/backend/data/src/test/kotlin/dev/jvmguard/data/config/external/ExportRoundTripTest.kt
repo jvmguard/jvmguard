@@ -113,12 +113,12 @@ class ExportRoundTripTest {
             )
 
             assertEquals(
-                2,
+                3,
                 gcBack.agentGroupConfig.transactionSettings.transactionDefs.size,
-                "default DeclaredTransactionDef plus the added MatchedTransactionDef must survive",
+                "default DeclaredTransactionDef and OtelTransactionDef plus the added MatchedTransactionDef must survive",
             )
-            assertInstanceOf(MatchedTransactionDef::class.java, gcBack.agentGroupConfig.transactionSettings.transactionDefs[1])
-            val pojoBack = gcBack.agentGroupConfig.transactionSettings.transactionDefs[1] as MatchedTransactionDef
+            assertInstanceOf(MatchedTransactionDef::class.java, gcBack.agentGroupConfig.transactionSettings.transactionDefs[2])
+            val pojoBack = gcBack.agentGroupConfig.transactionSettings.transactionDefs[2] as MatchedTransactionDef
             assertEquals("com.example.Foo", pojoBack.declaringClassName)
             assertEquals("bar", pojoBack.methodName)
 

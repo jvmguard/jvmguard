@@ -1,0 +1,44 @@
+---
+title: OTel Transactions
+---
+
+import Figure from '../../../components/Figure.astro';
+
+If your application already uses OpenTelemetry or Micrometer tracing annotations, jvmguard can turn them into
+transactions without any further configuration. The "OTel" transaction type maps
+
+* `io.opentelemetry.instrumentation.annotations.WithSpan` on methods
+* `io.micrometer.observation.annotation.Observed` on methods and classes
+
+Both annotations are often already present in applications that use OpenTelemetry or Micrometer, even if no
+tracing backend is attached, because `@WithSpan` only takes effect with the OpenTelemetry agent or Spring starter
+and `@Observed` only with Micrometer AOP on the classpath. jvmguard matches the annotations by name only, so they
+do not have to be functional otherwise, and there is no overhead when they are not used.
+
+The transaction recording settings contain a preconfigured OTel transaction definition on the "OTel" tab. Like
+any other transaction definition, it can be edited, reordered, discarded or deleted. If you delete it, it will
+not be recreated.
+
+<Figure src="ui/otel_transactions.png" />
+
+## Naming
+
+By default, transactions are named after the span name attribute of the annotation (`value` for `@WithSpan`,
+`contextualName` for `@Observed`). If the attribute is empty, the transaction is named `ClassName.methodName`,
+which is also the default span name that OpenTelemetry itself uses. You can change the naming on the "Naming"
+tab like for any other transaction definition.
+
+## Filtering by span name
+
+The "Filter" tab of the OTel transaction definition has a "Span name" field in addition to the class filter.
+Only annotations whose span name matches the configured wildcard or regular expression create transactions.
+Annotations without a span name attribute never match a span name filter.
+
+## Overlap with other transaction types
+
+A method can carry several of the supported annotations. To avoid duplicate transactions, the following rules
+apply:
+
+* If a method is annotated with `@MethodTransaction`, only the Declared transaction is created.
+* If a method is annotated with both `@WithSpan` and `@Observed` (directly or through a class-level `@Observed` on the enclosing class), only the `@WithSpan` transaction is created.
+* An annotation directly on the method takes precedence over a class-level `@Observed` on the enclosing class.

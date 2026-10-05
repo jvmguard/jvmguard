@@ -37,6 +37,7 @@ class ConfigManager(private val configStorage: ConfigStorage) {
         initGlobalConfig()
         applyEnvVarOverrides()
         initGroupConfigs()
+        applyConfigTransforms()
     }
 
     fun addConfigChangeListener(listener: ConfigChangeListener) {
@@ -193,6 +194,7 @@ class ConfigManager(private val configStorage: ConfigStorage) {
         val globalConfigs = configStorage.list(GlobalConfig::class.java)
         if (globalConfigs.isEmpty()) {
             val config = GlobalConfig()
+            config.configVersion = GlobalConfig.CURRENT_CONFIG_VERSION
             globalConfig = config
             configStorage.store(GlobalConfig::class.java, config)
         } else {
@@ -237,6 +239,32 @@ class ConfigManager(private val configStorage: ConfigStorage) {
                 modifyConfig(idToGroupConfig, GroupConfig::class.java, GroupConfig.createDefault())
             }
         }
+    }
+
+    private fun applyConfigTransforms() {
+        val config = globalConfig ?: return
+        var version = config.configVersion
+        if (version >= GlobalConfig.CURRENT_CONFIG_VERSION) {
+            return
+        }
+        val context = ConfigTransforms.Context(
+            findRootGroupConfig = { findGroupConfigByIdentifier(VmIdentifier.ROOT_GROUP_IDENTIFIER) },
+            storeGroupConfig = { groupConfig ->
+                synchronized(idToGroupConfig) {
+                    modifyConfig(idToGroupConfig, GroupConfig::class.java, groupConfig)
+                }
+            },
+        )
+        for ((targetVersion, transform) in ConfigTransforms.TRANSFORMS) {
+            if (version < targetVersion) {
+                if (transform(context)) {
+                    logger.info("Applied config transform to version $targetVersion")
+                }
+                version = targetVersion
+            }
+        }
+        config.configVersion = GlobalConfig.CURRENT_CONFIG_VERSION
+        configStorage.store(GlobalConfig::class.java, config.toObfuscatedConfig())
     }
 
     private fun <T : StoredConfig> modifyConfigs(listModification: ListModification<T>, idToConfig: MutableMap<Long, T>, configClass: Class<T>) {

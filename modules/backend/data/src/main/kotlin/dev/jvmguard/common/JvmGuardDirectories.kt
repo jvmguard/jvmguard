@@ -67,21 +67,26 @@ class JvmGuardDirectories private constructor(dataDirectorySpec: String, integra
                 val loadingDescriptor = LoadingDescriptor.getInstance(JvmGuardDirectories::class.java)
                 var baseDirectory = loadingDescriptor.baseDir
                 val propertiesBaseDir: File
-                val distDirectory: File
                 val demoDirectory: File
                 val logbackFile: File
                 if (loadingDescriptor.isLoadedFromJAR) {
                     baseDirectory = File(baseDirectory, "../..").canonicalFile
                     propertiesBaseDir = baseDirectory
                     demoDirectory = File(baseDirectory, DEMO_DIR_NAME)
-                    distDirectory = baseDirectory
                     logbackFile = File(baseDirectory, "logback.xml")
                 } else {
                     baseDirectory = File(baseDirectory, "../..").canonicalFile
                     propertiesBaseDir = File(baseDirectory, "../../dist-template").canonicalFile
                     demoDirectory = File(baseDirectory, "../../dist-template/$DEMO_DIR_NAME")
-                    distDirectory = File(baseDirectory, "../../dist")
                     logbackFile = File(baseDirectory, "../../dist-template/logback.xml")
+                }
+                val distOverride = System.getProperty("jvmguard.distDirectory")
+                val distDirectory: File = if (distOverride != null) {
+                    File(distOverride).canonicalFile
+                } else if (loadingDescriptor.isLoadedFromJAR) {
+                    baseDirectory
+                } else {
+                    File(baseDirectory, "../../dist")
                 }
                 return Layout(File(propertiesBaseDir, "config"), distDirectory, demoDirectory, logbackFile)
             } catch (e: IOException) {

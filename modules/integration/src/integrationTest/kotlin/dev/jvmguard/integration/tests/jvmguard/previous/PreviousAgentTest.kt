@@ -1,6 +1,7 @@
 package dev.jvmguard.integration.tests.jvmguard.previous
 
 import dev.jvmguard.agent.JvmGuardAgent
+import dev.jvmguard.agent.AgentInit
 import dev.jvmguard.agent.config.VmType
 import dev.jvmguard.agent.config.telemetry.MBeanLineConfig
 import dev.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
@@ -19,16 +20,28 @@ import dev.jvmguard.data.transactions.TransactionDataType
 import dev.jvmguard.data.transactions.TransactionTreeInterval
 import dev.jvmguard.data.vmdata.*
 import java.io.File
+import java.util.jar.JarFile
 
 /**
- *  To re-enable backward-compat testing see modules/integration/previous/README.md
+ *  See modules/integration/previous/README.md
  */
 class PreviousAgentTest : JvmGuardTest() {
 
-    // previous agent versions, each must exist under modules/integration/previous/<version>/.
-    private val previousVersions = emptyList<String>()
+    // each version must exist under modules/integration/previous/<version>/.
+    private val previousVersions = listOf("0.2")
 
-    override fun isRunOnVM(vmConfig: VMConfig) = vmConfig.isJava(8) && previousVersions.isNotEmpty()
+    // a local build can compare older than the last release if not all commits are pushed
+    private fun currentIsNewer(): Boolean {
+        val current = manifestBuildVersion(File(distDir(), "agent/lib/agent.jar"))
+        val previousDir = File(File(distDir(), "agent/jvmguard.jar").parentFile.parentFile.parentFile,
+            "modules/integration/previous")
+        return previousVersions.all { current > manifestBuildVersion(File(previousDir, "$it/lib/agent.jar")) }
+    }
+
+    private fun manifestBuildVersion(jar: File): Long =
+        JarFile(jar).use { it.manifest.mainAttributes.getValue(AgentInit.BUILD_VERSION_ATTRIBUTE_NAME).toLong() }
+
+    override fun isRunOnVM(vmConfig: VMConfig) = vmConfig.isJava(8) && previousVersions.isNotEmpty() && currentIsNewer()
     override fun isCleanUserDir(libraryNo: Int) = libraryNo < 3
     override fun getJvmGuardOptions(runNo: Int, vmNo: Int, libraryNo: Int) =
         super.getJvmGuardOptions(runNo, vmNo, libraryNo) + (if (libraryNo < 3 && (vmNo == 2 || vmNo == 3)) " -Djvmguard.ignoreConfig=true" else "")
@@ -60,6 +73,8 @@ class PreviousAgentTest : JvmGuardTest() {
     }
 
     override fun connect(vmManager: TestVmManager, serverConnection: TestServerConnection, controller: Controller) {
+        JvmGuardAgent.initBuildVersion(File(distDir(), "agent/lib/agent.jar"))
+
         val vms = waitForConnections(serverConnection)
 
         sleep(70 * 1000)
@@ -108,7 +123,7 @@ class PreviousAgentTest : JvmGuardTest() {
         assertTrue(
             File(
                 jvmguardUserDir,
-                "agent/" + BootstrapFileUtil.getHashedPath(File(System.getProperty("distDir") + "/agent").canonicalPath) + "/" + JvmGuardAgent.getBuildVersion() + "/agent.jar"
+                "agent/" + BootstrapFileUtil.getHashedPath(File(distDir(), "agent").canonicalPath) + "/" + JvmGuardAgent.getBuildVersion() + "/agent.jar"
             ).isFile
         )
         // Verify each previous-agent VM downloaded and cached its agent
@@ -123,11 +138,13 @@ class PreviousAgentTest : JvmGuardTest() {
                     replaceAgent(
                         vmNo,
                         1,
-                        File(System.getProperty("distDir") + "/agent/jvmguard.jar")
+                        File(distDir(), "agent/jvmguard.jar")
                     ).parentFile.canonicalPath
                 ) + "/" + JvmGuardAgent.getBuildVersion() + "/agent.jar"
             ).isFile
         )
     }
+
+    private fun distDir(): File = File(System.getProperty("jvmguard.integration.distDir"))
 
 }

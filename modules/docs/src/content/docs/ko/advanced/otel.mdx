@@ -1,0 +1,42 @@
+---
+title: OTel 트랜잭션
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+애플리케이션이 이미 OpenTelemetry 또는 Micrometer 트레이싱 어노테이션을 사용하고 있다면 jvmguard는 추가 구성
+없이 이를 트랜잭션으로 전환할 수 있습니다. "OTel" 트랜잭션 타입은 다음을 매핑합니다:
+
+* 메서드의 `io.opentelemetry.instrumentation.annotations.WithSpan`
+* 메서드 및 클래스의 `io.micrometer.observation.annotation.Observed`
+
+두 어노테이션 모두 OpenTelemetry 또는 Micrometer를 사용하는 애플리케이션에 트레이싱 백엔드가 연결되어 있지
+않더라도 이미 존재하는 경우가 많습니다. `@WithSpan`은 OpenTelemetry 에이전트나 Spring 스타터가 있어야만
+동작하고 `@Observed`는 클래스패스에 Micrometer AOP가 있어야만 동작하기 때문입니다. jvmguard는 어노테이션을
+이름으로만 일치시키므로 어노테이션이 기능하지 않아도 되며, 사용되지 않을 때 오버헤드도 없습니다.
+
+트랜잭션 기록 설정의 "OTel" 탭에는 미리 구성된 OTel 트랜잭션 정의가 있습니다. 다른 트랜잭션 정의와
+마찬가지로 편집, 순서 변경, 버리기 또는 삭제가 가능합니다. 삭제하면 다시 생성되지 않습니다.
+
+<Figure src="ui/otel_transactions.png" />
+
+## 명명
+
+기본적으로 트랜잭션은 어노테이션의 스팬 이름 속성(`@WithSpan`은 `value`, `@Observed`는 `contextualName`)으로
+이름이 지정됩니다. 속성이 비어 있으면 트랜잭션 이름은 `ClassName.methodName`이 되며, 이는 OpenTelemetry
+자체의 기본 스팬 이름이기도 합니다. "명명" 탭에서 다른 트랜잭션 정의와 마찬가지로 명명을 변경할 수 있습니다.
+
+## 스팬 이름으로 필터링
+
+OTel 트랜잭션 정의의 "필터" 탭에는 클래스 필터 외에 "스팬 이름" 필드가 있습니다. 스팬 이름이 구성된
+와일드카드 또는 정규식과 일치하는 어노테이션만 트랜잭션을 생성합니다. 스팬 이름 속성이 없는 어노테이션은
+스팬 이름 필터와 절대 일치하지 않습니다.
+
+## 다른 트랜잭션 타입과의 중복
+
+메서드는 지원되는 어노테이션을 여러 개 가질 수 있습니다. 중복 트랜잭션을 방지하기 위해 다음 규칙이
+적용됩니다:
+
+* 메서드에 `@MethodTransaction` 어노테이션이 있으면 선언적 트랜잭션만 생성됩니다.
+* 메서드에 `@WithSpan`과 `@Observed`가 모두 있으면(메서드 자체 또는 외부 클래스의 클래스 수준 `@Observed`를 통해) `@WithSpan` 트랜잭션만 생성됩니다.
+* 메서드에 직접 붙은 어노테이션은 외부 클래스의 클래스 수준 `@Observed`보다 우선합니다.

@@ -71,6 +71,31 @@ The bean is **blind to the format**. Two backends implement those interfaces:
 Polymorphism on read (`readObject`) goes through `CodecRegistry` (keyed by `codecType()`, populated by
 `CodecTypes.registerAll()`, called at both agent and server startup).
 
+**Protocol versioning:** the backends also answer `satisfies(ProtocolRequirement)`. The binary
+backend holds the connection's `CommunicationContext` (passed in from `read(context, in)` /
+`write(context, out)` and shared with nested beans through `readObject`/`readList`), the JSON
+backend always satisfies (JSON is versionless). Fields introduced after protocol V1 are gated at
+the call site in the bean:
+
+```java
+if (reader.satisfies(ProtocolRequirement.V2)) {
+    annotationValueFilter = reader.readObject("annotationValueFilter");
+}
+```
+
+On binary V1 streams the gated read/write never happens, so old agents receive old streams. On
+JSON the gate is always open; keys that are absent in old exports read as their default
+(`readString` → null, `readInt` → 0, `readBoolean` → false) and nested objects simply read as
+null when the key is absent.
+
+**Versioned list elements:** whole *new types* (e.g. a new `NamingElement` subtype) cannot be
+gated field-by-field. Instead, a type declares `getSinceVersion()` (default `V1`) and
+`BinaryAgentWriter.writeList` skips elements whose requirement the peer does not satisfy — a new
+naming element in a config pushed to an old agent is simply dropped (degraded name, working
+config) instead of failing the whole config read on the unknown `codecType`. JSON keeps all
+elements (versionless document). This only covers list elements; new required object fields still
+need a gated plain field like above.
+
 **The key property:** each agent bean has **one** `readState`/`writeState`. That single definition
 produces *both* the live binary protocol bytes *and* the JSON export — no duplication. The caller just
 hands it a `BinaryAgent*` or a `JsonAgent*`.

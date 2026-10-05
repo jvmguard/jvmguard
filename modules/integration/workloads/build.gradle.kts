@@ -21,6 +21,9 @@ dependencies {
     api(libs.bundles.annotations)
     api(libs.jdom)
     api(project(":agent:api"))
+    // for the OTel tracing tests
+    api(libs.otel.instrumentation.annotations)
+    api(libs.micrometer.observation)
     // Agent classes are provided at runtime by -javaagent.
     compileOnly(project(":agent:bundle"))
 }

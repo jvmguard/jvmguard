@@ -10,6 +10,8 @@ import dev.jvmguard.agent.instrument.interceptions.BaseInterception;
 import dev.jvmguard.agent.instrument.interceptions.DeclaredInterception;
 import dev.jvmguard.agent.instrument.interceptions.DeclaredInterception.NamingResult;
 import dev.jvmguard.agent.instrument.interceptions.TransactionInterception;
+import dev.jvmguard.agent.instrument.transaction.TransactionDefinition;
+import dev.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import dev.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
 import dev.jvmguard.agent.thread.StackEntry;
 import org.objectweb.asm.Opcodes;
@@ -82,7 +84,8 @@ public class InstrumentationWrappingProvider extends WrappingProvider {
                             int namingIdentifier = handler.getNaming().namingIdentifier();
                             mv.visitLdcInsn(namingIdentifier);
                             if (namingIdentifier > 0) {
-                                mv.visitLdcInsn(handler.calculateStaticTransactionName(usedClassName, visibleMethodName));
+                                mv.visitLdcInsn(handler.calculateStaticTransactionName(usedClassName, visibleMethodName,
+                                    transactionInterception.getAnnotationAttributes(), getAnnotationDescriptor(transactionInterception)));
                             } else {
                                 mv.visitInsn(ACONST_NULL);
                             }
@@ -118,6 +121,11 @@ public class InstrumentationWrappingProvider extends WrappingProvider {
 
     private Class getTargetClass(TransactionInterception transactionInterception) throws ClassNotFoundException {
         return instrumenter.getTargetClass(className, transactionInterception);
+    }
+
+    private static String getAnnotationDescriptor(TransactionInterception interception) {
+        TransactionDefinition definition = interception.getDefinition();
+        return definition instanceof AnnotationDefinition ? ((AnnotationDefinition)definition).getName() : null;
     }
 
     private boolean isStatic() {

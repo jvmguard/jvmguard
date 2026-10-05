@@ -100,6 +100,9 @@ public class Instrumenter {
     @GuardedBy("classesToStoredMethodAnnotations")
     private final Map<String, Map<String, Set<InterceptionMethod>>> classesToStoredMethodAnnotations = new HashMap<>();
 
+    @GuardedBy("classesToStoredMethodAnnotationAttributes")
+    private final Map<String, Map<String, Map<InterceptionMethod, Map<String, String>>>> classesToStoredMethodAnnotationAttributes = new HashMap<>();
+
     private final SystemInstrVisitor systemInstrVisitor = new SystemInstrVisitor();
 
     public List<Class> calculateChanges(Map<MatchedDefinition, MatchedTransactionDefList> pojoInterceptionMap,
@@ -504,6 +507,23 @@ public class Instrumenter {
         synchronized (classesToStoredMethodAnnotations) {
             Map<String, Set<InterceptionMethod>> annotationsToMethods = classesToStoredMethodAnnotations.computeIfAbsent(className, k -> new HashMap<>());
             annotationsToMethods.put(annotationName, methods);
+        }
+    }
+
+    public Map<InterceptionMethod, Map<String, String>> getMethodAnnotationAttributes(String className, String annotationName) {
+        synchronized (classesToStoredMethodAnnotationAttributes) {
+            Map<String, Map<InterceptionMethod, Map<String, String>>> annotationsToAttributes = classesToStoredMethodAnnotationAttributes.get(className);
+            if (annotationsToAttributes != null) {
+                return annotationsToAttributes.get(annotationName);
+            }
+        }
+        return null;
+    }
+
+    public void setMethodAnnotationAttributes(String className, String annotationName, Map<InterceptionMethod, Map<String, String>> attributes) {
+        synchronized (classesToStoredMethodAnnotationAttributes) {
+            Map<String, Map<InterceptionMethod, Map<String, String>>> annotationsToAttributes = classesToStoredMethodAnnotationAttributes.computeIfAbsent(className, k -> new HashMap<>());
+            annotationsToAttributes.put(annotationName, attributes);
         }
     }
 

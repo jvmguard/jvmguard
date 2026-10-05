@@ -4,4 +4,8 @@ public interface CodecEntity {
     String codecType();
     void readState(AgentReader reader) throws Exception;
     void writeState(AgentWriter writer) throws Exception;
+
+    default ProtocolRequirement getSinceVersion() {
+        return ProtocolRequirement.V1;
+    }
 }

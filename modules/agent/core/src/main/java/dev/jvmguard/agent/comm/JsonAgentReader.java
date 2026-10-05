@@ -34,6 +34,11 @@ public class JsonAgentReader implements AgentReader {
     }
 
     @Override
+    public boolean satisfies(ProtocolRequirement requirement) {
+        return true;
+    }
+
+    @Override
     public <E extends Enum<E>> E readEnum(String name, Class<E> enumClass) {
         return Enum.valueOf(enumClass, current.getString(name, null));
     }

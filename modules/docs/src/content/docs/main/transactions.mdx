@@ -32,7 +32,7 @@ the transaction type and is described in the advanced topics for each type.
 ## Transaction types
 
 Usually, a small set of methods maps to the operations that are important to measure, either in your own code or in a
-library you cannot modify. jvmguard offers three transaction types for these cases. Beyond the basics, the
+library you cannot modify. jvmguard offers four transaction types for these cases. Beyond the basics, the
 configuration has elaborate aspects, so each of them has its own chapter in the advanced topics.
 
 **Declared** transactions are defined in your code with annotations supplied by jvmguard. While the naming is completely
@@ -44,6 +44,11 @@ For a **Mapped invocation** transaction, you specify a particular annotation cla
 configuration](/docs/advanced/mapped) you can decide whether the annotation should apply to classes or methods and
 how inherited classes should be handled. This is useful when a framework already uses annotations to designate
 entry points.
+
+**OTel** transactions map the OpenTelemetry `@WithSpan` and Micrometer `@Observed` tracing annotations to
+transactions. A preconfigured definition exists in the transaction recording settings, so if your application
+already carries these annotations, you get transactions without any configuration. See the [advanced topic about
+OTel transactions](/docs/advanced/otel) for more information.
 
 If you cannot modify the code that should be monitored, **Matched transactions** allow you to specify all the same
 interceptions as Declared transactions directly in the jvmguard UI. See the detailed explanation of [Matched

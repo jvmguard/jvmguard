@@ -41,7 +41,7 @@ class GroupConfigSchemaTest {
     @Test
     fun cataloguesTransactionAndTriggerVariants() {
         val transactionClasses = list("transactionTypes").map { it["class"] }
-        assertTrue(transactionClasses.containsAll(listOf("MatchedTransactionDef", "MappedTransactionDef", "DeclaredTransactionDef")))
+        assertTrue(transactionClasses.containsAll(listOf("MatchedTransactionDef", "MappedTransactionDef", "DeclaredTransactionDef", "OtelTransactionDef")))
         val triggerTypes = list("triggerTypes").map { it["type"] }
         assertTrue(triggerTypes.containsAll(listOf("CONNECTION", "POLICY", "THRESHOLD")))
     }

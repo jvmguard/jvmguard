@@ -13,14 +13,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
 
-class NamingForm : VerticalLayout() {
+open class NamingForm(private val elementsEditor: NamingElementsEditor = NamingElementsEditor()) : VerticalLayout() {
 
     private val binder = Binder(TransactionNaming::class.java)
 
     private val active = Checkbox(t("recording.naming.active")).apply { testId = "naming-active" }
     private val reentry = EnumSelect("", ReentryInhibition::class.java)
     private val group = TextField(t("recording.naming.groupName")).apply { width = "20rem" }
-    private val elementsEditor = NamingElementsEditor()
 
     private val reentryRow = HorizontalLayout(Span(t("recording.naming.suppressNested")), reentry).apply {
         defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
@@ -67,3 +66,7 @@ class NamingForm : VerticalLayout() {
         group.isVisible = active.value && reentry.value == ReentryInhibition.GROUP
     }
 }
+
+class AnnotationNamingForm : NamingForm(AnnotationNamingElementsEditor())
+
+class OtelNamingForm : NamingForm(OtelNamingElementsEditor())

@@ -1,7 +1,8 @@
 package dev.jvmguard.agent.comm;
 
 public enum ProtocolRequirement {
-    V1(1);
+    V1(1),
+    V2(2);
 
     private final int version;
 

@@ -6,6 +6,7 @@ public enum TransactionType {
     MATCHED("Matched invocation", 2),
     MAPPED("Mapped invocation", 3),
     DECLARED("Declared invocation", 4),
+    OTEL("OTel invocation", 5),
     VM("VM", 8),
     CALL_WITHOUT_TRANSACTION("Call without transaction", 13);
 

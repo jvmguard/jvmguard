@@ -7,9 +7,20 @@ import java.util.List;
 
 public class BinaryAgentReader implements AgentReader {
     private final DataInputStream in;
+    private final CommunicationContext context;
 
     public BinaryAgentReader(DataInputStream in) {
+        this(in, null);
+    }
+
+    public BinaryAgentReader(DataInputStream in, CommunicationContext context) {
         this.in = in;
+        this.context = context;
+    }
+
+    @Override
+    public boolean satisfies(ProtocolRequirement requirement) {
+        return context == null || context.satisfies(requirement);
     }
 
     @Override

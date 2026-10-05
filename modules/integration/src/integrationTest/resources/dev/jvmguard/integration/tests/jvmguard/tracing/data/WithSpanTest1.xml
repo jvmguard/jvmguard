@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="DoublyAnnotatedService.bothWays" count="2" type="declared"/>
+      <element name="ObservedClassService.classLevelMethod" count="2" type="otel"/>
+      <element name="ObservedMethodService.observedMethod" count="2" type="otel"/>
+      <element name="WithSpanService.outer" count="2" type="otel">
+        <children>
+          <element name="WithSpanService.inner" count="2" type="otel"/>
+        </children>
+      </element>
+      <element name="both annotations" count="2" type="otel"/>
+      <element name="custom span name" count="2" type="otel"/>
+      <element name="observed span name" count="2" type="otel"/>
+    </children>
+  </callTree>
+</data>

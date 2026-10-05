@@ -7,9 +7,20 @@ import java.util.List;
 
 public class BinaryAgentWriter implements AgentWriter {
     private final DataOutputStream out;
+    private final CommunicationContext context;
 
     public BinaryAgentWriter(DataOutputStream out) {
+        this(out, null);
+    }
+
+    public BinaryAgentWriter(DataOutputStream out, CommunicationContext context) {
         this.out = out;
+        this.context = context;
+    }
+
+    @Override
+    public boolean satisfies(ProtocolRequirement requirement) {
+        return context == null || context.satisfies(requirement);
     }
 
     @Override
@@ -56,9 +67,11 @@ public class BinaryAgentWriter implements AgentWriter {
     @Override
     public <T extends CodecEntity> void writeList(String name, List<T> value) throws Exception {
         for (CodecEntity element : value) {
-            out.writeBoolean(true);
-            out.writeUTF(element.codecType());
-            element.writeState(this);
+            if (context == null || context.satisfies(element.getSinceVersion())) {
+                out.writeBoolean(true);
+                out.writeUTF(element.codecType());
+                element.writeState(this);
+            }
         }
         out.writeBoolean(false);
     }

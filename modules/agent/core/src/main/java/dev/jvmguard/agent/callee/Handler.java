@@ -4,6 +4,8 @@ import dev.jvmguard.agent.RequestSession;
 import dev.jvmguard.agent.config.transactions.*;
 import dev.jvmguard.agent.config.transactions.MethodInterceptionTransactionDef.MethodInterceptionTransactionEnvironment;
 
+import java.util.Map;
+
 public class Handler {
 
     protected final ClassFilterTransactionDef policyTransaction;
@@ -35,8 +37,9 @@ public class Handler {
         return MethodInterceptionTransactionDef.getTransactionName(namingTransaction.getNaming().getNamingElements(), environment);
     }
 
-    public String calculateStaticTransactionName(String className, String methodName) {
-        return calculateTransactionName(className, methodName, null, null);
+    public String calculateStaticTransactionName(String className, String methodName, Map<String, String> annotationAttributes, String annotationDescriptor) {
+        MethodInterceptionTransactionEnvironment environment = new MethodInterceptionTransactionEnvironment(className, methodName, null, null, annotationAttributes, annotationDescriptor);
+        return MethodInterceptionTransactionDef.getTransactionName(namingTransaction.getNaming().getNamingElements(), environment);
     }
 
     protected void doEnter(TransactionType transactionType, int namingId, String staticName, String className, String methodName, Object thisObject, Object[] parameter) {

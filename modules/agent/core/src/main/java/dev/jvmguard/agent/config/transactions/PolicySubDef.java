@@ -123,12 +123,12 @@ public class PolicySubDef extends AbstractEntity implements PolicyDef, AgentSeri
 
     @Override
     public void read(CommunicationContext context, DataInputStream in) throws Exception {
-        readState(new BinaryAgentReader(in));
+        readState(new BinaryAgentReader(in, context));
     }
 
     @Override
     public void write(CommunicationContext context, DataOutputStream out) throws Exception {
-        writeState(new BinaryAgentWriter(out));
+        writeState(new BinaryAgentWriter(out, context));
     }
 
     @Override

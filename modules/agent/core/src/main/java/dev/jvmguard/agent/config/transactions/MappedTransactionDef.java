@@ -2,13 +2,13 @@ package dev.jvmguard.agent.config.transactions;
 
 import dev.jvmguard.agent.comm.*;
 import dev.jvmguard.agent.config.base.ConfigDoc;
+import dev.jvmguard.agent.config.transactions.naming.AnnotationAttributeElement;
 import dev.jvmguard.agent.instrument.transaction.DefinitionSite;
 import dev.jvmguard.agent.instrument.transaction.annotation.AnnotationDefinition;
 import dev.jvmguard.agent.instrument.transaction.annotation.MappedAnnotationDefinition;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-
 @ConfigDoc("Marks classes/methods as transactions by the presence of a given annotation type.")
 public class MappedTransactionDef extends AnnotatedTransactionDef {
 
@@ -28,7 +28,7 @@ public class MappedTransactionDef extends AnnotatedTransactionDef {
 
     @Override
     public String getAutomaticName() {
-        return annotationName + " [" + super.getAutomaticName() + "]";
+        return annotationName + " [" + describeFilters() + "]";
     }
 
     public String getAnnotationName() {
@@ -88,12 +88,12 @@ public class MappedTransactionDef extends AnnotatedTransactionDef {
 
     @Override
     public void read(CommunicationContext context, DataInputStream in) throws Exception {
-        readState(new BinaryAgentReader(in));
+        readState(new BinaryAgentReader(in, context));
     }
 
     @Override
     public void write(CommunicationContext context, DataOutputStream out) throws Exception {
-        writeState(new BinaryAgentWriter(out));
+        writeState(new BinaryAgentWriter(out, context));
     }
 
     @Override
@@ -134,7 +134,20 @@ public class MappedTransactionDef extends AnnotatedTransactionDef {
                 .inheritable(interceptSubclasses)
                 .implementingOnly(methodAnnotation || methodInterceptionMode == MethodInterceptionMode.IMPLEMENTING_PUBLIC)
                 .useDeclaringClassName(useDeclaringClassName)
+                .attributeCapture(usesAnnotationAttributes())
+                .valueFilter(getAnnotationValueFilter())
         };
+    }
+
+    private boolean usesAnnotationAttributes() {
+        if (getNaming().isActive()) {
+            for (NamingElement namingElement : getNaming().getNamingElements()) {
+                if (namingElement instanceof AnnotationAttributeElement) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public enum AnnotatedTarget {

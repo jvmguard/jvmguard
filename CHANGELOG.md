@@ -1,6 +1,17 @@
 # Changelog
 
 
+### 0.3
+
+**New features:**
+
+- New "OTel" transaction type: methods annotated with OpenTelemetry's `@WithSpan` or Micrometer's
+  `@Observed` are recorded as transactions, named after the span name in the annotation. A
+  preconfigured, fully editable OTel transaction definition exists in the transaction recording
+  settings, with an optional span name filter.
+- Mapped transaction definitions can now filter by annotation attribute values and use annotation
+  attribute values as transaction naming elements.
+
 ### 0.2
 
 **New features:**

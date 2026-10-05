@@ -35,12 +35,16 @@ public final class CodecTypes {
                 MatchedTransactionDef::new,
                 MappedTransactionDef::new,
                 DeclaredTransactionDef::new,
+                OtelTransactionDef::new,
+                AnnotationValueFilter::new,
                 ClassNameElement::new,
                 InstanceClassNameElement::new,
                 InstanceElement::new,
                 MethodNameElement::new,
                 MethodParameterElement::new,
-                TextElement::new
+                TextElement::new,
+                AnnotationAttributeElement::new,
+                OtelSpanNameElement::new
             );
             registered = true;
         }

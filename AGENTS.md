@@ -118,7 +118,8 @@ Orientation:
   `-Dvaadin.productionMode=true` to serve the pre-built bundle. Append **`?mock`** to log in against the
   canned `MockServerConnectionImpl` data instead of the live backend (auth still needs a real user/password;
   the flag only swaps the connection via `Sessions.captureMock` → `Sessions.mockMode()` →
-  `SecurityBridge.authenticate(..., mockMode)`).
+  `SecurityBridge.authenticate(..., mockMode)`). Add `-Djvmguard.distDirectory=<repo>/dist` so the
+  from-sources layout can find the agent (agent auto-update pushes zip `agent/lib`).
 - **Testing:** browserless (`JvmGuardBrowserlessTest`, the fast per-change check) plus Playwright e2e
   (`./gradlew :ui:e2eTest`, its own `ServerMain` on 8123/8948). Full API and gotchas in
   web-ui-style.md.

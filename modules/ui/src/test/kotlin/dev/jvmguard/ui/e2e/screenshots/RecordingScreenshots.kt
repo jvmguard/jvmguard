@@ -211,6 +211,15 @@ class RecordingScreenshots : ScreenshotTest() {
     }
 
     @Test
+    fun otelTransactions() = onPage {
+        login()
+        openTransactionsAt("Otel")
+        // the default OTel definition is listed, without filters its name is "*"
+        assertThat(getByTestId("transaction-grid-otel").getByText("*", Locator.GetByTextOptions().setExact(true))).isVisible()
+        capture("otel_transactions")
+    }
+
+    @Test
     fun instanceNameConfig() = onPage {
         login()
         openMatchedDialog()

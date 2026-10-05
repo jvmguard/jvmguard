@@ -76,7 +76,8 @@ public class ConfigurationParameter extends BaseParameter {
             PolicyOptions policyOptions = new PolicyOptions();
             Set<AnnotationDefinition> declaredGroupDefinitions = new HashSet<>();
 
-            for (TransactionDef transactionDef : parameters.getTransactionSettings().getTransactionDefs()) {
+            List<TransactionDef> transactionDefs = parameters.getTransactionSettings().getTransactionDefs();
+            for (TransactionDef transactionDef : transactionDefs) {
                 transactionDef.getNaming().getGroup().setUsedValue(transactionDef.getNaming().getGroup().getUsedValue().intern());
                 initPolicyHandler(transactionDef, policyOptions);
                 initSubPolicyHandler(transactionDef, policyOptions);
@@ -117,7 +118,7 @@ public class ConfigurationParameter extends BaseParameter {
             Logger.log(Subsystem.INSTRUMENTATION, 5, true, "used declared group definitions %s\n", declaredGroupDefinitions);
             if (!declaredGroupDefinitions.isEmpty()) {
                 // for every group defined, a list must be constructed containing the entries from this group and the entries for all groups in the correct order
-                for (TransactionDef transactionDef : parameters.getTransactionSettings().getTransactionDefs()) {
+                for (TransactionDef transactionDef : transactionDefs) {
                     if (transactionDef instanceof DeclaredTransactionDef) {
                         DeclaredTransactionDef declaredTransactionDev = (DeclaredTransactionDef)transactionDef;
 

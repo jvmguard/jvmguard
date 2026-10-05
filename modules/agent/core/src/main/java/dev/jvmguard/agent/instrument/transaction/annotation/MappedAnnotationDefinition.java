@@ -1,11 +1,17 @@
 package dev.jvmguard.agent.instrument.transaction.annotation;
 
+import dev.jvmguard.agent.config.transactions.AnnotationValueFilter;
 import dev.jvmguard.agent.config.transactions.TransactionType;
+
+import java.util.Map;
+import java.util.Objects;
 
 public class MappedAnnotationDefinition extends AnnotationDefinition {
     private boolean inheritable;
     private boolean implementingOnly;
     private boolean useDeclaringClassName;
+    private boolean attributeCapture;
+    private AnnotationValueFilter valueFilter;
     private final TransactionType transactionType;
 
     public MappedAnnotationDefinition(String name, boolean methodAnnotation, boolean staticMethods, TransactionType transactionType) {
@@ -28,6 +34,23 @@ public class MappedAnnotationDefinition extends AnnotationDefinition {
         return this;
     }
 
+    public MappedAnnotationDefinition attributeCapture(boolean attributeCapture) {
+        this.attributeCapture = attributeCapture;
+        return this;
+    }
+
+    public MappedAnnotationDefinition valueFilter(AnnotationValueFilter valueFilter) {
+        this.valueFilter = valueFilter;
+        return this;
+    }
+
+    public boolean isAttributeCapture() {
+        return attributeCapture || valueFilter != null && valueFilter.isActive();
+    }
+    public boolean matchesValueFilter(Map<String, String> attributes) {
+        return valueFilter == null || valueFilter.matches(attributes);
+    }
+
     public boolean isImplementingOnly() {
         return implementingOnly;
     }
@@ -39,6 +62,10 @@ public class MappedAnnotationDefinition extends AnnotationDefinition {
 
     public boolean isUseDeclaringClassName() {
         return useDeclaringClassName;
+    }
+
+    public TransactionType getTransactionType() {
+        return transactionType;
     }
 
     @Override
@@ -82,6 +109,12 @@ public class MappedAnnotationDefinition extends AnnotationDefinition {
         if (useDeclaringClassName != that.useDeclaringClassName) {
             return false;
         }
+        if (attributeCapture != that.attributeCapture) {
+            return false;
+        }
+        if (!Objects.equals(valueFilter, that.valueFilter)) {
+            return false;
+        }
         if (transactionType != that.transactionType) {
             return false;
         }
@@ -95,6 +128,8 @@ public class MappedAnnotationDefinition extends AnnotationDefinition {
         result = 31 * result + (inheritable ? 1 : 0);
         result = 31 * result + (implementingOnly ? 1 : 0);
         result = 31 * result + (useDeclaringClassName ? 1 : 0);
+        result = 31 * result + (attributeCapture ? 1 : 0);
+        result = 31 * result + Objects.hashCode(valueFilter);
         result = 31 * result + transactionType.hashCode();
         return result;
     }

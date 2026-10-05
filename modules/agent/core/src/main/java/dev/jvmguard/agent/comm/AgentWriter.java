@@ -13,6 +13,8 @@ public interface AgentWriter {
 
     void writeBoolean(String name, boolean value) throws Exception;
 
+    boolean satisfies(ProtocolRequirement requirement);
+
     <E extends Enum<E>> void writeEnum(String name, E value) throws Exception;
 
     void writeCheckedString(String name, CheckedString value) throws Exception;

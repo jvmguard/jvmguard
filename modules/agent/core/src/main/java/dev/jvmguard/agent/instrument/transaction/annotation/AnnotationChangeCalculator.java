@@ -2,6 +2,7 @@ package dev.jvmguard.agent.instrument.transaction.annotation;
 
 import dev.jvmguard.agent.base.logging.Subsystem;
 import dev.jvmguard.agent.instrument.Instrumenter;
+import dev.jvmguard.agent.instrument.classInfo.AnnotationAttributeInfo;
 import dev.jvmguard.agent.instrument.classInfo.ClassFileInfo;
 import dev.jvmguard.agent.instrument.classInfo.ClassFileInfo.HierarchyVisitor;
 import dev.jvmguard.agent.instrument.classInfo.DeclaredAnnotationInfo;
@@ -102,6 +103,11 @@ public class AnnotationChangeCalculator extends ChangeCalculator<AnnotationDefin
                     for (Object storedAnnotation : definedAnnotations) {
                         if (storedAnnotation instanceof String) {
                             String storedAnnotationName = (String)storedAnnotation;
+                            if (!inheritable || !DeclaredAnnotationDefinition.isDeclaredDescriptor(storedAnnotationName)) {
+                                checkAffectedClasses(searchedAnnotations, storedAnnotationName, className);
+                            }
+                        } else if (storedAnnotation instanceof AnnotationAttributeInfo) {
+                            String storedAnnotationName = ((AnnotationAttributeInfo)storedAnnotation).getDescriptor();
                             if (!inheritable || !DeclaredAnnotationDefinition.isDeclaredDescriptor(storedAnnotationName)) {
                                 checkAffectedClasses(searchedAnnotations, storedAnnotationName, className);
                             }

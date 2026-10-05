@@ -10,19 +10,23 @@ import dev.jvmguard.agent.config.transactions.ComparisonType
 import dev.jvmguard.agent.config.telemetry.MBeanLineConfig
 import dev.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings
+import dev.jvmguard.agent.config.transactions.AnnotationValueFilter
 import dev.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import dev.jvmguard.agent.config.transactions.MappedTransactionDef
 import dev.jvmguard.agent.config.transactions.MatchedTransactionDef
+import dev.jvmguard.agent.config.transactions.OtelTransactionDef
 import dev.jvmguard.agent.config.transactions.Policy
 import dev.jvmguard.agent.config.transactions.PolicySubDef
 import dev.jvmguard.agent.config.transactions.TransactionDef
 import dev.jvmguard.agent.config.transactions.TransactionNaming
 import dev.jvmguard.agent.config.transactions.TransactionSettings
+import dev.jvmguard.agent.config.transactions.naming.AnnotationAttributeElement
 import dev.jvmguard.agent.config.transactions.naming.ClassNameElement
 import dev.jvmguard.agent.config.transactions.naming.InstanceClassNameElement
 import dev.jvmguard.agent.config.transactions.naming.InstanceElement
 import dev.jvmguard.agent.config.transactions.naming.MethodNameElement
 import dev.jvmguard.agent.config.transactions.naming.MethodParameterElement
+import dev.jvmguard.agent.config.transactions.naming.OtelSpanNameElement
 import dev.jvmguard.agent.config.transactions.naming.TextElement
 import dev.jvmguard.data.config.GroupConfig
 import dev.jvmguard.data.config.external.ConfigDocKeys
@@ -65,6 +69,8 @@ object GroupConfigSchema {
             MatchedTransactionDef(),
             MappedTransactionDef(),
             DeclaredTransactionDef(),
+            OtelTransactionDef(),
+            AnnotationValueFilter(),
             Policy(),
             PolicySubDef(),
             TransactionNaming(),
@@ -74,6 +80,8 @@ object GroupConfigSchema {
             MethodNameElement(),
             MethodParameterElement(),
             TextElement(),
+            AnnotationAttributeElement(),
+            OtelSpanNameElement(),
             TelemetrySettings(),
             MBeanTelemetryConfig(),
             MBeanLineConfig()

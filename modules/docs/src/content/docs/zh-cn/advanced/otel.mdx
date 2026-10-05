@@ -1,0 +1,39 @@
+---
+title: OTel 事务
+---
+
+import Figure from '../../../../components/Figure.astro';
+
+如果应用程序已经使用了 OpenTelemetry 或 Micrometer 的追踪注解，jvmguard 无需任何额外配置即可将其转换为
+事务。“OTel”事务类型映射：
+
+* 方法上的 `io.opentelemetry.instrumentation.annotations.WithSpan`
+* 方法和类上的 `io.micrometer.observation.annotation.Observed`
+
+在使用 OpenTelemetry 或 Micrometer 的应用程序中，即使没有连接追踪后端，这两个注解通常也已经存在，因为
+`@WithSpan` 只有在 OpenTelemetry 代理或 Spring starter 存在时才生效，`@Observed` 只有在类路径中存在
+Micrometer AOP 时才生效。jvmguard 仅按名称匹配注解，因此注解无需处于可用状态，未使用时也没有开销。
+
+事务记录设置的“OTel”选项卡中包含一个预配置的 OTel 事务定义。与任何其他事务定义一样，它可以编辑、
+重新排序、丢弃或删除。删除后不会重新创建。
+
+<Figure src="ui/otel_transactions.png" />
+
+## 命名
+
+默认情况下，事务以注解的 span 名称属性命名（`@WithSpan` 为 `value`，`@Observed` 为 `contextualName`）。
+如果该属性为空，事务将命名为 `ClassName.methodName`，这也是 OpenTelemetry 自身的默认 span 名称。可以在
+“命名”选项卡中像其他事务定义一样更改命名。
+
+## 按 span 名称筛选
+
+OTel 事务定义的“筛选”选项卡除了类过滤器之外还有“Span 名称”字段。只有 span 名称与配置的通配符或正则
+表达式匹配的注解才会创建事务。没有 span 名称属性的注解永远不会匹配 span 名称过滤器。
+
+## 与其他事务类型的重叠
+
+一个方法可以携带多个受支持的注解。为避免重复的事务，适用以下规则：
+
+* 如果方法带有 `@MethodTransaction` 注解，则只创建已声明的事务。
+* 如果方法同时带有 `@WithSpan` 和 `@Observed`（直接标注，或通过外部类上的类级别 `@Observed`），则只创建 `@WithSpan` 事务。
+* 直接标注在方法上的注解优先于外部类上的类级别 `@Observed`。

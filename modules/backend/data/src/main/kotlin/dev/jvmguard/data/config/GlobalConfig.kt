@@ -52,6 +52,10 @@ open class GlobalConfig : StoredConfig() {
     var checkForUpdates: Boolean = true
         set(value) { field = changed(field, value) }
 
+    // 0 for installations that predate config versioning, set to CURRENT_CONFIG_VERSION on creation
+    var configVersion: Int = 0
+        set(value) { field = changed(field, value) }
+
     val transactionDays: Int
         get() = if (infiniteTransactionDays) Int.MAX_VALUE else fixedTransactionDays
 
@@ -74,6 +78,8 @@ open class GlobalConfig : StoredConfig() {
         get() = listOf(smtpConfig, ldapConfig) + ssoConfig.providers
 
     companion object {
+        const val CURRENT_CONFIG_VERSION = 1
+
         fun getUsedRetentionDays(retentionDays: Int): Int = maxOf(retentionDays, 2)
     }
 }

@@ -31,10 +31,14 @@ abstract class AbstractTransactionDefDialog<T : ClassFilterTransactionDef>(
         width = "60rem"
 
         naming = namingForm()
-        wizard.addTab(t("recording.tab.definition"), definitionTab())
-        wizard.addTab(t("recording.tab.filter"), VerticalLayout(className, discard).apply { isPadding = false; isSpacing = true })
+        val definitionTab = definitionTab()
+        if (definitionTab != null) {
+            wizard.addTab(t("recording.tab.definition"), definitionTab)
+        }
+        wizard.addTab(t("recording.tab.filter"), VerticalLayout(className, *filterTabExtras().toTypedArray(), discard).apply { isPadding = false; isSpacing = true })
         naming?.let { wizard.addTab(t("recording.tab.naming"), it) }
         wizard.addTab(t("recording.tab.policies"), policyForm)
+        infoLine()?.let { add(it) }
         add(wizard)
 
         bindShared()
@@ -48,7 +52,9 @@ abstract class AbstractTransactionDefDialog<T : ClassFilterTransactionDef>(
     }
 
     protected abstract val typeKey: String
-    protected abstract fun definitionTab(): Component
+    protected abstract fun definitionTab(): Component?
+    protected open fun infoLine(): Component? = null
+    protected open fun filterTabExtras(): List<Component> = emptyList()
     protected open fun bindDefinition(binder: Binder<T>) {}
     protected open fun readDefinition(def: T) {}
     protected open fun writeDefinition(def: T): Boolean = true
@@ -60,17 +66,12 @@ abstract class AbstractTransactionDefDialog<T : ClassFilterTransactionDef>(
     }
 
     private fun save() {
-        if (!binder.writeBeanIfValid(def)) {
-            return
-        }
-        if (!writeDefinition(def)) {
-            return
-        }
-        if (!policyForm.writeIfValid(def.policy)) {
-            return
-        }
-        val namingForm = naming
-        if (namingForm != null && !namingForm.writeIfValid(def.naming)) {
+        val valid = binder.writeBeanIfValid(def) &&
+            writeDefinition(def) &&
+            policyForm.writeIfValid(def.policy) &&
+            naming?.writeIfValid(def.naming) != false
+        if (!valid) {
+            wizard.revealFirstInvalidField()
             return
         }
         onSave(def)

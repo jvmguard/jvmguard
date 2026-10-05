@@ -4,6 +4,8 @@ import dev.jvmguard.agent.config.recording.RetransformationType
 import dev.jvmguard.agent.config.transactions.MappedTransactionDef
 import dev.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import dev.jvmguard.agent.config.transactions.MatchedTransactionDef
+import dev.jvmguard.agent.config.transactions.OtelTransactionDef
+import dev.jvmguard.agent.config.transactions.naming.AnnotationAttributeElement
 import dev.jvmguard.data.user.AccessLevel
 import dev.jvmguard.data.vmdata.VmIdentifier
 import dev.jvmguard.ui.JvmGuardBrowserlessTest
@@ -11,6 +13,8 @@ import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.components.recording.MappedTransactionDefDialog
 import dev.jvmguard.ui.components.recording.DeclaredTransactionDefDialog
 import dev.jvmguard.ui.components.recording.MatchedTransactionDefDialog
+import dev.jvmguard.ui.components.recording.NamingElementDialog
+import dev.jvmguard.ui.components.recording.OtelTransactionDefDialog
 import dev.jvmguard.ui.components.recording.sets.SaveSetDialog
 import dev.jvmguard.ui.server.MockConnections
 import dev.jvmguard.ui.server.Sessions
@@ -18,8 +22,10 @@ import dev.jvmguard.ui.server.UserSession
 import dev.jvmguard.connector.api.ServerConnection
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
+import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.tabs.TabSheet
+import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.component.textfield.TextField
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -51,14 +57,14 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     @Test
     fun rootShowsTransactionGridsAndRetransformation() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        assertEquals(3, find<TabSheet>().single().tabCount)
+        assertEquals(4, find<TabSheet>().single().tabCount)
         assertTrue(find<EnumSelect<*>>().all().any { it.label == "Reinstrument classes" })
     }
 
     @Test
     fun addingAMatchedDefPersistsToTheGroup() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<TabSheet>().single()).select(2)
+        use(find<TabSheet>().single()).select(3)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
 
         val dialog = find<MatchedTransactionDefDialog>().single()
@@ -75,7 +81,7 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     @Test
     fun matchedMethodFieldsAppearOnlyForMethodInterception() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
-        use(find<TabSheet>().single()).select(2)
+        use(find<TabSheet>().single()).select(3)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
         val dialog = find<MatchedTransactionDefDialog>().single()
 
@@ -114,9 +120,104 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
     }
 
     @Test
-    fun savingATransactionSetStoresItOnTheServer() {
+    fun defaultOtelDefIsShownOnTheOtelTab() {
         UI.getCurrent().navigate(RecordingTransactionsView::class.java)
         use(find<TabSheet>().single()).select(2)
+        assertTrue(rootDefs().any { it is OtelTransactionDef })
+    }
+
+    @Test
+    fun otelSpanNameFilterPersists() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(2)
+        use(find<Button>().all().first { it.text == "Add transaction" }).click()
+
+        val dialog = find<OtelTransactionDefDialog>().single()
+        val spanNameField = find<TextField>(dialog).all().first { it.label == "Span name" }
+        // like the class filter, the span name filter defaults to "*"
+        assertEquals("*", spanNameField.value)
+        use(spanNameField).setValue("checkout*")
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+
+        val def = rootDefs().filterIsInstance<OtelTransactionDef>().first { it.annotationValueFilter != null }
+        assertEquals("checkout*", def.annotationValueFilter!!.value)
+    }
+
+    @Test
+    fun otelSpanNameFilterStarMeansNoFilter() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(2)
+        use(find<Button>().all().first { it.text == "Add transaction" }).click()
+
+        val dialog = find<OtelTransactionDefDialog>().single()
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+
+        val defs = rootDefs().filterIsInstance<OtelTransactionDef>()
+        assertTrue(defs.none { it.annotationValueFilter != null })
+    }
+
+    @Test
+    fun annotationAttributeElementRequiresName() {
+        var saved = false
+        val dialog = NamingElementDialog(AnnotationAttributeElement()) { saved = true }
+        dialog.open()
+
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+        assertFalse(saved)
+        assertTrue(find<NamingElementDialog>().all().isNotEmpty())
+
+        use(find<TextField>(dialog).all().first { it.label == "Attribute name" }).setValue("value")
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+        assertTrue(saved)
+    }
+
+    @Test
+    fun mappedAnnotationFilterRequiresBothFields() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(1)
+        use(find<Button>().all().first { it.text == "Add transaction" }).click()
+
+        val dialog = find<MappedTransactionDefDialog>().single()
+        use(find<TextField>(dialog).all().first { it.label == "Annotation class name" }).setValue("com.example.Traced")
+
+        // the filter fields are disabled until the filter is enabled
+        val attributeField = find<TextField>(dialog).all().first { it.label == "Attribute name" }
+        assertFalse(attributeField.isEnabled)
+        use(find<Checkbox>(dialog).all().first { it.label == "Filter by annotation attribute" }).check()
+        assertTrue(attributeField.isEnabled)
+
+        use(attributeField).setValue("operation")
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+
+        // value pattern missing: dialog stays open
+        assertTrue(find<MappedTransactionDefDialog>().all().isNotEmpty())
+
+        use(find<TextField>(dialog).all().first { it.label == null && it.helperText != null }).setValue("place*")
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+
+        val def = rootDefs().filterIsInstance<MappedTransactionDef>().first { it.annotationName == "com.example.Traced" }
+        assertEquals("operation", def.annotationValueFilter!!.attributeName)
+        assertEquals("place*", def.annotationValueFilter!!.value)
+    }
+
+    @Test
+    fun mappedAnnotationFilterDisabledSavesNoFilter() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(1)
+        use(find<Button>().all().first { it.text == "Add transaction" }).click()
+
+        val dialog = find<MappedTransactionDefDialog>().single()
+        use(find<TextField>(dialog).all().first { it.label == "Annotation class name" }).setValue("com.example.Traced")
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+
+        val def = rootDefs().filterIsInstance<MappedTransactionDef>().first { it.annotationName == "com.example.Traced" }
+        assertNull(def.annotationValueFilter)
+    }
+
+    @Test
+    fun savingATransactionSetStoresItOnTheServer() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(3)
         use(find<Button>().all().first { it.text == "Add transaction" }).click()
         val dialog = find<MatchedTransactionDefDialog>().single()
         use(find<TextField>(dialog).all().first { it.label == "Class or interface name" }).setValue("com.example.Service")
@@ -128,6 +229,22 @@ class RecordingTransactionsTest : JvmGuardBrowserlessTest() {
         use(find<Button>(setDialog).all().first { it.text == "Save" }).click()
 
         assertTrue(connection.transactionDefSets.any { it.name == "My transactions" && it.items.isNotEmpty() })
+    }
+
+    @Test
+    fun saveWithInvalidFieldSwitchesToItsTab() {
+        UI.getCurrent().navigate(RecordingTransactionsView::class.java)
+        use(find<TabSheet>().single()).select(1)
+        use(find<Button>().all().first { it.text == "Add transaction" }).click()
+
+        val dialog = find<MappedTransactionDefDialog>().single()
+        // go to the Filter tab without entering the required annotation class name
+        find<Tabs>(dialog).single().selectedIndex = 1
+        use(find<Button>(dialog).all().first { it.text == "Save" }).click()
+
+        // the wizard switches back to the Definition tab where the invalid field is
+        assertEquals(0, find<Tabs>(dialog).single().selectedIndex)
+        assertTrue(find<TextField>(dialog).all().first { it.label == "Annotation class name" }.isInvalid)
     }
 
     @Test

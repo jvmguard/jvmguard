@@ -34,6 +34,11 @@ public class JsonAgentWriter implements AgentWriter {
     }
 
     @Override
+    public boolean satisfies(ProtocolRequirement requirement) {
+        return true;
+    }
+
+    @Override
     public <E extends Enum<E>> void writeEnum(String name, E value) {
         current.put(name, value.name());
     }

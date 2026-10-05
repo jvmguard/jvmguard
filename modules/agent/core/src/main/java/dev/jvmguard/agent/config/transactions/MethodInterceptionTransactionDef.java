@@ -1,8 +1,10 @@
 package dev.jvmguard.agent.config.transactions;
 
 import dev.jvmguard.agent.config.transactions.naming.MethodNameElement;
+import dev.jvmguard.agent.config.transactions.naming.OtelSpanNameElement;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class MethodInterceptionTransactionDef extends ClassFilterTransactionDef {
 
@@ -16,6 +18,8 @@ public abstract class MethodInterceptionTransactionDef extends ClassFilterTransa
             try {
                 if (namingElement instanceof MethodNameElement) {
                     ((MethodNameElement)namingElement).appendName(buffer, environment);
+                } else if (namingElement instanceof OtelSpanNameElement) {
+                    ((OtelSpanNameElement)namingElement).appendName(buffer, environment);
                 } else {
                     classInterceptionAppendTransactionName(namingElement, environment, buffer);
                 }
@@ -27,12 +31,17 @@ public abstract class MethodInterceptionTransactionDef extends ClassFilterTransa
     }
 
     public static class MethodInterceptionTransactionEnvironment extends ClassInterceptionTransactionEnvironment implements
-        MethodNameElement.TransactionEnvironment {
+        MethodNameElement.TransactionEnvironment,
+        OtelSpanNameElement.TransactionEnvironment {
 
         private String methodName;
 
         public MethodInterceptionTransactionEnvironment(String className, String methodName, Object thisObject, Object[] parameterObjects) {
-            super(className, thisObject, parameterObjects);
+            this(className, methodName, thisObject, parameterObjects, null, null);
+        }
+
+        public MethodInterceptionTransactionEnvironment(String className, String methodName, Object thisObject, Object[] parameterObjects, Map<String, String> annotationAttributes, String annotationDescriptor) {
+            super(className, thisObject, parameterObjects, annotationAttributes, annotationDescriptor);
             this.methodName = methodName;
         }
 

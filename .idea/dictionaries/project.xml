@@ -5,6 +5,8 @@
       <w>Buildsys</w>
       <w>Echart</w>
       <w>Iface</w>
+      <w>OTel</w>
+      <w>Otel</w>
       <w>aarch</w>
       <w>addvms</w>
       <w>authcode</w>
@@ -31,6 +33,7 @@
       <w>mygroup</w>
       <w>navgroup</w>
       <w>openj</w>
+      <w>otel</w>
       <w>preparecodescan</w>
       <w>propname</w>
       <w>runcitest</w>

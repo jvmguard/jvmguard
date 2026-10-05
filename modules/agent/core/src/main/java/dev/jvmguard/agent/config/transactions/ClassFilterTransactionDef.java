@@ -2,6 +2,7 @@ package dev.jvmguard.agent.config.transactions;
 
 import dev.jvmguard.agent.comm.*;
 import dev.jvmguard.agent.config.base.ConfigDoc;
+import dev.jvmguard.agent.config.transactions.naming.AnnotationAttributeElement;
 import dev.jvmguard.agent.config.transactions.naming.ClassNameElement;
 import dev.jvmguard.agent.config.transactions.naming.InstanceElement;
 import dev.jvmguard.agent.config.transactions.naming.MethodParameterElement;
@@ -10,6 +11,7 @@ import dev.jvmguard.agent.instrument.transaction.DefinitionSite;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.Map;
 
 public abstract class ClassFilterTransactionDef extends WildcardTransactionDef {
 
@@ -25,12 +27,12 @@ public abstract class ClassFilterTransactionDef extends WildcardTransactionDef {
 
     @Override
     public void read(CommunicationContext context, DataInputStream in) throws Exception {
-        readState(new BinaryAgentReader(in));
+        readState(new BinaryAgentReader(in, context));
     }
 
     @Override
     public void write(CommunicationContext context, DataOutputStream out) throws Exception {
-        writeState(new BinaryAgentWriter(out));
+        writeState(new BinaryAgentWriter(out, context));
     }
 
     @Override
@@ -89,6 +91,8 @@ public abstract class ClassFilterTransactionDef extends WildcardTransactionDef {
             ((MethodParameterElement)namingElement).appendName(buffer, environment);
         } else if (namingElement instanceof InstanceElement) {
             ((InstanceElement)namingElement).appendName(buffer, environment);
+        } else if (namingElement instanceof AnnotationAttributeElement) {
+            ((AnnotationAttributeElement)namingElement).appendName(buffer, environment);
         } else {
             commonAppendTransactionName(namingElement, buffer);
         }
@@ -96,16 +100,25 @@ public abstract class ClassFilterTransactionDef extends WildcardTransactionDef {
 
     public static class ClassInterceptionTransactionEnvironment implements
         InstanceElement.TransactionEnvironment,
-        MethodParameterElement.TransactionEnvironment {
+        MethodParameterElement.TransactionEnvironment,
+        AnnotationAttributeElement.TransactionEnvironment {
 
         private String className;
         private Object[] parameterObjects;
         private Object instance;
+        private Map<String, String> annotationAttributes;
+        private String annotationDescriptor;
 
         public ClassInterceptionTransactionEnvironment(String className, Object instance, Object[] parameterObjects) {
+            this(className, instance, parameterObjects, null, null);
+        }
+
+        public ClassInterceptionTransactionEnvironment(String className, Object instance, Object[] parameterObjects, Map<String, String> annotationAttributes, String annotationDescriptor) {
             this.className = className;
             this.instance = instance;
             this.parameterObjects = parameterObjects;
+            this.annotationAttributes = annotationAttributes;
+            this.annotationDescriptor = annotationDescriptor;
         }
 
         @Override
@@ -126,6 +139,15 @@ public abstract class ClassFilterTransactionDef extends WildcardTransactionDef {
         @Override
         public Object getInstance() {
             return instance;
+        }
+
+        @Override
+        public String getAnnotationAttribute(String attributeName) {
+            return annotationAttributes != null ? annotationAttributes.get(attributeName) : null;
+        }
+
+        public String getAnnotationDescriptor() {
+            return annotationDescriptor;
         }
 
         @Override

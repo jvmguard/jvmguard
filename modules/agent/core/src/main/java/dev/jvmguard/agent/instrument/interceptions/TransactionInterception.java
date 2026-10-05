@@ -4,21 +4,41 @@ import dev.jvmguard.agent.instrument.model.InterceptionMethod;
 import dev.jvmguard.agent.callee.Handler;
 import dev.jvmguard.agent.instrument.transaction.TransactionDefinition;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class TransactionInterception extends BaseInterception {
     private final TransactionDefinition definition;
     private final Set<InterceptionMethod> noTransactionMethods;
     private final Handler handler;
+    private final Map<String, String> annotationAttributes;
 
     public TransactionInterception(TransactionDefinition definition, Handler handler) { // should be called for concrete method interceptions only
         this(definition, null, handler);
     }
 
+    public TransactionInterception(TransactionDefinition definition, Handler handler, Map<String, String> annotationAttributes) {
+        this(definition, null, handler, annotationAttributes);
+    }
+
     public TransactionInterception(TransactionDefinition definition, Set<InterceptionMethod> noTransactionMethods, Handler handler) {
+        this(definition, noTransactionMethods, handler, null);
+    }
+
+    public TransactionInterception(TransactionDefinition definition, Set<InterceptionMethod> noTransactionMethods, Handler handler, Map<String, String> annotationAttributes) {
         this.definition = definition;
         this.handler = handler;
         this.noTransactionMethods = noTransactionMethods;
+        this.annotationAttributes = annotationAttributes;
+    }
+
+    /**
+     * Rendered attribute values of the annotation that caused this interception, or null when no
+     * attributes were captured. Used for annotation-based naming elements at instrumentation time.
+     */
+    public Map<String, String> getAnnotationAttributes() {
+        return annotationAttributes;
     }
 
     public String getUsedClassName(String instrumentedClassName) {
@@ -100,6 +120,9 @@ public class TransactionInterception extends BaseInterception {
         if (!handler.equals(that.handler)) {
             return false;
         }
+        if (!Objects.equals(annotationAttributes, that.annotationAttributes)) {
+            return false;
+        }
 
         return true;
     }
@@ -108,6 +131,7 @@ public class TransactionInterception extends BaseInterception {
     public int hashCode() {
         int result = definition.hashCode();
         result = 31 * result + handler.hashCode();
+        result = 31 * result + Objects.hashCode(annotationAttributes);
         return result;
     }
 

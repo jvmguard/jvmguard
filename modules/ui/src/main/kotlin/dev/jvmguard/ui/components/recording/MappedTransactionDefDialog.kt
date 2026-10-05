@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.components.recording
 
+import dev.jvmguard.agent.config.transactions.AnnotationValueFilter
 import dev.jvmguard.agent.config.transactions.MappedTransactionDef
 import dev.jvmguard.agent.config.transactions.MappedTransactionDef.AnnotatedTarget
 import dev.jvmguard.agent.config.transactions.MappedTransactionDef.MethodInterceptionMode
@@ -7,6 +8,9 @@ import dev.jvmguard.ui.components.EnumSelect
 import dev.jvmguard.ui.server.t
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.checkbox.Checkbox
+import com.vaadin.flow.component.html.Span
+import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
@@ -35,6 +39,17 @@ class MappedTransactionDefDialog(
         helperText = t("recording.transaction.mapped.methodSelection.helper")
     }
 
+    private val filterEnabled = Checkbox(t("recording.transaction.annotationFilter.enabled")).apply {
+        addValueChangeListener { event -> if (event.isFromClient) updateFilterEnabled() }
+    }
+    private val filterAttribute = TextField(t("recording.transaction.annotationFilter.attribute")).apply {
+        addValueChangeListener { isInvalid = false }
+    }
+    private val filterValue = TextField().apply {
+        helperText = t("recording.transaction.classFilter.helper")
+        addValueChangeListener { isInvalid = false }
+    }
+
     init {
         build()
     }
@@ -45,6 +60,16 @@ class MappedTransactionDefDialog(
         isPadding = false
         isSpacing = true
     }
+
+    override fun filterTabExtras(): List<Component> = listOf(
+        filterEnabled,
+        HorizontalLayout(filterAttribute, Span("="), filterValue).apply {
+            defaultVerticalComponentAlignment = FlexComponent.Alignment.BASELINE
+            isPadding = false
+            setWidthFull()
+            setFlexGrow(1.0, filterAttribute, filterValue)
+        }
+    )
 
     @Suppress("DuplicatedCode")
     override fun bindDefinition(binder: Binder<MappedTransactionDef>) {
@@ -58,13 +83,46 @@ class MappedTransactionDefDialog(
     }
 
     override fun readDefinition(def: MappedTransactionDef) {
+        filterEnabled.value = def.annotationValueFilter != null
+        filterAttribute.value = def.annotationValueFilter?.attributeName ?: ""
+        filterValue.value = def.annotationValueFilter?.value ?: ""
+        updateFilterEnabled()
         checkEnabled()
     }
 
-    override fun namingForm(): NamingForm = NamingForm()
+    override fun writeDefinition(def: MappedTransactionDef): Boolean {
+        if (!filterEnabled.value) {
+            def.annotationValueFilter = null
+            return true
+        }
+        val attribute = filterAttribute.value.trim()
+        val value = filterValue.value.trim()
+        if (attribute.isEmpty()) {
+            filterAttribute.errorMessage = t("recording.transaction.annotationFilter.attribute.required")
+            filterAttribute.isInvalid = true
+            return false
+        }
+        if (value.isEmpty()) {
+            filterValue.errorMessage = t("recording.transaction.annotationFilter.value.required")
+            filterValue.isInvalid = true
+            return false
+        }
+        val filter = def.annotationValueFilter ?: AnnotationValueFilter()
+        filter.attributeName = attribute
+        filter.value = value
+        def.annotationValueFilter = filter
+        return true
+    }
+
+    override fun namingForm(): NamingForm = AnnotationNamingForm()
 
     private fun checkEnabled() {
         useDeclaringClassName.isEnabled = interceptSubclasses.value
         methodInterceptionMode.isEnabled = interceptSubclasses.value && annotatedTarget.value == AnnotatedTarget.CLASS
+    }
+
+    private fun updateFilterEnabled() {
+        filterAttribute.isEnabled = filterEnabled.value
+        filterValue.isEnabled = filterEnabled.value
     }
 }

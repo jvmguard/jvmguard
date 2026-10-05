@@ -131,6 +131,7 @@ class TransactionDefGrid(
             TransactionType.MATCHED -> MatchedTransactionDefDialog(def as MatchedTransactionDef, isNew) { onSave(it) }.open()
             TransactionType.DECLARED -> DeclaredTransactionDefDialog(def as DeclaredTransactionDef, isNew) { onSave(it) }.open()
             TransactionType.MAPPED -> MappedTransactionDefDialog(def as MappedTransactionDef, isNew) { onSave(it) }.open()
+            TransactionType.OTEL -> OtelTransactionDefDialog(def as OtelTransactionDef, isNew) { onSave(it) }.open()
             else -> {}
         }
     }
@@ -139,6 +140,7 @@ class TransactionDefGrid(
         TransactionType.MATCHED -> MatchedTransactionDef()
         TransactionType.DECLARED -> DeclaredTransactionDef()
         TransactionType.MAPPED -> MappedTransactionDef()
+        TransactionType.OTEL -> OtelTransactionDef()
         else -> throw IllegalStateException("Unsupported transaction type $type")
     }
 
@@ -184,6 +186,7 @@ class TransactionDefGrid(
         TransactionType.MATCHED -> t("recording.transaction.help.matched")
         TransactionType.DECLARED -> t("recording.transaction.help.declared")
         TransactionType.MAPPED -> t("recording.transaction.help.mapped")
+        TransactionType.OTEL -> t("recording.transaction.help.otel")
         else -> ""
     }
 

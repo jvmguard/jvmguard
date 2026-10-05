@@ -6,6 +6,7 @@ import dev.jvmguard.agent.config.base.EntityChangeListener
 import dev.jvmguard.agent.config.recording.RecordingOptions
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings
 import dev.jvmguard.agent.config.transactions.DeclaredTransactionDef
+import dev.jvmguard.agent.config.transactions.OtelTransactionDef
 import dev.jvmguard.agent.config.transactions.TransactionSettings
 import dev.jvmguard.common.helper.GroupHelper
 import dev.jvmguard.data.base.HierarchicalConfig
@@ -52,6 +53,10 @@ open class GroupConfig : HierarchicalConfig {
         declaredAnnotatedTransactionDef.initDefault()
         declaredAnnotatedTransactionDef.id = 1L
         transactionDefs.add(declaredAnnotatedTransactionDef)
+        val otelTransactionDef = OtelTransactionDef()
+        otelTransactionDef.initDefault()
+        otelTransactionDef.id = 2L
+        transactionDefs.add(otelTransactionDef)
     }
 
     val groupIdentifier: VmIdentifier

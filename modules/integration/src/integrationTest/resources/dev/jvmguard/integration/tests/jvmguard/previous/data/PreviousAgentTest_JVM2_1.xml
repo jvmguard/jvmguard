@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<data timeUnit="milliseconds">
+  <callTree>
+    <children>
+      <element name="PreviousAgentWorkload.transaction1" time="2501" count="10" type="declared"/>
+      <element name="PreviousAgentWorkload.transaction2" time="2500" count="10" type="declared"/>
+    </children>
+  </callTree>
+</data>

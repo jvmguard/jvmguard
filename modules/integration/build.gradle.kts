@@ -104,6 +104,7 @@ fun Test.configureIntegrationTest() {
     jvmArgumentProviders.add(CommandLineArgumentProvider {
         listOf("-Djvmguard.integration.workloadClasspath=" + workloadFiles.asPath)
     })
+    systemProperty("jvmguard.distDirectory", distDir.absolutePath)
     outputs.upToDateWhen { false }
 }
 

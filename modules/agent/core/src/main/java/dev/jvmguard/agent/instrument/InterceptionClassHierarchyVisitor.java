@@ -4,6 +4,7 @@ import dev.jvmguard.agent.base.logging.Subsystem;
 import dev.jvmguard.agent.instrument.model.InterceptionMethod;
 import dev.jvmguard.agent.callee.AnnotationHandler;
 import dev.jvmguard.agent.callee.MatchedHandler;
+import dev.jvmguard.agent.instrument.classInfo.AnnotationAttributeInfo;
 import dev.jvmguard.agent.instrument.classInfo.ClassFileInfo;
 import dev.jvmguard.agent.instrument.classInfo.ClassFileInfo.HierarchyVisitor;
 import dev.jvmguard.agent.instrument.classInfo.DeclaredAnnotationInfo;
@@ -23,8 +24,11 @@ import dev.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefLi
 import dev.jvmguard.agent.util.Logger;
 import dev.jvmguard.annotation.Inheritance.Mode;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class InterceptionClassHierarchyVisitor extends HierarchyVisitor {
@@ -68,7 +72,10 @@ public class InterceptionClassHierarchyVisitor extends HierarchyVisitor {
         if (classFileInfo.getClassAnnotations() != null) {
             for (Object storedAnnotation : classFileInfo.getClassAnnotations()) {
                 if (storedAnnotation instanceof String) {
-                    checkStoredString(classFileInfo, dottedDeclaringClassName, isBaseClass, false, noTransactionMethods, (String)storedAnnotation);
+                    checkStoredString(classFileInfo, dottedDeclaringClassName, isBaseClass, false, noTransactionMethods, (String)storedAnnotation, null);
+                } else if (storedAnnotation instanceof AnnotationAttributeInfo) {
+                    AnnotationAttributeInfo annotationAttributeInfo = (AnnotationAttributeInfo)storedAnnotation;
+                    checkStoredString(classFileInfo, dottedDeclaringClassName, isBaseClass, false, noTransactionMethods, annotationAttributeInfo.getDescriptor(), annotationAttributeInfo.getAttributes());
                 } else if (storedAnnotation instanceof DeclaredAnnotationInfo) {
                     checkDeclaredTransactionInfo(dottedDeclaringClassName, noTransactionMethods, (DeclaredAnnotationInfo)storedAnnotation);
                 }
@@ -77,7 +84,7 @@ public class InterceptionClassHierarchyVisitor extends HierarchyVisitor {
         if (classFileInfo.getMethodAnnotations() != null) {
             for (Object storedAnnotation : classFileInfo.getMethodAnnotations()) {
                 if (storedAnnotation instanceof String) {
-                    checkStoredString(classFileInfo, dottedDeclaringClassName, isBaseClass, true, noTransactionMethods, (String)storedAnnotation);
+                    checkStoredString(classFileInfo, dottedDeclaringClassName, isBaseClass, true, noTransactionMethods, (String)storedAnnotation, null);
                 } else if (storedAnnotation instanceof DeclaredAnnotationInfo) {
                     checkDeclaredTransactionInfo(dottedDeclaringClassName, noTransactionMethods, (DeclaredAnnotationInfo)storedAnnotation);
                 }
@@ -104,7 +111,7 @@ public class InterceptionClassHierarchyVisitor extends HierarchyVisitor {
         return true;
     }
 
-    private void checkStoredString(ClassFileInfo classFileInfo, String dottedDeclaringClassName, boolean isBaseClass, boolean methodAnnotation, Set<InterceptionMethod> noTransactionMethods, String annotationDescriptor) {
+    private void checkStoredString(ClassFileInfo classFileInfo, String dottedDeclaringClassName, boolean isBaseClass, boolean methodAnnotation, Set<InterceptionMethod> noTransactionMethods, String annotationDescriptor, Map<String, String> annotationAttributes) {
         List<AnnotationTransactionDefList> interceptionAnnotations = annotationDefinitions.get(annotationDescriptor);
         if (interceptionAnnotations == null) {
             String matchAllName = DeclaredAnnotationDefinition.getMatchAllDescriptor(annotationDescriptor);
@@ -117,6 +124,9 @@ public class InterceptionClassHierarchyVisitor extends HierarchyVisitor {
             for (AnnotationTransactionDefList transactionDefList : interceptionAnnotations) {
                 AnnotationDefinition definition = transactionDefList.getDefinition();
                 if (isApplicable(definition, isBaseClass, methodAnnotation)) {
+                    if (!methodAnnotation && definition instanceof MappedAnnotationDefinition && !((MappedAnnotationDefinition)definition).matchesValueFilter(annotationAttributes)) {
+                        continue;
+                    }
                     AnnotationHandler annotationHandler = transactionDefList.getHandler(annotationDefinitionSite.init(dottedBaseClassName, dottedDeclaringClassName));
                     if (annotationHandler != null) {
                         if (definition instanceof DeclaredAnnotationDefinition && declaredAnnotations != null) {
@@ -128,6 +138,26 @@ public class InterceptionClassHierarchyVisitor extends HierarchyVisitor {
                                 continue;
                             }
                             if (customAnnotationDefinition.isMethodAnnotation() && customAnnotationDefinition.isInheritable()) {
+                                // the attributes of the annotation are captured per method, so the methods are
+                                // grouped by their attributes: the value filter and the annotation naming elements
+                                // see the attributes of the annotation on each individual method
+                                Map<InterceptionMethod, Map<String, String>> attributesByMethod = instrumenter.getMethodAnnotationAttributes(dottedDeclaringClassName, annotationDescriptor);
+                                if (attributesByMethod != null && !attributesByMethod.isEmpty()) {
+                                    Map<Map<String, String>, Set<InterceptionMethod>> methodsByAttributes = new HashMap<>();
+                                    for (Entry<InterceptionMethod, Map<String, String>> entry : attributesByMethod.entrySet()) {
+                                        methodsByAttributes.computeIfAbsent(entry.getValue(), k -> new HashSet<>()).add(entry.getKey());
+                                    }
+                                    for (Entry<Map<String, String>, Set<InterceptionMethod>> entry : methodsByAttributes.entrySet()) {
+                                        if (customAnnotationDefinition.matchesValueFilter(entry.getKey())) {
+                                            classInterceptions.add(new AnnotationInterception(definition, noTransactionMethods, annotationHandler, dottedDeclaringClassName, entry.getKey(), entry.getValue()));
+                                        }
+                                    }
+                                    continue;
+                                }
+                                if (!customAnnotationDefinition.matchesValueFilter(null)) {
+                                    // no attributes were captured for this annotation, an active value filter cannot match
+                                    continue;
+                                }
                                 if (definition.getDefinedMethods() == null) {
                                     Set<InterceptionMethod> methods = instrumenter.getMethodAnnotations(dottedDeclaringClassName, annotationDescriptor);
                                     if (methods == null) {
@@ -135,8 +165,10 @@ public class InterceptionClassHierarchyVisitor extends HierarchyVisitor {
                                     }
                                     definition.setDefinedMethods(methods);
                                 }
+                                classInterceptions.add(new AnnotationInterception(definition, noTransactionMethods, annotationHandler, dottedDeclaringClassName, null));
+                                continue;
                             }
-                            classInterceptions.add(new AnnotationInterception(definition, noTransactionMethods, annotationHandler, dottedDeclaringClassName));
+                            classInterceptions.add(new AnnotationInterception(definition, noTransactionMethods, annotationHandler, dottedDeclaringClassName, annotationAttributes));
                         } else {
                             classInterceptions.add(new AnnotationInterception(definition, noTransactionMethods, annotationHandler, dottedDeclaringClassName));
                         }

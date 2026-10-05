@@ -16,7 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.IntegerField
 import com.vaadin.flow.component.textfield.TextField
 
-class NamingElementsEditor : VerticalLayout() {
+open class NamingElementsEditor : VerticalLayout() {
 
     private var elements: MutableList<NamingElement> = mutableListOf()
 
@@ -37,7 +37,7 @@ class NamingElementsEditor : VerticalLayout() {
         setSizeFull()
         val hint = Span(t("recording.naming.hint"))
         val addButton = menuButton(VaadinIcon.PLUS, t("recording.naming.add"), ID_ADD) {
-            ELEMENT_TYPES.forEach { type -> addItem(t(type.labelKey)) { addElement(type) } }
+            elementTypes().forEach { type -> addItem(t(type.labelKey)) { addElement(type) } }
         }
         val header = HorizontalLayout(hint, addButton).apply {
             defaultVerticalComponentAlignment = FlexComponent.Alignment.CENTER
@@ -56,10 +56,14 @@ class NamingElementsEditor : VerticalLayout() {
 
     private fun addElement(type: ElementType) {
         val element = type.create()
-        elements.add(element)
-        refresh()
         if (type.hasDialog) {
-            edit(element)
+            NamingElementDialog(element) {
+                elements.add(element)
+                refresh()
+            }.open()
+        } else {
+            elements.add(element)
+            refresh()
         }
     }
 
@@ -83,6 +87,8 @@ class NamingElementsEditor : VerticalLayout() {
         refresh()
     }
 
+    protected open fun elementTypes(): List<ElementType> = BASE_ELEMENT_TYPES
+
     private fun refresh() {
         grid.setItems(elements)
     }
@@ -94,6 +100,8 @@ class NamingElementsEditor : VerticalLayout() {
         is InstanceElement -> withGetterChain(element, "recording.naming.row.instance")
         is MethodNameElement -> t("recording.naming.type.methodName")
         is TextElement -> t("recording.naming.row.text", element.text)
+        is AnnotationAttributeElement -> t("recording.naming.row.annotationAttribute", element.attributeName)
+        is OtelSpanNameElement -> t("recording.naming.type.otelSpanName")
         else -> element.displayName
     }
 
@@ -102,13 +110,15 @@ class NamingElementsEditor : VerticalLayout() {
         return if (chain.isEmpty()) t(key, *params) else t("$key.getterChain", *params, chain)
     }
 
-    private enum class ElementType(val labelKey: String, val create: () -> NamingElement, val hasDialog: Boolean) {
+    enum class ElementType(val labelKey: String, val create: () -> NamingElement, val hasDialog: Boolean) {
         CLASS_NAME("recording.naming.type.className", { ClassNameElement() }, true),
         INSTANCE_CLASS_NAME("recording.naming.type.instanceClassName", { InstanceClassNameElement() }, true),
         INSTANCE("recording.naming.type.instance", { InstanceElement() }, true),
         METHOD_PARAMETER("recording.naming.type.methodParameter", { MethodParameterElement() }, true),
         METHOD_NAME("recording.naming.type.methodName", { MethodNameElement() }, false),
         TEXT("recording.naming.type.text", { TextElement() }, true),
+        ANNOTATION_ATTRIBUTE("recording.naming.type.annotationAttribute", { AnnotationAttributeElement() }, true),
+        OTEL_SPAN_NAME("recording.naming.type.otelSpanName", { OtelSpanNameElement() }, false),
     }
 
     companion object {
@@ -116,13 +126,23 @@ class NamingElementsEditor : VerticalLayout() {
         const val ID_ADD = "naming-elements-add"
         const val ID_ROW_MENU = "naming-element-row-menu"
 
-        private val ELEMENT_TYPES = ElementType.entries
+        private val BASE_ELEMENT_TYPES = ElementType.entries - ElementType.ANNOTATION_ATTRIBUTE - ElementType.OTEL_SPAN_NAME
 
-        private fun hasDialog(element: NamingElement): Boolean = element !is MethodNameElement
+        private fun hasDialog(element: NamingElement): Boolean = element !is MethodNameElement && element !is OtelSpanNameElement
     }
 }
 
-private class NamingElementDialog(
+/** Also offers the annotation attribute element, for annotation-based transaction definitions. */
+class AnnotationNamingElementsEditor : NamingElementsEditor() {
+    override fun elementTypes(): List<ElementType> = super.elementTypes() + ElementType.ANNOTATION_ATTRIBUTE
+}
+
+/** Also offers the OTel span name element, for the OTel transaction definition. */
+class OtelNamingElementsEditor : NamingElementsEditor() {
+    override fun elementTypes(): List<ElementType> = super.elementTypes() + ElementType.ANNOTATION_ATTRIBUTE + ElementType.OTEL_SPAN_NAME
+}
+
+internal class NamingElementDialog(
     private val element: NamingElement,
     private val onSave: () -> Unit,
 ) : JvmGuardDialog() {
@@ -169,6 +189,21 @@ private class NamingElementDialog(
                 val getter = getterChainField(e.getterChain.usedValue)
                 body.add(index, getter)
                 return { e.parameterIndex = index.value ?: 0; applyGetterChain(e.getterChain, getter); true }
+            }
+
+            is AnnotationAttributeElement -> {
+                val attribute = TextField(t("recording.naming.annotationAttribute")).apply { setWidthFull(); value = e.attributeName }
+                body.add(attribute)
+                return {
+                    if (attribute.value.isBlank()) {
+                        attribute.errorMessage = t("recording.naming.annotationAttribute.required")
+                        attribute.isInvalid = true
+                        false
+                    } else {
+                        e.attributeName = attribute.value.trim()
+                        true
+                    }
+                }
             }
 
             else -> return { true }

@@ -13,6 +13,8 @@ public interface AgentReader {
 
     boolean readBoolean(String name) throws Exception;
 
+    boolean satisfies(ProtocolRequirement requirement);
+
     <E extends Enum<E>> E readEnum(String name, Class<E> enumClass) throws Exception;
 
     CheckedString readCheckedString(String name) throws Exception;

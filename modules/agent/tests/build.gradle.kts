@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":agent:api"))
     implementation(project(":agent:mbean"))
     implementation(libs.asm.commons)
+    implementation(libs.nanojson)
     addJunit6()
 }
 
