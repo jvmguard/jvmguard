@@ -30,7 +30,9 @@ dependencies {
     addJunit6()
     testImplementation("com.github.dasniko:testcontainers-keycloak:3.7.0")
     testImplementation("org.testcontainers:junit-jupiter:1.21.0")
-    developmentOnly("com.vaadin:vaadin-dev")
+    developmentOnly("com.vaadin:vaadin-dev") {
+        exclude(group = "com.vaadin", module = "copilot")
+    }
 }
 
 springBoot {
