@@ -5,7 +5,6 @@ import dev.jvmguard.agent.comm.CodecRegistry
 import dev.jvmguard.agent.comm.CodecTypes
 import dev.jvmguard.agent.config.VmType
 import dev.jvmguard.agent.config.base.ConfigDoc
-import dev.jvmguard.agent.config.recording.RecordingOptions
 import dev.jvmguard.agent.config.transactions.ComparisonType
 import dev.jvmguard.agent.config.telemetry.MBeanLineConfig
 import dev.jvmguard.agent.config.telemetry.MBeanTelemetryConfig
@@ -64,7 +63,6 @@ object GroupConfigSchema {
 
     val editableBeans: List<EditableBean> =
         listOf(
-            RecordingOptions(),
             TransactionSettings(),
             MatchedTransactionDef(),
             MappedTransactionDef(),

@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.nio.charset.StandardCharsets
 
 class CodecRoundTripTest {
 
@@ -38,12 +39,35 @@ class CodecRoundTripTest {
     fun jsonNestsSubBeansWithoutCollision() {
         val root = JsonObject()
         populated().writeState(JsonAgentWriter(root))
-        assertNotNull(root.getObject("recordingOptions"), "recordingOptions must be a nested object")
+        assertFalse(root.has("recordingOptions"), "the legacy recordingOptions slot is not written anymore")
         assertNotNull(root.getObject("transactionSettings"), "transactionSettings must be a nested object")
         assertFalse(
             root.has("retransformationType"),
-            "retransformationType must NOT be inlined at the AgentGroupConfig level (would collide between RecordingOptions and TransactionSettings)",
+            "retransformationType must NOT be inlined at the AgentGroupConfig level",
         )
+    }
+
+    @Test
+    fun binaryV1KeepsLegacySlotForOldAgents() {
+        val bout = ByteArrayOutputStream()
+        populated().write(CommunicationContext(1), DataOutputStream(bout))
+
+        // pre-V2 agents parse three positional objects; the first is the legacy RecordingOptions slot
+        val input = DataInputStream(ByteArrayInputStream(bout.toByteArray()))
+        assertTrue(input.readBoolean(), "slot present flag")
+        assertEquals("RecordingOptions", input.readUTF())
+        assertEquals("ALWAYS", input.readUTF(), "the dead retransformation field keeps its default")
+
+        val back = AgentGroupConfig()
+        back.read(CommunicationContext(1), DataInputStream(ByteArrayInputStream(bout.toByteArray())))
+        assertPopulated(back)
+    }
+
+    @Test
+    fun binaryV2DropsTheLegacySlot() {
+        val bout = ByteArrayOutputStream()
+        populated().write(CommunicationContext(2), DataOutputStream(bout))
+        assertFalse(String(bout.toByteArray(), StandardCharsets.UTF_8).contains("RecordingOptions"))
     }
 
     companion object {
@@ -67,7 +91,6 @@ class CodecRoundTripTest {
 
         private fun populated(): AgentGroupConfig {
             val agc = AgentGroupConfig()
-            agc.recordingOptions.setRetransformationType(RetransformationType.STARTUP)
             agc.transactionSettings.retransformationType = RetransformationType.ALWAYS
             val pojo = MatchedTransactionDef()
             pojo.declaringClassName = "com.example.Foo"

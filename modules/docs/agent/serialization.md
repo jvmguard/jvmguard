@@ -7,7 +7,7 @@ disjoint set of beans. They meet in exactly one place: the export file.
 
 | | **Server beans** | **Agent beans** |
 |---|---|---|
-| Examples | `User`, `GlobalConfig`, `GroupConfig`, the `*Set`s, `ServerGroupConfig`, `ServerConfig` | `AgentGroupConfig`, `RecordingOptions`, `TransactionSettings`/`TransactionDef`, `TelemetrySettings`/`MBeanTelemetryConfig`, `Policy`, `NamingElement` |
+| Examples | `User`, `GlobalConfig`, `GroupConfig`, the `*Set`s, `ServerGroupConfig`, `ServerConfig` | `AgentGroupConfig`, `TransactionSettings`/`TransactionDef`, `TelemetrySettings`/`MBeanTelemetryConfig`, `Policy`, `NamingElement` |
 | Serialized by | **Jackson** | **the custom codec** |
 | Base class | `StoredConfig` → `AbstractEntity` | `AbstractEntity` (directly, or via `OptionalConfig`) |
 | Reach the agent? | never | yes (they are the agent's own config) |
@@ -100,6 +100,14 @@ need a gated plain field like above.
 produces *both* the live binary protocol bytes *and* the JSON export — no duplication. The caller just
 hands it a `BinaryAgent*` or a `JsonAgent*`.
 
+**Command parameters** (`dev.jvmguard.agent.parameter`, e.g. `JfrRecordParameters`) are not codec beans:
+they implement `AgentSerializable` with raw positional `read`/`write` over the streams directly and never
+appear in JSON. They receive the `CommunicationContext` as an argument, so post-V1 fields are gated with
+`context.satisfies(ProtocolRequirement.V2)` at the call site, exactly like above. The four capture commands
+(heap dump, thread dump, JFR snapshot, JProfiler recording) share `CaptureContextParameters`, which carries
+a nullable `CaptureContext` behind a presence boolean — null suppresses the OTel capture event. Nullable
+strings use the `""` sentinel because `writeUTF` NPEs on null.
+
 ## Where they meet: the export file
 
 `jvmguard_server_config.json` / `jvmguard_recording_config.json` is one JSON file assembled from three
@@ -111,7 +119,6 @@ sources — a nanojson envelope, codec-produced subtrees, and Jackson-produced s
   "groups": [{
     "path": "...", "groupType": 0,
     "agentConfig": {                                          ← CODEC (JsonAgentWriter)
-      "recordingOptions": {"@type":"RecordingOptions","retransformationType":"STARTUP"},
       "transactionSettings": { … },
       "telemetrySettings": { … } },
     "serverConfig": { … }                                     ← JACKSON (plain object; @type only where polymorphic)
@@ -122,6 +129,13 @@ sources — a nanojson envelope, codec-produced subtrees, and Jackson-produced s
 
 - The **envelope** (`version`, `type`, `groups`, `path`, `groupType`) is plain JSON.
 - `groups[].agentConfig` is built by handing the agent bean to `JsonAgentWriter` → a nanojson object.
+  Old exports and DB rows may still carry a `recordingOptions` key: `RecordingOptions` was a
+  pre-V2 bean whose only field was never read, so it was deleted. `AgentGroupConfig` keeps its
+  first positional slot alive for pre-V2 binary peers through a small `LegacyRecordingOptions`
+  shim (nested in `AgentGroupConfig`, registered in `CodecTypes` under the original codec type);
+  the slot is ignored in JSON, which always satisfies. Dropping a whole bean like this is only
+  safe while the introducing protocol version is unreleased; after that it would need a new
+  `ProtocolRequirement`.
 - `groups[].serverConfig` (per-group) and the top-level `serverConfig` are built by
   `ConfigStorage.objectMapper().writeValueAsString(...)` → a plain Jackson object, embedded verbatim.
 

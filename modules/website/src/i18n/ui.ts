@@ -198,7 +198,7 @@ export const en = {
     'One trigger fires across all matching JVMs in the fleet, not one-by-one over individual JVMs.',
   'compare.isnot.rule': 'What jvmguard is not',
   'compare.isnot.p':
-    'jvmguard is not an APM. There is no continuous tracing, no distributed trace export, and no metrics pipeline, and it does not auto-instrument your frameworks. It records only the lightweight telemetries and the transactions you define, so the always-on overhead stays minimal. Deep captures are intentional and scoped, and they stay on your infrastructure. No user data is exported to a remote backend.',
+    'jvmguard is not an APM. There is no continuous tracing, no trace collection, and no metrics pipeline, and it does not auto-instrument your frameworks. It records only the lightweight telemetries and the transactions you define, so the always-on overhead stays minimal. If you run OpenTelemetry, jvmguard works with it: the tracing annotations you already carry become transactions, and captures are emitted as OTel log records into your own pipeline. Deep captures are intentional and scoped, and they stay on your infrastructure. No user data is exported to a remote backend.',
   'compare.fits.rule': 'Where jvmguard fits',
   'compare.fits.1':
     'A developer gets a deep capture from a production JVM through authorized, audited access, without an SSH session on the host.',
@@ -407,7 +407,7 @@ export const ko: Messages = {
     '하나의 트리거가 개별 JVM을 하나씩 처리하는 대신 플릿의 일치하는 모든 JVM에서 발생합니다.',
   'compare.isnot.rule': 'jvmguard가 아닌 것',
   'compare.isnot.p':
-    'jvmguard는 APM이 아닙니다. 지속적 트레이싱도, 분산 트레이스보내기도, 메트릭 파이프라인도 없으며 프레임워크를 자동 계측하지 않습니다. 가벼운 텔레메트리와 정의한 트랜잭션만 기록하므로 상시 오버헤드는 최소로 유지됩니다. 심층 캡처는 의도적이고 범위가 지정되며 인프라에 머뭅니다. 어떤 사용자 데이터도 원격 백엔드로보내지 않습니다.',
+    'jvmguard는 APM이 아닙니다. 지속적 트레이싱도, 트레이스 수집도, 메트릭 파이프라인도 없으며 프레임워크를 자동 계측하지 않습니다. 가벼운 텔레메트리와 정의한 트랜잭션만 기록하므로 상시 오버헤드는 최소로 유지됩니다. OpenTelemetry를 사용하는 경우 jvmguard가 함께 동작합니다: 이미 적용된 트레이싱 어노테이션이 트랜잭션이 되고, 캡처는 OTel 로그 레코드로 사용자의 파이프라인에 전송됩니다. 심층 캡처는 의도적이고 범위가 지정되며 인프라에 머뭅니다. 어떤 사용자 데이터도 원격 백엔드로보내지 않습니다.',
   'compare.fits.rule': 'jvmguard가 맞는 경우',
   'compare.fits.1':
     '개발자가 호스트에 SSH 세션 없이 승인되고 감사된 접근을 통해 프로덕션 JVM에서 심층 캡처를 얻습니다.',
@@ -612,7 +612,7 @@ export const ja: Messages = {
     '1つのトリガーが、個々のJVMを1台ずつではなく、フリート内の一致するすべてのJVMで発生します。',
   'compare.isnot.rule': 'jvmguardではないもの',
   'compare.isnot.p':
-    'jvmguardはAPMではありません。継続的なトレーシング、分散トレースのエクスポート、メトリクスパイプラインはなく、フレームワークを自動計装もしません。軽量なテレメトリと定義したトランザクションのみを記録するため、常時オーバーヘッドは最小限に保たれます。ディープキャプチャは意図的でスコープが限定され、インフラ内にとどまります。ユーザーデータがリモートバックエンドにエクスポートされることはありません。',
+    'jvmguardはAPMではありません。継続的なトレーシング、トレースの収集、メトリクスパイプラインはなく、フレームワークを自動計装もしません。軽量なテレメトリと定義したトランザクションのみを記録するため、常時オーバーヘッドは最小限に保たれます。OpenTelemetryをお使いの場合、jvmguardはそれと連携します：すでに付けられたトレーシングアノテーションがトランザクションになり、キャプチャはOTelログレコードとしてお客様のパイプラインに発行されます。ディープキャプチャは意図的でスコープが限定され、インフラ内にとどまります。ユーザーデータがリモートバックエンドにエクスポートされることはありません。',
   'compare.fits.rule': 'jvmguardが適する場面',
   'compare.fits.1':
     '開発者がホスト上のSSHセッションなしに、承認され監査されたアクセスを通じてプロダクションJVMからディープキャプチャを取得します。',
@@ -814,7 +814,7 @@ export const zhCn: Messages = {
     '一个触发器在集群中所有匹配的 JVM 上同时触发,而不是逐个 JVM 单独执行。',
   'compare.isnot.rule': 'jvmguard 不是什么',
   'compare.isnot.p':
-    'jvmguard 不是 APM。它没有持续追踪、没有分布式跟踪导出、没有指标管道,也不会自动插桩框架。它只记录轻量遥测和定义的事务,因此常驻开销保持最低。深层捕获是有意的、有范围限定的,并且留在您的基础设施上。没有任何用户数据被导出到远端后端。',
+    'jvmguard 不是 APM。它没有持续追踪、没有跟踪收集、没有指标管道,也不会自动插桩框架。它只记录轻量遥测和定义的事务,因此常驻开销保持最低。如果您使用 OpenTelemetry,jvmguard 可以与之配合:已有的追踪注解会成为事务,捕获会作为 OTel 日志记录发送到您自己的管道中。深层捕获是有意的、有范围限定的,并且留在您的基础设施上。没有任何用户数据被导出到远端后端。',
   'compare.fits.rule': 'jvmguard 适用的场景',
   'compare.fits.1':
     '开发人员无需在主机上建立 SSH 会话,即可通过授权且可审计的访问,从生产 JVM 获取深层捕获。',

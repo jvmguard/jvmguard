@@ -32,7 +32,7 @@ class ExportRoundTripTest {
         val exported = bout.toString(StandardCharsets.UTF_8)
         assertTrue(
             exported.contains("\"retransformationType\":\"STARTUP\""),
-            "the non-default RecordingOptions.retransformationType must be serialized into the agentConfig",
+            "the non-default TransactionSettings.retransformationType must be serialized into the agentConfig",
         )
 
         val root = JsonParser.`object`().from(exported)
@@ -92,8 +92,7 @@ class ExportRoundTripTest {
         }
 
         private fun populate(groupConfig: GroupConfig) {
-            groupConfig.agentGroupConfig.recordingOptions.setRetransformationType(RetransformationType.STARTUP)
-            groupConfig.agentGroupConfig.transactionSettings.retransformationType = RetransformationType.ALWAYS
+            groupConfig.agentGroupConfig.transactionSettings.retransformationType = RetransformationType.STARTUP
 
             val pojo = MatchedTransactionDef()
             pojo.declaringClassName = "com.example.Foo"
@@ -107,7 +106,7 @@ class ExportRoundTripTest {
 
         private fun assertPopulated(gcBack: GroupConfig) {
             assertEquals(
-                RetransformationType.ALWAYS,
+                RetransformationType.STARTUP,
                 gcBack.agentGroupConfig.transactionSettings.retransformationType,
                 "the non-default TransactionSettings.retransformationType must survive the round-trip",
             )

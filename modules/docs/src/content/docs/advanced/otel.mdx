@@ -42,3 +42,32 @@ apply:
 * If a method is annotated with `@MethodTransaction`, only the Declared transaction is created.
 * If a method is annotated with both `@WithSpan` and `@Observed` (directly or through a class-level `@Observed` on the enclosing class), only the `@WithSpan` transaction is created.
 * An annotation directly on the method takes precedence over a class-level `@Observed` on the enclosing class.
+
+## Capture events as OTel log records
+
+When a capture is taken (a heap dump, a thread dump, a JFR snapshot or a JProfiler recording) the agent
+emits an OTel log record through the logs bridge of the OpenTelemetry SDK in the monitored application, so the
+capture shows up in your existing OTel pipeline alongside traces. This works for captures fired by trigger
+actions as well as for captures taken manually in the UI or through the REST API.
+
+The agent calls the OpenTelemetry API reflectively and does not require any particular setup. If the
+application does not have the OpenTelemetry API on its class path, nothing is emitted and a single note is
+written to the agent log.
+
+The severity of the log record is derived from the policy event that fired the trigger: `ERROR` for error
+events, `WARN` for very slow and overdue events, and `INFO` otherwise, including manual captures. The log
+record carries the following attributes:
+
+* `jvmguard.capture.type`: `heap_dump`, `thread_dump`, `jfr_snapshot` or `jprofiler_recording`
+* `jvmguard.capture.origin`: `trigger` or `manual`
+* `jvmguard.vm.name`: the name of the monitored VM
+* `jvmguard.trigger`: the description of the trigger that fired the capture
+* `jvmguard.transaction.name`: the transaction whose policy event last contributed to firing the trigger
+* `jvmguard.policy.event`: the policy event type of that transaction, such as `SLOW` or `VERY_SLOW`
+
+The last two attributes are only present for captures fired by policy triggers. Because a trigger can
+accumulate events from several transactions before it fires, they name the transaction that most recently
+added events, not necessarily the one that contributed the most.
+
+To switch the emission off, uncheck "Emit capture events as OTel log records" in the trigger recording
+settings. The checkbox is only shown for the root group and applies to all JVMs.

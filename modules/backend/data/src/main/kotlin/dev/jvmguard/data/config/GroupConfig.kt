@@ -3,7 +3,6 @@ package dev.jvmguard.data.config
 import dev.jvmguard.agent.config.AgentGroupConfig
 import dev.jvmguard.agent.config.VmType
 import dev.jvmguard.agent.config.base.EntityChangeListener
-import dev.jvmguard.agent.config.recording.RecordingOptions
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings
 import dev.jvmguard.agent.config.transactions.DeclaredTransactionDef
 import dev.jvmguard.agent.config.transactions.OtelTransactionDef
@@ -102,9 +101,6 @@ open class GroupConfig : HierarchicalConfig {
             value.addChangeListener(beanChangeAdapter)
         }
 
-    val recordingOptions: RecordingOptions
-        get() = agentGroupConfig.recordingOptions
-
     override fun getHierarchySeparatorChar(): Char = '/'
 
     private fun initListeners() {
@@ -114,7 +110,6 @@ open class GroupConfig : HierarchicalConfig {
         }
         beanChangeAdapter = adapter
         transactionSettings.addChangeListener(adapter)
-        recordingOptions.addChangeListener(adapter)
         thresholdSettings.addChangeListener(adapter)
         triggerSettings.addChangeListener(adapter)
         guardrailSettings.addChangeListener(adapter)

@@ -1,6 +1,5 @@
 package dev.jvmguard.data.config
 
-import dev.jvmguard.agent.config.recording.RecordingOptions
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings
 import dev.jvmguard.agent.config.transactions.TransactionSettings
 import dev.jvmguard.data.config.guardrails.GuardrailSettings
@@ -22,10 +21,6 @@ class GroupHierarchyWrapper(private val groupConfigPath: LinkedList<GroupConfig>
         get() = groupConfigPath
             .flatMap { it.thresholdSettings.thresholds }
             .filter { it.target == Target.SINGLE_VMS }
-
-    val recordingOptions: RecordingOptions
-        get() = groupConfigPath.map { it.recordingOptions }.firstOrNull { it.isUsed }
-            ?: rootConfig.recordingOptions
 
     val guardrailSettings: GuardrailSettings
         get() = groupConfigPath.map { it.guardrailSettings }.firstOrNull { it.isUsed }

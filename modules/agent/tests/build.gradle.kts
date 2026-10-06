@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":agent:mbean"))
     implementation(libs.asm.commons)
     implementation(libs.nanojson)
+    testImplementation(libs.otel.api)
     addJunit6()
 }
 

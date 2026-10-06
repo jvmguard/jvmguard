@@ -1,5 +1,6 @@
 package dev.jvmguard.collector.trigger
 
+import dev.jvmguard.agent.parameter.CaptureContext
 import dev.jvmguard.collector.main.CollectorContext
 import dev.jvmguard.data.config.triggers.ConnectionTrigger
 import dev.jvmguard.data.config.triggers.ConnectionTrigger.StartMode
@@ -30,7 +31,10 @@ class ConnectionTriggerHandler(var trigger: ConnectionTrigger, private val group
                 (lastTimeTriggeredNanos == Long.MIN_VALUE || nanoTime - lastTimeTriggeredNanos >= trigger.inhibitionInterval.getNanos(trigger.inhibitionTime))
             ) {
                 lastTimeTriggeredNanos = nanoTime
-                TriggerHandler.executeActions(collectorContext, trigger.triggerActions, null, groupVm, trigger.description)
+                TriggerHandler.executeActions(
+                    collectorContext, trigger.triggerActions, null, groupVm,
+                    CaptureContext(CaptureContext.Origin.TRIGGER, trigger.description, null, null)
+                )
             }
         } else {
             firstTimeReachedNanos = Long.MIN_VALUE

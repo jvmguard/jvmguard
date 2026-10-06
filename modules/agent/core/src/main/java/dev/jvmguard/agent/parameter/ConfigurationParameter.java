@@ -6,7 +6,6 @@ import dev.jvmguard.agent.comm.CommunicationContext;
 import dev.jvmguard.agent.comm.JvmGuardCommunication;
 import dev.jvmguard.agent.config.AgentGroupConfig;
 import dev.jvmguard.agent.config.base.DefaultConstructor;
-import dev.jvmguard.agent.config.recording.RecordingOptions;
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings;
 import dev.jvmguard.agent.config.transactions.*;
 import dev.jvmguard.agent.instrument.Transformer;
@@ -38,8 +37,7 @@ public class ConfigurationParameter extends BaseParameter {
 
     private AgentGroupConfig agentGroupConfig = new AgentGroupConfig();
 
-    public ConfigurationParameter(RecordingOptions recordingOptions, TransactionSettings transactionSettings, TelemetrySettings telemetrySettings) {
-        agentGroupConfig.setRecordingOptions(recordingOptions);
+    public ConfigurationParameter(TransactionSettings transactionSettings, TelemetrySettings telemetrySettings) {
         agentGroupConfig.setTransactionSettings(transactionSettings);
         agentGroupConfig.setTelemetrySettings(telemetrySettings);
     }
@@ -200,10 +198,6 @@ public class ConfigurationParameter extends BaseParameter {
 
     public void setTransactionSettings(TransactionSettings transactionSettings) {
         agentGroupConfig.setTransactionSettings(transactionSettings);
-    }
-
-    public void setRecordingOptions(RecordingOptions recordingOptions) {
-        agentGroupConfig.setRecordingOptions(recordingOptions);
     }
 
     public TelemetrySettings getTelemetrySettings() {

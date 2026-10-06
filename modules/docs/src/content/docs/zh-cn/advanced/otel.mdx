@@ -37,3 +37,27 @@ OTel 事务定义的“筛选”选项卡除了类过滤器之外还有“Span �
 * 如果方法带有 `@MethodTransaction` 注解，则只创建已声明的事务。
 * 如果方法同时带有 `@WithSpan` 和 `@Observed`（直接标注，或通过外部类上的类级别 `@Observed`），则只创建 `@WithSpan` 事务。
 * 直接标注在方法上的注解优先于外部类上的类级别 `@Observed`。
+
+## 捕获事件作为 OTel 日志记录
+
+当执行捕获（堆转储、线程转储、JFR 快照或 JProfiler 记录）时，代理会通过受监控应用程序中 OpenTelemetry SDK 的日志桥接发出一条 OTel 日志记录，
+因此捕获会与链路追踪一起显示在现有的 OTel 管道中。这既适用于触发器操作触发的捕获，也适用于在 UI 中或通过 REST API 手动执行的捕获。
+
+代理通过反射调用 OpenTelemetry API，不需要任何特定配置。如果应用程序的类路径上没有 OpenTelemetry API，则不会发出任何内容，只会在代理日志中写入
+一条说明。
+
+日志记录的严重级别由触发触发器的策略事件决定：错误事件为 `ERROR`，很慢和超时未完成事件为 `WARN`，其他情况（包括手动捕获）为 `INFO`。
+日志记录包含以下属性：
+
+* `jvmguard.capture.type`：`heap_dump`、`thread_dump`、`jfr_snapshot` 或 `jprofiler_recording`
+* `jvmguard.capture.origin`：`trigger` 或 `manual`
+* `jvmguard.vm.name`：受监控 VM 的名称
+* `jvmguard.trigger`：触发捕获的触发器的描述
+* `jvmguard.transaction.name`：其策略事件最后促成触发器触发的事务
+* `jvmguard.policy.event`：该事务的策略事件类型，例如 `SLOW` 或 `VERY_SLOW`
+
+最后两个属性仅在策略触发器触发的捕获中存在。由于触发器在触发前可能会累积来自多个事务的事件，因此它们指的是最近添加事件的事务，而不一定是贡献
+最多的事务。
+
+要关闭发送,请在触发器记录设置中取消勾选"将捕获事件作为 OTel 日志记录发送"。该复选框仅在根组中显示,
+并对整个集群生效:触发器在组层次结构中是叠加生效的,因此按组开关无法可靠地限定发送范围。

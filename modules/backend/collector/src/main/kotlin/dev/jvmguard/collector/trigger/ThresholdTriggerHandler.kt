@@ -1,5 +1,6 @@
 package dev.jvmguard.collector.trigger
 
+import dev.jvmguard.agent.parameter.CaptureContext
 import dev.jvmguard.collector.main.CollectorContext
 import dev.jvmguard.collector.threshold.ViolationEvent
 import dev.jvmguard.collector.vmdata.AbstractVmData.TelemetryValueVisitor
@@ -17,7 +18,7 @@ class ThresholdTriggerHandler(trigger: ThresholdTrigger, private val groupData: 
     @Synchronized
     fun addEvents(snapshotTimeStamp: Long, nanoTime: Long, violationEvent: ViolationEvent, vm: VM, collectorContext: CollectorContext) {
         lastEvent = violationEvent
-        super.addEvents(snapshotTimeStamp, nanoTime, 1, vm, collectorContext)
+        super.addEvents(snapshotTimeStamp, nanoTime, 1, vm, null, null, collectorContext)
     }
 
     override fun executeActions(snapshotTimeStamp: Long, collectorContext: CollectorContext) {
@@ -29,7 +30,10 @@ class ThresholdTriggerHandler(trigger: ThresholdTrigger, private val groupData: 
             groupData.visitConnectedVmTelemetryValue(telemetryIdentifier, bestTelemetryValueVisitor.init())
             usedLastVm = bestTelemetryValueVisitor.bestVm
         }
-        executeActions(collectorContext, triggerData.triggerActions, usedLastVm, groupVm, triggerData.description)
+        executeActions(
+            collectorContext, triggerData.triggerActions, usedLastVm, groupVm,
+            CaptureContext(CaptureContext.Origin.TRIGGER, triggerData.description, null, null)
+        )
     }
 
     private inner class BestTelemetryValueVisitor : TelemetryValueVisitor {

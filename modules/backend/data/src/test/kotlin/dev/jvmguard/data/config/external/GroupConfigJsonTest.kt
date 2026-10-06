@@ -15,7 +15,7 @@ class GroupConfigJsonTest {
 
     private fun sampleGroup(): GroupConfig {
         val gc = GroupConfig.createDefault(VmIdentifier("Demo/Purchase", VmType.GROUP))
-        gc.recordingOptions.setRetransformationType(RetransformationType.STARTUP)
+        gc.transactionSettings.retransformationType = RetransformationType.STARTUP
         gc.guardrailSettings.isUsed = true
         gc.guardrailSettings.allowHeapDump = false
         return gc

@@ -7,7 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class JfrRecordParameters extends BaseParameter {
+public class JfrRecordParameters extends CaptureContextParameters {
     private String recordingName;
     private int seconds;
     private boolean predefined;
@@ -17,7 +17,9 @@ public class JfrRecordParameters extends BaseParameter {
     public JfrRecordParameters() {
     }
 
-    public JfrRecordParameters(String recordingName, int seconds, boolean predefined, String profileNameOrSettings) {
+    public JfrRecordParameters(String recordingName, int seconds, boolean predefined, String profileNameOrSettings,
+                               CaptureContext captureContext) {
+        super(captureContext);
         this.recordingName = recordingName;
         this.seconds = seconds;
         this.predefined = predefined;
@@ -46,6 +48,7 @@ public class JfrRecordParameters extends BaseParameter {
         out.writeInt(seconds);
         out.writeBoolean(predefined);
         out.writeUTF(profileNameOrSettings);
+        writeCaptureContext(context, out);
     }
 
     @Override
@@ -54,5 +57,6 @@ public class JfrRecordParameters extends BaseParameter {
         seconds = in.readInt();
         predefined = in.readBoolean();
         profileNameOrSettings = in.readUTF();
+        readCaptureContext(context, in);
     }
 }

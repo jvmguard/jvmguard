@@ -7,7 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class JProfilerRecordParameters extends BaseParameter {
+public class JProfilerRecordParameters extends CaptureContextParameters {
 
     private int seconds;
     private String artifactKey;
@@ -23,7 +23,9 @@ public class JProfilerRecordParameters extends BaseParameter {
 
     public JProfilerRecordParameters(int seconds, String artifactKey, String[] subsystems,
                                      boolean heapDump, boolean heapDumpFullGc,
-                                     boolean mbeanSnapshot, boolean monitorDump) {
+                                     boolean mbeanSnapshot, boolean monitorDump,
+                                     CaptureContext captureContext) {
+        super(captureContext);
         this.seconds = seconds;
         this.artifactKey = artifactKey;
         this.subsystems = subsystems;
@@ -73,6 +75,7 @@ public class JProfilerRecordParameters extends BaseParameter {
         out.writeBoolean(heapDumpFullGc);
         out.writeBoolean(mbeanSnapshot);
         out.writeBoolean(monitorDump);
+        writeCaptureContext(context, out);
     }
 
     @Override
@@ -87,5 +90,6 @@ public class JProfilerRecordParameters extends BaseParameter {
         heapDumpFullGc = in.readBoolean();
         mbeanSnapshot = in.readBoolean();
         monitorDump = in.readBoolean();
+        readCaptureContext(context, in);
     }
 }

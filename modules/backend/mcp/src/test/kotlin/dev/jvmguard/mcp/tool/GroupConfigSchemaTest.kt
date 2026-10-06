@@ -30,8 +30,8 @@ class GroupConfigSchemaTest {
 
     @Test
     @Suppress("UNCHECKED_CAST")
-    fun documentsRecordingOptionsWithEnumDomain() {
-        val recording = sections().first { it["type"] == "RecordingOptions" }
+    fun documentsTransactionSettingsWithEnumDomain() {
+        val recording = sections().first { it["type"] == "TransactionSettings" }
         val field = (recording["fields"] as List<Map<String, Any?>>).first { it["key"] == "retransformationType" }
         assertEquals("enum", field["type"])
         val values = (field["values"] as List<Map<String, Any?>>).map { it["value"] }
@@ -67,7 +67,7 @@ class GroupConfigSchemaTest {
     @Test
     fun agentConfigCodecBeansDoNotExposeAClassName() {
         // The codec side keys on a simple @type discriminator, so a FQCN would only mislead the agent.
-        val recording = sections().first { it["type"] == "RecordingOptions" }
+        val recording = sections().first { it["type"] == "TransactionSettings" }
         assertFalse(recording.containsKey("className"))
     }
 

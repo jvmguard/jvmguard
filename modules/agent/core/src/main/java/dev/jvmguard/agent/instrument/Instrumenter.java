@@ -22,6 +22,7 @@ import dev.jvmguard.agent.instrument.transaction.annotation.AnnotationTransactio
 import dev.jvmguard.agent.instrument.transaction.matched.MatchedChangeCalculator;
 import dev.jvmguard.agent.instrument.transaction.matched.MatchedDefinition;
 import dev.jvmguard.agent.instrument.transaction.matched.MatchedTransactionDefList;
+import dev.jvmguard.agent.otel.OtelCaptureLogger;
 import dev.jvmguard.agent.telemetry.TelemetryCollector;
 import dev.jvmguard.agent.util.Logger;
 import dev.jvmguard.agent.util.LoggingHandler;
@@ -263,6 +264,10 @@ public class Instrumenter {
             }
             if (checkClassVisitor.getTelemetryMethods() != null) {
                 telemetryMethods.put(className.replace('/', '.'), checkClassVisitor.getTelemetryMethods());
+            }
+            if (loader != null &&
+                (!checkClassVisitor.getClassInterceptions().isEmpty() || !checkClassVisitor.getMethodInterceptions().isEmpty())) {
+                OtelCaptureLogger.captureClassLoader(loader);
             }
 
             PartiallyDefinedInfo partiallyDefinedInfo = checkClassVisitor.getPartiallyDefinedInfo(false);

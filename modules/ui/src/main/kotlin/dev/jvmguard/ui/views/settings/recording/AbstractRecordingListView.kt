@@ -45,8 +45,11 @@ abstract class AbstractRecordingListView<T : Identifiable, S : AbstractSet<T>> :
         val newGrid = createGrid({ items }, ::markChanged)
         grid = newGrid
         content.add(newGrid)
+        content.add(*extraComponents(selection).toTypedArray())
         buildToolbar(newGrid)
     }
+
+    protected open fun extraComponents(selection: VmIdentifier): List<Component> = emptyList()
 
     protected open fun onChanged() {}
 

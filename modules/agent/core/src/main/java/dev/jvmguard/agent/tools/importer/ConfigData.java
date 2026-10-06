@@ -4,7 +4,6 @@ import com.grack.nanojson.JsonObject;
 import dev.jvmguard.agent.comm.JsonAgentReader;
 import dev.jvmguard.agent.config.AgentGroupConfig;
 import dev.jvmguard.agent.config.VmType;
-import dev.jvmguard.agent.config.recording.RecordingOptions;
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings;
 import dev.jvmguard.agent.config.transactions.TransactionSettings;
 
@@ -35,10 +34,6 @@ public class ConfigData {
 
     public TransactionSettings getTransactionSettings() {
         return agentGroupConfig == null ? null : agentGroupConfig.getTransactionSettings();
-    }
-
-    public RecordingOptions getRecordingOptions() {
-        return agentGroupConfig == null ? null : agentGroupConfig.getRecordingOptions();
     }
 
     public TelemetrySettings getTelemetrySettings() {

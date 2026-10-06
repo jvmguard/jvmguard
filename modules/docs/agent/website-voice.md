@@ -206,9 +206,14 @@ of jvmguard** and must never appear on the site, even obliquely.
 - **Auto-detected Web / EJB / Spring / RMI transactions.**
 
 **In scope, with a nuance you must get right:**
-- **Transactions** are **Matched, Declared, and Mapped** types only. The site may describe
+- **Transactions** are **Matched, Declared, Mapped, and OTel** types only. The site may describe
   transactions, the call tree, and hot spots. It must **not** claim jvmguard "automatically detects"
-  servlet, EJB, Spring, RMI, or web-service transactions. Transactions are explicitly configured.
+  servlet, EJB, Spring, RMI, or web-service transactions. Transactions are explicitly configured,
+  with one exception: the OTel type honors `io.opentelemetry...WithSpan` and
+  `io.micrometer...Observed` annotations the application already carries.
+- **OpenTelemetry interoperability**: capture events are emitted as OTel log records into the
+  *user's own* OTel pipeline (agent-side, reflective, no-op without the OTel API). The site may say
+  jvmguard "works with your tracing setup".
 - **Heap dumps** are a trigger action (`HEAP_DUMP`), a capture-on-trigger. Steady-state memory views are
   not in scope.
 - **The JProfiler JVMTI cross-over** is a capture that produces a JProfiler snapshot for handoff. Frame

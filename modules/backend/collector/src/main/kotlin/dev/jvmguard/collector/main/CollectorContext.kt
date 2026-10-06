@@ -62,7 +62,10 @@ class CollectorContext(
         return false
     }
 
-    fun recordJProfilerSnapshot(vm: VM, user: User?, action: RecordJpsAction) {
+    fun isOtelCaptureEventsEnabled(): Boolean =
+        configManager.getGroupConfig(VmIdentifier.ROOT_GROUP_IDENTIFIER).triggerSettings.emitOtelCaptureEvents
+
+    fun recordJProfilerSnapshot(vm: VM, user: User?, action: RecordJpsAction, captureContext: CaptureContext?) {
         BaseResult.setTempDir(SnapshotFile.snapshotDirectory)
         val agentConnection = connectionRegistry.getLiveConnection(vm) ?: return
         jprofilerExecutor.submit {
@@ -92,7 +95,8 @@ class CollectorContext(
                     CommandType.RECORD_JPROFILER,
                     JProfilerRecordParameters(
                         getSeconds(action), ref.artifactKey, action.subsystems.toTypedArray(),
-                        action.heapDump, action.heapDumpFullGc, action.mbeanSnapshot, action.monitorDump
+                        action.heapDump, action.heapDumpFullGc, action.mbeanSnapshot, action.monitorDump,
+                        captureContext
                     ),
                     object : Handler<JProfilerSnapshotResult>() {
                         override fun handle(result: JProfilerSnapshotResult) {
@@ -114,7 +118,13 @@ class CollectorContext(
         }
     }
 
-    fun getRecordJfrCommand(vm: VM, user: User?, recordJfrAction: RecordJfrAction, redact: Boolean? = null): Command {
+    fun getRecordJfrCommand(
+        vm: VM,
+        user: User?,
+        recordJfrAction: RecordJfrAction,
+        redact: Boolean? = null,
+        captureContext: CaptureContext?,
+    ): Command {
         BaseResult.setTempDir(SnapshotFile.snapshotDirectory)
         val resolvedRedact = resolveRedact(vm, redact)
         val predefined = recordJfrAction.configMode == JfrConfigMode.PREDEFINED
@@ -122,7 +132,8 @@ class CollectorContext(
             "VM " + vm.name,
             getSeconds(recordJfrAction),
             predefined,
-            if (predefined) recordJfrAction.profileName else recordJfrAction.settings
+            if (predefined) recordJfrAction.profileName else recordJfrAction.settings,
+            captureContext
         )
         return Command(CommandType.JFR_SNAPSHOT, parameters, object : Handler<JfrSnapshotResult>() {
             override fun handle(result: JfrSnapshotResult) {
@@ -134,10 +145,17 @@ class CollectorContext(
         })
     }
 
-    fun getHeapDumpCommand(vm: VM, user: User?, inboxAll: Boolean, name: String, redact: Boolean? = null): Command {
+    fun getHeapDumpCommand(
+        vm: VM,
+        user: User?,
+        inboxAll: Boolean,
+        name: String,
+        redact: Boolean? = null,
+        captureContext: CaptureContext?,
+    ): Command {
         BaseResult.setTempDir(SnapshotFile.snapshotDirectory)
         val resolvedRedact = resolveRedact(vm, redact)
-        return Command(CommandType.HEAP_DUMP, null, object : Handler<HeapDumpResult>() {
+        return Command(CommandType.HEAP_DUMP, HeapDumpParameters(captureContext), object : Handler<HeapDumpResult>() {
             override fun handle(result: HeapDumpResult) {
                 handleSnapshotToInboxItem(result, vm, user, inboxAll, name, SnapshotFileType.HPZ, resolvedRedact)
             }
@@ -147,8 +165,8 @@ class CollectorContext(
     private fun resolveRedact(vm: VM, redact: Boolean?): Boolean =
         redact ?: configManager.getGroupHierarchyWrapper(vm).guardrailSettings.redactSnapshots
 
-    fun getThreadDumpCommand(vm: VM, user: User?, inboxAll: Boolean, name: String): Command {
-        return Command(CommandType.THREAD_DUMP, null, object : Handler<ThreadDumpResult>() {
+    fun getThreadDumpCommand(vm: VM, user: User?, inboxAll: Boolean, name: String, captureContext: CaptureContext?): Command {
+        return Command(CommandType.THREAD_DUMP, ThreadDumpParameters(captureContext), object : Handler<ThreadDumpResult>() {
             override fun handle(result: ThreadDumpResult) {
                 val snapshot = snapshotFileStorage.createSnapshotFile(vm, SnapshotFileType.THREAD_DUMP, System.currentTimeMillis(), name, result)
                 logEvent(vm, null, LogCategory.INFO, "Recorded ${SnapshotFileType.THREAD_DUMP} \"$name\"")

@@ -1,5 +1,6 @@
 package dev.jvmguard.ui.views.settings.recording
 
+import dev.jvmguard.agent.config.VmType
 import dev.jvmguard.data.config.thresholds.Threshold
 import dev.jvmguard.data.config.triggers.ConnectionTrigger
 import dev.jvmguard.data.config.triggers.ThresholdTrigger
@@ -19,6 +20,7 @@ import dev.jvmguard.ui.server.UserSession
 import dev.jvmguard.connector.api.ServerConnection
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button
+import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.menubar.MenuBar
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.textfield.TextArea
@@ -50,6 +52,9 @@ class RecordingTriggersTest : JvmGuardBrowserlessTest() {
 
     private fun shellSave(): Button = find<Button>().all().first { "jvmguard-settings-save" in it.classNames }
 
+    private fun otelCaptureEvents(): Checkbox =
+        find<Checkbox>().all().first { it.testId == RecordingTriggersView.ID_OTEL_CAPTURE_EVENTS }
+
     private fun cpuType(): TelemetryType = connection.idToTelemetryType.values.first { it.name == "CPU load" }
 
     @Test
@@ -57,6 +62,27 @@ class RecordingTriggersTest : JvmGuardBrowserlessTest() {
         UI.getCurrent().navigate(RecordingTriggersView::class.java)
         find<TriggerGrid>().single()
         assertTrue(find<MenuBar>().all().any { it.testId == "trigger-add" })
+    }
+
+    @Test
+    fun otelCaptureEventsFlagPersists() {
+        UI.getCurrent().navigate(RecordingTriggersView::class.java)
+
+        val checkbox = otelCaptureEvents()
+        assertTrue(checkbox.value)
+        use(checkbox).uncheck()
+
+        use(shellSave()).click()
+        assertFalse(connection.groupConfigs.first { it.isRoot }.triggerSettings.emitOtelCaptureEvents)
+    }
+
+    @Test
+    fun otelCaptureEventsCheckboxOnlyAtRoot() {
+        UI.getCurrent().navigate(RecordingTriggersView::class.java)
+        assertTrue(find<Checkbox>().all().any { it.testId == RecordingTriggersView.ID_OTEL_CAPTURE_EVENTS })
+
+        Sessions.recordingGroupSelection().set(VmIdentifier("ERP", VmType.GROUP))
+        assertFalse(find<Checkbox>().all().any { it.testId == RecordingTriggersView.ID_OTEL_CAPTURE_EVENTS })
     }
 
     @Test

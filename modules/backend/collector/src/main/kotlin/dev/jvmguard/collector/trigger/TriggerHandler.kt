@@ -1,6 +1,8 @@
 package dev.jvmguard.collector.trigger
 
 import dev.jvmguard.agent.config.base.LogCategory
+import dev.jvmguard.agent.config.transactions.PolicyEventType
+import dev.jvmguard.agent.parameter.CaptureContext
 import dev.jvmguard.collector.connection.Command
 import dev.jvmguard.collector.main.CollectorContext
 import dev.jvmguard.data.config.triggers.DataTrigger
@@ -23,6 +25,9 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
     private var currentEventCount: Long = 0
 
     protected var lastVm: VM? = null
+
+    private var lastTransactionName: String? = null
+    private var lastPolicyEventType: PolicyEventType? = null
 
     init {
         when (triggerData.interval) {
@@ -88,7 +93,10 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
     }
 
     protected open fun executeActions(snapshotTimeStamp: Long, collectorContext: CollectorContext) {
-        executeActions(collectorContext, triggerData.triggerActions, lastVm, groupVm, triggerData.description)
+        executeActions(
+            collectorContext, triggerData.triggerActions, lastVm, groupVm,
+            CaptureContext(CaptureContext.Origin.TRIGGER, triggerData.description, lastTransactionName, lastPolicyEventType)
+        )
     }
 
     private fun resetCounter() {
@@ -98,12 +106,22 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
     }
 
     @Synchronized
-    open fun addEvents(snapshotTimeStamp: Long, nanoTime: Long, count: Long, vm: VM, collectorContext: CollectorContext) {
+    open fun addEvents(
+        snapshotTimeStamp: Long,
+        nanoTime: Long,
+        count: Long,
+        vm: VM,
+        transactionName: String?,
+        policyEventType: PolicyEventType?,
+        collectorContext: CollectorContext,
+    ) {
         if (lastTriggerNano != Long.MIN_VALUE && nanoTime - lastTriggerNano < inhibitionNanos) {
             // do nothing
         } else {
             currentEventCount += count
             lastVm = vm
+            lastTransactionName = transactionName
+            lastPolicyEventType = policyEventType
             if (triggerData.interval == Interval.NONE && currentEventCount >= triggerData.count) {
                 lastTriggerNano = nanoTime
                 currentEventCount = 0
@@ -118,12 +136,14 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
             triggerActions: Collection<TriggerAction>,
             lastVm: VM?,
             groupVm: VM?,
-            triggerDescription: String,
+            captureContext: CaptureContext,
         ) {
             // every trigger firing leaves exactly one event log entry
             if (triggerActions.none { it is LogAction }) {
-                collectorContext.logEvent(groupVm, lastVm, LogCategory.INFO, "Trigger fired: $triggerDescription")
+                collectorContext.logEvent(groupVm, lastVm, LogCategory.INFO, "Trigger fired: ${captureContext.triggerDescription}")
             }
+            // a null capture context suppresses the OTel capture event agent-side
+            val effectiveCaptureContext = captureContext.takeIf { collectorContext.isOtelCaptureEventsEnabled() }
             var commands: MutableList<Command>? = null
             for (action in triggerActions) {
                 when {
@@ -143,18 +163,22 @@ abstract class TriggerHandler(protected var triggerData: DataTrigger, protected 
                             commands = ArrayList()
                         }
                         when (action) {
-                            is HeapDumpAction -> commands.add(collectorContext.getHeapDumpCommand(lastVm, null, action.isCreateInboxItem, action.artifactName))
+                            is HeapDumpAction -> commands.add(
+                                collectorContext.getHeapDumpCommand(lastVm, null, action.isCreateInboxItem, action.artifactName, captureContext = effectiveCaptureContext)
+                            )
+
                             is ThreadDumpAction -> commands.add(
                                 collectorContext.getThreadDumpCommand(
                                     lastVm,
                                     null,
                                     action.isCreateInboxItem,
-                                    action.artifactName
+                                    action.artifactName,
+                                    captureContext = effectiveCaptureContext
                                 )
                             )
 
-                            is RecordJpsAction -> collectorContext.recordJProfilerSnapshot(lastVm, null, action)
-                            is RecordJfrAction -> commands.add(collectorContext.getRecordJfrCommand(lastVm, null, action))
+                            is RecordJpsAction -> collectorContext.recordJProfilerSnapshot(lastVm, null, action, effectiveCaptureContext)
+                            is RecordJfrAction -> commands.add(collectorContext.getRecordJfrCommand(lastVm, null, action, captureContext = effectiveCaptureContext))
                         }
                     }
                 }

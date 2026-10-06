@@ -1,7 +1,7 @@
 package dev.jvmguard.agent.config;
 
 import dev.jvmguard.agent.comm.*;
-import dev.jvmguard.agent.config.recording.RecordingOptions;
+import dev.jvmguard.agent.config.recording.RetransformationType;
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings;
 import dev.jvmguard.agent.config.transactions.TransactionSettings;
 
@@ -10,8 +10,9 @@ import java.io.DataOutputStream;
 
 public class AgentGroupConfig implements AgentSerializable, CodecEntity {
 
+    private static final CodecEntity LEGACY_RECORDING_OPTIONS = new LegacyRecordingOptions();
+
     private TransactionSettings transactionSettings = new TransactionSettings();
-    private RecordingOptions recordingOptions = new RecordingOptions();
     private TelemetrySettings telemetrySettings = new TelemetrySettings();
 
     public TransactionSettings getTransactionSettings() {
@@ -20,14 +21,6 @@ public class AgentGroupConfig implements AgentSerializable, CodecEntity {
 
     public void setTransactionSettings(TransactionSettings transactionSettings) {
         this.transactionSettings = transactionSettings;
-    }
-
-    public RecordingOptions getRecordingOptions() {
-        return recordingOptions;
-    }
-
-    public void setRecordingOptions(RecordingOptions recordingOptions) {
-        this.recordingOptions = recordingOptions;
     }
 
     public TelemetrySettings getTelemetrySettings() {
@@ -55,23 +48,43 @@ public class AgentGroupConfig implements AgentSerializable, CodecEntity {
 
     @Override
     public void readState(AgentReader reader) throws Exception {
-        recordingOptions = reader.readObject("recordingOptions");
+        if (!reader.satisfies(ProtocolRequirement.V2)) {
+            reader.readObject("recordingOptions");
+        }
         transactionSettings = reader.readObject("transactionSettings");
         telemetrySettings = reader.readObject("telemetrySettings");
     }
 
     @Override
     public void writeState(AgentWriter writer) throws Exception {
-        writer.writeObject("recordingOptions", recordingOptions);
+        if (!writer.satisfies(ProtocolRequirement.V2)) {
+            writer.writeObject("recordingOptions", LEGACY_RECORDING_OPTIONS);
+        }
         writer.writeObject("transactionSettings", transactionSettings);
         writer.writeObject("telemetrySettings", telemetrySettings);
+    }
+
+    public static class LegacyRecordingOptions implements CodecEntity {
+        @Override
+        public String codecType() {
+            return "RecordingOptions";
+        }
+
+        @Override
+        public void readState(AgentReader reader) throws Exception {
+            reader.readEnum("retransformationType", RetransformationType.class);
+        }
+
+        @Override
+        public void writeState(AgentWriter writer) throws Exception {
+            writer.writeEnum("retransformationType", RetransformationType.ALWAYS);
+        }
     }
 
     @Override
     public String toString() {
         return "AgentGroupConfig{" +
             "transactionSettings=" + transactionSettings +
-            ", recordingOptions=" + recordingOptions +
             ", telemetrySettings=" + telemetrySettings +
             '}';
     }

@@ -208,7 +208,6 @@ class VmManagerImpl(
                 connectionEntry.vmData.setThresholds(groupHierarchyWrapper.vmThresholds)
 
                 val parameter = ConfigurationParameter()
-                parameter.setRecordingOptions(groupHierarchyWrapper.recordingOptions)
                 parameter.transactionSettings = groupHierarchyWrapper.transactionSettings
                 parameter.telemetrySettings = groupHierarchyWrapper.telemetrySettings
                 val runnable = Runnable {
@@ -228,7 +227,7 @@ class VmManagerImpl(
     }
 
     override fun recordJps(vm: VM, user: User, recordJpsAction: RecordJpsAction) {
-        collectorContext.recordJProfilerSnapshot(vm, user, recordJpsAction)
+        collectorContext.recordJProfilerSnapshot(vm, user, recordJpsAction, manualCaptureContext())
     }
 
     override fun getMBeanNames(vm: VM, createPlatformServer: Boolean): Collection<String> {
@@ -308,19 +307,23 @@ class VmManagerImpl(
     }
 
     override fun recordJfr(vm: VM, user: User, recordJfrAction: RecordJfrAction, redact: Boolean?) {
-        collectorContext.executeLater(vm, setOf(collectorContext.getRecordJfrCommand(vm, user, recordJfrAction, redact)))
+        collectorContext.executeLater(vm, setOf(collectorContext.getRecordJfrCommand(vm, user, recordJfrAction, redact, manualCaptureContext())))
     }
 
     override fun heapDump(vm: VM, user: User, redact: Boolean?) {
-        collectorContext.executeLater(vm, setOf(collectorContext.getHeapDumpCommand(vm, user, false, vm.name, redact)))
+        collectorContext.executeLater(vm, setOf(collectorContext.getHeapDumpCommand(vm, user, false, vm.name, redact, manualCaptureContext())))
     }
 
     override fun getGuardrailSettings(vm: VM): GuardrailSettings =
         configManager.getGroupHierarchyWrapper(vm).guardrailSettings
 
     override fun threadDump(vm: VM, user: User) {
-        collectorContext.executeLater(vm, setOf(collectorContext.getThreadDumpCommand(vm, user, false, vm.name)))
+        collectorContext.executeLater(vm, setOf(collectorContext.getThreadDumpCommand(vm, user, false, vm.name, manualCaptureContext())))
     }
+
+    // a null capture context suppresses the OTel capture event agent-side
+    private fun manualCaptureContext(): CaptureContext? =
+        CaptureContext.manual().takeIf { collectorContext.isOtelCaptureEventsEnabled() }
 
     fun executeLater(vm: VM, commandType: CommandType, parameter: BaseParameter?, handler: Handler<*>?): Boolean {
         val agentConnection = connectionRegistry.getLiveConnection(vm)

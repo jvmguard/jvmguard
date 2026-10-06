@@ -6,8 +6,10 @@ import dev.jvmguard.agent.RequestSession;
 import dev.jvmguard.agent.base.logging.Subsystem;
 import dev.jvmguard.agent.data.BaseResult;
 import dev.jvmguard.agent.data.DeferredDataResult;
+import dev.jvmguard.agent.data.SnapshotTransferResult;
 import dev.jvmguard.agent.helper.SnapshotRecorder;
 import dev.jvmguard.agent.instrument.Transformer;
+import dev.jvmguard.agent.otel.OtelCaptureLogger;
 import dev.jvmguard.agent.parameter.BaseParameter;
 import dev.jvmguard.agent.telemetry.TelemetryCollector;
 import dev.jvmguard.agent.util.Logger;
@@ -234,6 +236,7 @@ public class JvmGuardCommunication implements Runnable {
                         submitDeferred(commandType, parameter, result, commandId, null, DEFERRED_TIMEOUT_MILLIS);
                     } else {
                         result.write(context, out);
+                        OtelCaptureLogger.emit(commandType, parameter, true);
                         Logger.log(Subsystem.COMMUNICATION, 3, true, "writing %s done.\n", result.getClass());
                     }
                     out.flush();
@@ -260,6 +263,7 @@ public class JvmGuardCommunication implements Runnable {
             try {
                 Logger.log(Subsystem.COMMUNICATION, 2, true, "starting deferred %s\n", commandType);
                 deferredDataResult.prepareDeferredLater(deferredContext);
+                OtelCaptureLogger.emit(commandType, parameter, isSuccess(result));
                 Logger.log(Subsystem.COMMUNICATION, 3, true, "deferred prepared %s\n", commandType);
                 new JvmGuardCommunication(hostname, port, socketFactory, deferredContext, timeoutMillis).run();
                 Logger.log(Subsystem.COMMUNICATION, 3, true, "deferred finished %s\n", commandType);
@@ -267,6 +271,10 @@ public class JvmGuardCommunication implements Runnable {
                 JvmGuardAgent.log(t);
             }
         });
+    }
+
+    private static boolean isSuccess(BaseResult result) {
+        return !(result instanceof SnapshotTransferResult) || ((SnapshotTransferResult)result).getErrorMessage() == null;
     }
 
     private boolean connect(boolean isPrimary) throws FatalConnectionException, RetryConnectionException {

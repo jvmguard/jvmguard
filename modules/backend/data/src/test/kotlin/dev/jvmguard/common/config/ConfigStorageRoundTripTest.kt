@@ -69,7 +69,6 @@ class ConfigStorageRoundTripTest {
         val gc = GroupConfig.createDefault()
         val back = roundTrip(gc, GroupConfig::class.java)
         assertNotNull(back.agentGroupConfig)
-        assertNotNull(back.agentGroupConfig.recordingOptions)
         assertNotNull(back.agentGroupConfig.transactionSettings)
     }
 

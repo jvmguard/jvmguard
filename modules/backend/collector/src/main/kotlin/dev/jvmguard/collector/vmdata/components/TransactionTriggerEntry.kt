@@ -4,7 +4,7 @@ import dev.jvmguard.collector.main.CollectorContext
 import dev.jvmguard.collector.trigger.PolicyTriggerHandler
 import dev.jvmguard.data.vmdata.VM
 
-internal class TransactionTriggerEntry(triggerHandler: Collection<PolicyTriggerHandler>, transactionName: String) {
+internal class TransactionTriggerEntry(triggerHandler: Collection<PolicyTriggerHandler>, private val transactionName: String) {
 
     private var triggerHandler: MutableList<PolicyTriggerHandler>? = null
 
@@ -17,7 +17,11 @@ internal class TransactionTriggerEntry(triggerHandler: Collection<PolicyTriggerH
             for (handler in handlers) {
                 val value = count.getValue(handler.getTrigger())
                 if (value > 0) {
-                    handler.addEvents(snapshotTimeStamp, nanoTime, value, vm, collectorContext)
+                    handler.addEvents(
+                        snapshotTimeStamp, nanoTime, value, vm,
+                        transactionName, count.getMostSevereCountedType(handler.getTrigger()),
+                        collectorContext
+                    )
                 }
             }
         }

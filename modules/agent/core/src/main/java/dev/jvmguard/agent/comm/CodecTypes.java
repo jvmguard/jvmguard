@@ -1,7 +1,6 @@
 package dev.jvmguard.agent.comm;
 
 import dev.jvmguard.agent.config.AgentGroupConfig;
-import dev.jvmguard.agent.config.recording.RecordingOptions;
 import dev.jvmguard.agent.config.telemetry.MBeanLineConfig;
 import dev.jvmguard.agent.config.telemetry.MBeanTelemetryConfig;
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings;
@@ -24,7 +23,7 @@ public final class CodecTypes {
             }
             CodecRegistry.register(
                 AgentGroupConfig::new,
-                RecordingOptions::new,
+                AgentGroupConfig.LegacyRecordingOptions::new,
                 TransactionSettings::new,
                 TelemetrySettings::new,
                 MBeanTelemetryConfig::new,

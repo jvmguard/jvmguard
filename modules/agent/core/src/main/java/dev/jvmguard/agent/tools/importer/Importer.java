@@ -21,7 +21,7 @@ public class Importer {
 
         root.visit(group -> {
             group.deleteHierarchy(jvmguardUserDir);
-            ConfigurationParameter.store(new ConfigurationParameter(group.getRecordingOptions(), group.getTransactionSettings(), group.getTelemetrySettings()),
+            ConfigurationParameter.store(new ConfigurationParameter(group.getTransactionSettings(), group.getTelemetrySettings()),
                 group.getConfigFile(jvmguardUserDir), new LogHandler() {
                     @Override
                     public void println(String s) {

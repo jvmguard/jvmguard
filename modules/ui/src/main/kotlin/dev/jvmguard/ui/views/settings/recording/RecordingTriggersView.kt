@@ -16,6 +16,7 @@ import dev.jvmguard.ui.server.enumLabel
 import dev.jvmguard.ui.server.t
 import dev.jvmguard.ui.shell.MainLayout
 import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.router.Route
 import jakarta.annotation.security.RolesAllowed
 
@@ -26,6 +27,27 @@ class RecordingTriggersView : AbstractRecordingListView<Trigger, TriggerSet>() {
     override fun intro(selection: VmIdentifier): String? =
         if (selection.isRoot) null
         else t("recording.settings.triggers.intro")
+
+    private val otelCaptureEvents = Checkbox(t("recording.settings.triggers.otelCaptureEvents")).apply {
+        addClassName("jvmguard-settings-gap-before")
+        testId = ID_OTEL_CAPTURE_EVENTS
+        addValueChangeListener { event -> if (event.isFromClient) onOtelCaptureEventsChanged(event.value) }
+    }
+
+    override fun extraComponents(selection: VmIdentifier): List<Component> =
+        if (selection.isRoot) {
+            otelCaptureEvents.value =
+                Sessions.recordingDraft().groupConfig(selection)?.triggerSettings?.emitOtelCaptureEvents ?: true
+            listOf(otelCaptureEvents)
+        } else {
+            emptyList()
+        }
+
+    private fun onOtelCaptureEventsChanged(value: Boolean) {
+        val selection = Sessions.recordingGroupSelection().selection
+        Sessions.recordingDraft().groupConfig(selection)?.triggerSettings?.emitOtelCaptureEvents = value
+        Sessions.recordingDraft().markChanged(selection)
+    }
 
     override val addButtonText: String get() = t("recording.settings.triggers.add")
     override val addButtonTestId: String get() = "trigger-add"
@@ -63,4 +85,8 @@ class RecordingTriggersView : AbstractRecordingListView<Trigger, TriggerSet>() {
 
     private fun telemetryTypes(): Collection<TelemetryType> =
         Sessions.current()?.serverConnection?.idToTelemetryType?.values ?: emptyList()
+
+    companion object {
+        const val ID_OTEL_CAPTURE_EVENTS = "trigger-otel-capture-events"
+    }
 }

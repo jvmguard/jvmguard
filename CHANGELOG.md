@@ -11,6 +11,11 @@
   settings, with an optional span name filter.
 - Mapped transaction definitions can now filter by annotation attribute values and use annotation
   attribute values as transaction naming elements.
+- Captures (heap dumps, thread dumps, JFR snapshots and JProfiler recordings) are now emitted as
+  OpenTelemetry log records into the monitored application's OTel pipeline when the OTel API is on
+  its classpath. Trigger-fired captures carry the trigger description, the transaction and the
+  policy event type that fired the trigger. The emission can be switched off in the trigger
+  recording settings of the root group.
 
 ### 0.2
 

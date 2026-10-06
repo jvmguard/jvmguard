@@ -1,7 +1,6 @@
 package dev.jvmguard.agent.tools.importer;
 
 import dev.jvmguard.agent.config.VmType;
-import dev.jvmguard.agent.config.recording.RecordingOptions;
 import dev.jvmguard.agent.config.telemetry.TelemetrySettings;
 import dev.jvmguard.agent.config.transactions.TransactionSettings;
 import dev.jvmguard.agent.parameter.ConfigurationParameter;
@@ -81,20 +80,6 @@ public class Group {
             "config=" + config +
             ",\nchildren=" + children +
             '}';
-    }
-
-    public RecordingOptions getRecordingOptions() {
-        if (parent == null) {
-            if (config != null && config.getRecordingOptions() != null) {
-                return config.getRecordingOptions();
-            } else {
-                return new RecordingOptions();
-            }
-        } else if (config != null && config.getRecordingOptions() != null && config.getRecordingOptions().isUsed()) {
-            return config.getRecordingOptions();
-        } else {
-            return parent.getRecordingOptions();
-        }
     }
 
     public TransactionSettings getTransactionSettings() {
