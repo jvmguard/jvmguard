@@ -19,12 +19,12 @@ class DropdownMenuPlacementE2ETest : PlaywrightE2ETest() {
         val button = getByTestId("trigger-add")
         for (attempt in 1..3) {
             // Click the right edge: a left-aligned menu proves the anchor is the button, not the cursor.
-            button.click(com.microsoft.playwright.Locator.ClickOptions().setPosition(button.boundingBox().width - 4.0, 4.0))
+            button.click(com.microsoft.playwright.Locator.ClickOptions().setPosition(button.boundingBox()!!.width - 4.0, 4.0))
 
             val overlay = locator("vaadin-menu-bar-overlay[opened]")
             overlay.waitFor()
-            val buttonBox = button.boundingBox()
-            val menuBox = overlay.boundingBox()
+            val buttonBox = button.boundingBox()!!
+            val menuBox = overlay.boundingBox()!!
             if (attempt == 3) {
                 screenshot(Page.ScreenshotOptions().setPath(screenshotPath("dropdown-menu-placement.png")))
             }
