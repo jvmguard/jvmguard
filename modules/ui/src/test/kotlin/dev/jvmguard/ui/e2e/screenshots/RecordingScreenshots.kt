@@ -17,6 +17,7 @@ import dev.jvmguard.ui.components.recording.triggers.TriggerDialog
 import dev.jvmguard.ui.components.recording.triggers.TriggerGrid
 import dev.jvmguard.ui.views.data.AbstractVmSelectorDialog
 import dev.jvmguard.ui.views.settings.recording.AbstractRecordingSettingsView
+import dev.jvmguard.ui.views.settings.recording.RecordingTriggersView
 import org.junit.jupiter.api.Test
 
 /** V2 has no Web/EJB transaction type and no per-VM threshold, so some V1 figure names map to the closest equivalent. */
@@ -166,6 +167,15 @@ class RecordingScreenshots : ScreenshotTest() {
         addAction(l("enum.ActionType.HEAP_DUMP"))
         assertThat(getByTestId(TriggerActionDialog.ID_SAVE)).isVisible()
         capture("trigger_heap_dump") // TODO: unused
+    }
+
+    @Test
+    fun otelCaptureEvents() = onPage {
+        login()
+        open("recording/triggers")
+        // The emission checkbox is only shown for the root group, which is the default selection.
+        assertThat(getByTestId(RecordingTriggersView.ID_OTEL_CAPTURE_EVENTS)).isVisible()
+        capture("otel_capture_events")
     }
 
     @Test
