@@ -17,6 +17,11 @@
   policy event type that fired the trigger. The emission can be switched off in the trigger
   recording settings of the root group.
 
+**Fixes:**
+
+- When saving a dialog fails because of an invalid value on another tab, the dialog now switches
+  to the tab with the invalid field.
+
 ### 0.2
 
 **New features:**
