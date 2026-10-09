@@ -115,13 +115,11 @@ tasks {
     }
 
     register("release") {
-        mustRunAfter(media)
+        description = "Publishes to Maven Central and marks the draft GitHub release as published"
         dependsOn(
-                ":agent:api:publishAndReleaseToMavenCentralGithub"
+                ":agent:api:publishAndReleaseToMavenCentralGithub",
+                "publishGithubRelease"
         )
-        doLastWith(getReleaseTag("jvmguard"), execOperations) { releaseTag, execOps ->
-            writeGitTag(execOps, releaseTag)
-        }
     }
 
     register("overwriteRelease") {
@@ -132,15 +130,27 @@ tasks {
         }
     }
 
-    register("publishGithubRelease") {
+    val draftGithubRelease = register("draftGithubRelease") {
         dependsOn(":extractReleaseNotes")
-        mustRunAfter("release", "overwriteRelease")
+        mustRunAfter(media, "overwriteRelease")
         val version = fullVersion
         val notesFile = mediaDir.parentFile.resolve("build/gradle/release-notes.md")
         val media = mediaDir
+        // Tag first, so the draft release is attached to an existing tag
+        doLastWith(getReleaseTag("jvmguard"), execOperations) { releaseTag, execOps ->
+            writeGitTag(execOps, releaseTag)
+        }
         doLastWith(execOperations, version, notesFile, media) { execOps, ver, notes, mediaDirectory ->
             val tag = "v$ver"
-            publishGithubRelease(execOps, tag, ver, notes, mediaDirectory)
+            publishGithubRelease(execOps, tag, ver, notes, mediaDirectory, draft = true)
+        }
+    }
+
+    register("publishGithubRelease") {
+        mustRunAfter(draftGithubRelease)
+        val version = fullVersion
+        doLastWith(execOperations, version) { execOps, ver ->
+            publishDraftGithubRelease(execOps, "v$ver")
             println("Triggering docs/Pages rebuild")
             execOps.exec {
                 commandLine("gh", "workflow", "run", "docs.yml")

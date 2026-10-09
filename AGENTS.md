@@ -300,8 +300,11 @@ which `:agent:bootstrap`'s `copyDist` renames to `agent.jar` for `dist/agent/lib
 
 - `gradle/libs.versions.toml` (all versions, single source), `settings.gradle.kts` (modules
   registered with explicit `include()`), the `foojay-resolver-convention` plugin provisions the
-  JDK toolchains. The product-orchestration tasks (`dist`, `media`, `release`, `overwriteRelease`,
-  `prepareCodescan`, `allTests`) live on the root project (`:dist` aggregates `:*:dist`).
+  JDK toolchains. The product-orchestration tasks (`dist`, `media`, `draftRelease`, `release`,
+  `overwriteRelease`, `prepareCodescan`, `allTests`) live on the root project (`:dist` aggregates
+  `:*:dist`). Releases are two-phase: `draftRelease` builds the media, tags and creates a **draft**
+  GitHub release with the assets; `release` publishes to Maven Central, marks the draft as published
+  and triggers the website deploy (which needs the published release for `updates.xml`).
 - **Per-module JDK levels** go through the `jvmguardJava` extension (`javaVersion` = toolchain,
   `classFileVersion` = bytecode level, both `Property<String>` with lazy wiring in
   `buildSrc/.../JvmGuardJavaSupport.kt`): `jvmguardJava { javaVersion.set("1.8") }`. Compilation uses
@@ -312,6 +315,55 @@ which `:agent:bootstrap`'s `copyDist` renames to `agent.jar` for `dist/agent/lib
   report in `build/reports/kover/`. `:integration` is excluded (test-only code, custom compilations),
   and the UI e2e/screenshot tasks are excluded from instrumentation. Local-only by design; there is no
   CI gate.
+
+## Releasing
+
+Releases are two-phase — draft first, publish later — and everything is driven from the repo root.
+The user reviews the draft; only run the publish phase when explicitly told to.
+
+1. **Changelog.** `CHANGELOG.md` is the source of truth for the release notes
+   (`extractReleaseNotes` pulls out the section matching `jvmguard.version`). Make sure the new
+   version's section exists and matches reality: walk `git log v<prev>..HEAD` (ignore dependabot
+   bumps and build/test-only changes) and split entries into `**New features:**` and `**Fixes:**`.
+2. **Screenshots (optional, for notable UI features).** Never capture by hand — add a Playwright
+   screenshot test in `modules/ui/src/test/kotlin/dev/jvmguard/ui/e2e/screenshots/` if none covers
+   the feature (see [modules/docs/agent/help-screenshots.md](./modules/docs/agent/help-screenshots.md)),
+   generate with `./gradlew :ui:screenshots :ui:darkScreenshots --tests "*<Class>.<test>"`, and copy
+   the PNGs (light + `_dark`) into `modules/docs/public/images/ui/`. Reference them from the release
+   notes like the README does:
+   `https://raw.githubusercontent.com/jvmguard/jvmguard/main/modules/docs/public/images/ui/<name>.png`
+   (a `<picture>` element with a `srcset` for the `_dark` variant). **The URLs only resolve after the
+   screenshots are pushed to main**, so commit them with the version bump, before drafting.
+3. **Version bump + commit.** Set `jvmguard.version` in `gradle.properties` to the new version and
+   commit (message: just the version, e.g. `0.3`) together with any screenshot changes. Push to main —
+   the GitHub tasks verify that local and origin match. Do **not** create the tag by hand;
+   `draftRelease` does it.
+4. **Draft.** `./gradlew draftRelease` builds the signed media (all platforms, ~15 min; the macOS DMG
+   is notarized), creates and pushes tag `v<version>`, and creates the **draft** GitHub release with
+   the changelog section as notes and everything in `media/` attached (installers, `sha256sums`,
+   `updates.xml`, …). `./gradlew overwriteRelease` re-rolls a draft: rebuilds media, force-moves the
+   tag, re-uploads assets.
+   - Signing needs the AWS-KMS DigestSigner from the ejt checkout
+     (`~/projects/ejt`, via `digestSigningCommandLine` in `~/.gradle/gradle.properties`). If signing
+     fails with `RuntimeOperatorException ... EOFException`, its cached classpath is stale —
+     regenerate with `./gradlew :ejt:digestsigner:prepareDigestSigner` in the ejt checkout.
+   - To augment the notes (e.g. screenshots), edit the draft afterwards with
+     `gh release edit v<version> --notes-file <file>` — start from the extracted
+     `build/gradle/release-notes.md`.
+5. **Publish (user-approved only).** `./gradlew release` publishes `:agent:api` to Maven Central (via
+   the `build.yml` CI workflow — the local machine needs no signing key), marks the draft as
+   published and triggers `docs.yml`, which redeploys jvmguard.dev with the new `updates.xml` and
+   download links (that workflow reads the latest *published* release, which is why this must not
+   happen before publishing).
+6. **Verify.** Release page lists all assets; `https://jvmguard.dev/updates.xml` shows the new
+   version; Maven Central sync takes up to ~30 min
+   (`https://repo1.maven.org/maven2/dev/jvmguard/jvmguard-annotations/`). The production server is
+   updated with `~/deploy-jvmguard.sh` (uploads `media/jvmguard_unix_installer_*.sh` to the `web`
+   host, unattended in-place upgrade into `/opt/jvmguard`, restarts the systemd unit; needs the
+   user's sudo password, so hand it over). **Upgrading an installation that was ever deployed from a
+   tar.gz leaves the old `lib/server` jars behind** (they are recorded as `uninstallMode=NEVER` in
+   `.install4j/files.log`) and the wildcard classpath then breaks startup — delete stale jars before
+   restarting.
 
 ## Docs
 

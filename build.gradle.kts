@@ -86,16 +86,22 @@ tasks {
         dependsOn(dist, ":installer:mediaLinux")
     }
 
+    register("draftRelease") {
+        group = "release"
+        description = "Builds the media, tags the release and creates a draft GitHub release with the media attached"
+        dependsOn(media, ":installer:draftGithubRelease")
+    }
+
     register("release") {
         group = "release"
-        description = "Builds the media, publishes to Maven Central and creates a GitHub release"
-        dependsOn(media, ":installer:release", ":installer:publishGithubRelease")
+        description = "Publishes the draft GitHub release, publishes to Maven Central and triggers the website deploy"
+        dependsOn(":installer:release")
     }
 
     register("overwriteRelease") {
         group = "release"
-        description = "Builds the media and creates a GitHub release (skips Maven publish)"
-        dependsOn(media, ":installer:overwriteRelease", ":installer:publishGithubRelease")
+        description = "Builds the media and replaces the tag and the draft GitHub release (skips Maven publish)"
+        dependsOn(media, ":installer:overwriteRelease", ":installer:draftGithubRelease")
     }
 
     val fullVersion = getProductVersion("jvmguard")

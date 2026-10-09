@@ -226,7 +226,8 @@ fun publishGithubRelease(
     version: String,
     notesFile: File,
     mediaDir: File,
-    prerelease: Boolean = false
+    prerelease: Boolean = false,
+    draft: Boolean = false
 ) {
     val mediaFiles = (mediaDir.listFiles()?.toList() ?: emptyList())
         .filter { it.isFile }
@@ -259,6 +260,15 @@ fun publishGithubRelease(
         if (prerelease) {
             args.add("--prerelease")
         }
+        if (draft) {
+            args.add("--draft")
+        }
         execOps.exec { commandLine(args) }
+    }
+}
+
+fun publishDraftGithubRelease(execOps: ExecOperations, tag: String) {
+    execOps.exec {
+        commandLine("gh", "release", "edit", tag, "--draft=false")
     }
 }
