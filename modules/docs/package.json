@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/starlight": "^0.42.6",
+    "@astrojs/starlight": "^0.42.7",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
-    "astro": "^7.4.0",
+    "astro": "^7.4.2",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "typescript": "^6.0.3"
   },
   "overrides": {
